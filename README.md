@@ -109,8 +109,8 @@ These are optional companions, not bundled dependencies. See the [compatibility 
 You need **Git**, an internet connection and a **full JDK 21**. A game launcher's Java runtime/JRE alone is not enough to compile. Set `JAVA_HOME` to the JDK installation directory and use the included Gradle wrapper; a separate Gradle installation is unnecessary.
 
 ```sh
-git clone --branch main https://github.com/CesarPetrescu/ElectricalAge.git
-cd ElectricalAge
+git clone --branch main https://github.com/reamnet/ELN1.21.1ForkPatch.git
+cd ELN1.21.1ForkPatch
 ```
 
 **Windows — PowerShell**
@@ -133,7 +133,9 @@ javac -version
 
 Check that the compiler and Gradle JVM use **Java 21**. The first build downloads Gradle, Minecraft tooling and dependencies, so it takes longer than later builds.
 
-The compiled mod is **`build/libs/ElectricalAge-3.0.0-port.jar`**. `build` also runs unit tests. Install that JAR like the release JAR, including Kotlin for Forge separately. The rolling release renames the published artifact to `ElectricalAge-1.21.1-latest.jar`.
+The compiled mod is **`build/libs/ElectricalAge-3.0.0-port.jar`**. `build` also runs unit tests. Install that JAR like the release JAR, including Kotlin for Forge separately.
+
+For Ubuntu 24.04 servers, see [installation and rebuild commands](docs/building-on-ubuntu-24.04.md).
 
 ### Useful development commands
 
