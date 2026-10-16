@@ -87,6 +87,10 @@ class SixNode : Node() {
             sideElementList[direction.int] = descriptor!!.ElementClass.getConstructor(SixNode::class.java, Direction::class.java, SixNodeDescriptor::class.java).newInstance(this, direction, descriptor) as SixNodeElement
             if (descriptor is LampSocketDescriptor) {
                 LampSocketElement.placingPlayerIsCreative = player is ServerPlayer && isCreative(player)
+                if (player != null) {
+                    (sideElementList[direction.int] as LampSocketElement).lampSupplyChannel =
+                        mods.eln.sixnode.lampsocket.LampChannelMemory.read(player.persistentData)
+                }
             }
             sideElementIdList[direction.int] = 0
             disconnect()

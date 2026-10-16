@@ -31,6 +31,7 @@ class ElnConsoleCommands {
     init {
         ElnConsoleCommandList.addAll(listOf(
             ElnLsCommand(),
+            ElnChunkloadCommand(),
             ElnConfigCommand(),
             ElnAboutCommand(),
             ElnVersionCommand(),

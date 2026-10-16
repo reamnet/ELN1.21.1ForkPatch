@@ -12,7 +12,6 @@ import java.util.ArrayList;
 /** An {@link EditBox} driven by the mod's {@link IGuiObject} event loop; keeps 1.7.10's getText/setText. */
 public class GuiTextFieldEln extends EditBox implements IGuiObject {
 
-    int xPos, yPos, width, height;
     GuiTextFieldElnObserver observer;
     GuiHelper helper;
 
@@ -30,10 +29,6 @@ public class GuiTextFieldEln extends EditBox implements IGuiObject {
         setTextColorUneditable(-1);
         setBordered(true);
         setMaxLength(maxLength);
-        xPos = x;
-        yPos = y;
-        width = w;
-        height = h;
         this.helper = helper;
     }
 
@@ -43,7 +38,7 @@ public class GuiTextFieldEln extends EditBox implements IGuiObject {
 
     @Override
     public int getYMax() {
-        return yPos + height;
+        return getY() + getHeight();
     }
 
     public void setObserver(GuiTextFieldElnObserver observer) {
@@ -94,6 +89,7 @@ public class GuiTextFieldEln extends EditBox implements IGuiObject {
     }
 
     public void setEnabled(boolean par1) {
+        if (!par1) setFocused(false);
         enabled = par1;
         setEditable(par1);
     }
@@ -114,21 +110,44 @@ public class GuiTextFieldEln extends EditBox implements IGuiObject {
 
     @Override
     public void setFocused(boolean par1) {
-        if (isFocused() == true && par1 == false) {
+        boolean commit = isFocused() && !par1;
+        super.setFocused(par1);
+        if (commit) {
             if (observer != null)
                 observer.textFieldNewValue(this, this.getText());
             if (iGuiObjectObserver != null)
                 iGuiObjectObserver.guiObjectEvent(this);
         }
-        super.setFocused(par1);
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (!visible || !enabled || !isFocused()) return false;
+        if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+            setFocused(false);
+            return true;
+        }
+        boolean shortcut = (modifiers & (Minecraft.ON_OSX ? GLFW.GLFW_MOD_SUPER : GLFW.GLFW_MOD_CONTROL)) != 0
+            && (modifiers & GLFW.GLFW_MOD_ALT) == 0;
+        if (shortcut) {
+            switch (keyCode) {
+                case GLFW.GLFW_KEY_A -> { moveCursorToEnd(false); setHighlightPos(0); return true; }
+                case GLFW.GLFW_KEY_C -> { Minecraft.getInstance().keyboardHandler.setClipboard(getHighlighted()); return true; }
+                case GLFW.GLFW_KEY_V -> { if (canConsumeInput()) insertText(Minecraft.getInstance().keyboardHandler.getClipboard()); return true; }
+                case GLFW.GLFW_KEY_X -> {
+                    Minecraft.getInstance().keyboardHandler.setClipboard(getHighlighted());
+                    if (canConsumeInput()) insertText("");
+                    return true;
+                }
+            }
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
     public void idraw(int x, int y, float f) {
         GuiGraphics g = Gui.graphics();
         if (g == null) return;
-        setX(xPos);
-        setY(yPos);
         render(g, x, y, f);
     }
 
@@ -139,9 +158,12 @@ public class GuiTextFieldEln extends EditBox implements IGuiObject {
 
     @Override
     public void imouseClicked(int x, int y, int code) {
-        boolean inside = x >= xPos && y >= yPos && x < xPos + width && y < yPos + height;
-        if (inside != isFocused()) setFocused(inside);
-        if (inside) this.mouseClicked(x, y, code);
+        boolean inside = visible && enabled && isMouseOver(x, y);
+        if (!inside) setFocused(false);
+        else {
+            setFocused(true);
+            mouseClicked(x, y, code);
+        }
     }
 
     @Override
@@ -154,19 +176,15 @@ public class GuiTextFieldEln extends EditBox implements IGuiObject {
 
     @Override
     public void idraw2(int x, int y) {
-        if (!isFocused() && visible && x >= xPos && y >= yPos && x < xPos + width && y < yPos + height)
-            helper.drawHoveringText(comment, x, y, Minecraft.getInstance().font);
+        if (!isFocused() && visible && isMouseOver(x, y))
+            helper.drawHoveringTextAtScreen(comment, x, y, Minecraft.getInstance().font);
 
     }
 
     @Override
     public void translate(int x, int y) {
-        this.xPos += x;
-        this.yPos += y;
-    }
-
-    public int getHeight() {
-        return height;
+        setX(getX() + x);
+        setY(getY() + y);
     }
 
     public void setGuiObserver(IGuiObjectObserver iGuiObjectObserver) {

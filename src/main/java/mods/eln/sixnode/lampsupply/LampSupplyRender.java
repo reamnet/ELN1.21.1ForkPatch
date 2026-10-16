@@ -24,6 +24,7 @@ public class LampSupplyRender extends SixNodeElementRender {
 
     LampSupplyDescriptor descriptor;
 
+    public int transmissionRange = 32;
     Coordinate coord;
     PhysicalInterpolator interpolator;
 
@@ -93,6 +94,7 @@ public class LampSupplyRender extends SixNodeElementRender {
             }
 
             ItemStack cableStack = Utils.unserialiseItemStack(stream);
+            transmissionRange = stream.readInt();
             if (!McBridge.isNothing(cableStack)) {
                 GenericItemBlockUsingDamageDescriptor desc = GenericItemBlockUsingDamageDescriptor.getDescriptor(cableStack, GenericCableDescriptor.class);
                 if (desc instanceof GenericCableDescriptor) cableRender = ((GenericCableDescriptor) desc).render;

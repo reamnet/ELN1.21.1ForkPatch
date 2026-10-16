@@ -1,0 +1,57 @@
+# Device configuration and unattended installations
+
+Device text fields accept Ctrl+A, Ctrl+C, Ctrl+X and Ctrl+V (Command on macOS).
+Enter, clicking another control, or closing the screen commits a field. Transformer
+controls use the same text fields; hover help appears beside the pointer instead of
+adding the panel offset a second time.
+
+Lamp sockets remember the last wireless power channel configured by **the player
+placing them**. The name survives world/server restarts and is also remembered when
+using the configuration-copy tool. Existing lamps retain their saved channels. This
+replaces the old, disabled-by-default shared `rememberLastLampSignalName` setting;
+it no longer depends on a server-wide last-used name.
+
+The lamp supply's **Power range** button cycles through **32, 64, 128, 256 and 512
+blocks**. It controls wireless power coverage, including the boundary, within the
+same dimension. One installed power cable is still required to connect the supply;
+extra cables no longer determine coverage. Existing supplies migrate their previous
+32-plus-cable-count coverage until a range is selected. The configuration-copy tool
+also copies a selected range. Wireless control reception is separate from power
+coverage; setting a control-signal name does not create a power-transmission channel.
+
+## Keeping a plant running while away
+
+Minecraft unloads chunks outside the active area. ELN retains its electrical graph,
+but block ticks, fuel inventories, fluids and other mods' machinery need loaded,
+ticking chunks. Server administrators and singleplayer owners can keep an explicit
+area active with:
+
+```
+/eln chunkload on
+/eln chunkload on 1
+/eln chunkload list
+/eln chunkload off 1
+/eln chunkload clear
+```
+
+`on` keeps the current chunk ticking. A radius of `1` keeps a 3-by-3 area; `2`
+keeps a 5-by-5 area. The optional radius is in **chunks**, from 0 through 4.
+Include the generators, cables, machines, fuel/fluid handling and any required
+external-mod blocks. F3+G displays chunk boundaries.
+
+Tickets survive a server/world restart. `list` shows this dimension's ELN tickets;
+`off` releases the specified area at the command's current position; `clear`
+releases all ELN installation tickets in this dimension. These commands preserve
+vanilla `/forceload` and other mods' tickets. There is a limit of 256 selected chunks
+per dimension. Larger loaded areas increase server work. A paused singleplayer
+world or stopped server does not advance time.
+
+## Regression checks
+
+Run `./gradlew build` for the unit suite. Under a working X/GL display, add
+`-Deln.configurationChecks=true` to `JAVA_TOOL_OPTIONS` and run `./gradlew runClient`.
+The opt-in client check creates a uniquely named disposable flat world, exercises
+actual GUI clicks/shortcuts and server packet round trips for transformers and
+lighting, tests remote furnace ticking, and reopens the world to check persistence.
+It writes `run/client/configuration-checks.json` and GUI screenshots, and exits
+nonzero on a failed assertion. It never opens or replaces a pre-existing save.

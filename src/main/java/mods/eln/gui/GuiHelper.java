@@ -179,9 +179,34 @@ public class GuiHelper {
     /** Whether a text field has the keyboard, so the screen does not treat typed letters as hotkeys. */
     public boolean hasFocusedTextField() {
         for (IGuiObject o : objectList) {
-            if (o instanceof GuiTextFieldEln t && t.isFocused()) return true;
+            if (o instanceof GuiTextFieldEln t && t.visible && t.getEnabled() && t.isFocused()) return true;
         }
         return false;
+    }
+
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        boolean handled = false;
+        for (IGuiObject o : objectListCopy()) {
+            if (o instanceof GuiTextFieldEln field) handled |= field.keyPressed(keyCode, scanCode, modifiers);
+            else handled |= o.ikeyTyped('\0', keyCode);
+        }
+        return handled;
+    }
+
+    public boolean charTyped(char character, int modifiers) {
+        boolean handled = false;
+        for (IGuiObject o : objectListCopy()) {
+            if (o instanceof GuiTextFieldEln field) {
+                if (field.visible && field.getEnabled()) handled |= field.charTyped(character, modifiers);
+            } else handled |= o.ikeyTyped(character, 0);
+        }
+        return handled;
+    }
+
+    public void commitTextFields() {
+        for (IGuiObject o : objectListCopy()) {
+            if (o instanceof GuiTextFieldEln field) field.setFocused(false);
+        }
     }
 
     protected void keyTyped(char key, int code) {
@@ -191,9 +216,10 @@ public class GuiHelper {
     }
 
     protected void mouseClicked(int x, int y, int code) {
-        for (IGuiObject o : objectListCopy()) {
-            o.imouseClicked(x, y, code);
-        }
+        // Commit inputs before a button changes the setting's mode or units.
+        IGuiObject[] objects = objectListCopy();
+        for (IGuiObject o : objects) if (o instanceof GuiTextFieldEln) o.imouseClicked(x, y, code);
+        for (IGuiObject o : objects) if (!(o instanceof GuiTextFieldEln)) o.imouseClicked(x, y, code);
     }
 
     protected void mouseMove(int x, int y) {
@@ -231,6 +257,13 @@ public class GuiHelper {
             y += (screen.height - ySize) / 2;
         }
         g.renderComponentTooltip(font, lines, x, y);
+    }
+
+    /** Widget mouse coordinates are already in screen space, including on inventory screens. */
+    public void drawHoveringTextAtScreen(List<String> lines, int x, int y, Font font) {
+        GuiGraphics g = graphics();
+        if (g != null && !lines.isEmpty())
+            g.renderComponentTooltip(font, lines.stream().<Component>map(Component::literal).toList(), x, y);
     }
 
     public void drawGradientRect(int par1, int par2, int par3, int par4, int par5, int par6) {

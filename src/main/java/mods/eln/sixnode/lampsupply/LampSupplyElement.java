@@ -94,6 +94,8 @@ public class LampSupplyElement extends SixNodeElement implements IConfigurable {
     public static final byte setPowerName = 1;
     public static final byte setWirelessName = 2;
     public static final byte setSelectedAggregator = 3;
+    public static final byte setTransmissionRange = 4;
+    private int transmissionRange = 32;
     double RpStack = 0;
 
     boolean[] channelStates;
@@ -313,6 +315,7 @@ public class LampSupplyElement extends SixNodeElement implements IConfigurable {
     @Override
     public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
+        nbt.putInt("transmissionRange", transmissionRange);
         int idx = 0;
         for (Entry e : entries) {
             nbt.putString("entry_p" + idx, e.powerChannel);
@@ -334,6 +337,8 @@ public class LampSupplyElement extends SixNodeElement implements IConfigurable {
         }
 
         super.readFromNBT(nbt);
+        transmissionRange = LampSupplyRange.fromSave(nbt.contains("transmissionRange", 3) ? nbt.getInt("transmissionRange") : null,
+            descriptor.range + getInventory().getItem(LampSupplyContainer.cableSlotId).getCount());
         if (nbt.contains("channel")) {
             entries.get(0).powerChannel = nbt.getString("channel");
 
@@ -380,27 +385,40 @@ public class LampSupplyElement extends SixNodeElement implements IConfigurable {
         try {
             switch (stream.readByte()) {
                 case setPowerName: {
-                    int id = stream.readByte();
+                    int id = stream.readUnsignedByte();
                     String newName = stream.readUTF();
+                    if (id >= entries.size() || newName.length() > 150) break;
                     channelRemove(this, id, entries.get(id).powerChannel);
                     entries.get(id).powerChannel = newName;
                     needPublish();
                     channelRegister(this, id, newName);
                     break;
                 }
-                case setWirelessName: {
-                    int id = stream.readByte();
-                    String newName = stream.readUTF();
-                    channelRemove(this, id, entries.get(id).wirelessChannel);
-                    entries.get(id).wirelessChannel = newName;
-                    needPublish();
-                    channelRegister(this, id, newName);
+                case setTransmissionRange: {
+                    int nextRange = stream.readInt();
+                    if (LampSupplyRange.isSelectable(nextRange)) {
+                        transmissionRange = nextRange;
+                        needPublish();
+                    }
                     break;
                 }
-                case setSelectedAggregator:
-                    entries.get(stream.readByte()).aggregator = stream.readByte();
+                case setWirelessName: {
+                    int id = stream.readUnsignedByte();
+                    String newName = stream.readUTF();
+                    if (id >= entries.size() || newName.length() > 150) break;
+                    entries.get(id).wirelessChannel = newName;
                     needPublish();
                     break;
+                }
+                case setSelectedAggregator: {
+                    int channel = stream.readUnsignedByte();
+                    int aggregator = stream.readUnsignedByte();
+                    if (channel < entries.size() && aggregator < 3) {
+                        entries.get(channel).aggregator = aggregator;
+                        needPublish();
+                    }
+                    break;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -423,6 +441,7 @@ public class LampSupplyElement extends SixNodeElement implements IConfigurable {
             }
 
             Utils.serialiseItemStack(stream, getInventory().getItem(LampSupplyContainer.cableSlotId));
+            stream.writeInt(transmissionRange);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -437,17 +456,20 @@ public class LampSupplyElement extends SixNodeElement implements IConfigurable {
     }
 
     public int getRange() {
-        return getRange(descriptor, inventoryProxy.getInventory());
+        return transmissionRange;
     }
 
-    private int getRange(LampSupplyDescriptor desc, Container inventory2) {
-        ItemStack stack = getInventory().getItem(LampSupplyContainer.cableSlotId);
-        if (McBridge.isNothing(stack)) return desc.range;
-        return desc.range + stack.getCount();
+    public boolean isInRange(mods.eln.misc.Coordinate target) {
+        var source = getCoordinate();
+        return source != null && source.dimension == target.dimension && source.trueDistanceTo(target) <= transmissionRange;
     }
 
     @Override
     public void readConfigTool(CompoundTag compound, Player invoker) {
+        if (compound.contains("transmissionRange", 3) && LampSupplyRange.isSelectable(compound.getInt("transmissionRange"))) {
+            transmissionRange = compound.getInt("transmissionRange");
+            needPublish();
+        }
         if(compound.contains("powerChannels")) {
             ListTag list = compound.getList("powerChannels", 8);
             for(int idx = 0; idx < descriptor.channelCount && idx < list.size(); idx++) {
@@ -460,9 +482,7 @@ public class LampSupplyElement extends SixNodeElement implements IConfigurable {
         if(compound.contains("wirelessChannels")) {
             ListTag list = compound.getList("wirelessChannels", 8);
             for(int idx = 0; idx < descriptor.channelCount && idx < list.size(); idx++) {
-                channelRemove(this, idx, entries.get(idx).wirelessChannel);
                 entries.get(idx).wirelessChannel = list.getString(idx);
-                channelRegister(this, idx, entries.get(idx).wirelessChannel);
             }
             needPublish();
         }
@@ -479,6 +499,7 @@ public class LampSupplyElement extends SixNodeElement implements IConfigurable {
 
     @Override
     public void writeConfigTool(CompoundTag compound, Player invoker) {
+        compound.putInt("transmissionRange", transmissionRange);
         ListTag powerList = new ListTag();
         ListTag wirelessList = new ListTag();
         int[] aggregators = new int[descriptor.channelCount];

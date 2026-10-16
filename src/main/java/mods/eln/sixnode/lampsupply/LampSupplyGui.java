@@ -15,6 +15,7 @@ public class LampSupplyGui extends GuiContainerEln {
 
 
     private LampSupplyRender render;
+    private GuiButtonEln rangeButton;
 
     private HashMap<Object, Integer> powerMap = new HashMap<Object, Integer>();
     private HashMap<Object, Integer> wirelessMap = new HashMap<Object, Integer>();
@@ -64,6 +65,8 @@ public class LampSupplyGui extends GuiContainerEln {
     @Override
     public void initGui() {
         super.initGui();
+        powerMap.clear();
+        wirelessMap.clear();
         int y = 6;
 
         int x;
@@ -71,13 +74,13 @@ public class LampSupplyGui extends GuiContainerEln {
             x = 6;
 
             LampSupplyElement.Entry e = render.entries.get(id);
-            GuiTextFieldEln powerChannel = newGuiTextField(x, y, 101);
+            GuiTextFieldEln powerChannel = newGuiTextField(x, y, 99);
             x += powerChannel.getWidth() + 12;
             powerChannel.setText(e.powerChannel);
             powerChannel.setComment(0, tr("Power channel name"));
             powerMap.put(powerChannel, id);
 
-            GuiTextFieldEln wirelessChannel = newGuiTextField(x, y, 101);
+            GuiTextFieldEln wirelessChannel = newGuiTextField(x, y, 99);
             x += wirelessChannel.getWidth() + 12;
             wirelessChannel.setText(e.wirelessChannel);
             wirelessChannel.setComment(0, tr("Wireless channel name"));
@@ -110,15 +113,26 @@ public class LampSupplyGui extends GuiContainerEln {
                 buttonToogle.setComment(lineNumber++, line);
             y += buttonToogle.getHeight() + 6;
         }
+        rangeButton = newGuiButton(6, y, 208, "");
+        rangeButton.setComment(0, tr("Click to cycle 32, 64, 128, 256 or 512 blocks"));
+        rangeButton.setComment(1, tr("Power range does not load chunks; keep the installation loaded separately"));
+    }
+
+    @Override
+    protected void preDraw(float f, int x, int y) {
+        rangeButton.displayString = tr("Power range: %1$ blocks", render.transmissionRange);
     }
 
     @Override
     protected GuiHelperContainer newHelper() {
-        return new GuiHelperContainer(this, 220, 205, 8, 125);
+        return new GuiHelperContainer(this, 220, 231, 8, 151);
     }
 
     @Override
     public void guiObjectEvent(IGuiObject object) {
+        if (object == rangeButton) {
+            render.clientSetInt(LampSupplyElement.setTransmissionRange, LampSupplyRange.next(render.transmissionRange));
+        }
         if (powerMap.containsKey(object)) {
             try {
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();

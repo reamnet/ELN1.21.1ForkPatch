@@ -104,7 +104,7 @@ public class GuiButtonEln extends Button implements IGuiObject {
     @Override
     public void idraw2(int x, int y) {
         if (helper != null && visible && x >= getX() && y >= getY() && x < getX() + width && y < getY() + height)
-            helper.drawHoveringText(comment, x, y, Minecraft.getInstance().font);
+            helper.drawHoveringTextAtScreen(comment, x, y, Minecraft.getInstance().font);
     }
 
     @Override

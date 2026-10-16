@@ -72,13 +72,13 @@ class FestiveElement(node: TransparentNode, descriptor: TransparentNodeDescripto
             val chanMap = LampSupplyElement.channelMap[elem.powerChannel] ?: return null
             val bestChanHand = bestChannelHandle
             // Here's our cached value. We just check if it's null and if it's still a thing.
-            if (!(bestChanHand == null || forceUpdate || !chanMap.contains(bestChanHand.second))) {
+            if (!(bestChanHand == null || forceUpdate || !chanMap.contains(bestChanHand.second) || !bestChanHand.second.element.isInRange(here))) {
                 return bestChanHand // we good!
             }
             val list = LampSupplyElement.channelMap[elem.powerChannel]?.filterNotNull() ?: return null
             val map = list.map { Pair(it.element.sixNode!!.coordinate.trueDistanceTo(here), it) }
             val sortedBy = map.sortedBy { it.first }
-            val chanHand = sortedBy.first()
+            val chanHand = sortedBy.firstOrNull { it.second.element.isInRange(here) }
             bestChannelHandle = chanHand
             return bestChannelHandle
         }

@@ -59,6 +59,7 @@ Generated_power=发电功率
 Generates_heat_when_supplied_with_fuel.=燃烧燃料产热
 Generating=发电中
 Good=好
+Grid_links_require_an_intact_power_cable;_signal_and_melted_cables_are_not_supported=Grid links require an intact power cable; signal and melted cables are not supported
 Has_a_signal_output.=有一个信号输出
 Has_some_caveats\:=有一些注意事项:
 Hold_[ctrl]_for_realism_details=按住 [ctrl] 查看拟真详情
@@ -141,6 +142,7 @@ Resistance=电阻
 Resistance\:_%1$Ω=电阻: %1$Ω
 Secondary=Secondary
 Secondary_winding=Secondary winding
+Select_a_grid_terminal,_not_the_device_body=Select a grid terminal, not the device body
 Serial_resistance\:_%1$Ω=串联电阻: %1$Ω
 Signal=信号
 Smallest=最小
@@ -159,6 +161,7 @@ Toggle=切换
 Toggle_switch=切换开关
 Toggles_the_output_each_time\nan_emitter's_value_rises.\nUseful_to_allow_multiple_buttons\nto_control_the_same_light.=每次发射器的值上升时\n切换输出。\n可让多个按钮控制同一盏灯。
 Transforms_an_input_voltage_to\nan_output_voltage.=将输入电压\n转换为输出电压。
+Unavailable=Unavailable
 Used=旧
 Used_to_cool_down_turbines.=用来散热
 Uses_the_biggest\nvalue_on_the_channel.=使用频道上\n最大的值。
@@ -169,6 +172,7 @@ Voltage=电压
 Voltage\:_%1$V=电压: %1$V
 Voltage_drop=压降
 Voltages=电压
+Winding_ratio=Winding ratio
 Winding_resistance=Winding resistance
 Write=写入
 Yes=是
@@ -213,7 +217,8 @@ Energy_per_operation\:_%1$J=每次操作能量: %1$J
 Time_per_operation\:_%1$h=每次操作时间: %1$h
 
 # src/main/java/mods/eln/item/FerromagneticCoreDescriptor.java
-Cable_loss_factor\:_%1$=导线损耗系数: %1$
+Legacy_cable_loss_factor\:_%1$=Legacy cable loss factor: %1$
+Modern_DC/DC_winding_resistance_comes_from_the_wire,_not_this_legacy_factor.=Modern DC/DC winding resistance comes from the wire, not this legacy factor.
 
 # src/main/java/mods/eln/item/HeatingCorpElement.java
 
@@ -244,8 +249,6 @@ __*_It_exposes_a_nominal_mains_class_instead_of_wall-plug_details=  * 它暴露�
 
 # src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerElement.java
 Charge_Current=充电电流
-
-# src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerGui.java
 
 # src/main/java/mods/eln/sixnode/diode/DiodeDescriptor.java
 Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=电流只能从正极流向负极
@@ -321,10 +324,6 @@ Displays_signal_value.=显示信号值。
 Max=最大
 Min=最小
 
-# src/main/java/mods/eln/sixnode/electricaldigitaldisplay/ElectricalDigitalDisplayGui.java
-
-# src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java
-
 # src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java
 Output_voltage_increases\nif_entities_are_moving_around.=当周围有实体移动时\n输出电压增加。
 
@@ -342,8 +341,6 @@ Fire_present=发生火灾
 # src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceDescriptor.java
 Provides_configurable_signal\nvoltage.=提供可配置的信号电压。
 
-# src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceElement.java
-
 # src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceGui.java
 Output_at_%1$%=输出: %1$%
 
@@ -354,8 +351,6 @@ Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_dayli
 
 # src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorElement.java
 Light_level=光照等级
-
-# src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathContainer.java
 
 # src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
 Applicable_boolean_operators\:=适用的布尔运算符:
@@ -383,18 +378,10 @@ Converts_Redstone_signal\nto_an_electrical_voltage.=将红石信号\n转换为�
 # src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputDescriptor.java
 Converts_electrical_voltage\ninto_a_Redstone_signal.=将电压\n转换为红石信号。
 
-# src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputElement.java
-
 # src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayDescriptor.java
 Contact_current_rating\:_%1$A=触点额定电流: %1$A
 Contact_voltage\:_%1$V=触点电压: %1$V
 Control_voltage\:_%1$V=控制电压: %1$V
-
-# src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayElement.java
-
-# src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayGui.java
-
-# src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorContainer.java
 
 # src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorDescriptor.java
 Can_measure_Voltage/Power/Current=可测量电压/功率/电流
@@ -428,8 +415,6 @@ Remaining=剩余
 # src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutGui.java
 Set=激活
 The_time_interval_the\noutput_is_kept_high.=输出保持为高电平的时间间隔。
-
-# src/main/java/mods/eln/sixnode/electricalwatch/ElectricalWatchContainer.java
 
 # src/main/java/mods/eln/sixnode/electricalwatch/ElectricalWatchDescriptor.java
 Requires_batteries_for_operation.=需要电池进行工作
@@ -479,7 +464,7 @@ A_bit_contrived,_as_the_wires_could_just_cross_over_each_other._Realism_depends_
 Allows_crossing_cables\non_one_single_block.=允许在一个方块上\n交叉导线。
 
 # src/main/java/mods/eln/sixnode/lampsupply/LampSupplyContainer.java
-Cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.=导线槽\n基础范围为32格。\n每增加一根导线\n范围增加一格。
+Cable_slot\nSelect_the_wireless_power_range_in_the_GUI.\nCable_quantity_does_not_change_the_range.=Cable slot\nSelect the wireless power range in the GUI.\nCable quantity does not change the range.
 
 # src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java
 Capable_of_operating_3_light_channels.=可以控制3个照明频道
@@ -493,7 +478,10 @@ Wireless_control_signals_are_totally_possible=无线控制信号是完全有可�
 Total_power=总功率
 
 # src/main/java/mods/eln/sixnode/lampsupply/LampSupplyGui.java
+Click_to_cycle_32,_64,_128,_256_or_512_blocks=Click to cycle 32, 64, 128, 256 or 512 blocks
 Power_channel_name=供电频道名称
+Power_range\:_%1$_blocks=Power range: %1$ blocks
+Power_range_does_not_load_chunks;_keep_the_installation_loaded_separately=Power range does not load chunks; keep the installation loaded separately
 Wireless_channel_name=无线信号频道名称
 
 # src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuElement.java
@@ -518,8 +506,6 @@ Coal_dust_slot=碳粉
 # src/main/java/mods/eln/sixnode/resistor/ResistorDescriptor.java
 It's_a_resistor=这是一个电阻
 
-# src/main/java/mods/eln/sixnode/resistor/ResistorElement.java
-
 # src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
 High_parallel_resistance\n_->_Low_power_dissipation.=High parallel resistance\n -> Low power dissipation.
 Low_serial_resistance\n_->_High_conductivity.=Low serial resistance\n -> High conductivity.
@@ -531,8 +517,6 @@ The_thermal_simulator_doesn't_properly_manage_heat=The thermal simulator doesn't
 # src/main/java/mods/eln/sixnode/thermalcable/ThermalCableElement.java
 Thermic_power=热功率
 
-# src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorContainer.java
-
 # src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorDescriptor.java
 Can_measure\:=可测量:
 Measures_temperature_of_cables.=测量导线的温度.
@@ -542,8 +526,6 @@ __Temperature/Power_conducted=  温度/热功率
 # src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorElement.java
 Measured_temperature=实测温度
 Measured_thermal_power=实测热功率
-
-# src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorGui.java
 
 # src/main/java/mods/eln/sixnode/tutorialsign/TutorialSignElement.java
 No_text_associated_to_this_beacon=没有关联到这个标志的文本
@@ -570,6 +552,8 @@ Receive_signal_voltage_on_selected_wireless_signal_channel=接收选定无线信
 
 # src/main/java/mods/eln/sixnode/wirelesssignal/tx/WirelessSignalTxDescriptor.java
 Sends_signal_voltage_on_selected_wireless_signal_channel=在选定无线信号频道上发送信号电压
+
+# src/main/java/mods/eln/sixnode/wirelesssignal/tx/WirelessSignalTxElement.java
 
 # src/main/java/mods/eln/transparentnode/autominer/AutoMinerContainer.java
 Drill_slot=钻头
@@ -624,7 +608,7 @@ Auto_shutdown=自动启停
 Manual_shutdown=手动启停
 Set_point\:_%1$=设定值: %1$
 
-# src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
+# src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineContainer.java
 
 # src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineElement.java
 Power_provided=供应功率
@@ -646,12 +630,6 @@ Take_fuel=运行中
 
 # src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorContainer.java
 (Increases_maximal_voltage)=(增大最大电压)
-
-# src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorGui.java
-
-# src/main/java/mods/eln/transparentnode/powerinductor/PowerInductorContainer.java
-
-# src/main/java/mods/eln/transparentnode/powerinductor/PowerInductorGui.java
 
 # src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelContainer.java
 Solar_tracker_slot=太阳追踪组件
@@ -704,6 +682,8 @@ Temperature_difference\:_%1$°C=温度差: %1$°C
 
 # src/main/java/mods/eln/transparentnode/turbine/TurbineElement.java
 Nominal=额定
+
+# src/main/java/mods/eln/transparentnode/turret/TurretContainer.java
 
 # src/main/java/mods/eln/transparentnode/turret/TurretDescriptor.java
 CAUTION\:_Cables_can_get_quite_hot!=注意: 导线可能会变得非常热!
@@ -775,6 +755,8 @@ Search_results\:_%1$=Search results: %1$
 # src/main/kotlin/mods/eln/block/ArcClayBlock.kt
 tile.arc_clay_block.name=铝块
 tile.arc_metal_block.name=钢块
+
+# src/main/kotlin/mods/eln/cable/CableItemSlot.kt
 
 # src/main/kotlin/mods/eln/falstad/FalstadImporter.kt
 %1$x%2$_blocks=%1$x%2$方块
@@ -862,8 +844,14 @@ Cannot_connect,_no_line_of_sight=无法连接，视线受阻
 Cannot_connect,_range_%1$_and_limit_%2$_blocks=无法连接，距离%1$格，限制%2$格
 Cannot_connect_these_two_objects=无法连接这两个对象
 Setting_starting_point=设置起始点
-Wrong_cable_for_this_pole=此电线杆使用了错误的导线
+This_cable_spool_has_no_usable_length=This cable spool has no usable length
 You_need_%1$_m_of_cable=你需要%1$米导线
+
+# src/main/kotlin/mods/eln/gridnode/GridLink.kt
+Grid_cable_item_does_not_match_the_paid_length=Grid cable item does not match the paid length
+Grid_cable_item_does_not_match_the_selected_cable=Grid cable item does not match the selected cable
+Grid_endpoint_is_no_longer_available=Grid endpoint is no longer available
+Invalid_grid_cable_span=Invalid grid cable span
 
 # src/main/kotlin/mods/eln/gridnode/GridSwitch.kt
 Closed?=关闭中?
@@ -986,6 +974,8 @@ Stored_Energy\:_%1$J_(%2$%)=储存能量: %1$J (%2$%)
 # src/main/kotlin/mods/eln/item/electricalitem/ElectricalPickaxe.kt
 Opens_holes._Right-click_to_open_smaller_holes.=挖3*3，右键切换1*1模式
 
+# src/main/kotlin/mods/eln/item/electricalitem/PortableOreScannerItem.kt
+
 # src/main/kotlin/mods/eln/item/lampitem/LampDescriptor.kt
 Current_lifetime\:_%1$h=当前寿命: %1$h
 Nominal_brightness\:_%1$=额定亮度: %1$
@@ -1053,7 +1043,7 @@ Life_Left=剩余寿命
 Requires_a_turbine_blade_to_operate.=需要涡轮叶片才能运行。
 Turbine_blade_slot=涡轮叶片
 
-# src/main/kotlin/mods/eln/misc/Tooltips.kt
+# src/main/kotlin/mods/eln/misc/UtilsClient.kt
 
 # src/main/kotlin/mods/eln/misc/Version.kt
 mod.name=电力时代
@@ -1071,10 +1061,12 @@ Separate_or_unsolved_electrical_sections\:_check_their_ground_references_before_
 Terminal_B_current\:_%1$_|_Cable/contact_loss_at_B\:_%2$=Terminal B current: %1$ | Cable/contact loss at B: %2$
 The_circuit_has_no_finite_solver_reading_yet.=The circuit has no finite solver reading yet.
 
-# src/main/kotlin/mods/eln/node/six/SixNodeDescriptor.kt
+# src/main/kotlin/mods/eln/node/transparent/TransparentNodeDescriptor.kt
 
 # src/main/kotlin/mods/eln/railroad/ElectricMinecartChargeReporter.kt
 Cart_Energy\:_=矿车能量:
+
+# src/main/kotlin/mods/eln/railroad/OverheadLines.kt
 
 # src/main/kotlin/mods/eln/registration/EntityRegistration.kt
 entity.EAReplicator.name=复制机
@@ -1801,6 +1793,15 @@ Wire_Combiner.name=导线合并器
 Wire_Insulator.name=导线绝缘器
 Wire_Roller.name=导线轧制机
 
+# src/main/kotlin/mods/eln/server/console/ElnChunkloadCommand.kt
+Cannot_load_this_area\:_it_crosses_the_world_border_or_exceeds_the_%1$_chunk_limit.=Cannot load this area: it crosses the world border or exceeds the %1$ chunk limit.
+Chunk_%1$,_%2$_(block_%3$,_%4$)=Chunk %1$, %2$ (block %3$, %4$)
+ELN_keeps_%1$_chunks_ticking_in_this_dimension_(limit_%2$).=ELN keeps %1$ chunks ticking in this dimension (limit %2$).
+Keeping_%1$_installation_chunks_ticking,_including_after_a_server_restart.=Keeping %1$ installation chunks ticking, including after a server restart.
+Released_ELN_tickets_for_%1$_installation_chunks.=Released ELN tickets for %1$ installation chunks.
+Released_all_ELN_installation_chunks_in_this_dimension.=Released all ELN installation chunks in this dimension.
+Use_/eln_chunkload_on_[0-4]_or_off_[0-4]_at_the_installation;_radius_is_in_chunks._Use_list_or_clear_to_manage_this_dimension.=Use /eln chunkload on [0-4] or off [0-4] at the installation; radius is in chunks. Use list or clear to manage this dimension.
+
 # src/main/kotlin/mods/eln/sixnode/AnalogChips.kt
 A_voltage-controlled_amplifier_(VCA)\nis_an_electronic_amplifier_that_varies\nits_gain_depending_on_the_control_voltage.=压控放大器(VCA)是一种\n根据控制电压改变\n增益的电子放大器。
 A_voltage-controlled_oscillator_or_VCO_is\nan_electronic_oscillator_whose_oscillation\nfrequency_is_controlled_by_a_voltage_input.=压控振荡器(VCO)是一种\n振荡频率由电压输入\n控制的电子振荡器。
@@ -1996,6 +1997,8 @@ Latest=Latest
 Monitor_printout=Monitor printout
 No_recorded_samples=No recorded samples
 
+# src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorContainer.kt
+
 # src/main/kotlin/mods/eln/sixnode/electricalhumiditysensor/ElectricalHumiditySensorDescriptor.kt
 0%%_RH\:_%1$V=0%相对湿度: %1$V
 100%%_RH\:_%1$V=100%相对湿度: %1$V
@@ -2025,6 +2028,8 @@ Powered_by_lamp_supply=由无线照明控制盒供电
 Specify_the_lamp_supply_channel=指定照明供电盒频道
 This_currently_does_nothing.=此功能暂未实现。
 Ungrounded=未接地
+
+# src/main/kotlin/mods/eln/sixnode/mqttmeter/MqttEnergyMeterContainer.kt
 
 # src/main/kotlin/mods/eln/sixnode/mqttmeter/MqttEnergyMeterElement.kt
 Elapsed_time=已用时间
@@ -2064,6 +2069,8 @@ Set_min/max_values_in_GUI\nto_map_temperature_to_output.=在GUI中设置最小/�
 # src/main/kotlin/mods/eln/sixnode/thermometersensor/ThermometerSensorElement.kt
 Biome_temperature=生物群系温度
 
+# src/main/kotlin/mods/eln/sixnode/thermometersensor/ThermometerSensorGui.kt
+
 # src/main/kotlin/mods/eln/transparentnode/DcDc.kt
 This_DC/DC_has_unrealistic_capacitance_effects_and_can_sink/source_power_that_violates_Newton's_laws=此变压器有不真实的电容效应，可以吸收/输出违反牛顿定律的功率
 
@@ -2075,21 +2082,26 @@ Idle=Idle
 Input_current_limit_or_voltage_sag=Input current limit or voltage sag
 Input_exceeds_winding_voltage_rating=Input exceeds winding voltage rating
 Input_undervoltage=Input undervoltage
-Invalid_control_signal=Invalid control signal
+Internal_output_target_(V);_terminal_voltage_falls_with_winding_and_cable_losses=Internal output target (V); terminal voltage falls with winding and cable losses
+Invalid_control_setting_or_signal=Invalid control setting or signal
+Invalid_mode=Invalid mode
 Invalid_or_conflicting_network=Invalid or conflicting network
+Manual_modes_ignore_the_0-50_V_control-signal_connector=Manual modes ignore the 0-50 V control-signal connector
 Maximum_conversion_ratio=Maximum conversion ratio
-Mode\:_%1$=Mode: %1$
 Network_did_not_converge;_reconfigure_to_reset=Network did not converge; reconfigure to reset
 No_input_supply=No input supply
 Output_already_at_target;_reverse_transfer_blocked=Output already at target; reverse transfer blocked
 Output_current_limit=Output current limit
 Output_power_limit=Output power limit
 Output_voltage_limit=Output voltage limit
-Ratio_or_internal_no-load_output_target_in_volts=Ratio or internal no-load output target in volts
+Ratio_(x)=Ratio (x)
 Regulating=Regulating
 Requested_conversion_is_outside_this_topology=Requested conversion is outside this topology
+Signal_(0-50_V)=Signal (0-50 V)
+Target_(V)=Target (V)
 Transferring_power=Transferring power
 Use_V2=Use V2
+Voltage_gain_x_\=_Vout_/_Vin;_x2_requests_twice_the_input_voltage=Voltage gain x = Vout / Vin; x2 requests twice the input voltage
 Winding_voltage_rating_exceeded=Winding voltage rating exceeded
 
 # src/main/kotlin/mods/eln/transparentnode/DcDcWinding.kt
@@ -2125,6 +2137,11 @@ Set_resistance_with_coal_dust=用碳粉增加电阻
 __*_Resistance_is_not_impacted_by_temperature=  * 电阻不受温度影响
 __*_Signal_input_doesn't_require_power=  * 信号输入不需要电源
 
+# src/main/kotlin/mods/eln/transparentnode/LegacyDcDc.kt
+Legacy_item-count_windings_only;_use_modern_DC/DC_for_length-based_spools.=Legacy item-count windings only; use modern DC/DC for length-based spools.
+Needs_a_core_and_two_legacy_power-cable_windings=Needs a core and two legacy power-cable windings
+Winding_policy=Winding policy
+
 # src/main/kotlin/mods/eln/transparentnode/NixieTube.kt
 Blank=黯淡
 Digit=数字
@@ -2135,9 +2152,12 @@ Signal_input_doesn't_require_power,_and_interfaces_are_tailored_to_gameplay=信�
 
 # src/main/kotlin/mods/eln/transparentnode/OneWayDcDc.kt
 Front_and_back_connections_are_isolated\nground_references_for_each_side.=Front and back connections are isolated\nground references for each side.
+Ignored_in_manual_mode=Ignored in manual mode
 Internal_output_target=Internal output target
+Measured_terminal_ratio=Measured terminal ratio
 Moves_power_from_the_input_side\nto_the_output_side_only.=Moves power from the input side\nto the output side only.
-The_output_voltage_ratio_is_controlled\nfrom_a_signal_input.=The output voltage ratio is controlled\nfrom a signal input.
+Requested_ratio=Requested ratio
+Select_signal,_manual_ratio_or_voltage\ntarget_in_the_control_panel.=Select signal, manual ratio or voltage\ntarget in the control panel.
 This_DC/DC_uses_an_ideal_power_sink_and_source_to_move_power_in_one_direction.=This DC/DC uses an ideal power sink and source to move power in one direction.
 Transferred_power=Transferred power
 

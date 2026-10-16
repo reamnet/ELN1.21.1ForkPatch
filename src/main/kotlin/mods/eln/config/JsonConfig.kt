@@ -99,7 +99,6 @@ class JsonConfig @JvmOverloads constructor(
         spec(path = "gameplay.seasonal.enableFestiveItems", defaultValue = true, comment = "Set false to disable festive items."),
         spec(path = "gameplay.crafting.verticalIronCableCrafting", defaultValue = false, comment = "Craft iron cables with vertical ingots instead of horizontal ones."),
         spec(path = "gameplay.cables.creativeFreeLength", defaultValue = true, comment = "When enabled, creative players do not consume utility cable length when placing cables or connecting poles."),
-        spec(path = "gameplay.qol.rememberLastLampSignalName", defaultValue = false, comment = "Lamp sockets remember the last used wireless channel name."),
         spec(path = "gameplay.qol.rememberLastLampSocketContents", defaultValue = false, comment = "Lamp sockets are pre filled with last used bulb and cable (creative only)."),
         spec(path = "gameplay.qol.creativeNoConsumeInsertedItems", defaultValue = false, comment = "Right click insertion does not consume items from creative players."),
         spec(path = "gameplay.qol.rememberLastFloodlightBulbs", defaultValue = false, comment = "Floodlights are pre filled with last used bulbs (creative only)."),

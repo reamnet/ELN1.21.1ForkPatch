@@ -117,18 +117,21 @@ public abstract class GuiContainerEln extends AbstractContainerScreen<AbstractCo
 
     @Override
     public boolean charTyped(char codePoint, int modifiers) {
-        helper.keyTyped(codePoint, 0);
-        return super.charTyped(codePoint, modifiers);
+        return helper.charTyped(codePoint, modifiers) || super.charTyped(codePoint, modifiers);
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == Keyboard.KEY_RETURN) helper.keyTyped('\r', keyCode);
-        else if (keyCode == Keyboard.KEY_BACK || keyCode == Keyboard.KEY_DELETE || keyCode == Keyboard.KEY_LEFT || keyCode == Keyboard.KEY_RIGHT)
-            helper.keyTyped('\0', keyCode);
-        // A focused text field owns the keyboard (the inventory key must not close the screen).
+        if (helper.keyPressed(keyCode, scanCode, modifiers)) return true;
+        // Inventory and other hotkeys must not close the screen while typing.
         if (keyCode != Keyboard.KEY_ESCAPE && helper.hasFocusedTextField()) return true;
         return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public void removed() {
+        if (helper != null) helper.commitTextFields();
+        super.removed();
     }
 
     @Override

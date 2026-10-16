@@ -123,12 +123,13 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
         val channelMap = LampSupplyElement.channelMap[element.lampSupplyChannel]
 
         if (channelMap != null) {
-            if (channelMap.contains(cachedBestChannelHandle?.second) && !forceUpdate) return
+            if (channelMap.contains(cachedBestChannelHandle?.second) &&
+                cachedBestChannelHandle?.second?.element?.isInRange(coordinate) == true && !forceUpdate) return
             else {
                 channelMap.filterNotNull()
                 cachedBestChannelHandle = channelMap
                     .map { Pair(it.element.sixNode!!.coordinate.trueDistanceTo(coordinate), it) }
-                    .filter { it.first < it.second.element.range }
+                    .filter { it.second.element.isInRange(coordinate) }
                     .minByOrNull { it.first }
             }
         } else cachedBestChannelHandle = null

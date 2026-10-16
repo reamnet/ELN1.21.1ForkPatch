@@ -59,6 +59,7 @@ Generated_power=Παραγόμενη ισχύς
 Generates_heat_when_supplied_with_fuel.=Παράγει θερμότητα όταν τροφοδοτείται με καύσιμο.
 Generating=Παράγει
 Good=Καλό
+Grid_links_require_an_intact_power_cable;_signal_and_melted_cables_are_not_supported=Grid links require an intact power cable; signal and melted cables are not supported
 Has_a_signal_output.=Διαθέτει έξοδο σήματος.
 Has_some_caveats\:=Έχει ορισμένες επιφυλάξεις:
 Hold_[ctrl]_for_realism_details=Κρατήστε [ctrl] για λεπτομέρειες ρεαλισμού
@@ -141,6 +142,7 @@ Resistance=Αντίσταση
 Resistance\:_%1$Ω=Αντίσταση: %1$Ω
 Secondary=Secondary
 Secondary_winding=Secondary winding
+Select_a_grid_terminal,_not_the_device_body=Select a grid terminal, not the device body
 Serial_resistance\:_%1$Ω=Αντίσταση σειράς: %1$Ω
 Signal=Σήμα
 Smallest=Μικρότερο
@@ -159,6 +161,7 @@ Toggle=Εναλλαγή
 Toggle_switch=Διακόπτης εναλλαγής
 Toggles_the_output_each_time\nan_emitter's_value_rises.\nUseful_to_allow_multiple_buttons\nto_control_the_same_light.=Εναλλάσσει την έξοδο κάθε φορά\nπου ανεβαίνει η τιμή ενός πομπού.\nΧρήσιμο για να επιτρέπει πολλαπλά κουμπιά\nνα ελέγχουν το ίδιο φως.
 Transforms_an_input_voltage_to\nan_output_voltage.=Μετασχηματίζει μια τάση εισόδου σε\nτάση εξόδου.
+Unavailable=Unavailable
 Used=Χρησιμοποιημένο
 Used_to_cool_down_turbines.=Χρησιμοποιείται για την ψύξη των τουρμπινών.
 Uses_the_biggest\nvalue_on_the_channel.=Χρησιμοποιεί τη μεγαλύτερη\nτιμή στο κανάλι.
@@ -169,6 +172,7 @@ Voltage=Τάση
 Voltage\:_%1$V=Τάση: %1$V
 Voltage_drop=Πτώση τάσης
 Voltages=Τάσεις
+Winding_ratio=Winding ratio
 Winding_resistance=Winding resistance
 Write=Εγγραφή
 Yes=Ναι
@@ -213,7 +217,8 @@ Energy_per_operation\:_%1$J=Ενέργεια ανά λειτουργία: %1$J
 Time_per_operation\:_%1$h=Χρόνος ανά λειτουργία: %1$h
 
 # src/main/java/mods/eln/item/FerromagneticCoreDescriptor.java
-Cable_loss_factor\:_%1$=Συντελεστής απωλειών καλωδίου: %1$
+Legacy_cable_loss_factor\:_%1$=Legacy cable loss factor: %1$
+Modern_DC/DC_winding_resistance_comes_from_the_wire,_not_this_legacy_factor.=Modern DC/DC winding resistance comes from the wire, not this legacy factor.
 
 # src/main/java/mods/eln/item/HeatingCorpElement.java
 
@@ -244,8 +249,6 @@ __*_It_exposes_a_nominal_mains_class_instead_of_wall-plug_details=  * Εκθέτ
 
 # src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerElement.java
 Charge_Current=Ρεύμα Φόρτισης
-
-# src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerGui.java
 
 # src/main/java/mods/eln/sixnode/diode/DiodeDescriptor.java
 Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=Το ηλεκτρικό ρεύμα μπορεί μόνο\nνα ρέει μέσω της διόδου\nαπό την άνοδο προς την κάθοδο
@@ -321,10 +324,6 @@ Displays_signal_value.=Εμφανίζει την τιμή σήματος.
 Max=Μέγ
 Min=Ελάχ
 
-# src/main/java/mods/eln/sixnode/electricaldigitaldisplay/ElectricalDigitalDisplayGui.java
-
-# src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java
-
 # src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java
 Output_voltage_increases\nif_entities_are_moving_around.=Η τάση εξόδου αυξάνεται\nεάν οι οντότητες κινούνται γύρω.
 
@@ -342,8 +341,6 @@ Fire_present=Παρουσία φωτιάς
 # src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceDescriptor.java
 Provides_configurable_signal\nvoltage.=Παρέχει ρυθμιζόμενη\nτάση σήματος.
 
-# src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceElement.java
-
 # src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceGui.java
 Output_at_%1$%=Έξοδος στο %1$%
 
@@ -354,8 +351,6 @@ Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_dayli
 
 # src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorElement.java
 Light_level=Επίπεδο φωτός
-
-# src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathContainer.java
 
 # src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
 Applicable_boolean_operators\:=Εφαρμόσιμοι λογικοί τελεστές:
@@ -383,18 +378,10 @@ Converts_Redstone_signal\nto_an_electrical_voltage.=Μετατρέπει σήμ�
 # src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputDescriptor.java
 Converts_electrical_voltage\ninto_a_Redstone_signal.=Μετατρέπει ηλεκτρική τάση\nσε σήμα Redstone.
 
-# src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputElement.java
-
 # src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayDescriptor.java
 Contact_current_rating\:_%1$A=Ονομαστικό ρεύμα επαφής: %1$A
 Contact_voltage\:_%1$V=Τάση επαφής: %1$V
 Control_voltage\:_%1$V=Τάση ελέγχου: %1$V
-
-# src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayElement.java
-
-# src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayGui.java
-
-# src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorContainer.java
 
 # src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorDescriptor.java
 Can_measure_Voltage/Power/Current=Μπορεί να μετρήσει Τάση/Ισχύ/Ρεύμα
@@ -428,8 +415,6 @@ Remaining=Απομένει
 # src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutGui.java
 Set=Ορισμός
 The_time_interval_the\noutput_is_kept_high.=Το χρονικό διάστημα που\nη έξοδος διατηρείται υψηλή.
-
-# src/main/java/mods/eln/sixnode/electricalwatch/ElectricalWatchContainer.java
 
 # src/main/java/mods/eln/sixnode/electricalwatch/ElectricalWatchDescriptor.java
 Requires_batteries_for_operation.=Απαιτεί μπαταρίες για λειτουργία.
@@ -479,7 +464,7 @@ A_bit_contrived,_as_the_wires_could_just_cross_over_each_other._Realism_depends_
 Allows_crossing_cables\non_one_single_block.=Επιτρέπει τη διασταύρωση καλωδίων\nσε ένα μόνο μπλοκ.
 
 # src/main/java/mods/eln/sixnode/lampsupply/LampSupplyContainer.java
-Cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.=Θέση καλωδίου\nΗ βασική εμβέλεια είναι 32 μπλοκ.\nΚάθε επιπλέον καλώδιο\nαυξάνει την εμβέλεια κατά ένα.
+Cable_slot\nSelect_the_wireless_power_range_in_the_GUI.\nCable_quantity_does_not_change_the_range.=Cable slot\nSelect the wireless power range in the GUI.\nCable quantity does not change the range.
 
 # src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java
 Capable_of_operating_3_light_channels.=Ικανό να λειτουργεί 3 κανάλια φωτός.
@@ -493,7 +478,10 @@ Wireless_control_signals_are_totally_possible=Τα ασύρματα σήματα
 Total_power=Συνολική ισχύς
 
 # src/main/java/mods/eln/sixnode/lampsupply/LampSupplyGui.java
+Click_to_cycle_32,_64,_128,_256_or_512_blocks=Click to cycle 32, 64, 128, 256 or 512 blocks
 Power_channel_name=Όνομα καναλιού ισχύος
+Power_range\:_%1$_blocks=Power range: %1$ blocks
+Power_range_does_not_load_chunks;_keep_the_installation_loaded_separately=Power range does not load chunks; keep the installation loaded separately
 Wireless_channel_name=Όνομα ασύρματου καναλιού
 
 # src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuElement.java
@@ -518,8 +506,6 @@ Coal_dust_slot=Θέση σκόνης άνθρακα
 # src/main/java/mods/eln/sixnode/resistor/ResistorDescriptor.java
 It's_a_resistor=Είναι ένας αντιστάτης
 
-# src/main/java/mods/eln/sixnode/resistor/ResistorElement.java
-
 # src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
 High_parallel_resistance\n_->_Low_power_dissipation.=High parallel resistance\n -> Low power dissipation.
 Low_serial_resistance\n_->_High_conductivity.=Low serial resistance\n -> High conductivity.
@@ -531,8 +517,6 @@ The_thermal_simulator_doesn't_properly_manage_heat=The thermal simulator doesn't
 # src/main/java/mods/eln/sixnode/thermalcable/ThermalCableElement.java
 Thermic_power=Θερμική ισχύς
 
-# src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorContainer.java
-
 # src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorDescriptor.java
 Can_measure\:=Μπορεί να μετρήσει:
 Measures_temperature_of_cables.=Μετρά τη θερμοκρασία των καλωδίων.
@@ -542,8 +526,6 @@ __Temperature/Power_conducted=  Θερμοκρασία/Μεταφερόμενη 
 # src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorElement.java
 Measured_temperature=Μετρούμενη θερμοκρασία
 Measured_thermal_power=Μετρούμενη θερμική ισχύς
-
-# src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorGui.java
 
 # src/main/java/mods/eln/sixnode/tutorialsign/TutorialSignElement.java
 No_text_associated_to_this_beacon=Δεν υπάρχει κείμενο σχετιζόμενο με αυτόν τον φάρο
@@ -570,6 +552,8 @@ Receive_signal_voltage_on_selected_wireless_signal_channel=Λαμβάνει τά
 
 # src/main/java/mods/eln/sixnode/wirelesssignal/tx/WirelessSignalTxDescriptor.java
 Sends_signal_voltage_on_selected_wireless_signal_channel=Στέλνει τάση σήματος στο επιλεγμένο ασύρματο κανάλι σήματος
+
+# src/main/java/mods/eln/sixnode/wirelesssignal/tx/WirelessSignalTxElement.java
 
 # src/main/java/mods/eln/transparentnode/autominer/AutoMinerContainer.java
 Drill_slot=Θέση τρυπανιού
@@ -624,7 +608,7 @@ Auto_shutdown=Αυτόματη απενεργοποίηση
 Manual_shutdown=Χειροκίνητη απενεργοποίηση
 Set_point\:_%1$=Σημείο ρύθμισης: %1$
 
-# src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
+# src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineContainer.java
 
 # src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineElement.java
 Power_provided=Παρεχόμενη ισχύς
@@ -646,12 +630,6 @@ Take_fuel=Λήψη καυσίμου
 
 # src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorContainer.java
 (Increases_maximal_voltage)=(Αυξάνει τη μέγιστη τάση)
-
-# src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorGui.java
-
-# src/main/java/mods/eln/transparentnode/powerinductor/PowerInductorContainer.java
-
-# src/main/java/mods/eln/transparentnode/powerinductor/PowerInductorGui.java
 
 # src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelContainer.java
 Solar_tracker_slot=Θέση ηλιακού ανιχνευτή
@@ -704,6 +682,8 @@ Temperature_difference\:_%1$°C=Διαφορά θερμοκρασίας: %1$°C
 
 # src/main/java/mods/eln/transparentnode/turbine/TurbineElement.java
 Nominal=Ονομαστικό
+
+# src/main/java/mods/eln/transparentnode/turret/TurretContainer.java
 
 # src/main/java/mods/eln/transparentnode/turret/TurretDescriptor.java
 CAUTION\:_Cables_can_get_quite_hot!=ΠΡΟΣΟΧΗ: Τα καλώδια μπορεί να θερμανθούν πολύ!
@@ -775,6 +755,8 @@ Search_results\:_%1$=Search results: %1$
 # src/main/kotlin/mods/eln/block/ArcClayBlock.kt
 tile.arc_clay_block.name=Μπλοκ Πηλού Τόξου
 tile.arc_metal_block.name=Μπλοκ Μετάλλου Τόξου
+
+# src/main/kotlin/mods/eln/cable/CableItemSlot.kt
 
 # src/main/kotlin/mods/eln/falstad/FalstadImporter.kt
 %1$x%2$_blocks=%1$x%2$ μπλοκ
@@ -862,8 +844,14 @@ Cannot_connect,_no_line_of_sight=Αδυναμία σύνδεσης, δεν υπ�
 Cannot_connect,_range_%1$_and_limit_%2$_blocks=Αδυναμία σύνδεσης, εμβέλεια %1$ και όριο %2$ μπλοκ
 Cannot_connect_these_two_objects=Αδυναμία σύνδεσης αυτών των δύο αντικειμένων
 Setting_starting_point=Ορισμός σημείου εκκίνησης
-Wrong_cable_for_this_pole=Λάθος καλώδιο για αυτόν τον στύλο
+This_cable_spool_has_no_usable_length=This cable spool has no usable length
 You_need_%1$_m_of_cable=Χρειάζεστε %1$ m καλωδίου
+
+# src/main/kotlin/mods/eln/gridnode/GridLink.kt
+Grid_cable_item_does_not_match_the_paid_length=Grid cable item does not match the paid length
+Grid_cable_item_does_not_match_the_selected_cable=Grid cable item does not match the selected cable
+Grid_endpoint_is_no_longer_available=Grid endpoint is no longer available
+Invalid_grid_cable_span=Invalid grid cable span
 
 # src/main/kotlin/mods/eln/gridnode/GridSwitch.kt
 Closed?=Κλειστό;
@@ -986,6 +974,8 @@ Stored_Energy\:_%1$J_(%2$%)=Αποθηκευμένη Ενέργεια: %1$J (%2$
 # src/main/kotlin/mods/eln/item/electricalitem/ElectricalPickaxe.kt
 Opens_holes._Right-click_to_open_smaller_holes.=Ανοίγει τρύπες. Δεξί κλικ για να ανοίξει μικρότερες τρύπες.
 
+# src/main/kotlin/mods/eln/item/electricalitem/PortableOreScannerItem.kt
+
 # src/main/kotlin/mods/eln/item/lampitem/LampDescriptor.kt
 Current_lifetime\:_%1$h=Τρέχουσα διάρκεια ζωής: %1$h
 Nominal_brightness\:_%1$=Ονομαστική φωτεινότητα: %1$
@@ -1053,7 +1043,7 @@ Life_Left=Απομένουσα Ζωή
 Requires_a_turbine_blade_to_operate.=Απαιτεί λεπίδα τουρμπίνας για λειτουργία.
 Turbine_blade_slot=Θέση λεπίδας τουρμπίνας
 
-# src/main/kotlin/mods/eln/misc/Tooltips.kt
+# src/main/kotlin/mods/eln/misc/UtilsClient.kt
 
 # src/main/kotlin/mods/eln/misc/Version.kt
 mod.name=Electrical Age
@@ -1071,10 +1061,12 @@ Separate_or_unsolved_electrical_sections\:_check_their_ground_references_before_
 Terminal_B_current\:_%1$_|_Cable/contact_loss_at_B\:_%2$=Terminal B current: %1$ | Cable/contact loss at B: %2$
 The_circuit_has_no_finite_solver_reading_yet.=The circuit has no finite solver reading yet.
 
-# src/main/kotlin/mods/eln/node/six/SixNodeDescriptor.kt
+# src/main/kotlin/mods/eln/node/transparent/TransparentNodeDescriptor.kt
 
 # src/main/kotlin/mods/eln/railroad/ElectricMinecartChargeReporter.kt
 Cart_Energy\:_=Ενέργεια Βαγονιού: 
+
+# src/main/kotlin/mods/eln/railroad/OverheadLines.kt
 
 # src/main/kotlin/mods/eln/registration/EntityRegistration.kt
 entity.EAReplicator.name=Αντιγραφέας
@@ -1801,6 +1793,15 @@ Wire_Combiner.name=Συνδυαστής Συρμάτων
 Wire_Insulator.name=Μονωτής Συρμάτων
 Wire_Roller.name=Κύλινδρος Συρμάτων
 
+# src/main/kotlin/mods/eln/server/console/ElnChunkloadCommand.kt
+Cannot_load_this_area\:_it_crosses_the_world_border_or_exceeds_the_%1$_chunk_limit.=Cannot load this area: it crosses the world border or exceeds the %1$ chunk limit.
+Chunk_%1$,_%2$_(block_%3$,_%4$)=Chunk %1$, %2$ (block %3$, %4$)
+ELN_keeps_%1$_chunks_ticking_in_this_dimension_(limit_%2$).=ELN keeps %1$ chunks ticking in this dimension (limit %2$).
+Keeping_%1$_installation_chunks_ticking,_including_after_a_server_restart.=Keeping %1$ installation chunks ticking, including after a server restart.
+Released_ELN_tickets_for_%1$_installation_chunks.=Released ELN tickets for %1$ installation chunks.
+Released_all_ELN_installation_chunks_in_this_dimension.=Released all ELN installation chunks in this dimension.
+Use_/eln_chunkload_on_[0-4]_or_off_[0-4]_at_the_installation;_radius_is_in_chunks._Use_list_or_clear_to_manage_this_dimension.=Use /eln chunkload on [0-4] or off [0-4] at the installation; radius is in chunks. Use list or clear to manage this dimension.
+
 # src/main/kotlin/mods/eln/sixnode/AnalogChips.kt
 A_voltage-controlled_amplifier_(VCA)\nis_an_electronic_amplifier_that_varies\nits_gain_depending_on_the_control_voltage.=Ένας ενισχυτής ελεγχόμενος από τάση (VCA)\nείναι ένας ηλεκτρονικός ενισχυτής που μεταβάλλει\nτην απολαβή του ανάλογα με την τάση ελέγχου.
 A_voltage-controlled_oscillator_or_VCO_is\nan_electronic_oscillator_whose_oscillation\nfrequency_is_controlled_by_a_voltage_input.=Ένας ταλαντωτής ελεγχόμενος από τάση ή VCO είναι\nένας ηλεκτρονικός ταλαντωτής του οποίου η συχνότητα\nταλάντωσης ελέγχεται από μια είσοδο τάσης.
@@ -1996,6 +1997,8 @@ Latest=Latest
 Monitor_printout=Monitor printout
 No_recorded_samples=No recorded samples
 
+# src/main/kotlin/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorContainer.kt
+
 # src/main/kotlin/mods/eln/sixnode/electricalhumiditysensor/ElectricalHumiditySensorDescriptor.kt
 0%%_RH\:_%1$V=0%% ΣΥ: %1$V
 100%%_RH\:_%1$V=100%% ΣΥ: %1$V
@@ -2025,6 +2028,8 @@ Powered_by_lamp_supply=Τροφοδοτείται από τροφοδοσία λ
 Specify_the_lamp_supply_channel=Καθορίστε το κανάλι τροφοδοσίας λαμπτήρων
 This_currently_does_nothing.=Αυτό προς το παρόν δεν κάνει τίποτα.
 Ungrounded=Αγείωτο
+
+# src/main/kotlin/mods/eln/sixnode/mqttmeter/MqttEnergyMeterContainer.kt
 
 # src/main/kotlin/mods/eln/sixnode/mqttmeter/MqttEnergyMeterElement.kt
 Elapsed_time=Χρόνος που έχει παρέλθει
@@ -2064,6 +2069,8 @@ Set_min/max_values_in_GUI\nto_map_temperature_to_output.=Ορίστε ελάχ./
 # src/main/kotlin/mods/eln/sixnode/thermometersensor/ThermometerSensorElement.kt
 Biome_temperature=Θερμοκρασία βιώματος
 
+# src/main/kotlin/mods/eln/sixnode/thermometersensor/ThermometerSensorGui.kt
+
 # src/main/kotlin/mods/eln/transparentnode/DcDc.kt
 This_DC/DC_has_unrealistic_capacitance_effects_and_can_sink/source_power_that_violates_Newton's_laws=Αυτός ο DC/DC έχει μη ρεαλιστικά φαινόμενα χωρητικότητας και μπορεί να καταβυθίζει/παρέχει ισχύ που παραβιάζει τους νόμους του Νεύτωνα
 
@@ -2075,21 +2082,26 @@ Idle=Idle
 Input_current_limit_or_voltage_sag=Input current limit or voltage sag
 Input_exceeds_winding_voltage_rating=Input exceeds winding voltage rating
 Input_undervoltage=Input undervoltage
-Invalid_control_signal=Invalid control signal
+Internal_output_target_(V);_terminal_voltage_falls_with_winding_and_cable_losses=Internal output target (V); terminal voltage falls with winding and cable losses
+Invalid_control_setting_or_signal=Invalid control setting or signal
+Invalid_mode=Invalid mode
 Invalid_or_conflicting_network=Invalid or conflicting network
+Manual_modes_ignore_the_0-50_V_control-signal_connector=Manual modes ignore the 0-50 V control-signal connector
 Maximum_conversion_ratio=Maximum conversion ratio
-Mode\:_%1$=Mode: %1$
 Network_did_not_converge;_reconfigure_to_reset=Network did not converge; reconfigure to reset
 No_input_supply=No input supply
 Output_already_at_target;_reverse_transfer_blocked=Output already at target; reverse transfer blocked
 Output_current_limit=Output current limit
 Output_power_limit=Output power limit
 Output_voltage_limit=Output voltage limit
-Ratio_or_internal_no-load_output_target_in_volts=Ratio or internal no-load output target in volts
+Ratio_(x)=Ratio (x)
 Regulating=Regulating
 Requested_conversion_is_outside_this_topology=Requested conversion is outside this topology
+Signal_(0-50_V)=Signal (0-50 V)
+Target_(V)=Target (V)
 Transferring_power=Transferring power
 Use_V2=Use V2
+Voltage_gain_x_\=_Vout_/_Vin;_x2_requests_twice_the_input_voltage=Voltage gain x = Vout / Vin; x2 requests twice the input voltage
 Winding_voltage_rating_exceeded=Winding voltage rating exceeded
 
 # src/main/kotlin/mods/eln/transparentnode/DcDcWinding.kt
@@ -2125,6 +2137,11 @@ Set_resistance_with_coal_dust=Ορισμός αντίστασης με σκόν�
 __*_Resistance_is_not_impacted_by_temperature=  * Η αντίσταση δεν επηρεάζεται από τη θερμοκρασία
 __*_Signal_input_doesn't_require_power=  * Η είσοδος σήματος δεν απαιτεί ισχύ
 
+# src/main/kotlin/mods/eln/transparentnode/LegacyDcDc.kt
+Legacy_item-count_windings_only;_use_modern_DC/DC_for_length-based_spools.=Legacy item-count windings only; use modern DC/DC for length-based spools.
+Needs_a_core_and_two_legacy_power-cable_windings=Needs a core and two legacy power-cable windings
+Winding_policy=Winding policy
+
 # src/main/kotlin/mods/eln/transparentnode/NixieTube.kt
 Blank=Κενό
 Digit=Ψηφίο
@@ -2135,9 +2152,12 @@ Signal_input_doesn't_require_power,_and_interfaces_are_tailored_to_gameplay=Η �
 
 # src/main/kotlin/mods/eln/transparentnode/OneWayDcDc.kt
 Front_and_back_connections_are_isolated\nground_references_for_each_side.=Front and back connections are isolated\nground references for each side.
+Ignored_in_manual_mode=Ignored in manual mode
 Internal_output_target=Internal output target
+Measured_terminal_ratio=Measured terminal ratio
 Moves_power_from_the_input_side\nto_the_output_side_only.=Moves power from the input side\nto the output side only.
-The_output_voltage_ratio_is_controlled\nfrom_a_signal_input.=The output voltage ratio is controlled\nfrom a signal input.
+Requested_ratio=Requested ratio
+Select_signal,_manual_ratio_or_voltage\ntarget_in_the_control_panel.=Select signal, manual ratio or voltage\ntarget in the control panel.
 This_DC/DC_uses_an_ideal_power_sink_and_source_to_move_power_in_one_direction.=This DC/DC uses an ideal power sink and source to move power in one direction.
 Transferred_power=Transferred power
 

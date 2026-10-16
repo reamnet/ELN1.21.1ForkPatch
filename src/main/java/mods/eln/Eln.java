@@ -303,6 +303,7 @@ public class Eln {
         modBus.addListener(this::loadComplete);
         modBus.addListener(this::buildCreativeTabContents);
         modBus.addListener(ElnCapabilities::register);
+        modBus.addListener(mods.eln.server.LoadedInstallations::register);
         NeoForge.EVENT_BUS.addListener(this::onServerAboutToStart);
         NeoForge.EVENT_BUS.addListener(this::onServerStarting);
         NeoForge.EVENT_BUS.addListener(this::onServerStopped);

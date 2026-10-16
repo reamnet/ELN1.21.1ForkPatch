@@ -13,9 +13,8 @@ public class LampSupplyContainer extends BasicContainer {
     public static final double requiredCableLength = 1.0; // This applies only for utility cables
 
     public LampSupplyContainer(Player player, Container inventory) {
-        super(player, inventory, new Slot[]{new CableItemSlot(inventory, cableSlotId, 184, 144, 64, false,
-                requiredCableLength, I18N.tr("Cable slot\nBase range is 32 blocks.\nEach additional cable\nincreases " +
-                "range by one.").split("\n"))});
+        super(player, inventory, new Slot[]{new CableItemSlot(inventory, cableSlotId, 184, 170, 64, false,
+                requiredCableLength, I18N.tr("Cable slot\nSelect the wireless power range in the GUI.\nCable quantity does not change the range.").split("\n"))});
     }
 
 }

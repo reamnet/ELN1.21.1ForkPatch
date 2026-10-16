@@ -68,7 +68,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     private val lampSocketProcess = LampSocketProcess(this)
 
     var poweredByLampSupply = true
-    var lampSupplyChannel = if (Eln.config.getBooleanOrElse("gameplay.qol.rememberLastLampSignalName", false)) lastChannel else "Default channel"
+    var lampSupplyChannel = LampChannelMemory.DEFAULT_CHANNEL
     var activeLampSupplyConnection = false
     var projectionRotationAngle = 0.0
     private var paintColor = LampSocketRender.DEFAULT_PAINT_COLOR
@@ -287,7 +287,11 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
         }
     }
 
-    override fun networkUnserialize(stream: DataInputStream) {
+    override fun networkUnserialize(stream: DataInputStream) = readSettings(stream, null)
+
+    override fun networkUnserialize(stream: DataInputStream, player: ServerPlayer?) = readSettings(stream, player)
+
+    private fun readSettings(stream: DataInputStream, player: ServerPlayer?) {
         try {
             when (stream.readByte()) {
                 LampSocketGui.TOGGLE_GROUNDED_EVENT -> {
@@ -300,7 +304,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
                 }
                 LampSocketGui.UPDATE_LAMP_SUPPLY_CHANNEL_EVENT -> {
                     lampSupplyChannel = stream.readUTF()
-                    if (Eln.config.getBooleanOrElse("gameplay.qol.rememberLastLampSignalName", false)) lastChannel = lampSupplyChannel
+                    player?.let { LampChannelMemory.remember(it.persistentData, lampSupplyChannel) }
                 }
                 LampSocketGui.ADJUST_ROTATION_ANGLE_EVENT -> projectionRotationAngle = stream.readDouble()
             }
@@ -356,6 +360,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
 
         if (compound.contains("lampSupplyChannel")) {
             lampSupplyChannel = compound.getString("lampSupplyChannel")
+            LampChannelMemory.remember(invoker.persistentData, lampSupplyChannel)
             publishChanges = true
         }
 
@@ -398,7 +403,6 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     }
 
     companion object {
-        var lastChannel = "Default channel"
         var lastLampStack: ItemStack? = null
         var lastCableStack: ItemStack? = null
         var placingPlayerIsCreative = false

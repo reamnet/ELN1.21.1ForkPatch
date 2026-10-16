@@ -44,6 +44,8 @@ See the [Create adapter guide](docs/create-shaft-adapters.md) for connections on
 
 **In-game recipes and help:** press **P** to open the [Electrical Age guide](docs/in-game-guide.md). Search items, scroll through recipes and click ingredients to follow their crafting chains.
 
+**Device configuration and unattended plants:** text fields support clipboard shortcuts; lamp supplies have selectable power coverage. See the [configuration and chunk-loading guide](docs/device-configuration-and-chunk-loading.md) for remembered lamp channels and `/eln chunkload` commands.
+
 **Meters and monitor paper:** sneak-click two terminals with a Multimeter/AllMeter to measure their voltage difference. Right-click a printed monitor sheet to read its saved chart. Press **P** for the new circuit exercises, or read the [printout and diagnostics guide](docs/monitor-print-and-diagnostics.md).
 
 **Wire overloads:** AWG/kcmil conductors now account for electrical heat, material heat capacity and conductor failure. Damaged insulation can still conduct until the metal breaks. See the [thermal model, assumptions and tests](docs/wire-thermal-model.md). Existing overloaded builds may fail after updating; back up your world first.
