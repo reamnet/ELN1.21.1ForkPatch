@@ -73,7 +73,8 @@ JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS -Deln.generatorWorld=generator-check-1 -De
 ```
 
 This covers both output ports, cables placed before/after the machine, legacy
-very-high-voltage and single-conductor utility cables, and installations with/without
+very-high-voltage, insulated copper utility and **Aluminum 1000 kcmil Cable Bare**
+cables (12 setups total), and installations with/without
 forced chunks away from the player. Verification also deliberately disconnects the
 generator's simulation registration before calling its boot hook, checking recovery,
 unchanged shaft energy, no duplicate connections, and subsequent delivered power.

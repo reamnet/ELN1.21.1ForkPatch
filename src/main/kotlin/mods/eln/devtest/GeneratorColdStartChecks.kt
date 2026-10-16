@@ -36,6 +36,7 @@ object GeneratorColdStartChecks {
     private var work: CompletableFuture<Void>? = null
     private val results = mutableListOf<Map<String, Any>>()
     private val recovery = mutableListOf<String>()
+    private const val caseCount = 12
     private fun origin(i: Int) = BlockPos(512 + i * 31, 65, 533)
 
     @SubscribeEvent fun tick(event: ClientTickEvent.Post) {
@@ -64,13 +65,19 @@ object GeneratorColdStartChecks {
                         player.abilities.flying = true; player.onUpdateAbilities()
                         if (mode == "place") {
                             val f = NativeCampaignFixtures(world, player)
-                            repeat(8) { i ->
+                            repeat(caseCount) { i ->
                                 val p = origin(i)
                                 for (x in -3..8) for (z in -3..3) {
                                     world.setChunkForced((p.x+x) shr 4, (p.z+z) shr 4, true)
                                     world.setBlockAndUpdate(p.offset(x,-1,z), Blocks.STONE.defaultBlockState())
                                 }
-                                fun cable(at: BlockPos) { f.placeSix(if (i < 4) f.requiredItem("Very High Voltage Cable") else f.spool(), at) }
+                                fun cable(at: BlockPos) {
+                                    f.placeSix(when (i / 4) {
+                                        0 -> f.requiredItem("Very High Voltage Cable")
+                                        1 -> f.spool()
+                                        else -> f.requiredItem("Aluminum 1000 kcmil Cable Bare")
+                                    }, at)
+                                }
                                 val output = p.offset(4, 0, if (i % 4 < 2) -1 else 1)
                                 if (i % 2 == 0) cable(output)
                                 f.source(p.offset(-1,0,-1), Eln.VVU)
@@ -93,13 +100,14 @@ object GeneratorColdStartChecks {
                     val server = mc.singleplayerServer!!
                     work = CompletableFuture.runAsync({
                         val f = NativeCampaignFixtures(server.overworld(), server.playerList.players.first())
-                        repeat(8) { i ->
+                        repeat(caseCount) { i ->
                             val p = origin(i)
                             val generator = f.machine(p.east(4)) as GeneratorElement
                             val motor = f.machine(p) as SimpleShaftElement
                             val cable = f.six(p.offset(4,0,if(i%4<2)-1 else 1))
                             val load = cable.electricalLoadList.first()
                             val result = mapOf("case" to i, "mode" to mode, "stage" to stage, "speed" to generator.shaft.rads,
+                                "cable" to cable.sixNodeElementDescriptor.name,
                                 "sameShaft" to (generator.shaft === motor.shaft), "voltage" to load.voltage,
                                 "current" to load.current, "connections" to cable.sixNode!!.nodeConnectionList.size)
                             results.add(result)
@@ -110,8 +118,8 @@ object GeneratorColdStartChecks {
                             "Large Generator did not deliver power: $results"
                         }
                         if (mode == "place") {
-                            // Half of each cable type starts the next JVM without any loaded fixture chunks.
-                            for (i in listOf(1,3,5,7)) {
+                            // Half of each cable type starts the next JVM without forced fixture chunks.
+                            for (i in (0 until caseCount).filter { it % 2 == 1 }) {
                                 val p = origin(i)
                                 for (x in -3..8) for (z in -3..3)
                                     f.world.setChunkForced((p.x+x) shr 4,(p.z+z) shr 4,false)
@@ -128,7 +136,7 @@ object GeneratorColdStartChecks {
                             val player = server.playerList.players.first()
                             val world = player.serverLevel()
                             val f = NativeCampaignFixtures(world, player)
-                            repeat(8) { i ->
+                            repeat(caseCount) { i ->
                                 val generator = f.machine(origin(i).east(4)) as GeneratorElement
                                 val node = generator.node!!
                                 val connections = node.nodeConnectionList.size
