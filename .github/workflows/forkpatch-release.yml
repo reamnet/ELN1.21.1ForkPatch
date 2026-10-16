@@ -1,0 +1,94 @@
+name: Publish ForkPatch release
+
+on:
+  workflow_dispatch:
+    inputs:
+      ci_run_id:
+        description: CI run containing the tested mod-jar artifact
+        required: true
+        type: string
+      release_id:
+        description: Existing draft release ID targeting that CI commit
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: forkpatch-release-${{ inputs.release_id }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Verify draft and wait for its source build
+        id: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CI_RUN_ID: ${{ inputs.ci_run_id }}
+          RELEASE_ID: ${{ inputs.release_id }}
+        run: |
+          python3 <<'PY'
+          import json, os, re, subprocess, time
+          repo = os.environ['GITHUB_REPOSITORY']
+          run_id, release_id = os.environ['CI_RUN_ID'], os.environ['RELEASE_ID']
+          assert run_id.isdigit() and release_id.isdigit(), 'IDs must be numeric'
+          def api(route):
+              return json.loads(subprocess.check_output(['gh', 'api', f'repos/{repo}/{route}']))
+          release = api(f'releases/{release_id}')
+          assert release['draft'] and not release['assets'], 'Expected an empty draft release'
+          tag, sha = release['tag_name'], release['target_commitish']
+          assert re.fullmatch(r'v\d+\.\d+\.\d+-port-forkpatch\.\d+', tag), 'Unexpected release tag'
+          assert re.fullmatch(r'[0-9a-f]{40}', sha), 'Draft must target a fixed commit'
+          run = api(f'actions/runs/{run_id}')
+          assert run['head_sha'] == sha, 'CI artifact and release source differ'
+          assert run['head_repository']['full_name'].lower() == repo.lower(), 'Wrong source repository'
+          assert run['path'] == '.github/workflows/ci.yml', 'Expected the repository CI workflow'
+          for attempt in range(40):
+              jobs = api(f'actions/runs/{run_id}/jobs?per_page=100')['jobs']
+              builds = [j for j in jobs if j['name'] == 'Build and unit tests']
+              assert len(builds) == 1, 'Expected one build job'
+              build = builds[0]
+              if build['status'] == 'completed':
+                  assert build['conclusion'] == 'success', 'Source build failed'
+                  break
+              print('Waiting for source build and unit tests...', flush=True)
+              time.sleep(15)
+          else:
+              raise RuntimeError('Source build did not finish in time')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
+              out.write(f'tag={tag}\nnumber={tag.rsplit(".", 1)[1]}\n')
+          print(f'Publishing {tag} from tested commit {sha}')
+          PY
+
+      - name: Download the tested jar from that exact CI run
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.ci_run_id }}
+          name: mod-jar
+          path: release-input
+
+      - name: Upload jar and checksum, then publish the draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.source.outputs.tag }}
+          RELEASE_NUMBER: ${{ steps.source.outputs.number }}
+        run: |
+          set -euo pipefail
+          mapfile -d '' jars < <(find release-input -type f -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' -print0)
+          [[ ${#jars[@]} -eq 1 ]] || { echo 'Expected one installable jar'; exit 1; }
+          mkdir release-output
+          filename="ElectricalAge-1.21.1-ForkPatch-${RELEASE_NUMBER}.jar"
+          cp "${jars[0]}" "release-output/$filename"
+          (cd release-output && sha256sum "$filename" > "$filename.sha256")
+          gh release upload "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+            "release-output/$filename" "release-output/$filename.sha256"
+          gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false
+          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json url --jq .url
