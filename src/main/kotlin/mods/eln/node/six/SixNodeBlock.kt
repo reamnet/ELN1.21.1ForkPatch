@@ -386,7 +386,7 @@ class SixNodeBlock : NodeBlock(nodeProperties().strength(0.3f, 1.0f), 0) {
 
     override fun getLightBlock(state: BlockState, w: BlockGetter, pos: BlockPos): Int {
         val sne = LoadedBlockEntities.get(w, pos) as? SixNodeEntity ?: return 0
-        val b = sne.sixNodeCacheBlock
+        val b = if (isRemote(w)) sne.sixNodeCacheBlock else (sne.node as? SixNode)?.sixNodeCacheBlock ?: Blocks.AIR
         return if (b === Blocks.AIR) 0 else try {
             b.defaultBlockState().getLightBlock(w, pos)
         } catch (e2: Exception) {

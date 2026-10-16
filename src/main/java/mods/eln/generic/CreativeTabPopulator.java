@@ -61,7 +61,14 @@ public final class CreativeTabPopulator {
     }
 
     private static String sortKey(ItemStack stack) {
-        String family = stack.getItem() instanceof DescriptorBlockItem<?> item ? item.descriptor.getClass().getName() : stack.getItem().getClass().getName();
+        String family = stack.getItem() instanceof DescriptorBlockItem<?> item ? item.descriptor.getClass().getName()
+            : stack.getItem() instanceof DescriptorItem<?> item ? item.descriptor.getClass().getName()
+            : stack.getItem().getClass().getName();
+        // Legacy groups and sub-IDs encode the registered item families (dusts, ingots, bulbs,
+        // tools, cable sizes). Keep these together instead of sorting translated/display names.
+        if (stack.getItem() instanceof IDescriptorItem item) {
+            return family + ":" + String.format(java.util.Locale.ROOT, "%08d", item.legacyId());
+        }
         String id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
         var matcher = java.util.regex.Pattern.compile("\\d+").matcher(id);
         StringBuilder ordered = new StringBuilder();

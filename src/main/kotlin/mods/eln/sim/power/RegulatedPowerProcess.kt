@@ -20,11 +20,12 @@ class RegulatedPowerProcess(
 ) : ConservativePowerProcess {
     var status = "IDLE"
         private set
-    private var tripped = false
+    private val retry = ConverterRetry()
     private var activeLimits: ConverterLimits? = null
     private var previousTarget = Double.NaN
 
-    fun resetFault() { tripped = false; previousTarget = Double.NaN }
+    fun resetFault() { retry.reset(); previousTarget = Double.NaN }
+    override fun beginStep(seconds: Double) { retry.advance(seconds) }
 
     private fun open(reason: String) {
         input.enabled = false
@@ -60,7 +61,7 @@ class RegulatedPowerProcess(
     }
 
     override fun prepareStep() {
-        if (tripped) { open("NON_CONVERGENT"); return }
+        if (retry.waiting) { open("NON_CONVERGENT"); return }
         if (!enabled()) { open("DISABLED"); return }
         val a = probePort(primary, primaryReference, input)
         val rating = readLimits() ?: return
@@ -78,7 +79,7 @@ class RegulatedPowerProcess(
     }
 
     override fun rootSystemPreStepProcess() {
-        if (tripped) { open("NON_CONVERGENT"); return }
+        if (retry.waiting) { open("NON_CONVERGENT"); return }
         if (!enabled()) { open("DISABLED"); return }
         val a = probePort(primary, primaryReference, input)
         val b = probePort(secondary, secondaryReference, output)
@@ -111,7 +112,7 @@ class RegulatedPowerProcess(
         return balancedPower(-pendingSourcePower(input), pendingSourcePower(output), rating.electronicsEfficiency)
     }
 
-    override fun failClosed() { tripped = true; open("NON_CONVERGENT") }
+    override fun failClosed() { retry.trip(); open("NON_CONVERGENT") }
     override fun connectedSystems(): Set<SubSystem> = setOfNotNull(primary.subSystem, secondary.subSystem)
     override fun trialSources(): List<SwitchableVoltageSource> = listOf(input, output)
 }

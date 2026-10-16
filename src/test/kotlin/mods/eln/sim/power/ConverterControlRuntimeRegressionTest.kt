@@ -53,6 +53,44 @@ class ConverterControlRuntimeRegressionTest {
     private fun limits() = ConverterLimits(.1, 120_000.0, 120_000.0,
         1000.0, 1000.0, 1_000_000.0, .97, 1.0 / 256, 256.0)
 
+    @Test fun numericalFailureRecoversWithoutChangingSettingsAfterOnePhysicalSecond() {
+        for (regulated in listOf(false, true)) {
+            val c = Circuit()
+            val process: ConservativePowerProcess = if (regulated)
+                RegulatedPowerProcess(c.primary, null, c.secondary, null, c.input, c.output,
+                    { true }, { limits() }, { 100.0 })
+            else SafeTransformerProcess(c.primary, c.secondary, c.input, c.output) { true }.apply { ratio = 2.0 }
+            c.root.addProcess(process)
+            c.settle()
+            assertTrue(c.load.power > 0.0)
+            process.failClosed()
+            repeat(99) { c.root.step(); assertOpen(c) }
+            c.root.step()
+            assertTrue(c.input.enabled && c.output.enabled, "Controller remained latched off")
+            assertTrue(c.load.power > 0.0)
+            close(c.output.power, -c.input.power * if (regulated) .97 else 1.0)
+        }
+    }
+
+    @Test fun retryDoesNotAdvanceDuringAlgebraicTrialsOrBypassInvalidControls() {
+        val c = Circuit()
+        var request = 100.0
+        val process = RegulatedPowerProcess(c.primary, null, c.secondary, null, c.input, c.output,
+            { true }, { limits() }, { request })
+        c.root.addProcess(process)
+        c.settle()
+        process.failClosed()
+        repeat(1000) { process.prepareStep(); process.rootSystemPreStepProcess() }
+        assertFalse(c.output.enabled)
+        request = Double.NaN
+        repeat(101) { c.root.step() }
+        assertOpen(c)
+        assertEquals("INVALID_CONTROL", process.status)
+        request = 100.0
+        c.settle()
+        assertTrue(c.output.enabled)
+    }
+
     @Test fun regulatedInvalidRequestsOpenBothBranchesAndRecover() {
         val c = Circuit()
         var request = 100.0

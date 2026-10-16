@@ -244,7 +244,10 @@ public class RootSystem {
         // Seed all voltage-regulated sources before sequential load calculations. Otherwise
         // the first member of a parallel bus is incorrectly asked to carry the entire load,
         // and subsequent members climb out of current limit only millivolts per iteration.
-        for (ConservativePowerProcess converter : converters) converter.prepareStep();
+        for (ConservativePowerProcess converter : converters) {
+            converter.beginStep(dt);
+            converter.prepareStep();
+        }
         Set<ConservativePowerProcess> blocked = new HashSet<>();
         boolean converged = false;
         int attempts = converters.isEmpty() ? 1 : 64;

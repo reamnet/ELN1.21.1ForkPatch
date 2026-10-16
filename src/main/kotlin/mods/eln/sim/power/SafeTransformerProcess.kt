@@ -20,12 +20,13 @@ class SafeTransformerProcess(
     var voltageTarget: Double? = null
     var status = "IDLE"
         private set
-    private var tripped = false
+    private val retry = ConverterRetry()
 
-    fun resetFault() { tripped = false }
+    fun resetFault() { retry.reset() }
+    override fun beginStep(seconds: Double) { retry.advance(seconds) }
 
     override fun rootSystemPreStepProcess() {
-        if (tripped) { open("NON_CONVERGENT"); return }
+        if (retry.waiting) { open("NON_CONVERGENT"); return }
         if (!enabled || !populated()) { open("DISABLED"); return }
         val target = voltageTarget
         if (target != null) {
@@ -69,6 +70,6 @@ class SafeTransformerProcess(
 
     override fun trialSources(): List<SwitchableVoltageSource> = listOf(input, output)
 
-    override fun failClosed() { tripped = true; open("NON_CONVERGENT") }
+    override fun failClosed() { retry.trip(); open("NON_CONVERGENT") }
     override fun connectedSystems(): Set<SubSystem> = setOfNotNull(primary.subSystem, secondary.subSystem)
 }

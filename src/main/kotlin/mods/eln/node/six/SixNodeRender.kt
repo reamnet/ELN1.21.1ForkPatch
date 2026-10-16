@@ -16,6 +16,10 @@ import net.minecraft.world.phys.Vec3
 class SixNodeRender : BlockEntityRenderer<SixNodeEntity> {
     override fun render(entity: SixNodeEntity, partialTicks: Float, poseStack: PoseStack, buffer: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
         Minecraft.getInstance().profiler.push("SixNode")
+        // Camouflage has collision in SixNodeBlock; it also needs its normal baked block model.
+        val cover = entity.sixNodeCacheBlock.defaultBlockState()
+        if (!cover.isAir) Minecraft.getInstance().blockRenderer.renderSingleBlock(
+            cover, poseStack, buffer, packedLight, packedOverlay)
         FixedFunction.begin(poseStack, buffer, NodeRenderSupport.neighbourLight(entity), packedOverlay)
         try {
             GL11.glPushMatrix()

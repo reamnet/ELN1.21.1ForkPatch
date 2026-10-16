@@ -9,6 +9,8 @@ import kotlin.math.max
 
 /** Participant in the root solver's trial/commit boundary. */
 interface ConservativePowerProcess : IRootSystemPreStepProcess {
+    /** Once per physical step, before algebraic trials. Retry timers must not advance per trial. */
+    fun beginStep(seconds: Double) {}
     /** Initial trial commands only. Never advances a physical state or bypasses acceptance. */
     fun prepareStep() {}
     /** Voltage commands eligible for a bounded algebraic convergence correction. */
@@ -18,6 +20,19 @@ interface ConservativePowerProcess : IRootSystemPreStepProcess {
     fun acceptsCandidate(): Boolean
     fun failClosed()
     fun connectedSystems(): Set<SubSystem>
+}
+
+/** A failed algebraic solve opens the converter for a second, then retries normal validation.
+ * This is a numerical recovery timer, separate from persistent insulation/winding damage.
+ */
+internal class ConverterRetry {
+    private var remaining = 0.0
+    val waiting get() = remaining > 1e-9
+    fun trip() { remaining = 1.0 }
+    fun reset() { remaining = 0.0 }
+    fun advance(seconds: Double) {
+        if (seconds.isFinite() && seconds > 0.0) remaining = (remaining - seconds).coerceAtLeast(0.0)
+    }
 }
 
 /** Precision-preserving affine Thevenin probe; never commits physical state. */

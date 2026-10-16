@@ -612,7 +612,7 @@ class OneWayDcDcElement(
 class OneWayDcDcProcess(private val element: OneWayDcDcElement) : ConservativePowerProcess {
     var status = "IDLE"
         private set
-    private var tripped = false
+    private val retry = ConverterRetry()
     private var efficiency = 1.0
     private var inputLimit = Double.MAX_VALUE
     private var outputLimit = Double.MAX_VALUE
@@ -639,7 +639,11 @@ class OneWayDcDcProcess(private val element: OneWayDcDcElement) : ConservativePo
         }
     )
 
-    fun resetFault() { tripped = false; regulated.resetFault() }
+    fun resetFault() { retry.reset(); regulated.resetFault() }
+    override fun beginStep(seconds: Double) {
+        retry.advance(seconds)
+        regulated.beginStep(seconds)
+    }
     private fun open(reason: String) {
         element.inputSink.enabled = false
         element.outputSource.enabled = false
@@ -658,7 +662,7 @@ class OneWayDcDcProcess(private val element: OneWayDcDcElement) : ConservativePo
             status = regulated.status
             return
         }
-        if (tripped) { open("NON_CONVERGENT"); return }
+        if (retry.waiting) { open("NON_CONVERGENT"); return }
         if (!element.settings.enabled || !element.populated) { open("DISABLED"); return }
         val a = probePort(element.primaryInternal, if (element.isolated) element.primaryReferenceLoad else null, element.inputSink)
         val b = probePort(element.secondaryInternal, if (element.isolated) element.secondaryReferenceLoad else null, element.outputSource)
@@ -718,7 +722,7 @@ class OneWayDcDcProcess(private val element: OneWayDcDcElement) : ConservativePo
     override fun trialSources(): List<SwitchableVoltageSource> = listOf(element.inputSink, element.outputSource)
     override fun failClosed() {
         if (modernRegulated) regulated.failClosed()
-        tripped = true; open("NON_CONVERGENT")
+        retry.trip(); open("NON_CONVERGENT")
     }
     override fun connectedSystems(): Set<SubSystem> = setOfNotNull(element.primaryInternal.subSystem, element.secondaryInternal.subSystem)
     private fun th(value: PortThevenin) = object : OneWayDcDcThevenin {
