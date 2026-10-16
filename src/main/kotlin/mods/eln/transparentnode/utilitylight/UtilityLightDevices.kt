@@ -86,11 +86,9 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
         if (lightLevel > 0) {
             // Light comes from the head, and must not load a remote chunk merely to refresh it.
             val world = node!!.coordinate.world() as? ServerLevel ?: return
-            for (x in -2..-1) {
-                val at = Coordinate(x, 2, 0, 0).apply { applyTransformation(front, node!!.coordinate) }
-                if (world.chunkSource.getChunkNow(at.x shr 4, at.z shr 4) != null)
-                    LightBlockEntity.addLight(at, lightLevel, 5)
-            }
+            val at = Coordinate(-1, 2, 0, 0).apply { applyTransformation(front, node!!.coordinate) }
+            if (world.chunkSource.getChunkNow(at.x shr 4, at.z shr 4) != null)
+                LightBlockEntity.addLight(at, lightLevel, 5)
         }
     }
     override fun connectJob() { super.connectJob(); Eln.simulator.mna.addProcess(unit.controller) }

@@ -41,15 +41,14 @@ class UtilityStreetLightDescriptor(name: String) : GridDescriptor(name, Eln.obj.
         creativeTab = Eln.creativeTabLighting
         ghostGroup = GhostGroup().apply {
             for (y in 1..4) addElement(0, y, 0)
-            addElement(-1, 3, 0); addElement(-2, 3, 0)
+            addElement(-1, 3, 0)
         }
     }
     fun drawLamp(front: Direction, lit: Boolean, installed: Boolean) = preserveMatrix {
         if (installed) obj.getPart("transformer")?.draw()
-        front.glRotateXnRef()
-        GL11.glTranslatef(0f, 3.4f, 0f)
-        GL11.glRotatef(180f, 0f, 1f, 0f)
-        GL11.glRotatef(90f, 1f, 0f, 0f)
+        front.glRotateZnRef()
+        GL11.glTranslatef(0f, 1.5f, -1.25f)
+        GL11.glRotatef(90f, 0f, 0f, 1f)
         fixture.getPart("Structure_StreetLightWall_socket")?.draw()
         for (name in arrayOf("Glass_StreetLightWall_socket.002", "Light_StreetLightWall_socket.003")) {
             val part = fixture.getPart(name)
