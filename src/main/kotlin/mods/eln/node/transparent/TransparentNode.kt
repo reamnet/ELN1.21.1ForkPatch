@@ -40,6 +40,11 @@ class TransparentNode : Node() {
         return false
     }
 
+    override fun globalBoot() {
+        super.globalBoot()
+        element?.globalBoot()
+    }
+
     override fun onNeighborBlockChange() {
         super.onNeighborBlockChange()
         element!!.onNeighborBlockChange()

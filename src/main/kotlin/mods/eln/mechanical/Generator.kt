@@ -271,6 +271,15 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
         }
     }
 
+    override fun globalBoot() {
+        super.globalBoot()
+        // Initial connections are made while NodeManager is still restoring neighbouring nodes
+        // and multiblock ghost ports. Rebuild once the whole saved graph is available, just as
+        // replacing the output cable would, without changing blocks or resetting shaft energy.
+        node!!.neighborBlockRead()
+        reconnect()
+    }
+
     override fun connectJob() {
         super.connectJob()
         Eln.simulator.mna.addProcess(electricalProcess)

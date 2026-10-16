@@ -46,6 +46,14 @@ vanilla `/forceload` and other mods' tickets. There is a limit of 256 selected c
 per dimension. Larger loaded areas increase server work. A paused singleplayer
 world or stopped server does not advance time.
 
+## Generator startup
+
+Generators refresh their electrical connections once after all saved nodes and
+multiblock shaft ports have initialized. This rebuilds the output connection during
+startup without replacing a cable or resetting the shaft's stored energy. It also
+applies to the Large Generator. Fuel-dependent plants still need their operating
+area loaded as described above.
+
 ## Regression checks
 
 Run `./gradlew build` for the unit suite. Under a working X/GL display, add
@@ -55,3 +63,19 @@ actual GUI clicks/shortcuts and server packet round trips for transformers and
 lighting, tests remote furnace ticking, and reopens the world to check persistence.
 It writes `run/client/configuration-checks.json` and GUI screenshots, and exits
 nonzero on a failed assertion. It never opens or replaces a pre-existing save.
+
+For the generator check, choose an unused disposable world name and run two
+separate Minecraft JVMs under an X/GL display:
+
+```bash
+JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS -Deln.generatorWorld=generator-check-1 -Deln.generatorChecks=place" ./gradlew runClient
+JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS -Deln.generatorWorld=generator-check-1 -Deln.generatorChecks=verify" ./gradlew runClient
+```
+
+This covers both output ports, cables placed before/after the machine, legacy
+very-high-voltage and single-conductor utility cables, and installations with/without
+forced chunks away from the player. Verification also deliberately disconnects the
+generator's simulation registration before calling its boot hook, checking recovery,
+unchanged shaft energy, no duplicate connections, and subsequent delivered power.
+Reports are `run/client/generator-checks-place.json` and `generator-checks-verify.json`.
+These controlled checks do not reproduce every existing world's wiring or load.

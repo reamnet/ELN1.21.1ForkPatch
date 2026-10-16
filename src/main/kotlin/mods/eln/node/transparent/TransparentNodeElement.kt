@@ -357,6 +357,9 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
         nbt.putByte("others", (front.int + if (grounded) 8 else 0).toByte())
     }
 
+    /** Called after every saved node has been initialized, including multiblock shaft ports. */
+    open fun globalBoot() {}
+
     override fun reconnect() {
         node!!.reconnect()
     }
