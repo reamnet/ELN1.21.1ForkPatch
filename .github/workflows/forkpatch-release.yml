@@ -49,7 +49,7 @@ jobs:
           run = api(f'actions/runs/{run_id}')
           assert run['head_sha'] == sha, 'CI artifact and release source differ'
           assert run['head_repository']['full_name'].lower() == repo.lower(), 'Wrong source repository'
-          assert run['path'] == '.github/workflows/ci.yml', 'Expected the repository CI workflow'
+          assert run['path'] in ('.github/workflows/ci.yml', '.github/workflows/forkpatch-build.yml'), 'Expected a repository build workflow'
           for attempt in range(40):
               jobs = api(f'actions/runs/{run_id}/jobs?per_page=100')['jobs']
               builds = [j for j in jobs if j['name'] == 'Build and unit tests']
