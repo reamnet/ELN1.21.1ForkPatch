@@ -28,6 +28,8 @@ import mods.eln.sim.ThermalLoadInitializerByPowerDrop
 import mods.eln.sixnode.electricalcable.UtilityCableDescriptor
 import mods.eln.sound.SoundCommand
 import mods.eln.transparentnode.*
+import mods.eln.transparentnode.utilitylight.StepDownUnitDescriptor
+import mods.eln.transparentnode.utilitylight.UtilityStreetLightDescriptor
 import mods.eln.transparentnode.autominer.AutoMinerDescriptor
 import mods.eln.transparentnode.battery.BatteryDescriptor
 import mods.eln.transparentnode.eggincubator.EggIncubatorDescriptor
@@ -1622,6 +1624,13 @@ object TransparentNodeRegistration {
             desc.ghostGroup = g
             transparentNodeItem.addDescriptor(subId + (id shl 6), desc)
         }
+        // New sub-IDs only: existing poles, towers and switches retain their saved identities.
+        transparentNodeItem.addDescriptor(9 + (id shl 6),
+            UtilityStreetLightDescriptor(TR_NAME(I18N.Type.NONE, "Utility Pole Street Light")))
+        transparentNodeItem.addDescriptor(10 + (id shl 6),
+            StepDownUnitDescriptor(TR_NAME(I18N.Type.NONE, "Mains Step-down Unit")).apply {
+                setCreativeTab(Eln.creativeTabPowerElectronics)
+            })
     }
 
 

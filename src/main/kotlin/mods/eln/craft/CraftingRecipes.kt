@@ -912,6 +912,14 @@ object CraftingRecipes {
             findItemStack("DC-DC Converter")
         )
 
+        // The pole's replaceable step-down hardware is crafted separately from its lamp fixture.
+        addRecipe(findItemStack("Mains Step-down Unit"), "CFC", "MVM", "CCC",
+            'C', findItemStack("Copper Cable"), 'F', findItemStack("Optimal Ferromagnetic Core"),
+            'M', findItemStack("Machine Block"), 'V', findItemStack("Variable DC-DC Converter"))
+        addRecipe(findItemStack("Utility Pole Street Light"), " IL", " PB", " I ",
+            'I', "ingotIron", 'L', findItemStack("Streetlight"),
+            'P', findItemStack("Utility Pole"), 'B', findItemStack("120V LED Light Bulb"))
+
         // I don't care what you think, if your modpack lacks steel then you don't *need* this much power.
         // Or just use the new Arc furnace. Other mod's steel methods are slow and tedious and require huge multiblocks.
         // Feel free to add alternate non-iron recipes, though. Here, or by minetweaker.

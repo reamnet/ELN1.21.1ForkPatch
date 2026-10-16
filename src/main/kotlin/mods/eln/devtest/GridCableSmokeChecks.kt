@@ -27,7 +27,8 @@ object GridCableSmokeChecks {
     fun run(world: ServerLevel) {
         val devices = Eln.transparentNodeItem.subItemList.values.filterIsInstance<GridDescriptor>().distinct()
         check(devices.map { it.name }.toSet() == setOf("Grid DC-DC Converter", "Utility Pole",
-            "Utility Pole w/DC-DC Converter", "Transmission Tower", "Direct Utility Pole", "Grid Switch"))
+            "Utility Pole w/DC-DC Converter", "Transmission Tower", "Direct Utility Pole", "Grid Switch",
+            "Utility Pole Street Light"))
         val registered = Eln.sixNodeItem.subItemList.values.filterIsInstance<ElectricalCableDescriptor>().distinct()
         // Select by circuit type/damage, independently of the policy under test.
         val cables = registered.filter { !it.signalWire && !(it is UtilityCableDescriptor && it.melted) }

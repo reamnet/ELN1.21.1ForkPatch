@@ -1,7 +1,8 @@
 # Grid cables: all intact power cables
 
-All six grid devices (Grid DC-DC Converter, Utility Pole, Utility Pole w/DC-DC Converter,
-Transmission Tower, Direct Utility Pole and Grid Switch) accept **every intact power cable**.
+All seven grid devices (Grid DC-DC Converter, Utility Pole, Utility Pole w/DC-DC Converter,
+Transmission Tower, Direct Utility Pole, Grid Switch and Utility Pole Street Light) accept
+**every intact power cable**.
 There is no minimum voltage: low-voltage legacy cables, 300/600 V spools, all HV spools and
 bare conductors qualify. Copper/aluminum, gauge, conductor count and the historical
 `poleEligible` flag do not restrict compatibility.
@@ -47,7 +48,7 @@ of signal/damaged cables and invalid spans, paid-length identity/copying, saved 
 and loaded MNA voltage drop/power balance. The focused CI gate requires every named result and
 rejects failed, missing, duplicate or skipped tests.
 
-`GridCableSmokeChecks` places each of the six registered grid devices and exercises the real
+`GridCableSmokeChecks` places each of the seven registered grid devices and exercises the real
 server click handler in survival mode for **every registered intact power-cable descriptor**
 in both click orders. It checks exact consumption, both endpoint lists, identity, paid length,
 NBT round-trip and refunds, and separately rejects all signal/damaged descriptors. It logs

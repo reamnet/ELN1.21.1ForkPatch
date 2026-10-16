@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "eln:120v_led_light_bulb"
+    },
+    "I": {
+      "tag": "c:ingots/iron"
+    },
+    "L": {
+      "item": "eln:streetlight"
+    },
+    "P": {
+      "item": "eln:utility_pole"
+    }
+  },
+  "pattern": [
+    " IL",
+    " PB",
+    " I "
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:utility_pole_street_light"
+  }
+}

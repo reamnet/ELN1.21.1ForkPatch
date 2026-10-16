@@ -67,6 +67,7 @@ Hold_[shift]_for_details=[Umschalt] für Details halten
 Inductance=Induktivität
 Inductance\:_%1$H=Induktivität: %1$H
 Input=Eingang
+Input\:_%1$=Input: %1$
 Input_/_Output_windings=Input / Output windings
 Input_voltage=Eingangsspannung
 Inputs=Eingänge
@@ -552,8 +553,6 @@ Receive_signal_voltage_on_selected_wireless_signal_channel=Empfängt Signalspann
 
 # src/main/java/mods/eln/sixnode/wirelesssignal/tx/WirelessSignalTxDescriptor.java
 Sends_signal_voltage_on_selected_wireless_signal_channel=Sendet Signalspannung auf gewähltem Funksignalkanal
-
-# src/main/java/mods/eln/sixnode/wirelesssignal/tx/WirelessSignalTxElement.java
 
 # src/main/java/mods/eln/transparentnode/autominer/AutoMinerContainer.java
 Drill_slot=Bohrer-Slot
@@ -1756,6 +1755,7 @@ Legacy_DC-DC_Converter.name=DC-DC-Wandler (Veraltet)
 Life_Oriented_Battery.name=Lebensdauerorientierte Batterie
 Low_Power_Receiver_Antenna.name=Niedrigleistungs-Empfangsantenne
 Low_Power_Transmitter_Antenna.name=Niedrigleistungs-Sendeantenne
+Mains_Step-down_Unit.name=Mains Step-down Unit
 Medium_Power_Receiver_Antenna.name=Mittelleistungs-Empfangsantenne
 Medium_Power_Transmitter_Antenna.name=Mittelleistungs-Sendeantenne
 Nixie_Tube.name=Nixie-Röhre
@@ -1784,6 +1784,7 @@ Tachometer.name=Drehzahlmesser
 Thermal_Heat_Exchanger.name=Wärmetauscher
 Transmission_Tower.name=T2-Hochspannungsmast
 Utility_Pole.name=T1-Strommast
+Utility_Pole_Street_Light.name=Utility Pole Street Light
 Utility_Pole_w/DC-DC_Converter.name=T1-Strommast mit Transformator
 Variable_DC-DC_Converter.name=Variabler DC-DC-Wandler
 Voltage_Oriented_Battery.name=Spannungsorientierte Batterie
@@ -2282,7 +2283,6 @@ Fan_limit\:_%1$%=Fan limit: %1$%
 Heat\:_copper_sides_|_Power\:_front/rear_|_Water\:_top/bottom=Heat: copper sides | Power: front/rear | Water: top/bottom
 Hover_for_connections.=Hover for connections.
 Inhibited=Inhibited
-Input\:_%1$=Input: %1$
 Intake_temperature=Intake temperature
 Lower_maximum_fan_speed_by_10_percent.=Lower maximum fan speed by 10 percent.
 Lower_target_by_1_C.=Lower target by 1 C.
@@ -2333,6 +2333,37 @@ Bulb_2_Life_Left=Lampe 2 Restlebensdauer
 Beam_width\:_%1$°=Strahlbreite: %1$°
 Horizontal_angle\:_%1$°=Horizontalwinkel: %1$°
 Vertical_angle\:_%1$°=Vertikalwinkel: %1$°
+
+# src/main/kotlin/mods/eln/transparentnode/utilitylight/MainsStepDown.kt
+Output_power=Output power
+
+# src/main/kotlin/mods/eln/transparentnode/utilitylight/UtilityLightClient.kt
+Insert_step-down_unit=Insert step-down unit
+Lamp\:_Off=Lamp: Off
+Lamp\:_On=Lamp: On
+Mains_Step-down_Unit=Mains Step-down Unit
+Output\:_%1$=Output: %1$
+Output\:_%1$_V=Output: %1$ V
+Step-down_unit_required=Step-down unit required
+Unit_installed=Unit installed
+Utility_Pole_Street_Light=Utility Pole Street Light
+
+# src/main/kotlin/mods/eln/transparentnode/utilitylight/UtilityLightDescriptors.kt
+Base_terminals_also_supply_the_regulated_output=Base terminals also supply the regulated output
+Grid-powered_%1$_W_street_light_with_%2$-block_pole_connections=Grid-powered %1$ W street light with %2$-block pole connections
+Install_a_Mains_Step-down_Unit_and_select_%1$_V_or_%2$_V=Install a Mains Step-down Unit and select %1$ V or %2$ V
+Maximum_input\:_%1$_V;_maximum_output\:_%2$_W=Maximum input: %1$ V; maximum output: %2$ W
+Place_on_its_own_or_install_in_a_Utility_Pole_Street_Light=Place on its own or install in a Utility Pole Street Light
+Selectable_output\:_%1$_V_or_%2$_V=Selectable output: %1$ V or %2$ V
+Step-down_only;_grid_voltage_must_reach_the_selected_output=Step-down only; grid voltage must reach the selected output
+
+# src/main/kotlin/mods/eln/transparentnode/utilitylight/UtilityLightDevices.kt
+Grid\:_%1$;_output\:_%2$=Grid: %1$; output: %2$
+Input\:_%1$;_output\:_%2$=Input: %1$; output: %2$
+Installed=Installed
+Lamp=Lamp
+Missing=Missing
+Step-down_unit=Step-down unit
 
 # src/main/kotlin/mods/eln/wiki/CircuitLessons.kt
 1._Hold_a_Multimeter_or_AllMeter._Normal_right-click_keeps_the_existing_machine_readings._Sneak-click_a_connector_to_select_reference_A,_then_sneak-click_a_second_connector_B.=1. Hold a Multimeter or AllMeter. Normal right-click keeps the existing machine readings. Sneak-click a connector to select reference A, then sneak-click a second connector B.
