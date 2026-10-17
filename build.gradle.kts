@@ -7,7 +7,7 @@ plugins {
 }
 
 group = properties["modGroup"] as String
-version = "3.0.0-port"
+version = providers.gradleProperty("modVersion").get()
 
 val companionProfile = providers.gradleProperty("companionProfile").orNull
 require(companionProfile == null || companionProfile in setOf("fluids", "opencomputers", "combined")) {
