@@ -40,6 +40,7 @@ class StreetLightControlsTest {
         e.unit.packet(82, bool(true)); e.unit.packet(83, bool(false)); sample(0, true)
         repeat(8) { e.unit.packet(84, movement(-1)); sample(0, true) }
         repeat(8) { e.unit.packet(84, movement(1)); sample(0, true) }
+        for (turn in listOf(5, -1, -5, 1)) { e.unit.packet(85, movement(turn)); sample(0, true) }
         e.unit.packet(81, bool(false))
         e.updateAmbientDarkness(11); repeat(8) { root.step() }
         assertFalse(e.unit.output.enabled); assertTrue(e.lamp.power < 1e-6)
@@ -89,5 +90,34 @@ class StreetLightControlsTest {
         assertEquals(2, StreetLightMount.lightY(copy.lampHeightStep))
         copy.read(CompoundTag().apply { putInt("mainsLampHeightStep", Int.MAX_VALUE) })
         assertEquals(0, copy.lampHeightStep)
+    }
+
+    @Test fun lampRotationWrapsSupportsFineStepsAndPersistsWithoutChangingHeight() {
+        val unit = pole().unit
+        unit.packet(84, movement(-1))
+        for ((turn, expected) in listOf(-5 to 355, 1 to 356, 5 to 1, -1 to 0)) {
+            unit.packet(85, movement(turn))
+            assertEquals(expected, unit.lampYaw)
+        }
+        repeat(9) { unit.packet(85, movement(5)) }
+        assertEquals(45, unit.lampYaw)
+        assertEquals(-1, unit.lampHeightStep)
+        for (invalid in listOf(0, 2, -2, 360, Int.MAX_VALUE, Int.MIN_VALUE)) {
+            unit.packet(85, movement(invalid))
+            assertEquals(45, unit.lampYaw)
+        }
+        unit.packet(85, DataInputStream(ByteArrayInputStream(byteArrayOf(0, 0))))
+        assertEquals(45, unit.lampYaw)
+        val saved = CompoundTag().also(unit::write)
+        val copy = pole().unit
+        copy.read(saved)
+        assertEquals(45, copy.lampYaw)
+        assertEquals(-1, copy.lampHeightStep)
+        copy.read(CompoundTag())
+        assertEquals(0, copy.lampYaw)
+        for (invalid in listOf(-1, 360, Int.MAX_VALUE)) {
+            copy.read(CompoundTag().apply { putInt("mainsLampYaw", invalid) })
+            assertEquals(0, copy.lampYaw)
+        }
     }
 }

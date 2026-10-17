@@ -7,7 +7,6 @@ import mods.eln.gridnode.GridElement
 import mods.eln.gridnode.GridLink
 import mods.eln.gui.GuiButtonEln
 import mods.eln.misc.Direction
-import mods.eln.misc.Coordinate
 import mods.eln.misc.tagCompound
 import mods.eln.node.transparent.TransparentNodeEntity
 import mods.eln.node.CircuitDiagnostics
@@ -18,6 +17,7 @@ import mods.eln.transparentnode.utilitylight.*
 import net.minecraft.client.Minecraft
 import net.minecraft.client.Screenshot
 import net.minecraft.client.gui.screens.TitleScreen
+import net.minecraft.client.gui.screens.Screen
 import net.minecraft.core.BlockPos
 import net.minecraft.core.registries.Registries
 import net.minecraft.server.level.ServerPlayer
@@ -48,6 +48,7 @@ object StreetLightQolChecks {
     private var ready = 0
     private var done = false
     private var work: CompletableFuture<Void>? = null
+    private var shiftHeld = false
     private val passed = mutableListOf<String>()
     private fun f(p: ServerPlayer) = NativeCampaignFixtures(p.serverLevel(), p)
     private fun lamp(p: ServerPlayer) = f(p).machine(at) as UtilityStreetLightElement
@@ -83,20 +84,55 @@ object StreetLightQolChecks {
         val e=lamp(p)
         check(e.unit.lampHeightStep==step)
         checkLight(p,true)
-        fun lightAt(y: Int): Boolean {
-            val c=Coordinate(-1,y,0,0).apply { applyTransformation(e.front,e.coordinate()) }
-            return p.serverLevel().getBlockState(BlockPos(c.x,c.y,c.z)).block===Eln.lightBlock
-        }
-        val lightY=StreetLightMount.lightY(step)
-        check(lightAt(lightY)) { "No light at the adjusted head height" }
-        check(!lightAt(if(lightY==1) 2 else 1)) { "The old head height kept emitting light" }
+        val offset=StreetLightMount.lightOffset(e.front,step,e.unit.lampYaw)
+        val lightPos=at.offset(offset)
+        check(p.serverLevel().getBlockState(lightPos).block===Eln.lightBlock) { "No light at the adjusted head height" }
+        val oldPos=BlockPos(lightPos.x,at.y+if(offset.y==1) 2 else 1,lightPos.z)
+        check(p.serverLevel().getBlockState(oldPos).block!==Eln.lightBlock) { "The old head height kept emitting light" }
     }
     private fun checkClientHeight(step: Int) {
         val render=(mc.level!!.getBlockEntity(at) as TransparentNodeEntity).elementRender as UtilityStreetLightRender
         check(render.display.heightStep==step) { "The client did not receive the changed height" }
     }
+    private fun checkAngle(p: ServerPlayer, angle: Int, oldAngle: Int) {
+        val e=lamp(p)
+        check(e.unit.lampYaw==angle)
+        checkHeight(p,StreetLightMount.MAX_STEP)
+        val current=StreetLightMount.lightOffset(e.front,e.unit.lampHeightStep,angle)
+        val old=StreetLightMount.lightOffset(e.front,e.unit.lampHeightStep,oldAngle)
+        if(current!=old) check(p.serverLevel().getBlockState(at.offset(old)).block!==Eln.lightBlock) { "The old direction kept emitting light" }
+    }
+    private fun checkClientAngle(angle: Int) {
+        val render=(mc.level!!.getBlockEntity(at) as TransparentNodeEntity).elementRender as UtilityStreetLightRender
+        check(render.display.yaw==angle) { "The client did not receive the changed angle" }
+    }
+    private fun shiftKey(down: Boolean) {
+        // Minecraft forces java.awt.headless, so inject a real X11 key rather than using AWT Robot.
+        val script = """
+            import ctypes, sys
+            x = ctypes.CDLL('libX11.so.6')
+            t = ctypes.CDLL('libXtst.so.6')
+            x.XOpenDisplay.argtypes = [ctypes.c_char_p]
+            x.XOpenDisplay.restype = ctypes.c_void_p
+            x.XKeysymToKeycode.argtypes = [ctypes.c_void_p, ctypes.c_ulong]
+            x.XKeysymToKeycode.restype = ctypes.c_uint
+            x.XSync.argtypes = [ctypes.c_void_p, ctypes.c_int]
+            x.XCloseDisplay.argtypes = [ctypes.c_void_p]
+            t.XTestFakeKeyEvent.argtypes = [ctypes.c_void_p, ctypes.c_uint, ctypes.c_int, ctypes.c_ulong]
+            display = x.XOpenDisplay(None)
+            assert display, 'X11 display unavailable'
+            assert t.XTestFakeKeyEvent(display, x.XKeysymToKeycode(display, 0xffe1), int(sys.argv[1]), 0)
+            x.XSync(display, 0)
+            x.XCloseDisplay(display)
+        """.trimIndent()
+        val process = ProcessBuilder("python3", "-c", script, if(down) "1" else "0").redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().use { it.readText() }
+        check(process.waitFor()==0) { "XTest Shift input failed: $output" }
+        shiftHeld=down
+    }
     private fun finish(error: Throwable?) {
         done=true
+        if(shiftHeld) runCatching { shiftKey(false) }
         Files.writeString(mc.gameDirectory.toPath().resolve("streetlight-qol-checks.json"),
             GsonBuilder().setPrettyPrinting().create().toJson(mapOf("world" to worldName,"passed" to passed,"failure" to error?.stackTraceToString())))
         if (error!=null) Eln.logger.error("STREETLIGHT_QOL FAIL",error) else Eln.logger.info("STREETLIGHT_QOL COMPLETE {} checks",passed.size)
@@ -194,8 +230,8 @@ object StreetLightQolChecks {
                 }
                 14 -> if (ticks>40 && mc.singleplayerServer==null) { mc.createWorldOpenFlows().openWorld(worldName) { error("Cannot reopen world") }; step(15) }
                 15 -> if (mc.player!=null && mc.level!=null && mc.screen==null) { ready=mc.singleplayerServer!!.tickCount+100; step(16) }
-                16 -> if (settled()) { server { p -> check(lamp(p).installed && lamp(p).unit.lampAutomatic && lamp(p).unit.lampEnabled); checkHeight(p,StreetLightMount.MAX_STEP) }; step(17) }
-                17 -> if (complete()) { checkClientHeight(StreetLightMount.MAX_STEP); record("Saved-world restart preserves the installed unit, automatic mode, 240 V selection and raised height"); finish(null) }
+                16 -> if (settled()) { server { p -> check(lamp(p).installed && lamp(p).unit.lampAutomatic && lamp(p).unit.lampEnabled); checkAngle(p,46,0) }; step(17) }
+                17 -> if (complete()) { checkClientHeight(StreetLightMount.MAX_STEP); checkClientAngle(46); record("Saved-world restart preserves the installed unit, automatic mode, 240 V selection, height and 46-degree angle"); finish(null) }
                 18 -> if (complete() && mc.screen is StepDownGui && ticks>20) {
                     repeat(4) { click("heightDown") }; waitServer(19)
                 }
@@ -225,6 +261,41 @@ object StreetLightQolChecks {
                 23 -> if (complete() && ticks>20) {
                     shot("height-high")
                     record("GUI Up/Down moves the fixture and light through both limits, preserves the loaded outlet and copies with the configuration tool")
+                    server { gui(it) }; step(24)
+                }
+                24 -> if (complete() && mc.screen is StepDownGui && ticks>20) {
+                    click("angleRight"); waitServer(25)
+                }
+                25 -> if (settled()) {
+                    checkClientAngle(355)
+                    server { p -> checkAngle(p,355,0) }
+                    org.lwjgl.glfw.GLFW.glfwFocusWindow(mc.window.window)
+                    shiftKey(true); step(26)
+                }
+                26 -> if (complete() && ticks>5) {
+                    check(Screen.hasShiftDown()) { "Native Shift key did not reach the game" }
+                    click("angleLeft"); shiftKey(false); waitServer(27)
+                }
+                27 -> if (settled()) {
+                    checkClientAngle(356)
+                    check(!Screen.hasShiftDown())
+                    server { p -> checkAngle(p,356,355) }
+                    repeat(10) { click("angleLeft") }; waitServer(28)
+                }
+                28 -> if (settled()) {
+                    checkClientAngle(46); shot("angle-gui"); mc.setScreen(null)
+                    server { p ->
+                        checkAngle(p,46,356)
+                        val config=CompoundTag(); lamp(p).writeConfigTool(config,p)
+                        val copy=f(p).machine(at.east(24)) as UtilityStreetLightElement
+                        copy.readConfigTool(config,p)
+                        check(copy.unit.lampYaw==46 && copy.unit.lampHeightStep==StreetLightMount.MAX_STEP)
+                        view(p,height=StreetLightMount.height(StreetLightMount.MAX_STEP))
+                    }; step(29)
+                }
+                29 -> if (complete() && ticks>20) {
+                    shot("angle-46")
+                    record("GUI rotation wraps through zero; a native Shift-click turns one degree; the 46-degree fixture and light stay powered and copy with the configuration tool")
                     mc.level!!.disconnect(); mc.disconnect(TitleScreen()); step(14)
                 }
             }

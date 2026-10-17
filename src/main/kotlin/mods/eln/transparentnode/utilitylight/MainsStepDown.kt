@@ -36,6 +36,8 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
         private set
     var lampHeightStep = 0
         private set
+    var lampYaw = 0
+        private set
     val primary = NbtElectricalLoad("mainsPrimary")
     val secondary = NbtElectricalLoad("mainsSecondary")
     private val inputPin = NbtElectricalLoad("mainsInputPin")
@@ -70,6 +72,7 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
         tag.putBoolean("mainsLampEnabled", lampEnabled)
         tag.putBoolean("mainsLampAutomatic", lampAutomatic)
         tag.putInt("mainsLampHeightStep", lampHeightStep)
+        tag.putInt("mainsLampYaw", lampYaw)
     }
     fun read(tag: CompoundTag) {
         outputVoltage = tag.getInt("mainsOutputVoltage").takeIf(::validVoltage) ?: 120
@@ -77,10 +80,11 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
         lampEnabled = !tag.contains("mainsLampEnabled") || tag.getBoolean("mainsLampEnabled")
         lampAutomatic = tag.getBoolean("mainsLampAutomatic")
         lampHeightStep = tag.getInt("mainsLampHeightStep").takeIf(StreetLightMount::validStep) ?: 0
+        lampYaw = tag.getInt("mainsLampYaw").takeIf(StreetLightMount::validYaw) ?: 0
         controller.resetFault()
     }
     fun packet(id: Byte, stream: DataInputStream): Boolean {
-        if (id.toInt() !in 80..84) return false
+        if (id.toInt() !in 80..85) return false
         try {
             when (id.toInt()) {
                 80 -> { val value = stream.readInt(); if (!validVoltage(value)) return true; outputVoltage = value }
@@ -93,6 +97,12 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
                         lampHeightStep = (lampHeightStep + movement).coerceIn(StreetLightMount.MIN_STEP, StreetLightMount.MAX_STEP)
                     return true // Moving the fixture must not reset the electrical controller.
                 }
+                85 -> {
+                    val movement = stream.readInt()
+                    if (movement == -5 || movement == -1 || movement == 1 || movement == 5)
+                        lampYaw = StreetLightMount.turn(lampYaw, movement)
+                    return true
+                }
             }
             controller.resetFault()
         } catch (_: IOException) { /* Reject truncated settings without mutating them. */ }
@@ -102,6 +112,7 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
         stream.writeInt(outputVoltage); stream.writeBoolean(enabled); stream.writeBoolean(lampEnabled); stream.writeBoolean(lampAutomatic)
         stream.writeBoolean(installed); stream.writeByte(light)
         stream.writeByte(lampHeightStep)
+        stream.writeShort(lampYaw)
         stream.writeDouble(primary.voltage); stream.writeDouble(secondary.voltage)
         stream.writeDouble(output.power); stream.writeUTF(controller.status)
         owner.node!!.lrduCubeMask.getTranslate(owner.front.down()).serialize(stream)

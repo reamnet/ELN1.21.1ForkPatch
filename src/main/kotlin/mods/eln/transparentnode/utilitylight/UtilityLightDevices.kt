@@ -7,7 +7,6 @@ import mods.eln.gridnode.GridElement
 import mods.eln.i18n.I18N.tr
 import mods.eln.item.IConfigurable
 import mods.eln.lightblock.LightBlockEntity
-import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction
 import mods.eln.misc.LRDU
 import mods.eln.misc.Utils
@@ -93,8 +92,8 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
         if (next != lightLevel) { lightLevel = next; needPublish() }
         if (lightLevel > 0) {
             // Light comes from the head, and must not load a remote chunk merely to refresh it.
-            val at = Coordinate(-1, StreetLightMount.lightY(unit.lampHeightStep), 0, 0)
-                .apply { applyTransformation(front, node!!.coordinate) }
+            val offset = StreetLightMount.lightOffset(front, unit.lampHeightStep, unit.lampYaw)
+            val at = node!!.coordinate.newWithOffset(offset.x, offset.y, offset.z)
             if (world.chunkSource.getChunkNow(at.x shr 4, at.z shr 4) != null)
                 LightBlockEntity.addLight(at, lightLevel, 5)
         }

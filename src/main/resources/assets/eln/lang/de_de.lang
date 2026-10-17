@@ -79,6 +79,7 @@ It_doesn't_really_behave_well_for_DC=Verhält sich bei Gleichspannung nicht opti
 It_is_made_this_way_to_improve_the_performance_of_the_simulator_in_large_power_networks=Dies dient der Verbesserung der Simulatorleistung in großen Stromnetzen
 It_should_require_power_to_transmit_realistically=Sollte realistisch Strom zum Senden benötigen
 Lamp_Brightness=Lampenhelligkeit
+Left=Links
 Length_(m)=Länge (m)
 MQTT_server=MQTT-Server
 Material\:_%1$=Material: %1$
@@ -141,6 +142,7 @@ Relative_humidity=Relative Luftfeuchtigkeit
 Reset=Zurücksetzen
 Resistance=Widerstand
 Resistance\:_%1$Ω=Widerstand: %1$Ω
+Right=Rechts
 Secondary=Secondary
 Secondary_winding=Secondary winding
 Select_a_grid_terminal,_not_the_device_body=Select a grid terminal, not the device body
@@ -855,8 +857,6 @@ Invalid_grid_cable_span=Invalid grid cable span
 # src/main/kotlin/mods/eln/gridnode/GridSwitch.kt
 Closed?=Geschlossen?
 Drive=Antrieb
-Left=Links
-Right=Rechts
 Transfer=Übertragung
 
 # src/main/kotlin/mods/eln/integration/create/CreateAdapterClient.kt
@@ -2338,6 +2338,7 @@ Vertical_angle\:_%1$°=Vertikalwinkel: %1$°
 Output_power=Output power
 
 # src/main/kotlin/mods/eln/transparentnode/utilitylight/UtilityLightClient.kt
+Angle\:_%1$°=Angle: %1$°
 Down=Down
 Dusk\:_Auto=Dusk: Auto
 Dusk\:_Manual=Dusk: Manual
@@ -2349,6 +2350,8 @@ Mains_Step-down_Unit=Mains Step-down Unit
 Output\:_%1$=Output: %1$
 Output\:_%1$_V=Output: %1$ V
 Step-down_unit_required=Step-down unit required
+Turn_left_by_%1$°;_hold_Shift_for_%2$°_steps=Turn left by %1$°; hold Shift for %2$° steps
+Turn_right_by_%1$°;_hold_Shift_for_%2$°_steps=Turn right by %1$°; hold Shift for %2$° steps
 Unit_installed=Unit installed
 Up=Up
 Utility_Pole_Street_Light=Utility Pole Street Light
@@ -2362,6 +2365,7 @@ Maximum_input\:_%1$_V;_maximum_output\:_%2$_W=Maximum input: %1$ V; maximum outp
 Optional_dusk_control_switches_the_lamp_automatically=Optional dusk control switches the lamp automatically
 Place_on_its_own_or_install_in_a_Utility_Pole_Street_Light=Place on its own or install in a Utility Pole Street Light
 Right-click_with_a_Mains_Step-down_Unit_to_install_it=Right-click with a Mains Step-down Unit to install it
+Rotate_the_lamp_in_the_menu_to_follow_angled_streets=Rotate the lamp in the menu to follow angled streets
 Selectable_output\:_%1$_V_or_%2$_V=Selectable output: %1$ V or %2$ V
 Step-down_only;_grid_voltage_must_reach_the_selected_output=Step-down only; grid voltage must reach the selected output
 

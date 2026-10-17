@@ -33,6 +33,23 @@ Height changes do not reset the electrical controller or change the base outlet.
 Height is saved per pole, survives a world restart and copies with the
 configuration tool. It can be adjusted while the lamp is off or unpowered.
 
+## Direction adjustment (3.0.11)
+
+Use **Left** and **Right** beside the angle readout to turn the streetlight around
+its pole and line it up with an angled street. Each click turns **5°**; hold
+**Shift** while clicking for **1°** steps. Rotation wraps around a full circle
+between **0° and 359°**. The displayed angle is relative to the pole's original
+lamp direction; existing poles start at **0°**.
+
+The head, arm and collars turn together around the pole, keeping the fixture
+attached. Height adjustment remains independent. The transformer can, overhead
+wires and base terminals stay fixed. The world light source follows the rotated
+head, and the former light position expires normally. Turning the lamp does not
+reset the electrical controller or interrupt the base outlet.
+
+Both height and direction save across world restarts and copy with the
+configuration tool. Direction can also be adjusted while unpowered.
+
 ## Fixture and wiring
 
 The fixture now has two pole collars, a braced arm below the overhead conductors,
@@ -52,15 +69,16 @@ connection distances and electrical behavior are unchanged.
 ## Verification
 
 `./gradlew test` includes cable geometry, fixture loading and clearance at every
-height, height limits, dusk hysteresis, manual overrides, base-output operation,
-saved settings and malformed packet checks.
+height and direction, movement limits, angle wrapping, dusk hysteresis, manual
+overrides, base-output operation, saved settings and malformed packet checks.
 
 For the native check, run `./gradlew runClient` with
-`-Deln.streetLightQolChecks=true` in `JAVA_TOOL_OPTIONS` under an X/GL display.
+`-Deln.streetLightQolChecks=true` in `JAVA_TOOL_OPTIONS` under an X/GL display with
+Python 3 and XTest input support (used for a real Shift-click).
 It creates a disposable world, installs upgrades by hand, uses meters on the base
 and upper body, clicks the actual menu controls, tests daylight/night/manual-off
 with a loaded base outlet, moves the lamp through both height limits using the
-actual GUI, checks the light source and loaded outlet, captures cable side/end
-views, and reopens the saved world. Results are written to
-`run/client/streetlight-qol-checks.json` and
+actual GUI, turns the lamp with normal and Shift-clicks, checks the light source
+and loaded outlet, captures cable side/end views, and reopens the saved world.
+Results are written to `run/client/streetlight-qol-checks.json` and
 `run/client/screenshots/streetlight-qol-*.png`.
