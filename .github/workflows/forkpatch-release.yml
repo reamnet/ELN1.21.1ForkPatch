@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       release_id:
-        description: Existing draft release ID targeting that CI commit
+        description: Release ID targeting that tested commit (draft or versioned release)
         required: true
         type: string
 
@@ -27,7 +27,7 @@ jobs:
       actions: read
       contents: write
     steps:
-      - name: Verify draft and wait for its source build
+      - name: Verify release and wait for its source build
         id: source
         env:
           GH_TOKEN: ${{ github.token }}
@@ -42,10 +42,16 @@ jobs:
           def api(route):
               return json.loads(subprocess.check_output(['gh', 'api', f'repos/{repo}/{route}']))
           release = api(f'releases/{release_id}')
-          assert release['draft'] and not release['assets'], 'Expected an empty draft release'
           tag, sha = release['tag_name'], release['target_commitish']
-          assert re.fullmatch(r'v\d+\.\d+\.\d+-port-forkpatch\.\d+', tag), 'Unexpected release tag'
-          assert re.fullmatch(r'[0-9a-f]{40}', sha), 'Draft must target a fixed commit'
+          semantic = re.fullmatch(r'v(\d+\.\d+\.\d+)', tag)
+          legacy = re.fullmatch(r'v\d+\.\d+\.\d+-port-forkpatch\.(\d+)', tag)
+          assert semantic or legacy, 'Unexpected release tag'
+          if legacy:
+              assert release['draft'] and not release['assets'], 'Expected an empty legacy draft'
+          assert re.fullmatch(r'[0-9a-f]{40}', sha), 'Release must target a fixed commit'
+          if semantic:
+              ref = api(f'git/ref/tags/{tag}')
+              assert ref['object']['type'] == 'commit' and ref['object']['sha'] == sha, 'Version tag and release source differ'
           run = api(f'actions/runs/{run_id}')
           assert run['head_sha'] == sha, 'CI artifact and release source differ'
           assert run['head_repository']['full_name'].lower() == repo.lower(), 'Wrong source repository'
@@ -63,7 +69,9 @@ jobs:
           else:
               raise RuntimeError('Source build did not finish in time')
           with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
-              out.write(f'tag={tag}\nnumber={tag.rsplit(".", 1)[1]}\n')
+              version = semantic[1] if semantic else ''
+              filename = f'ElectricalAge-{version}.jar' if semantic else f'ElectricalAge-1.21.1-ForkPatch-{legacy[1]}.jar'
+              out.write(f'tag={tag}\nversion={version}\nfilename={filename}\n')
           print(f'Publishing {tag} from tested commit {sha}')
           PY
 
@@ -75,17 +83,28 @@ jobs:
           name: mod-jar
           path: release-input
 
-      - name: Upload jar and checksum, then publish the draft
+      - name: Verify jar version, upload jar and checksum, then publish
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ steps.source.outputs.tag }}
-          RELEASE_NUMBER: ${{ steps.source.outputs.number }}
+          RELEASE_VERSION: ${{ steps.source.outputs.version }}
+          RELEASE_FILENAME: ${{ steps.source.outputs.filename }}
         run: |
           set -euo pipefail
           mapfile -d '' jars < <(find release-input -type f -name '*.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' -print0)
           [[ ${#jars[@]} -eq 1 ]] || { echo 'Expected one installable jar'; exit 1; }
           mkdir release-output
-          filename="ElectricalAge-1.21.1-ForkPatch-${RELEASE_NUMBER}.jar"
+          filename="$RELEASE_FILENAME"
+          if [[ -n "$RELEASE_VERSION" ]]; then
+            [[ "$(basename "${jars[0]}")" == "$filename" ]] || { echo 'Jar filename and release version differ'; exit 1; }
+            python3 - "${jars[0]}" "$RELEASE_VERSION" <<'PY'
+          import sys, tomllib, zipfile
+          with zipfile.ZipFile(sys.argv[1]) as jar:
+              metadata = tomllib.loads(jar.read('META-INF/neoforge.mods.toml').decode())
+          mods = [mod for mod in metadata['mods'] if mod['modId'] == 'eln']
+          assert len(mods) == 1 and mods[0]['version'] == sys.argv[2], 'Embedded mod version and release differ'
+          PY
+          fi
           cp "${jars[0]}" "release-output/$filename"
           (cd release-output && sha256sum "$filename" > "$filename.sha256")
           gh release upload "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
