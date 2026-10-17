@@ -21,6 +21,8 @@ class RegulatedPowerProcess(
     var status = "IDLE"
         private set
     private val retry = ConverterRetry()
+    private var commandedInput = Double.NaN
+    private var commandedOutput = Double.NaN
     private var activeLimits: ConverterLimits? = null
     private var previousTarget = Double.NaN
 
@@ -91,6 +93,7 @@ class RegulatedPowerProcess(
             is TransferResult.Running -> {
                 input.voltage = result.point.inputVolts
                 output.voltage = result.point.outputVolts
+                commandedInput = input.voltage; commandedOutput = output.voltage
                 input.enabled = result.point.inputWatts > 0.0
                 output.enabled = true
                 status = result.point.limitedBy.firstOrNull()?.name ?: "REGULATING"
@@ -102,6 +105,8 @@ class RegulatedPowerProcess(
 
     override fun acceptsCandidate(): Boolean {
         if (!input.enabled && !output.enabled) return true
+        if ((input.enabled && !commandMatches(input.voltage, commandedInput)) ||
+            (output.enabled && !commandMatches(output.voltage, commandedOutput))) return false
         val rating = activeLimits ?: return false
         val a = input.subSystem ?: return false
         val b = output.subSystem ?: return false
@@ -115,5 +120,6 @@ class RegulatedPowerProcess(
     override fun failClosed() { retry.trip(); open("NON_CONVERGENT") }
     override fun isolatesLoadOnFailure() = true
     override fun connectedSystems(): Set<SubSystem> = setOfNotNull(primary.subSystem, secondary.subSystem)
-    override fun trialSources(): List<SwitchableVoltageSource> = listOf(input, output)
+    override fun trialSources(): List<SwitchableVoltageSource> =
+        if (!input.enabled && output.enabled) listOf(input) else listOf(input, output)
 }

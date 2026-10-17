@@ -93,6 +93,9 @@ The same check also builds 120 alternating 120/240 V street lights over a
 with a real 9 kW load at the far end.
 It repeatedly samples the pole outputs, travels away until chunks unload,
 changes the feed voltage and checks the installation again after a saved-world restart.
+It also connects direct/transformer pole taps through target-voltage converters
+to actual motor and teleporter electrical loads. See
+[external pole loads](external-pole-loads.md) for the 3.0.8 regression details.
 
 For generator/grid cold starts, run `runClient` with
 `-Deln.generatorChecks=place -Deln.generatorWorld=<new-test-world>` in

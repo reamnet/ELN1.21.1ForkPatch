@@ -62,8 +62,10 @@ object WorldInteractionChecks {
     private val feed = BlockPos(256, 66, 312)
     private val pole = feed.east(8)
     private val olderPole = feed.east(4)
+    private var olderReference: ElectricalPoleElement? = null
     private const val longPoleCount = 120
     private fun longPole(i: Int) = pole.east((i + 1) * 32)
+    private val taps = PoleTapFixture(List(4) { longPole(it) })
     private fun fixture(player: ServerPlayer) = NativeCampaignFixtures(player.serverLevel(), player)
     private fun unit(f: NativeCampaignFixtures) = f.machine(standalone) as StepDownUnitElement
     private fun lamp(f: NativeCampaignFixtures) = f.machine(pole) as UtilityStreetLightElement
@@ -89,7 +91,12 @@ object WorldInteractionChecks {
         }
     }
     private fun sampleLongLine(f: NativeCampaignFixtures) {
-        val transformer = (f.machine(olderPole) as ElectricalPoleElement).trafo!!
+        val old = f.node(olderPole) as? mods.eln.node.transparent.TransparentNode
+        check(old != null) {
+            val e = olderReference!!
+            "Older pole vanished: destructing=${e.node!!.isDestructing} primary=${e.electricalLoad.voltage} secondary=${e.trafo!!.secondaryLoad.voltage} secondaryLimit=${e.trafo!!.voltageSecondaryWatchdog.max} thermal=${e.thermalLoad.temperatureCelsius}"
+        }
+        val transformer = (old.element as ElectricalPoleElement).trafo!!
         check(abs(transformer.primaryVoltageSource.power + transformer.secondaryVoltageSource.power) < .001) {
             "Unused older pole transformer sinks or creates power on the overhead line"
         }
@@ -168,10 +175,13 @@ object WorldInteractionChecks {
                         val street = f.placeMachine(f.requiredItem("Utility Pole Street Light"),pole) as UtilityStreetLightElement
                         val cable = UtilityCableDescriptor.allDescriptors().single { it.material == UtilityCableMaterial.ALUMINUM && it.sizeLabel == "1000 kcmil" && !it.insulated && !it.melted }
                         foundation(player,olderPole)
-                        val older = f.placeMachine(f.requiredItem("Utility Pole w/DC-DC Converter"),olderPole) as GridElement
-                        for ((a,b) in listOf(direct to older,older to street)) {
-                            val stack = cable.newItemStack(1).also { cable.setRemainingLengthMeters(it,4.0) }
-                            GridLink.addLink(a,b,Direction.XP,Direction.XN,cable,4,stack)
+                        val older = f.placeMachine(f.requiredItem("Utility Pole w/DC-DC Converter"),olderPole) as ElectricalPoleElement
+                        olderReference = older
+                        // The unused legacy transformer is a spur, not a thermal
+                        // bottleneck carrying the entire 120-light/machine feeder.
+                        for ((a,b,meters) in listOf(Triple(direct,street,8),Triple(direct,older,4))) {
+                            val stack = cable.newItemStack(1).also { cable.setRemainingLengthMeters(it,meters.toDouble()) }
+                            GridLink.addLink(a,b,Direction.XP,Direction.XN,cable,meters,stack)
                         }
                         f.wire(pole.east()); f.load(pole.east(2),240.0); f.ground(pole.east(3))
                         var previous: GridElement = street
@@ -187,6 +197,7 @@ object WorldInteractionChecks {
                         // A real 9 kW load at the remote end, sharing its unit with the lamp.
                         val end = longPole(longPoleCount - 1)
                         f.wire(end.east()); f.load(end.east(2),240.0 * 240.0 / 9000.0); f.ground(end.east(3))
+                        taps.install(f)
                     }; step(2,true)
                 }
                 2 -> if (complete()) {
@@ -199,6 +210,7 @@ object WorldInteractionChecks {
                     server { player ->
                         val f = fixture(player); sampleConverters(f)
                         sampleLongLine(f)
+                        taps.attachLoads(f)
                         check(unit(f).unit.secondary.voltage in 119.0..121.0)
                         check(lamp(f).unit.secondary.voltage < 1.0 && lamp(f).lightLevel == 0)
                         lamp(f).inventory.setItem(0,f.requiredItem("Mains Step-down Unit")); lamp(f).inventory.setChanged()
@@ -208,12 +220,15 @@ object WorldInteractionChecks {
                                 e.javaClass.getDeclaredField("transferProcess").apply { isAccessible = true }.get(e) as ConservativePowerProcess
                             process.failClosed()
                         }
-                    }; step(3,true)
+                    }
+                    serverReadyAt = mc.singleplayerServer!!.tickCount + 100
+                    step(3,true)
                 }
-                3 -> if (complete() && ticks > 80) {
+                3 -> if (complete() && mc.singleplayerServer!!.tickCount >= serverReadyAt) {
                     server { player ->
                         val f = fixture(player); sampleConverters(f)
                         sampleLongLine(f)
+                        taps.sample(f)
                         check(lamp(f).unit.secondary.voltage in 119.0..121.0 && lamp(f).lightLevel >= 14)
                         check(lamp(f).unit.output.power > 110.0) { "Pole does not supply its external load: ${lamp(f).unit.waila()}" }
                         val head = Coordinate(-1,2,0,0).apply { applyTransformation(lamp(f).front,Coordinate(pole.x,pole.y,pole.z,player.serverLevel())) }
@@ -226,6 +241,7 @@ object WorldInteractionChecks {
                     record("six variable/voltage-controlled converters recover without GUI toggles; removable grid-fed light powers its lamp and base output")
                     record("120 installed 120/240 V street lights span 3840 metres, including a real remote 9 kW load")
                     record("the older utility pole transformer joins the same power-conserving solve on the overhead feeder")
+                    record("direct and transformer pole taps power 850 V teleporter charging ports and 3200 V Large Shaft Motors through target-voltage converters")
                     screenshot("pole")
                     server { it.serverLevel().dayTime=6000L; look(it,cover,0.0,.5,3.0) }; step(5,true)
                 }
@@ -248,25 +264,30 @@ object WorldInteractionChecks {
                     server { GuiHandler.open(it,GuiHandler.nodeBaseOpen+Direction.YN.int,it.serverLevel(),standalone.x,standalone.y,standalone.z) }
                     step(6,true)
                 }
-                6 -> if (complete() && mc.screen is StepDownGui && ticks > 40) { clickVoltage(); step(7) }
-                7 -> if (ticks > 40) {
+                6 -> if (complete() && mc.screen is StepDownGui && ticks > 40) {
+                    clickVoltage(); serverReadyAt = mc.singleplayerServer!!.tickCount + 40; step(7)
+                }
+                7 -> if (ticks > 40 && mc.singleplayerServer!!.tickCount >= serverReadyAt) {
                     screenshot("stepdown-gui"); mc.setScreen(null)
                     server { player ->
                         check(unit(fixture(player)).unit.outputVoltage == 240)
                         GuiHandler.open(player,GuiHandler.nodeBaseOpen+Direction.YN.int,player.serverLevel(),pole.x,pole.y,pole.z)
                     }; step(8,true)
                 }
-                8 -> if (complete() && mc.screen is StepDownGui && ticks > 40) { clickVoltage(); step(9) }
-                9 -> if (ticks > 40) {
+                8 -> if (complete() && mc.screen is StepDownGui && ticks > 40) {
+                    clickVoltage(); serverReadyAt = mc.singleplayerServer!!.tickCount + 40; step(9)
+                }
+                9 -> if (ticks > 40 && mc.singleplayerServer!!.tickCount >= serverReadyAt) {
                     screenshot("pole-gui"); mc.setScreen(null)
                     server { player ->
                         val f=fixture(player)
                         check(unit(f).unit.secondary.voltage in 239.0..241.0)
-                        check(lamp(f).unit.outputVoltage == 240 && lamp(f).unit.secondary.voltage in 239.0..241.0)
+                        check(lamp(f).unit.outputVoltage == 240 && lamp(f).unit.secondary.voltage in 239.0..241.0) { "Pole voltage selection did not settle: ${lamp(f).unit.waila()}" }
                         lamp(f).inventory.setItem(0,ItemStack.EMPTY); lamp(f).inventory.setChanged()
+                        serverReadyAt = player.server.tickCount + 40
                     }; step(16,true)
                 }
-                16 -> if (complete() && ticks > 40) {
+                16 -> if (complete() && mc.singleplayerServer!!.tickCount >= serverReadyAt) {
                     server { player ->
                         val f=fixture(player); val light=lamp(f)
                         check(!light.unit.input.enabled && !light.unit.output.enabled)
@@ -283,6 +304,7 @@ object WorldInteractionChecks {
                         check(player.serverLevel().chunkSource.getChunkNow(converter(0).x shr 4,converter(0).z shr 4) == null) { "Converter chunk never unloaded" }
                         sampleConverters(f)
                         sampleLongLine(f)
+                        taps.sample(f, false)
                         check(unit(f).unit.secondary.voltage in 239.0..241.0)
                         check(lamp(f).unit.secondary.voltage in 239.0..241.0)
                         look(player,pole,5.0,2.0,7.0)
@@ -308,6 +330,7 @@ object WorldInteractionChecks {
                     server { player ->
                         val f=fixture(player); sampleConverters(f)
                         sampleLongLine(f)
+                        taps.sample(f, false)
                         check(unit(f).unit.outputVoltage == 240 && unit(f).unit.secondary.voltage in 239.0..241.0)
                         val light=lamp(f)
                         check(light.installed && light.unit.outputVoltage == 240 && light.lightLevel >= 14)

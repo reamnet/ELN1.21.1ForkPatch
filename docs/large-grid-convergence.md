@@ -1,5 +1,8 @@
 # Large grids and step-down unit convergence
 
+For the later fixes involving external loads through direct/transformer pole
+taps and target-voltage converters, see [external pole loads](external-pole-loads.md).
+
 Version 3.0.7 addresses a reproduced `NON_CONVERGENT` shutdown when joining
 shaft-powered grids with 120 Mains Step-down Units. The production controller
 could become stuck when the sources entered different parts of their current

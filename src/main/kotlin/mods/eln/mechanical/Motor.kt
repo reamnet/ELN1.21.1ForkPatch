@@ -13,8 +13,10 @@ import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoadInitializer
 import mods.eln.sim.mna.component.Resistor
-import mods.eln.sim.mna.component.VoltageSource
-import mods.eln.sim.mna.misc.IRootSystemPreStepProcess
+import mods.eln.sim.mna.component.SwitchableVoltageSource
+import mods.eln.sim.power.ConservativePowerProcess
+import mods.eln.sim.power.ConverterRetry
+import mods.eln.sim.power.probePort
 import mods.eln.sim.mna.misc.MnaConst
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.nbt.NbtThermalLoad
@@ -215,7 +217,10 @@ class MotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     internal val negativeLoad = NbtElectricalLoad("negativeLoad")
     internal val shaftLoad = NbtElectricalLoad("shaftLoad")
     internal val wireShaftResistor = Resistor(wireLoad, shaftLoad)
-    internal val powerSource = VoltageSource("powerSource", shaftLoad, if (desc.bipolarTerminals) negativeLoad else null)
+    internal val powerSource = SwitchableVoltageSource("powerSource").apply {
+        connectTo(shaftLoad, if (desc.bipolarTerminals) negativeLoad else null)
+        enabled = true
+    }
 
     internal val electricalProcess = MotorElectricalProcess()
     internal val shaftProcess = MotorShaftProcess()
@@ -249,15 +254,48 @@ class MotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
         thermalFastProcessList.add(heater)
     }
 
-    inner class MotorElectricalProcess : IProcess, IRootSystemPreStepProcess {
+    inner class MotorElectricalProcess : IProcess, ConservativePowerProcess {
+        private val retry = ConverterRetry()
+        private var seconds = 0.0
+        private var previous = DoubleArray(6)
+        private var supply = MotorSupplyThevenin(0.0, MnaConst.highImpedance)
+        private var expectedCurrent = 0.0
+        private var firstStep = true
+        val faulted get() = retry.waiting
+
+        private fun restoreDrive() {
+            driveSpeedTarget = previous[0]; driveIntegrator = previous[1]
+            driveCurrentRequest = previous[2]; driveFilteredSupplyVoltage = previous[3]
+            driveFilteredOutputVoltage = previous[4]; driveStallTimer = previous[5]
+        }
+
+        override fun beginStep(seconds: Double) {
+            this.seconds = seconds
+            retry.advance(seconds)
+            previous = doubleArrayOf(driveSpeedTarget, driveIntegrator, driveCurrentRequest,
+                driveFilteredSupplyVoltage, driveFilteredOutputVoltage, driveStallTimer)
+        }
+
+        override fun prepareStep() {
+            if (!retry.waiting && firstStep) {
+                // A spinning motor already has back EMF before its first drive trial.
+                powerSource.voltage = desc.radsToU.getValue(shaft.rads)
+                powerSource.enabled = true
+                firstStep = false
+            }
+        }
+
         override fun process(time: Double) {
             val noTorqueU = desc.radsToU.getValue(shaft.rads)
             val dt = if (time > 0.0) time else Eln.simulator.electricalPeriod
 
             val th = getSupplyThevenin(noTorqueU)
+            supply = th
+            val emfResolution = 2 * (Math.ulp(noTorqueU) + Math.ulp(th.voltage))
+            val driveVoltage = th.voltage - noTorqueU
             // An externally driven motor is still a generator, including against a live battery.
             // Limit regeneration before solving, not afterwards by discarding negative shaft energy.
-            if (noTorqueU > th.voltage && !th.isHighImpedance()) {
+            if (driveVoltage < -emfResolution && !th.isHighImpedance()) {
                 driveSpeedTarget = 0.0
                 driveIntegrator = 0.0
                 driveCurrentRequest = 0.0
@@ -267,6 +305,7 @@ class MotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
                     desc.nominalU * 0.05 / desc.nominalCurrent, desc.driveCurrentLimit.toDouble(),
                     shaft.energy / dt * desc.generationEfficiency
                 )
+                powerSource.enabled = true
                 powerSource.setVoltage(driveFilteredOutputVoltage)
                 return
             }
@@ -283,6 +322,7 @@ class MotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
                     maxOf(noTorqueU, th.voltage)
                 }
                 driveFilteredOutputVoltage = idleVoltage
+                powerSource.enabled = true
                 powerSource.setVoltage(idleVoltage)
                 return
             }
@@ -315,7 +355,7 @@ class MotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
             val availableCurrent = if (th.isHighImpedance() || seriesResistance <= 0.0) {
                 0.0
             } else {
-                ((th.voltage - noTorqueU) / seriesResistance).coerceAtLeast(0.0)
+                if (driveVoltage > emfResolution) driveVoltage / seriesResistance else 0.0
             }
             val effectiveCurrent = requestedCurrent.coerceAtMost(availableCurrent)
 
@@ -323,6 +363,16 @@ class MotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
                 driveIntegrator = nextIntegrator
             }
             driveCurrentRequest = effectiveCurrent
+            if (effectiveCurrent == 0.0) {
+                // An idle drive requests no terminal current. Open its switches
+                // instead of chasing the supplying converter with an ideal clamp.
+                driveFilteredOutputVoltage = noTorqueU
+                powerSource.voltage = noTorqueU
+                powerSource.enabled = false
+                driveStallTimer = 0.0
+                return
+            }
+            powerSource.enabled = true
 
             val stalled = shaft.rads >= 0.0 &&
                 shaft.rads < desc.driveStallSpeedThreshold &&
@@ -357,23 +407,13 @@ class MotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
         }
 
         private fun getSupplyThevenin(noTorqueU: Double): MotorSupplyThevenin {
-            val positiveSystem = wireLoad.subSystem ?: return MotorSupplyThevenin(noTorqueU, MnaConst.highImpedance)
-            val positive = positiveSystem.getTh(wireLoad, powerSource)
-            if (positive.voltage.isNaN()) {
-                positive.voltage = noTorqueU
-                positive.resistance = MnaConst.highImpedance
-            }
-
-            if (!desc.bipolarTerminals) {
-                return MotorSupplyThevenin(positive.voltage, positive.resistance)
-            }
-
-            if (negativeLoad.subSystem == null) {
+            if (shaftLoad.subSystem == null) return MotorSupplyThevenin(noTorqueU, MnaConst.highImpedance)
+            val response = probePort(shaftLoad, if (desc.bipolarTerminals) negativeLoad else null, powerSource)
+            if (!response.volts.isFinite() || response.ohms.isNaN()) {
                 return MotorSupplyThevenin(noTorqueU, MnaConst.highImpedance)
             }
-
-            // getTh measures across the voltage source: already differential, even on a floating circuit.
-            return MotorSupplyThevenin(positive.voltage, positive.resistance)
+            // The affine probe is differential and does not replace the motor's trial command.
+            return MotorSupplyThevenin(response.volts, response.ohms)
         }
 
         private fun getDriveSeriesResistance(th: MotorSupplyThevenin): Double {
@@ -382,8 +422,33 @@ class MotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
         }
 
         override fun rootSystemPreStepProcess() {
-            process(0.0)
+            if (retry.waiting) { powerSource.enabled = false; return }
+            // Every algebraic evaluation starts from the last physical drive state.
+            // Filters, soft-start, integral control and stall time advance once, even
+            // when Newton probes or legacy oversampling require many evaluations.
+            restoreDrive()
+            process(seconds)
+            expectedCurrent = if (powerSource.enabled) (supply.voltage - powerSource.voltage) / supply.resistance else 0.0
         }
+
+        override fun trialSources() = listOf(powerSource)
+        override fun connectedSystems() = setOfNotNull(shaftLoad.subSystem, if (desc.bipolarTerminals) negativeLoad.subSystem else null)
+        override fun iterationRegion() = when {
+            !powerSource.enabled -> "OPEN"
+            expectedCurrent < 0.0 -> "REGENERATING"
+            expectedCurrent >= desc.driveCurrentLimit * .999999 -> "CURRENT_LIMIT"
+            else -> "DRIVING"
+        }
+        override fun acceptsCandidate(): Boolean {
+            if (!powerSource.enabled) return true
+            val system = shaftLoad.subSystem ?: return false
+            val amps = system.pendingValue(powerSource.currentState)
+            return amps.isFinite() && expectedCurrent.isFinite() &&
+                kotlin.math.abs(amps) <= desc.driveCurrentLimit * (1 + 1e-6) + 1e-7 &&
+                kotlin.math.abs(amps - expectedCurrent) <= 1e-7 + 1e-6 * maxOf(kotlin.math.abs(amps), kotlin.math.abs(expectedCurrent))
+        }
+        override fun isolatesLoadOnFailure() = true
+        override fun failClosed() { retry.trip(); powerSource.enabled = false; restoreDrive() }
     }
 
     inner class MotorShaftProcess : IProcess {

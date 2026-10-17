@@ -56,3 +56,8 @@ fun pendingSourcePower(source: SwitchableVoltageSource): Double {
 fun balancedPower(inputWatts: Double, outputWatts: Double, efficiency: Double = 1.0): Boolean =
     inputWatts.isFinite() && outputWatts.isFinite() &&
         abs(inputWatts * efficiency - outputWatts) <= 1e-7 + 1e-6 * max(abs(inputWatts), abs(outputWatts))
+
+/** A numerical candidate must still obey the actual control voltage law. */
+internal fun commandMatches(actual: Double, commanded: Double): Boolean =
+    actual.isFinite() && commanded.isFinite() &&
+        abs(actual - commanded) <= 1e-9 * maxOf(1.0, abs(actual), abs(commanded))

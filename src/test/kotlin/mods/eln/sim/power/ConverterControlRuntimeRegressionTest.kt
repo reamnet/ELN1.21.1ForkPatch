@@ -239,4 +239,102 @@ class ConverterControlRuntimeRegressionTest {
             previousOutput = c.secondary.voltage
         }
     }
+
+    @Test fun anIdleHvTapUsesOnlyItsVoltageResolutionBudgetAndRejectsLargerErrors() {
+        val c = Circuit(inputOhms = .002, loadOhms = 1e9)
+        c.supply.voltage = 14000.0
+        val process = SafeTransformerProcess(c.primary, c.secondary, c.input, c.output) { true }
+            .apply { voltageTarget = 850.0 }
+        c.root.addProcess(process)
+        c.settle()
+        assertEquals("TRANSFERRING", process.status)
+        assertTrue(c.input.enabled && c.output.enabled)
+        assertEquals(850.0 * 850.0 / 1e9, c.output.power, 1e-10)
+        assertTrue(-c.input.power > 0.0, "The idle load was discarded")
+        val quantumWatts = 14000.0 * (Math.ulp(14000.0) + Math.ulp(c.input.voltage)) / .002
+        assertTrue(abs(c.input.power + c.output.power) <= quantumWatts + 1e-7)
+        repeat(128) { c.input.voltage = Math.nextUp(c.input.voltage) }
+        c.primary.subSystem.stepCalc()
+        assertFalse(process.acceptsCandidate(), "A power error larger than voltage quantization was accepted")
+    }
+
+    @Test fun aRejectedTransformerIsIsolatedBeforeItsHealthySourceIsTripped() {
+        val c = Circuit()
+        var sourceTrips = 0
+        c.root.addProcess(object : ConservativePowerProcess {
+            override fun rootSystemPreStepProcess() {}
+            override fun acceptsCandidate() = true
+            override fun connectedSystems() = setOfNotNull(c.feed.subSystem)
+            override fun failClosed() { sourceTrips++ }
+        })
+        val process = SafeTransformerProcess(c.primary, c.secondary, c.input, c.output) { true }
+        c.root.addProcess(object : ConservativePowerProcess by process {
+            override fun acceptsCandidate() = !c.input.enabled && !c.output.enabled
+        })
+        c.root.step()
+        assertEquals("NON_CONVERGENT", process.status)
+        assertOpen(c)
+        assertEquals(0, sourceTrips)
+        close(c.feed.voltage, 50.0)
+    }
+
+    @Test fun anEnergizedOutputAtTheSetpointNeedsNoTransferButStillAllowsForwardAndReversePower() {
+        val c = Circuit(inputOhms = .002, loadOhms = 1e18)
+        c.supply.voltage = 3200.0
+        val motor = VoltageState(); c.root.addState(motor)
+        val emf = VoltageSource("coasting output", motor, null).apply { voltage = 3200.0000001 }
+        c.root.addComponent(emf)
+        c.root.addComponent(Resistor(motor, c.secondary).apply { resistance = .003 })
+        val controller = SafeTransformerProcess(c.primary, c.secondary, c.input, c.output) { true }
+            .apply { voltageTarget = 3200.0 }
+        c.root.addProcess(controller)
+        c.settle()
+        assertEquals("IDLE", controller.status)
+        assertFalse(c.input.enabled)
+        assertTrue(c.output.enabled)
+        assertEquals(emf.voltage, c.secondary.voltage, 1e-9)
+        assertEquals(0.0, c.input.power, 1e-7)
+        assertEquals(0.0, c.output.power, 1e-7)
+        emf.voltage = 3200.01
+        c.settle()
+        assertTrue(c.input.enabled && c.output.enabled)
+        assertTrue(c.input.power > 0.0 && c.output.power < 0.0)
+        close(-c.input.power, c.output.power)
+        emf.voltage = 3199.99
+        c.settle()
+        assertTrue(c.input.power < 0.0 && c.output.power > 0.0)
+        close(-c.input.power, c.output.power)
+    }
+    @Test fun powerBalanceAloneCannotAcceptAnOffTargetControlCommand() {
+        for (regulated in listOf(false, true)) {
+            val c = Circuit()
+            val efficiency = if (regulated) .97 else 1.0
+            val controller: ConservativePowerProcess = if (regulated)
+                RegulatedPowerProcess(c.primary, null, c.secondary, null, c.input, c.output,
+                    { true }, { limits() }, { 100.0 })
+            else SafeTransformerProcess(c.primary, c.secondary, c.input, c.output) { true }.apply { ratio = 2.0 }
+            c.root.addProcess(controller); c.settle()
+            c.output.voltage = 80.0
+            val watts = 80.0 * 80.0 / c.load.resistance / efficiency
+            c.input.voltage = (50.0 + kotlin.math.sqrt(2500.0 - 4 * c.winding.resistance * watts)) / 2
+            setOf(c.primary.subSystem, c.secondary.subSystem).forEach { it.stepCalc() }
+            assertTrue(balancedPower(-pendingSourcePower(c.input), pendingSourcePower(c.output), efficiency))
+            assertFalse(controller.acceptsCandidate(), "A balanced but off-target command bypassed control")
+        }
+    }
+
+    @Test fun anUnloadedTransformerCannotCommitAnObsoleteInducedVoltageAfterASupplyChange() {
+        val c = Circuit(loadOhms = 1e18)
+        val controller = SafeTransformerProcess(c.primary, c.secondary, c.input, c.output) { true }.apply { ratio = .25 }
+        c.root.addProcess(controller); c.settle()
+        assertFalse(c.input.enabled)
+        c.supply.voltage = 10.0
+        setOf(c.primary.subSystem, c.secondary.subSystem).forEach { it.stepCalc() }
+        assertTrue(balancedPower(-pendingSourcePower(c.input), pendingSourcePower(c.output)))
+        assertFalse(controller.acceptsCandidate(), "Zero watts hid a stale transformer ratio")
+        c.root.step()
+        assertEquals(2.5, c.secondary.voltage, 1e-8)
+        assertFalse(c.input.enabled)
+    }
+
 }

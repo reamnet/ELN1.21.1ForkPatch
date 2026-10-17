@@ -21,6 +21,9 @@ class SafeTransformerProcess(
     var status = "IDLE"
         private set
     private val retry = ConverterRetry()
+    private var commandedInput = Double.NaN
+    private var commandedOutput = Double.NaN
+    private var powerRoundoff = 0.0
 
     fun resetFault() { retry.reset() }
     override fun beginStep(seconds: Double) { retry.advance(seconds) }
@@ -40,6 +43,21 @@ class SafeTransformerProcess(
             a.ohms < 0.0 || b.ohms < 0.0) { open("INVALID_NETWORK"); return }
         if (target != null && a.volts > 0.0) ratio = (target / a.volts).coerceIn(1.0 / 256, 256.0)
         if (!ratio.isFinite() || ratio <= 0) { open("INVALID_CONTROL"); return }
+        val induced = a.volts * ratio
+        // An energized output already at the induced/set voltage needs no transfer.
+        // Keep its voltage present for drive controls, but remove the unnecessary
+        // input clamp. Otherwise a coasting motor and converter can chase tiny
+        // opposing voltage updates around a zero-power operating point.
+        if (target != null && abs(induced) > 1e-12 && a.ohms < RegulatedConverter.OPEN_OHMS && b.ohms < RegulatedConverter.OPEN_OHMS &&
+            abs(induced - b.volts) <= 1e-9 * maxOf(1.0, abs(induced), abs(b.volts)) &&
+            abs(a.volts) <= maximumPrimaryVoltage && abs(b.volts) <= maximumSecondaryVoltage) {
+            input.voltage = a.volts; input.enabled = false
+            output.voltage = b.volts; output.enabled = true
+            commandedInput = input.voltage; commandedOutput = output.voltage
+            powerRoundoff = powerResolution(output.voltage, b)
+            status = "IDLE"
+            return
+        }
         val point = when {
             abs(a.volts) < 1e-12 && abs(b.volts) < 1e-12 -> null
             a.ohms >= RegulatedConverter.OPEN_OHMS && b.ohms >= RegulatedConverter.OPEN_OHMS -> null
@@ -58,6 +76,8 @@ class SafeTransformerProcess(
         // unnecessary and unrepresentable at some cable impedances/voltage ULPs.
         input.enabled = b.ohms < RegulatedConverter.OPEN_OHMS
         output.enabled = a.ohms < RegulatedConverter.OPEN_OHMS
+        commandedInput = input.voltage; commandedOutput = output.voltage
+        powerRoundoff = powerResolution(input.voltage, a) + powerResolution(output.voltage, b)
         status = "TRANSFERRING"
     }
 
@@ -69,11 +89,41 @@ class SafeTransformerProcess(
 
     override fun acceptsCandidate(): Boolean {
         if (!input.enabled && !output.enabled) return true
-        return balancedPower(-pendingSourcePower(input), pendingSourcePower(output))
+        if ((input.enabled && !commandMatches(input.voltage, commandedInput)) ||
+            (output.enabled && !commandMatches(output.voltage, commandedOutput))) return false
+        val vp = primary.subSystem?.pendingValue(primary) ?: return false
+        val vs = secondary.subSystem?.pendingValue(secondary) ?: return false
+        val induced = ratio * vp
+        // An unloaded winding balances zero watts even with an obsolete induced
+        // voltage. Validate its actual solved ratio before watchdogs see a commit.
+        if (!vp.isFinite() || !vs.isFinite() || !induced.isFinite() ||
+            abs(vs - induced) > 1e-7 + 1e-6 * maxOf(abs(vs), abs(induced))) return false
+        val pin = -pendingSourcePower(input)
+        val pout = pendingSourcePower(output)
+        return balancedPower(pin, pout) ||
+            (pin.isFinite() && pout.isFinite() && powerRoundoff.isFinite() &&
+                abs(pin - pout) <= 1e-7 + 1e-6 * maxOf(abs(pin), abs(pout)) + powerRoundoff)
     }
 
-    override fun trialSources(): List<SwitchableVoltageSource> = listOf(input, output)
+    /** A voltage command and its Thevenin voltage are rounded doubles. Across a
+     * stiff HV feeder one ULP can represent more power than an idle machine's
+     * entire draw. Bound only that representational error, using d(V*I)/dV;
+     * do not discard the load or widen acceptance by an arbitrary wattage.
+     */
+    private fun powerResolution(volts: Double, port: PortThevenin): Double {
+        if (!port.ohms.isFinite() || port.ohms <= 0.0) return 0.0
+        val amps = (volts - port.volts) / port.ohms
+        return abs(volts) * (Math.ulp(volts) + Math.ulp(port.volts)) / port.ohms +
+            abs(amps) * Math.ulp(volts)
+    }
+
+    override fun trialSources(): List<SwitchableVoltageSource> =
+        // An unloaded target output is already fixed by its control law. Probing
+        // it as a free variable can activate an otherwise idle attached drive.
+        if (voltageTarget != null && !input.enabled && output.enabled) listOf(input)
+        else listOf(input, output)
 
     override fun failClosed() { retry.trip(); open("NON_CONVERGENT") }
+    override fun isolatesLoadOnFailure() = true
     override fun connectedSystems(): Set<SubSystem> = setOfNotNull(primary.subSystem, secondary.subSystem)
 }

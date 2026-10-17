@@ -11,6 +11,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.5` | ForkPatch 5 | Faster pole converters, long-line stability and 10 kW mains step-down units |
 | `v3.0.6` | — | Stop multiplying converter probes by the legacy 50-pass setting; reduce gauge allocations |
 | `v3.0.7` | — | Recover large joined grids across source current limits; isolate rejected step-down loads before tripping healthy supplies |
+| `v3.0.8` | — | Keep external pole loads powered: couple motor drives to the solver, stabilize idle/zero-transfer operation and numerical probing, handle tiny idle loads at HV voltage resolution, and isolate failed transformers locally |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`
