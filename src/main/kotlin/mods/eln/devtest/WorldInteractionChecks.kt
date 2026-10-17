@@ -294,7 +294,7 @@ object WorldInteractionChecks {
                 }
                 12 -> if (complete()) {
                     record("travelling 4000 blocks, unloading and returning preserves converter power without GUI edits")
-                    record("module removal opens both branches; reinsertion and a 12.8 kV to 3.2 kV grid change restore the selected output")
+                    record("module removal opens both branches; reinsertion and a 14 kV to 3.2 kV grid change restore the selected output")
                     step(13); mc.level!!.disconnect(); mc.disconnect(TitleScreen())
                 }
                 13 -> if (ticks > 40 && mc.singleplayerServer == null) {

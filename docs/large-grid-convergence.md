@@ -39,6 +39,10 @@ poles over 3,840 metres**, starting at **14 kV**, with mixed 120/240 V outputs a
 an additional 9 kW load on the last pole. It repeatedly checks outputs before and
 after a supply change, chunk unloading/return and reopening the saved world.
 
+Release validation passed all **565 unit tests** and **8 native Minecraft
+checks**, including this 120-pole campaign. Generator-grid, shared-output
+overload/recovery/reconnection and linear-control benchmarks also passed.
+
 Run the regressions with a Java 21 JDK:
 
 ```bash
