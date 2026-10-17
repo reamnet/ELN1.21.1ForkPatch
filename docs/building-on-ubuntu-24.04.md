@@ -24,7 +24,7 @@ To rebuild this exact release instead of the current `main`:
 
 ```bash
 git fetch --tags origin
-git switch --detach v3.0.0-port-forkpatch.3
+git switch --detach v3.0.0-port-forkpatch.4
 ./gradlew --no-daemon --max-workers=2 build
 ```
 

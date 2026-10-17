@@ -34,6 +34,7 @@ object PowerBehaviorChecks {
     private fun root(e: TransparentNodeElement): RootSystem = RootSystem(DT, 1).apply {
         e.electricalLoadList.forEach(::addState)
         e.electricalComponentList.forEach(::addComponent)
+        if (e is GeneratorElement) addProcess(e.electricalProcess)
     }
     private fun resistor(root: RootSystem, a: State?, b: State?, resistance: Double) = Resistor(a, b).also {
         it.resistance = resistance; root.addComponent(it)
@@ -102,7 +103,6 @@ object PowerBehaviorChecks {
                 val fault=FaultWire(r,g.inputLoad,negative)
                 val initial=g.shaft.energy
                 // Match the live simulator: rebuild topology before invoking the regulator.
-                r.addProcess(g.electricalProcess)
                 r.generate()
                 repeat(1200) {
                     r.step()
@@ -118,6 +118,7 @@ object PowerBehaviorChecks {
             }
             report.test(key, "small-load-and-stop-led-publication") {
                 val g = GeneratorElement(node(world), d)
+                g.electricalPowerSource.enabled = true
                 g.electricalPowerSource.voltage = 10.0
                 g.electricalPowerSource.currentState.state = -.1
                 g.node!!.needPublish = false
@@ -141,7 +142,7 @@ object PowerBehaviorChecks {
                 r.generate()
                 repeat(300) {
                     g.shaft.rads = d.nominalRads.toDouble() // external dynamometer supplies measured mechanical work
-                    g.electricalProcess.process(DT); r.step()
+                    r.step()
                     check(abs(g.electricalPowerSource.current) <= d.regulatorCurrentLimit * 1.001)
                     val before = g.shaft.energy
                     g.thermal.PcTemp = 0.0; g.shaftProcess.process(DT)
@@ -153,7 +154,7 @@ object PowerBehaviorChecks {
                 }
                 if (loadFraction == 0.0) check(abs(g.electricalPowerSource.current) < .001)
                 g.shaft.rads = 0.0
-                g.electricalProcess.process(DT); r.step()
+                r.step()
                 check(abs(load.power) < 1e-6) { "Stopped shaft still creates power" }
             }
             report.test(key, "battery-charge-and-backdrive") {
@@ -168,14 +169,14 @@ object PowerBehaviorChecks {
                 val before = b.batteryProcess.Q
                 repeat(400) {
                     g.shaft.rads = d.nominalRads * 140.0 / d.nominalU
-                    g.electricalProcess.process(DT); r.step(); b.batteryProcess.process(DT); g.shaftProcess.process(DT)
+                    r.step(); b.batteryProcess.process(DT); g.shaftProcess.process(DT)
                     check(abs(g.electricalPowerSource.current) <= d.regulatorCurrentLimit * 1.001)
                 }
                 check(b.batteryProcess.Q > before) { "Shaft generator did not charge battery" }
                 val charged = b.batteryProcess.Q
                 repeat(200) {
                     g.shaft.rads = 0.0
-                    g.electricalProcess.process(DT); r.step(); b.batteryProcess.process(DT); g.shaftProcess.process(DT)
+                    r.step(); b.batteryProcess.process(DT); g.shaftProcess.process(DT)
                     check(g.electricalPowerSource.current >= -d.regulatorCurrentLimit * 1.001)
                 }
                 check(b.batteryProcess.Q < charged && g.shaft.energy > 0.0) { "Battery cannot turn generator as inefficient motor" }

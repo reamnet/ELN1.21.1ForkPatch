@@ -51,6 +51,14 @@ second**, then retry through the normal control, winding and electrical-limit
 checks. Algebraic solver iterations do not advance this timer. This does not
 repair damaged windings or insulation, override disabled controls, or add power.
 
+Shaft generators now join the same converged electrical solve as their converter
+loads. Previously a converter input could hold a generator near its startup
+voltage even with a shaft turning at 202 rad/s; repeated failed solves could also
+make an entire connected light circuit blink. The generator's droop, forward and
+reverse current limits, and available shaft-energy budget must all be satisfied
+before a step is accepted. Its field ramp advances once per physical step.
+The numerical-failure message now correctly says it retries automatically.
+
 Wire camouflage applied by holding **C** and using a covering block now draws that
 block's model and uses its opacity as well as its existing collision. Creative
 items are ordered by their descriptor family and registered group/sub-ID, keeping
@@ -66,3 +74,13 @@ setups, controlled numerical recovery, C-key camouflage, item grouping, both new
 devices, menu packets, travel to unloaded chunks and back, and a saved-world restart.
 It writes `run/client/world-interaction-checks.json` and screenshots under
 `run/client/screenshots/world-interaction-*.png`.
+
+For generator/grid cold starts, run `runClient` with
+`-Deln.generatorChecks=place -Deln.generatorWorld=<new-test-world>` in
+`JAVA_TOOL_OPTIONS`, then start a separate JVM with
+`-Deln.generatorChecks=verify -Deln.generatorWorld=<same-test-world>`.
+The 18 placed circuits include the bare Aluminum 1000 kcmil cable, both generator
+output directions and placement orders, plus six generator-fed mains, variable
+and one-way buck converter loads at 120/240 V. Repeated samples check for blinks
+before and after restart; verification also checks restored connections without
+replacing any cable. Results are `run/client/generator-checks-{place,verify}.json`.

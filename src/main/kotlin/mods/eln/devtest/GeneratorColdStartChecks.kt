@@ -5,6 +5,10 @@ import mods.eln.Eln
 import mods.eln.mechanical.GeneratorElement
 import mods.eln.mechanical.SimpleShaftElement
 import mods.eln.misc.Direction
+import mods.eln.transparentnode.OneWayDcDcElement
+import mods.eln.transparentnode.VariableDcDcElement
+import mods.eln.transparentnode.utilitylight.StepDownUnitElement
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.TitleScreen
 import net.minecraft.core.BlockPos
@@ -36,8 +40,27 @@ object GeneratorColdStartChecks {
     private var work: CompletableFuture<Void>? = null
     private val results = mutableListOf<Map<String, Any>>()
     private val recovery = mutableListOf<String>()
-    private const val caseCount = 12
+    private const val caseCount = 18
     private fun origin(i: Int) = BlockPos(512 + i * 31, 65, 533)
+    private fun output(i: Int) = origin(i).offset(4, 0, if (i % 4 < 2) -1 else 1)
+
+    private fun converterValues(f: NativeCampaignFixtures, i: Int): Map<String, Any> {
+        val e = f.machine(output(i).east(2))
+        return when (e) {
+            is StepDownUnitElement -> mapOf("outputV" to e.unit.secondary.voltage,
+                "outputW" to e.unit.output.power, "status" to e.unit.controller.status)
+            is VariableDcDcElement -> mapOf("outputV" to e.secondaryLoad.voltage,
+                "outputW" to e.secondaryVoltageSource.power, "status" to e.interSystemProcess.status)
+            is OneWayDcDcElement -> f.converterValues(e)
+            else -> error("Unexpected generator load $e")
+        }.also { data ->
+            val target = if (i % 2 == 0) 120.0 else 240.0
+            check(kotlin.math.abs((data["outputV"] as Double) - target) < 1.0 &&
+                (data["outputW"] as Double) > 59.0 && data["status"] != "NON_CONVERGENT") {
+                "Generator-fed converter case $i flickered or lost power: $data"
+            }
+        }
+    }
 
     @SubscribeEvent fun tick(event: ClientTickEvent.Post) {
         if (mode !in setOf("place", "verify") || done) return
@@ -64,10 +87,13 @@ object GeneratorColdStartChecks {
                         player.teleportTo(world, 0.0, 72.0, 0.0, 180f, 0f)
                         player.abilities.flying = true; player.onUpdateAbilities()
                         if (mode == "place") {
+                            check(PowerBehaviorChecks.run(world, false) == 0) {
+                                "Generator/motor/battery energy and current-limit contracts failed"
+                            }
                             val f = NativeCampaignFixtures(world, player)
                             repeat(caseCount) { i ->
                                 val p = origin(i)
-                                for (x in -3..8) for (z in -3..3) {
+                                for (x in -3..12) for (z in -3..3) {
                                     world.setChunkForced((p.x+x) shr 4, (p.z+z) shr 4, true)
                                     world.setBlockAndUpdate(p.offset(x,-1,z), Blocks.STONE.defaultBlockState())
                                 }
@@ -78,7 +104,7 @@ object GeneratorColdStartChecks {
                                         else -> f.requiredItem("Aluminum 1000 kcmil Cable Bare")
                                     }, at)
                                 }
-                                val output = p.offset(4, 0, if (i % 4 < 2) -1 else 1)
+                                val output = output(i)
                                 if (i % 2 == 0) cable(output)
                                 f.source(p.offset(-1,0,-1), Eln.VVU)
                                 cable(p.north())
@@ -87,8 +113,35 @@ object GeneratorColdStartChecks {
                                 f.placeMachine(f.requiredItem("Joint"),p.offset(2,1,0))
                                 f.placeMachine(f.requiredItem("Large Generator"),p.east(4))
                                 if (i % 2 != 0) cable(output)
-                                f.load(output.east(),2000.0, Direction.XP)
-                                f.ground(output.east(2))
+                                if (i < 12) {
+                                    f.load(output.east(),2000.0, Direction.XP)
+                                    f.ground(output.east(2))
+                                } else {
+                                    cable(output.east())
+                                    val name = when (i % 3) {
+                                        0 -> "Mains Step-down Unit"
+                                        1 -> "Variable DC-DC Converter"
+                                        else -> "One-way Buck vDC/DC Converter"
+                                    }
+                                    val e = f.placeMachine(f.requiredItem(name), output.east(2))
+                                    val target = if (i % 2 == 0) 120 else 240
+                                    e.front = Direction.ZP
+                                    if (e is StepDownUnitElement) e.unit.read(CompoundTag().apply { putInt("mainsOutputVoltage", target) })
+                                    else {
+                                        e.inventory!!.setItem(0, f.spool())
+                                        e.inventory!!.setItem(1, f.spool())
+                                        e.inventory!!.setItem(2, f.requiredItem("Optimal Ferromagnetic Core"))
+                                        when (e) {
+                                            is VariableDcDcElement -> e.settings.apply { version = 2; mode = "VOLTAGE"; value = target.toDouble() }
+                                            is OneWayDcDcElement -> e.settings.apply { version = 2; mode = "VOLTAGE"; value = target.toDouble() }
+                                        }
+                                        e.inventory!!.setChanged()
+                                    }
+                                    e.reconnect()
+                                    cable(output.east(3))
+                                    f.load(output.east(4), target.toDouble() * target / 60.0, Direction.XP)
+                                    f.ground(output.east(5))
+                                }
                             }
                         }
                     }, server)
@@ -110,18 +163,20 @@ object GeneratorColdStartChecks {
                                 "cable" to cable.sixNodeElementDescriptor.name,
                                 "sameShaft" to (generator.shaft === motor.shaft), "voltage" to load.voltage,
                                 "current" to load.current, "connections" to cable.sixNode!!.nodeConnectionList.size)
-                            results.add(result)
+                            if (i >= 12) converterValues(f, i)
+                            results.add(if (i < 12) result else result + converterValues(f, i))
                             Eln.logger.info("GENERATOR_CHECK {}", result)
                         }
                         check(results.all { it["sameShaft"] == true && (it["speed"] as Double) > 150.0 &&
-                            (it["voltage"] as Double) > 2400.0 && (it["current"] as Double) > .1 }) {
+                            (it["voltage"] as Double) > 2400.0 &&
+                            (it["current"] as Double) > if ((it["case"] as Int) < 12) .1 else .01 }) {
                             "Large Generator did not deliver power: $results"
                         }
                         if (mode == "place") {
                             // Half of each cable type starts the next JVM without forced fixture chunks.
                             for (i in (0 until caseCount).filter { it % 2 == 1 }) {
                                 val p = origin(i)
-                                for (x in -3..8) for (z in -3..3)
+                                for (x in -3..12) for (z in -3..3)
                                     f.world.setChunkForced((p.x+x) shr 4,(p.z+z) shr 4,false)
                             }
                         }
@@ -159,6 +214,16 @@ object GeneratorColdStartChecks {
                 }
                 6 -> if (work!!.isDone) { work!!.join(); closeWorld() }
                 4 -> if (mc.singleplayerServer == null && ticks > 20) finish(null)
+            }
+            // A single good screenshot/sample can miss a one-second retry blink. Check repeatedly
+            // through eight seconds of real simulation, both before and after saved-world startup.
+            if (phase in setOf(2, 5) && ticks in 200..355 && ticks % 5 == 0 && work!!.isDone) {
+                work!!.join()
+                val server = mc.singleplayerServer!!
+                work = CompletableFuture.runAsync({
+                    val f = NativeCampaignFixtures(server.overworld(), server.playerList.players.first())
+                    for (i in 12 until caseCount) converterValues(f, i)
+                }, server)
             }
         } catch (error: Throwable) { finish(error) }
     }

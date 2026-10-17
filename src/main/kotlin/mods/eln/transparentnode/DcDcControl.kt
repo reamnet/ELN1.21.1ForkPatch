@@ -163,7 +163,7 @@ internal fun converterStateText(code: String): String = when (code) {
     "NO_INPUT" -> tr("No input supply")
     "INVALID_NETWORK" -> tr("Invalid or conflicting network")
     "INVALID_CONTROL" -> tr("Invalid control setting or signal")
-    "NON_CONVERGENT" -> tr("Network did not converge; reconfigure to reset")
+    "NON_CONVERGENT" -> tr("Network did not converge; retrying automatically")
     "INPUT_OVERVOLTAGE" -> tr("Input exceeds winding voltage rating")
     "VOLTAGE_LIMIT" -> tr("Winding voltage rating exceeded")
     "FIXED_RATIO_LIMIT" -> tr("Fixed-ratio current or voltage rating exceeded")

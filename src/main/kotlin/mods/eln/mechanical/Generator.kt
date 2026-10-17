@@ -13,8 +13,7 @@ import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoadInitializer
 import mods.eln.sim.mna.component.Resistor
-import mods.eln.sim.mna.component.VoltageSource
-import mods.eln.sim.mna.misc.IRootSystemPreStepProcess
+import mods.eln.sim.mna.component.SwitchableVoltageSource
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.nbt.NbtThermalLoad
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog
@@ -176,15 +175,19 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
 class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     SimpleShaftElement(node, desc_) {
     val desc = desc_ as GeneratorDescriptor
-    private var regulatorVoltageTarget = 0.0
-    private var regulatorCurrentLimitRequest = 0.0
 
     internal val inputLoad = NbtElectricalLoad("inputLoad")
     internal val negativeLoad = NbtElectricalLoad("negativeLoad")
     internal val positiveLoad = NbtElectricalLoad("positiveLoad")
     internal val inputToPositiveResistor = Resistor(inputLoad, positiveLoad)
-    internal val electricalPowerSource = VoltageSource("PowerSource", positiveLoad, if (desc.bipolarTerminals) negativeLoad else null)
-    internal val electricalProcess = GeneratorElectricalProcess()
+    internal val electricalPowerSource = SwitchableVoltageSource("PowerSource").apply {
+        connectTo(positiveLoad, if (desc.bipolarTerminals) negativeLoad else null)
+    }
+    internal val electricalProcess = ShaftGeneratorProcess(positiveLoad,
+        if (desc.bipolarTerminals) negativeLoad else null, electricalPowerSource,
+        { desc.RtoU.getValue(shaft.rads) }, { shaft.energy },
+        desc.nominalU / desc.regulatorRampTime, desc.regulatorDroopResistance.toDouble(),
+        desc.regulatorCurrentLimit.toDouble(), desc.generationEfficiency)
     internal val shaftProcess = GeneratorShaftProcess()
 
     internal val thermal = NbtThermalLoad("thermal")
@@ -218,32 +221,6 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
 
         // TODO: Add running lights. (More. Electrical sparks, perhaps?)
         // TODO: Add the thermal explosions—there should be some.
-    }
-
-    inner class GeneratorElectricalProcess : IProcess, IRootSystemPreStepProcess {
-        override fun process(time: Double) {
-            val targetU = desc.RtoU.getValue(shaft.rads).coerceAtLeast(0.0)
-            val dt = if (time > 0.0) time else Eln.simulator.electricalPeriod
-            val th = positiveLoad.getSubSystem().getTh(positiveLoad, electricalPowerSource)
-            val rampRate = desc.nominalU / desc.regulatorRampTime
-            regulatorVoltageTarget = when {
-                regulatorVoltageTarget < targetU ->
-                    (regulatorVoltageTarget + rampRate * dt).coerceAtMost(targetU)
-                else ->
-                    (regulatorVoltageTarget - rampRate * dt).coerceAtLeast(targetU)
-            }
-
-            regulatorCurrentLimitRequest = if (th.isHighImpedance()) 0.0 else desc.regulatorCurrentLimit.toDouble()
-            electricalPowerSource.setVoltage(ShaftElectricalMath.sourceVoltage(
-                minOf(regulatorVoltageTarget, targetU), th.voltage, th.resistance,
-                desc.regulatorDroopResistance.toDouble(), desc.regulatorCurrentLimit.toDouble(),
-                shaft.energy / dt * desc.generationEfficiency
-            ))
-        }
-
-        override fun rootSystemPreStepProcess() {
-            process(0.0)
-        }
     }
 
     inner class GeneratorShaftProcess() : IProcess {
@@ -328,8 +305,8 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
         if (Eln.config.getBooleanOrElse("ui.waila.easyMode", false)) {
             info.put(tr("Voltage"), Utils.plotVolt("", electricalPowerSource.getVoltage()))
             info.put(tr("Current"), Utils.plotAmpere("", electricalPowerSource.getCurrent()))
-            info.put(tr("Regulator target"), Utils.plotVolt("", regulatorVoltageTarget))
-            info.put(tr("Regulator current limit"), Utils.plotAmpere("", regulatorCurrentLimitRequest))
+            info.put(tr("Regulator target"), Utils.plotVolt("", electricalProcess.voltageTarget))
+            info.put(tr("Regulator current limit"), Utils.plotAmpere("", desc.regulatorCurrentLimit.toDouble()))
             info.put(tr("Temperature"), plotAmbientCelsius("", thermal.temperature))
         }
         return info

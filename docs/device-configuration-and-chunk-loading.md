@@ -54,6 +54,11 @@ startup without replacing a cable or resetting the shaft's stored energy. It als
 applies to the Large Generator. Fuel-dependent plants still need their operating
 area loaded as described above.
 
+The generator regulator also participates in the converter solver's final
+validation. This prevents a stiff converter input from holding it near its startup
+voltage while the shaft is already at full speed. See
+[coupled-grid recovery](utility-street-light-and-recovery.md#existing-device-fixes).
+
 ## Regression checks
 
 Run `./gradlew build` for the unit suite. Under a working X/GL display, add
@@ -74,8 +79,10 @@ JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS -Deln.generatorWorld=generator-check-1 -De
 
 This covers both output ports, cables placed before/after the machine, legacy
 very-high-voltage, insulated copper utility and **Aluminum 1000 kcmil Cable Bare**
-cables (12 setups total), and installations with/without
-forced chunks away from the player. Verification also deliberately disconnects the
+cables, and installations with/without forced chunks away from the player.
+Six more setups feed 120/240 V lights through mains step-down, variable and one-way
+buck converters (18 setups total). Repeated samples check for intermittent power.
+Verification also deliberately disconnects the
 generator's simulation registration before calling its boot hook, checking recovery,
 unchanged shaft energy, no duplicate connections, and subsequent delivered power.
 Reports are `run/client/generator-checks-place.json` and `generator-checks-verify.json`.
