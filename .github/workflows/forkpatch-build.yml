@@ -1,0 +1,42 @@
+name: Build ForkPatch artifact
+
+# A manual build for release artifacts, independent of the long-running full-world CI queue.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and unit tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build and test the selected source commit
+        run: ./gradlew --no-daemon --max-workers=2 build
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-reports
+          if-no-files-found: ignore
+          path: |
+            build/reports/tests/test/**
+            build/test-results/test/**
+      - name: Upload jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-jar
+          if-no-files-found: error
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
