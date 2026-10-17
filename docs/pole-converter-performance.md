@@ -14,6 +14,17 @@ reuse a convergence derivative; changed operating regions or failed improvement
 rebuild it. Every accepted step still checks power balance, generator droop,
 current limits and available mechanical energy. Physical time advances once.
 
+The older **Utility Pole w/DC-DC Converter** also uses that shared, validated
+transformer process. A regression at 202 rad/s previously held a Large Generator
+near 301 V with that pole on the feeder. The updated test requires normal output,
+checks power balance with an unused and loaded low-voltage tap, and stops/restarts
+the source. The existing 4:1 ratio and saved component names are unchanged.
+Idle transformer/converter inputs now remain open while their outputs retain the
+correct open-circuit voltage. A load reconnects the power path normally. This
+avoids trying to clamp a loaded high-voltage line at exactly zero current, which
+can fall below the voltage command's numerical resolution and trip the entire
+connected group into retries.
+
 ## Measured regression fixture
 
 `GeneratorGridProfilingTest` uses the production Large Generator, 60 W loads on
@@ -65,7 +76,8 @@ generator, then removes and restores the supply. The test checks every output
 repeatedly and verifies that unpowered probes do not cause new factorizations.
 
 The opt-in native `WorldInteractionChecks` places twenty actual street-light
-poles over a 640 m overhead line with the bare Aluminum 1000 kcmil cable. Their
+poles over a 640 m overhead line with the bare Aluminum 1000 kcmil cable and an
+older transformer pole on the feeder. Their
 modules alternate 120/240 V; the last pole also supplies a real 9 kW load. Repeated
 samples cover voltage changes, actual chunk unloading/return and a saved-world
 restart. See the [device guide](utility-street-light-and-recovery.md#checks).

@@ -2,6 +2,8 @@ package mods.eln.transparentnode.utilitylight
 
 import mods.eln.Eln
 import mods.eln.gridnode.WireSpanConnection
+import mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor
+import mods.eln.gridnode.electricalpole.ElectricalPoleElement
 import mods.eln.mechanical.GeneratorDescriptor
 import mods.eln.mechanical.GeneratorElement
 import mods.eln.node.transparent.TransparentNode
@@ -15,6 +17,47 @@ import net.minecraft.nbt.CompoundTag
 import kotlin.test.*
 
 class LongLineMainsTest {
+    @Test fun olderTransformerPoleOnTheLineDoesNotHoldASpinningGeneratorAtStartupVoltage() {
+        val root = RootSystem(.01, 1)
+        val descriptors = Eln.transparentNodeItem.subItemList.values
+        val generator = GeneratorElement(TransparentNode(), descriptors.filterIsInstance<GeneratorDescriptor>()
+            .single { it.name == "Large Generator" })
+        generator.shaft._mass = generator.shaftMass; generator.shaft.rads = 202.0
+        val pole = ElectricalPoleElement(TransparentNode(), descriptors.filterIsInstance<ElectricalPoleDescriptor>()
+            .single { it.name == "Utility Pole w/DC-DC Converter" })
+        pole.trafo!!.interSystemProcess.ratio = .25
+        val light = StepDownUnitElement(TransparentNode(), descriptors.filterIsInstance<StepDownUnitDescriptor>().single())
+        for (e in listOf(generator, pole, light)) {
+            e.electricalLoadList.forEach(root::addState); e.electricalComponentList.forEach(root::addComponent)
+        }
+        root.addProcess(generator.electricalProcess)
+        root.addProcess(pole.trafo!!.interSystemProcess)
+        root.addProcess(light.unit.controller)
+        root.addComponent(Resistor(generator.inputLoad, pole.electricalLoad).apply { resistance = .01 })
+        root.addComponent(Resistor(pole.electricalLoad, light.unit.primary).apply { resistance = 1.0 })
+        root.addComponent(Resistor(light.unit.secondary, null).apply { resistance = 240.0 })
+        repeat(300) { root.step() }
+        assertTrue(generator.inputLoad.voltage > 3000.0, "Generator held at ${generator.inputLoad.voltage} V")
+        assertEquals(120.0, light.unit.secondary.voltage, .1, light.unit.controller.status)
+        assertEquals(-pole.trafo.primaryVoltageSource.power, pole.trafo.secondaryVoltageSource.power, .001)
+        val tapLoad = Resistor(pole.trafo.secondaryLoad, null).apply { resistance = 500.0 }
+        root.addComponent(tapLoad)
+        repeat(100) { root.step() }
+        assertTrue(tapLoad.power > 1200.0)
+        assertEquals(pole.trafo.primaryVoltageSource.voltage * .25, pole.trafo.secondaryVoltageSource.voltage, 1e-6)
+        assertEquals(-pole.trafo.primaryVoltageSource.power, pole.trafo.secondaryVoltageSource.power, .001)
+        assertEquals(120.0, light.unit.secondary.voltage, .1)
+        generator.shaft.rads = 0.0
+        repeat(150) { root.step() }
+        assertEquals(0.0, tapLoad.power, 1e-8)
+        assertEquals(0.0, light.unit.output.power, 1e-8)
+        generator.shaft.rads = 202.0
+        repeat(300) { root.step() }
+        assertTrue(generator.inputLoad.voltage > 3000.0)
+        assertTrue(tapLoad.power > 1200.0)
+        assertEquals(120.0, light.unit.secondary.voltage, .1)
+    }
+
     @Test fun kilometreFeederStaysLitAtBothMainsVoltagesWhileSourceAndWireTemperaturesChange() {
         for ((grid, shaft, feedOhms) in listOf(Triple(3200.0, false, 100.0), Triple(12800.0, false, 100.0),
             Triple(51200.0, false, 100.0), Triple(3200.0, true, 100.0),

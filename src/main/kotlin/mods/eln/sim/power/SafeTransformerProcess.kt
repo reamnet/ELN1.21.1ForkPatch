@@ -53,7 +53,11 @@ class SafeTransformerProcess(
             open("VOLTAGE_LIMIT"); return
         }
         input.voltage = point.inputVolts; output.voltage = point.outputVolts
-        input.enabled = true; output.enabled = true
+        // An unloaded secondary needs an induced voltage, not an ideal clamp drawing
+        // exactly zero current from a loaded HV line. That zero-current clamp is both
+        // unnecessary and unrepresentable at some cable impedances/voltage ULPs.
+        input.enabled = b.ohms < RegulatedConverter.OPEN_OHMS
+        output.enabled = a.ohms < RegulatedConverter.OPEN_OHMS
         status = "TRANSFERRING"
     }
 

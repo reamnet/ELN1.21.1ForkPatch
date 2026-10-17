@@ -64,6 +64,15 @@ reverse current limits, and available shaft-energy budget must all be satisfied
 before a step is accepted. Its field ramp advances once per physical step.
 The numerical-failure message now correctly says it retries automatically.
 
+The older **Utility Pole w/DC-DC Converter** now joins that same validated solve.
+Its previous transformer controller could hold a spinning generator around 300 V
+and absorb or supply unaccounted power on a mixed overhead line, even with an
+unused low-voltage tap. Its existing 4:1 ratio, saved identities and watchdogs are
+preserved; both active branches now open safely when there is no input. An unused
+tap leaves its input branch open while retaining the expected open-circuit output
+voltage, avoiding zero-current clamps that could trigger repeated numerical trips
+on a loaded high-voltage line. Mains units use the same idle-input behavior.
+
 Wire camouflage applied by holding **C** and using a covering block now draws that
 block's model and uses its opacity as well as its existing collision. Creative
 items are ordered by their descriptor family and registered group/sub-ID, keeping
@@ -80,7 +89,8 @@ devices, menu packets, travel to unloaded chunks and back, and a saved-world res
 It writes `run/client/world-interaction-checks.json` and screenshots under
 `run/client/screenshots/world-interaction-*.png`.
 The same check also builds twenty alternating 120/240 V street lights over a
-640-metre bare-aluminum overhead line, with a real 9 kW load at the far end.
+640-metre bare-aluminum overhead line, fed through the older transformer pole,
+with a real 9 kW load at the far end.
 It repeatedly samples the pole outputs, travels away until chunks unload,
 changes the feed voltage and checks the installation again after a saved-world restart.
 

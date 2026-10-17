@@ -70,7 +70,7 @@ class RegulatedPowerProcess(
         val requested = readTarget(a.volts) ?: return
         // Retain the last operating point, especially in current limit. Re-seeding a
         // limited bus at its unloaded target each tick needlessly repeats startup.
-        if (input.enabled && output.enabled && requested == previousTarget) return
+        if (output.enabled && requested == previousTarget) return
         previousTarget = requested
         input.voltage = a.volts
         output.voltage = requested.coerceAtMost(rating.maxOutputVolts)
@@ -91,7 +91,7 @@ class RegulatedPowerProcess(
             is TransferResult.Running -> {
                 input.voltage = result.point.inputVolts
                 output.voltage = result.point.outputVolts
-                input.enabled = true
+                input.enabled = result.point.inputWatts > 0.0
                 output.enabled = true
                 status = result.point.limitedBy.firstOrNull()?.name ?: "REGULATING"
             }

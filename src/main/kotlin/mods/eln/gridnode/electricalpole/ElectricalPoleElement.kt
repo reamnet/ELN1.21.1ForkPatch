@@ -14,6 +14,8 @@ import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.mna.component.VoltageSource
+import mods.eln.sim.mna.component.SwitchableVoltageSource
+import mods.eln.sim.power.SafeTransformerProcess
 import mods.eln.sim.mna.process.TransformerInterSystemProcess
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.nbt.NbtThermalLoad
@@ -79,9 +81,9 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
 
         if (desc.includeTransformer) {
             val secondaryLoad = NbtElectricalLoad("secondaryLoad")
-            val primaryVoltageSource = VoltageSource("primaryVoltageSource", electricalLoad, null)
-            val secondaryVoltageSource = VoltageSource("secondaryVoltageSource", secondaryLoad, null)
-            val interSystemProcess = TransformerInterSystemProcess(electricalLoad, secondaryLoad, primaryVoltageSource, secondaryVoltageSource)
+            val primaryVoltageSource = SwitchableVoltageSource("primaryVoltageSource").apply { connectTo(electricalLoad, null) }
+            val secondaryVoltageSource = SwitchableVoltageSource("secondaryVoltageSource").apply { connectTo(secondaryLoad, null) }
+            val interSystemProcess = SafeTransformerProcess(electricalLoad, secondaryLoad, primaryVoltageSource, secondaryVoltageSource) { true }
             val voltageSecondaryWatchdog = VoltageStateWatchDog(secondaryLoad)
 
             trafo = Transformer(

@@ -93,6 +93,21 @@ class MainsStepDownTest {
         }
     }
 
+    @Test fun anIdleOutputDoesNotClampTheHighVoltageLineOrRepeatedlySwitchItsInput() {
+        val c = Circuit(12800.0, 120, 1e19)
+        c.settle()
+        assertFalse(c.unit.input.enabled)
+        assertTrue(c.unit.output.enabled)
+        assertEquals(120.0, c.unit.secondary.voltage, 1e-7)
+        val before = c.root.systems.sumOf { it.fullFactorizations + it.updatedFactorizations }
+        repeat(20) { c.root.step(); assertFalse(c.unit.input.enabled) }
+        assertEquals(before, c.root.systems.sumOf { it.fullFactorizations + it.updatedFactorizations })
+        c.load.resistance = 240.0
+        c.settle()
+        assertTrue(c.unit.input.enabled)
+        assertTrue(c.load.power > 59.0)
+    }
+
     @Test fun settingsSurviveItemAndSaveRoundTripsAndRejectInvalidPackets() {
         val c = Circuit(3200.0, 240, 960.0)
         val item = c.element.getItemStackNBT()

@@ -7,6 +7,7 @@ import mods.eln.ServerKeyHandler
 import mods.eln.generic.*
 import mods.eln.gridnode.GridElement
 import mods.eln.gridnode.GridLink
+import mods.eln.gridnode.electricalpole.ElectricalPoleElement
 import mods.eln.gui.GuiButtonEln
 import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction
@@ -59,6 +60,7 @@ object WorldInteractionChecks {
     private val standalone = BlockPos(272, 66, 284)
     private val feed = BlockPos(256, 66, 312)
     private val pole = feed.east(8)
+    private val olderPole = feed.east(4)
     private const val longPoleCount = 20
     private fun longPole(i: Int) = pole.east((i + 1) * 32)
     private fun fixture(player: ServerPlayer) = NativeCampaignFixtures(player.serverLevel(), player)
@@ -86,6 +88,10 @@ object WorldInteractionChecks {
         }
     }
     private fun sampleLongLine(f: NativeCampaignFixtures) {
+        val transformer = (f.machine(olderPole) as ElectricalPoleElement).trafo!!
+        check(abs(transformer.primaryVoltageSource.power + transformer.secondaryVoltageSource.power) < .001) {
+            "Unused older pole transformer sinks or creates power on the overhead line"
+        }
         repeat(longPoleCount) { i ->
             val light = f.machine(longPole(i)) as UtilityStreetLightElement
             val expected = if (i % 2 == 0) 120 else 240
@@ -160,8 +166,12 @@ object WorldInteractionChecks {
                         f.wire(feed.west()); f.source(feed.west(2),12800.0)
                         val street = f.placeMachine(f.requiredItem("Utility Pole Street Light"),pole) as UtilityStreetLightElement
                         val cable = UtilityCableDescriptor.allDescriptors().single { it.material == UtilityCableMaterial.ALUMINUM && it.sizeLabel == "1000 kcmil" && !it.insulated && !it.melted }
-                        val stack = cable.newItemStack(1).also { cable.setRemainingLengthMeters(it,8.0) }
-                        GridLink.addLink(direct,street,Direction.XP,Direction.XN,cable,8,stack)
+                        foundation(player,olderPole)
+                        val older = f.placeMachine(f.requiredItem("Utility Pole w/DC-DC Converter"),olderPole) as GridElement
+                        for ((a,b) in listOf(direct to older,older to street)) {
+                            val stack = cable.newItemStack(1).also { cable.setRemainingLengthMeters(it,4.0) }
+                            GridLink.addLink(a,b,Direction.XP,Direction.XN,cable,4,stack)
+                        }
                         f.wire(pole.east()); f.load(pole.east(2),240.0); f.ground(pole.east(3))
                         var previous: GridElement = street
                         repeat(longPoleCount) { i ->
@@ -208,6 +218,7 @@ object WorldInteractionChecks {
                 4 -> if (complete() && ticks > 60) {
                     record("six variable/voltage-controlled converters recover without GUI toggles; removable grid-fed light powers its lamp and base output")
                     record("twenty installed 120/240 V street lights span 640 metres, including a real remote 9 kW load")
+                    record("the older utility pole transformer joins the same power-conserving solve on the overhead feeder")
                     screenshot("pole")
                     server { it.serverLevel().dayTime=6000L; look(it,cover,0.0,.5,3.0) }; step(5,true)
                 }
