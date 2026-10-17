@@ -240,8 +240,10 @@ public class RootSystem {
         generate();
         profiler.add("interSystem");
         List<ConservativePowerProcess> converters = new ArrayList<>();
+        List<IRootSystemPreStepProcess> legacy = new ArrayList<>();
         for (IRootSystemPreStepProcess process : processPre) {
             if (process instanceof ConservativePowerProcess) converters.add((ConservativePowerProcess) process);
+            else legacy.add(process);
         }
         // Seed all voltage-regulated sources before sequential load calculations. Otherwise
         // the first member of a parallel bus is incorrectly asked to carry the entire load,
@@ -250,20 +252,24 @@ public class RootSystem {
             converter.beginStep(dt);
             converter.prepareStep();
         }
+        // Legacy partition/transformer proxies still need their configured sweeps.
+        // Exact converter networks have their own bounded trial/acceptance loop below;
+        // multiplying that loop by the default 50 legacy sweeps only repeats port probes.
+        if (!converters.isEmpty()) sampleLegacy(legacy);
         Set<ConservativePowerProcess> blocked = new HashSet<>();
         boolean converged = false;
         int attempts = converters.isEmpty() ? 1 : 64;
         for (int trial = 0; trial < attempts; trial++) {
-            for (int sample = 0; sample < Math.max(1, interSystemOverSampling); sample++) {
-                for (IRootSystemPreStepProcess process : processPre) {
-                    if (!blocked.contains(process)) process.rootSystemPreStepProcess();
-                }
-            }
+            for (ConservativePowerProcess converter : converters) converter.rootSystemPreStepProcess();
+            sampleLegacy(legacy);
             for (SubSystem system : systems) system.stepCalc();
             converged = converters.stream().allMatch(ConservativePowerProcess::acceptsCandidate);
             if (converged) break;
             if (trial == 1 || trial == 7) {
                 converterConvergence.correct(converters);
+                // Reconcile legacy loads/supplies with the new commands before accepting
+                // any candidate, including one produced by the numerical correction.
+                sampleLegacy(legacy);
                 for (SubSystem system : systems) system.stepCalc();
                 converged = converters.stream().allMatch(ConservativePowerProcess::acceptsCandidate);
                 if (converged) break;
@@ -292,9 +298,8 @@ public class RootSystem {
                 }
             } while (changed);
             for (ConservativePowerProcess converter : blocked) converter.failClosed();
-            for (int sample = 0; sample < Math.max(1, interSystemOverSampling); sample++) {
-                for (IRootSystemPreStepProcess process : processPre) if (!blocked.contains(process)) process.rootSystemPreStepProcess();
-            }
+            for (ConservativePowerProcess converter : converters) if (!blocked.contains(converter)) converter.rootSystemPreStepProcess();
+            sampleLegacy(legacy);
             for (SubSystem system : systems) system.stepCalc();
         }
         profiler.add("stepCalc");
@@ -333,6 +338,13 @@ public class RootSystem {
             );
             publishMetricsAccumulator.reset();
             publishTickCounter = 0;
+        }
+    }
+
+    private void sampleLegacy(List<IRootSystemPreStepProcess> processes) {
+        if (processes.isEmpty()) return;
+        for (int sample = 0; sample < Math.max(1, interSystemOverSampling); sample++) {
+            for (IRootSystemPreStepProcess process : processes) process.rootSystemPreStepProcess();
         }
     }
 

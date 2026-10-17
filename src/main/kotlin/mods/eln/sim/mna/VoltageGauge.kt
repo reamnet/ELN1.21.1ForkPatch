@@ -12,10 +12,11 @@ import kotlin.math.max
  */
 class VoltageGauge(matrix: Array<DoubleArray>, states: List<State>) {
     private val original = matrix.map { it.copyOf() }
-    private val rows = mutableListOf<Int>()
-    private val savedRhs = mutableMapOf<Int, Double>()
+    private val rows: IntArray
+    private val savedRhs: DoubleArray
 
     init {
+        val references = mutableListOf<Int>()
         val voltages = states.indices.filter { states[it] is VoltageState }
         val parent = IntArray(states.size) { it }
         fun root(i: Int): Int {
@@ -36,11 +37,13 @@ class VoltageGauge(matrix: Array<DoubleArray>, states: List<State>) {
             }
             if (floating) {
                 val pin = group.first()
-                rows += pin
+                references += pin
                 matrix[pin].fill(0.0)
                 matrix[pin][pin] = 1.0
             }
         }
+        rows = references.toIntArray()
+        savedRhs = DoubleArray(rows.size)
     }
 
     val active: Boolean get() = rows.isNotEmpty()
@@ -54,19 +57,27 @@ class VoltageGauge(matrix: Array<DoubleArray>, states: List<State>) {
     }
 
     fun applyRhs(rhs: DoubleArray) {
-        savedRhs.clear()
-        for (row in rows) {
-            savedRhs[row] = rhs[row]
+        for (i in rows.indices) {
+            val row = rows[i]
+            savedRhs[i] = rhs[row]
             rhs[row] = 0.0
         }
     }
 
     fun valid(solution: DoubleArray): Boolean {
         if (solution.any { !it.isFinite() }) return false
-        return rows.all { row ->
-            val rhs = savedRhs[row] ?: 0.0
-            val terms = original[row].indices.map { original[row][it] * solution[it] }
-            abs(terms.sum() - rhs) <= 1e-10 + 1e-8 * max(abs(rhs), terms.sumOf { abs(it) })
+        for (i in rows.indices) {
+            val rhs = savedRhs[i]
+            val coefficients = original[rows[i]]
+            var sum = 0.0
+            var magnitude = 0.0
+            for (column in coefficients.indices) {
+                val term = coefficients[column] * solution[column]
+                sum += term
+                magnitude += abs(term)
+            }
+            if (!(abs(sum - rhs) <= 1e-10 + 1e-8 * max(abs(rhs), magnitude))) return false
         }
+        return true
     }
 }

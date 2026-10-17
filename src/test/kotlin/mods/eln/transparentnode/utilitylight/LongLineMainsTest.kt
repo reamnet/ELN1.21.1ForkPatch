@@ -18,7 +18,7 @@ import kotlin.test.*
 
 class LongLineMainsTest {
     @Test fun olderTransformerPoleOnTheLineDoesNotHoldASpinningGeneratorAtStartupVoltage() {
-        val root = RootSystem(.01, 1)
+        val root = RootSystem(.01, 50)
         val descriptors = Eln.transparentNodeItem.subItemList.values
         val generator = GeneratorElement(TransparentNode(), descriptors.filterIsInstance<GeneratorDescriptor>()
             .single { it.name == "Large Generator" })
@@ -62,7 +62,7 @@ class LongLineMainsTest {
         for ((grid, shaft, feedOhms) in listOf(Triple(3200.0, false, 100.0), Triple(12800.0, false, 100.0),
             Triple(51200.0, false, 100.0), Triple(3200.0, true, 100.0),
             Triple(3200.0, false, 760.0), Triple(51200.0, false, 200000.0))) {
-            val root = RootSystem(.01, 1)
+            val root = RootSystem(.01, 50)
             val feed = VoltageState(); root.addState(feed)
             val source = VoltageSource("grid", feed, null).apply { voltage = grid }
             val generator = if (shaft) GeneratorElement(TransparentNode(), Eln.transparentNodeItem.subItemList.values

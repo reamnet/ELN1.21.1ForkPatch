@@ -335,8 +335,11 @@ public class SubSystem {
                 calculatingStep = false;
             }
 
-            double[] solveRhs = Idata.clone();
-            voltageGauge.applyRhs(solveRhs);
+            double[] solveRhs = Idata;
+            if (voltageGauge.getActive()) {
+                solveRhs = Idata.clone();
+                voltageGauge.applyRhs(solveRhs);
+            }
             boolean finite = true;
             DD[] solution = solvePrecise(solveRhs);
             for (int idx2 = 0; idx2 < stateCount; idx2++) {
@@ -405,8 +408,11 @@ public class SubSystem {
         if (singularMatrix || pin.getSubSystem() != this || !Double.isFinite(source.getVoltage())) return result;
         java.util.Arrays.fill(Idata, 0.0);
         for (ISubSystemProcessI process : processI) process.simProcessI(this);
-        double[] rhs = Idata.clone();
-        voltageGauge.applyRhs(rhs);
+        double[] rhs = Idata;
+        if (voltageGauge.getActive()) {
+            rhs = Idata.clone();
+            voltageGauge.applyRhs(rhs);
+        }
         if (source instanceof SwitchableVoltageSource && !((SwitchableVoltageSource) source).getEnabled()) {
             return openSourceThevenin(source, rhs);
         }

@@ -1,5 +1,46 @@
 # Pole converter performance and long lines
 
+## Version 3.0.6: use the default server workload
+
+The earlier regression fixture used `interSystemOverSampling=1`. Normal servers
+default to **50**, which was also repeating every exact-network converter's port
+probes 50 times before the root solver checked a candidate. The earlier timings
+below therefore understated this work at normal server settings.
+
+Version 3.0.6 separates those loops. Legacy partition and transformer proxies
+retain their configured sweeps; conservative converters run in the bounded
+trial/acceptance loop. Legacy supplies and loads are reconciled after converter
+commands change, including Newton corrections, before power balance and limits
+are checked. Physical commits, retry timing, electrical frequency and the 10 kW
+rating are unchanged. There is no need to lower the server's sampling setting.
+
+Grounded port probes also avoid copying their RHS and applying an unused voltage
+gauge. Floating networks retain reference and current-balance checks using
+primitive arrays, without allocating a map or a list of residual terms per probe.
+
+The generator benchmark and the 32-unit long-line regression now use **50**.
+`ConverterOversamplingTest` compares actual electrical outputs and controller
+counts at 1 and 50, checks a single physical commit per step, and tests a legacy
+transformer feeding a regulated converter in both registration orders while
+changing the source and load.
+
+On the same local Java 21/JFR fixture, the 64-unit / 323-state case measured:
+
+| Default-50 case | 3.0.5 median / p95 | 3.0.6 median / p95 |
+| --- | ---: | ---: |
+| Changing shaft speed | 15.13 / 22.33 ms | 2.09 / 8.45 ms |
+| Speed and wire temperature changes | 14.46 / 32.15 ms | 1.84 / 17.14 ms |
+| Unpowered grid | 0.121 / 0.225 ms | 0.057 / 0.097 ms |
+
+Over 60 changing-speed samples, controller evaluations fell from 405,925 to
+26,910. Matrix factorizations remained zero in that case and 12 with changing
+wire resistance. These are fixture timings, not a predicted server TPS; matrix
+changes, topology changes and very large networks still have a cost. The separate
+64-unit shared-output test measured 6.39 ms steady p95, 211 ms recovery and 242 ms
+reconnection. The unmodified overload and current-limit checks passed.
+
+## Earlier ForkPatch 5 changes
+
 ForkPatch 5 removes repeated matrix rebuilds from idle/undervoltage Mains Step-down
 Units, including the identical controllers installed in Utility Pole Street Lights.
 An open converter port is now measured using a unit-current response of the

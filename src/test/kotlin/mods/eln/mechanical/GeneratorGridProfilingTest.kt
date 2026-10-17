@@ -29,7 +29,7 @@ class GeneratorGridProfilingTest {
         recording.start()
         try {
             for (count in listOf(1, 4, 16, 64)) {
-                val root = RootSystem(.01, 1)
+                val root = RootSystem(.01, 50)
                 val descriptors = Eln.transparentNodeItem.subItemList.values
                 val generator = GeneratorElement(TransparentNode(), descriptors.filterIsInstance<GeneratorDescriptor>()
                     .single { it.name == "Large Generator" })
