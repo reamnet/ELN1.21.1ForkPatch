@@ -32,6 +32,8 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
         private set
     var lampEnabled = true
         private set
+    var lampAutomatic = false
+        private set
     val primary = NbtElectricalLoad("mainsPrimary")
     val secondary = NbtElectricalLoad("mainsSecondary")
     private val inputPin = NbtElectricalLoad("mainsInputPin")
@@ -64,27 +66,30 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
         tag.putInt("mainsOutputVoltage", outputVoltage)
         tag.putBoolean("mainsEnabled", enabled)
         tag.putBoolean("mainsLampEnabled", lampEnabled)
+        tag.putBoolean("mainsLampAutomatic", lampAutomatic)
     }
     fun read(tag: CompoundTag) {
         outputVoltage = tag.getInt("mainsOutputVoltage").takeIf(::validVoltage) ?: 120
         enabled = !tag.contains("mainsEnabled") || tag.getBoolean("mainsEnabled")
         lampEnabled = !tag.contains("mainsLampEnabled") || tag.getBoolean("mainsLampEnabled")
+        lampAutomatic = tag.getBoolean("mainsLampAutomatic")
         controller.resetFault()
     }
     fun packet(id: Byte, stream: DataInputStream): Boolean {
-        if (id.toInt() !in 80..82) return false
+        if (id.toInt() !in 80..83) return false
         try {
             when (id.toInt()) {
                 80 -> { val value = stream.readInt(); if (!validVoltage(value)) return true; outputVoltage = value }
                 81 -> enabled = stream.readBoolean()
                 82 -> lampEnabled = stream.readBoolean()
+                83 -> lampAutomatic = stream.readBoolean()
             }
             controller.resetFault()
         } catch (_: IOException) { /* Reject truncated settings without mutating them. */ }
         return true
     }
     fun publish(stream: DataOutputStream, installed: Boolean, light: Int) {
-        stream.writeInt(outputVoltage); stream.writeBoolean(enabled); stream.writeBoolean(lampEnabled)
+        stream.writeInt(outputVoltage); stream.writeBoolean(enabled); stream.writeBoolean(lampEnabled); stream.writeBoolean(lampAutomatic)
         stream.writeBoolean(installed); stream.writeByte(light)
         stream.writeDouble(primary.voltage); stream.writeDouble(secondary.voltage)
         stream.writeDouble(output.power); stream.writeUTF(controller.status)

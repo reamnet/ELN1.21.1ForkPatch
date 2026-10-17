@@ -6,10 +6,13 @@ Craft the new pole from a Utility Pole, Streetlight fixture, 120 V LED bulb and
 iron. It appears in the **Lighting** creative tab. Its overhead terminals accept
 the same intact power cables as other poles, with a 40-block connection range.
 
-Open its menu and insert a **Mains Step-down Unit** in the single upgrade slot.
+Right-click the pole while holding a **Mains Step-down Unit**, or open its menu
+and insert one in the single upgrade slot.
 Select **120 V** or **240 V** to match the devices you want to supply. The built-in
 60 W lamp adapts to either selection. The lamp button switches just the light;
 the converter's On/Off button controls the whole low-voltage supply.
+Enable **Dusk: Auto** to switch the lamp with daylight while keeping the base
+output available. See [streetlight controls and visuals](streetlight-qol.md).
 
 Base-level wire connections can supply other devices from the same regulated
 output. The lamp and those devices share the unit's **10 kW** rating, with an

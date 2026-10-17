@@ -19,7 +19,18 @@ class MeterDescriptor(name: String) : GenericItemUsingDamageDescriptor(name) {
         if (player == null || world == null || !player.isShiftKeyDown) return false
         val pos = net.minecraft.core.BlockPos(x, y, z)
         val state = world.getBlockState(pos)
-        val block = state.block as? mods.eln.node.NodeBlock ?: return false
+        val block = state.block
+        if (block is mods.eln.ghost.GhostBlock) {
+            if (!world.isClientSide) {
+                val ghost = mods.eln.Eln.ghostManager.getGhost(mods.eln.misc.Coordinate(x, y, z, world))
+                val node = mods.eln.node.NodeManager.instance?.getNodeFromCoordonate(ghost?.observatorCoordonate)
+                if (node != null && CircuitDiagnostics.activate(node, player,
+                    mods.eln.misc.Direction.fromFacing(net.minecraft.core.Direction.from3DDataValue(side)), vx, vy, vz)) return true
+            }
+            return block.onBlockActivated(world, pos, state, player, net.minecraft.world.InteractionHand.MAIN_HAND,
+                net.minecraft.core.Direction.from3DDataValue(side), vx, vy, vz)
+        }
+        if (block !is mods.eln.node.NodeBlock) return false
         return block.onBlockActivated(world, pos, state, player, net.minecraft.world.InteractionHand.MAIN_HAND,
             net.minecraft.core.Direction.from3DDataValue(side), vx, vy, vz)
     }

@@ -12,6 +12,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.6` | — | Stop multiplying converter probes by the legacy 50-pass setting; reduce gauge allocations |
 | `v3.0.7` | — | Recover large joined grids across source current limits; isolate rejected step-down loads before tripping healthy supplies |
 | `v3.0.8` | — | Keep external pole loads powered: couple motor drives to the solver, stabilize idle/zero-transfer operation and numerical probing, handle tiny idle loads at HV voltage resolution, and isolate failed transformers locally |
+| `v3.0.9` | — | Continuous overhead cable meshes, an attached streetlight model with a dark off state, optional dusk control, hand-installed step-down units and working pole meters |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`
@@ -24,7 +25,7 @@ release assets remain available with their original filenames.
 `modVersion` in `gradle.properties` is the version source for the jar filename,
 NeoForge metadata and the in-game version. Increment it when preparing the next
 update and create the matching `vX.Y.Z` source tag. For unpublished experiments,
-use an explicit override such as `-PmodVersion=3.0.7-local.1`.
+use an explicit override such as `-PmodVersion=3.0.10-local.1`.
 
 Build with `./gradlew build` to retain previous versioned jars in `build/libs/`.
 `./gradlew clean` removes that directory, and recompiling the same version

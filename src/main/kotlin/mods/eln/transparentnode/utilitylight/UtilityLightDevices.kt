@@ -67,7 +67,9 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
     }
     val unit = MainsStepDown(this) { installed }
     val installed get() = isStepDownUnit(inventory.getItem(0))
-    private val lamp = Resistor(unit.secondary, null)
+    internal val lamp = Resistor(unit.secondary, null)
+    private var darkOutside = false
+    private val lampRequested get() = installed && unit.enabled && unit.lampEnabled && (!unit.lampAutomatic || darkOutside)
     var lightLevel = 0
         private set
     init {
@@ -77,15 +79,20 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
         configureLamp()
     }
     private fun configureLamp() {
-        lamp.resistance = if (installed && unit.lampEnabled) unit.outputVoltage.toDouble().let { it * it / 60.0 } else 1e19
+        lamp.resistance = if (lampRequested) unit.outputVoltage.toDouble().let { it * it / 60.0 } else 1e19
+    }
+    internal fun updateAmbientDarkness(darkness: Int) {
+        // Global sky darkness includes dusk and weather, but never this lamp's own light.
+        darkOutside = if (darkOutside) darkness > 2 else darkness >= 4
+        configureLamp()
     }
     private fun updateLight() {
-        configureLamp()
-        val next = if (installed && unit.lampEnabled) (15.0 * (lamp.power / 60.0).coerceIn(0.0, 1.0)).toInt() else 0
+        val world = node!!.coordinate.world() as? ServerLevel ?: return
+        updateAmbientDarkness(if (world.dimensionType().hasSkyLight()) world.skyDarken else 15)
+        val next = if (lampRequested) (15.0 * (lamp.power / 60.0).coerceIn(0.0, 1.0)).toInt() else 0
         if (next != lightLevel) { lightLevel = next; needPublish() }
         if (lightLevel > 0) {
             // Light comes from the head, and must not load a remote chunk merely to refresh it.
-            val world = node!!.coordinate.world() as? ServerLevel ?: return
             val at = Coordinate(-1, 2, 0, 0).apply { applyTransformation(front, node!!.coordinate) }
             if (world.chunkSource.getChunkNow(at.x shr 4, at.z shr 4) != null)
                 LightBlockEntity.addLight(at, lightLevel, 5)
@@ -100,6 +107,18 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
         if (getElectricalLoad(side, lrdu) != null) NodeBase.maskElectricalPower else 0
     override fun getThermalLoad(side: Direction, lrdu: LRDU) = if (getElectricalLoad(side, lrdu) != null) unit.thermal else null
     override fun inventoryChange(inventory: Container?) { configureLamp(); needPublish() }
+    override fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+        val held = player.mainHandItem
+        if (!isStepDownUnit(held)) return super.onBlockActivated(player, side, vx, vy, vz)
+        if (!inventory.getItem(0).isEmpty) return false // Keep occupied slots available in the GUI.
+        inventory.setItem(0, held.copyWithCount(1))
+        val freeInsert = player.abilities.instabuild && Eln.config.getBooleanOrElse("gameplay.qol.creativeNoConsumeInsertedItems", false)
+        if (!freeInsert) held.shrink(1)
+        player.inventory.setChanged()
+        inventoryChange(inventory)
+        return true
+    }
+    override fun thermoMeterString(side: Direction) = plotAmbientCelsius("T", unit.thermal.temperatureCelsius)
     override fun newContainer(side: Direction, player: Player) = StepDownContainer(player, inventory, true)
     override fun hasGui() = true
     override fun getWaila() = unit.waila().apply {

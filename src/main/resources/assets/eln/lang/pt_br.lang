@@ -2338,6 +2338,8 @@ Vertical_angle\:_%1$°=Ângulo vertical: %1$°
 Output_power=Output power
 
 # src/main/kotlin/mods/eln/transparentnode/utilitylight/UtilityLightClient.kt
+Dusk\:_Auto=Dusk: Auto
+Dusk\:_Manual=Dusk: Manual
 Insert_step-down_unit=Insert step-down unit
 Lamp\:_Off=Lamp: Off
 Lamp\:_On=Lamp: On
@@ -2353,7 +2355,9 @@ Base_terminals_also_supply_the_regulated_output=Base terminals also supply the r
 Grid-powered_%1$_W_street_light_with_%2$-block_pole_connections=Grid-powered %1$ W street light with %2$-block pole connections
 Install_a_Mains_Step-down_Unit_and_select_%1$_V_or_%2$_V=Install a Mains Step-down Unit and select %1$ V or %2$ V
 Maximum_input\:_%1$_V;_maximum_output\:_%2$_W=Maximum input: %1$ V; maximum output: %2$ W
+Optional_dusk_control_switches_the_lamp_automatically=Optional dusk control switches the lamp automatically
 Place_on_its_own_or_install_in_a_Utility_Pole_Street_Light=Place on its own or install in a Utility Pole Street Light
+Right-click_with_a_Mains_Step-down_Unit_to_install_it=Right-click with a Mains Step-down Unit to install it
 Selectable_output\:_%1$_V_or_%2$_V=Selectable output: %1$ V or %2$ V
 Step-down_only;_grid_voltage_must_reach_the_selected_output=Step-down only; grid voltage must reach the selected output
 

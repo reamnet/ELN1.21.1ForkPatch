@@ -28,6 +28,7 @@ class StepDownDisplay {
     var voltage = 120
     var enabled = true
     var lampEnabled = true
+    var automatic = false
     var installed = false
     var light = 0
     var inputVolts = 0.0
@@ -36,7 +37,7 @@ class StepDownDisplay {
     var status = "IDLE"
     val connections = LRDUMask()
     fun read(stream: DataInputStream) {
-        voltage = stream.readInt(); enabled = stream.readBoolean(); lampEnabled = stream.readBoolean()
+        voltage = stream.readInt(); enabled = stream.readBoolean(); lampEnabled = stream.readBoolean(); automatic = stream.readBoolean()
         installed = stream.readBoolean(); light = stream.readUnsignedByte()
         inputVolts = stream.readDouble(); outputVolts = stream.readDouble(); watts = stream.readDouble()
         status = stream.readUTF()
@@ -84,17 +85,20 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
     private lateinit var voltage: GuiButtonEln
     private lateinit var enabled: GuiButtonEln
     private lateinit var lamp: GuiButtonEln
+    private lateinit var automatic: GuiButtonEln
     override fun newHelper() = GuiHelperContainer(this, 176, 208, 8, 126)
     override fun initGui() {
         super.initGui()
         voltage = newGuiButton(8, 60, 102, "")
         enabled = newGuiButton(116, 60, 52, "")
-        lamp = newGuiButton(8, 84, 160, "").apply { visible = pole }
+        lamp = newGuiButton(8, 84, 75, "").apply { visible = pole }
+        automatic = newGuiButton(87, 84, 81, "").apply { visible = pole }
         refresh()
     }
     private fun refresh() {
         voltage.displayString = tr("Output: %1$ V", display.voltage)
         enabled.displayString = if (display.enabled) tr("On") else tr("Off")
+        automatic.displayString = if (display.automatic) tr("Dusk: Auto") else tr("Dusk: Manual")
         lamp.displayString = if (display.lampEnabled) tr("Lamp: On") else tr("Lamp: Off")
     }
     override fun guiObjectEvent(obj: IGuiObject) {
@@ -103,6 +107,7 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
             voltage -> render.clientSendInt(80, if (display.voltage == 120) 240 else 120)
             enabled -> render.clientSendBoolean(81, !display.enabled)
             lamp -> render.clientSendBoolean(82, !display.lampEnabled)
+            automatic -> render.clientSendBoolean(83, !display.automatic)
         }
     }
     override fun postDraw(f: Float, x: Int, y: Int) {

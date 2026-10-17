@@ -36,7 +36,7 @@ class StepDownUnitDescriptor(name: String) :
 class UtilityStreetLightDescriptor(name: String) : GridDescriptor(name, Eln.obj.getObj("UtilityPole"),
     UtilityStreetLightElement::class.java, UtilityStreetLightRender::class.java,
     "textures/wire.png", Eln.instance.veryHighVoltageCableDescriptor, 40) {
-    private val fixture = Eln.obj.getObj("StreetLightWall")
+    private val fixture = Eln.obj.getObj("utilitystreetlamp")
     init {
         creativeTab = Eln.creativeTabLighting
         ghostGroup = GhostGroup().apply {
@@ -45,15 +45,28 @@ class UtilityStreetLightDescriptor(name: String) : GridDescriptor(name, Eln.obj.
         }
     }
     fun drawLamp(front: Direction, lit: Boolean, installed: Boolean) = preserveMatrix {
-        if (installed) obj.getPart("transformer")?.draw()
-        front.glRotateZnRef()
-        GL11.glTranslatef(0f, 1.5f, -1.25f)
-        GL11.glRotatef(90f, 0f, 0f, 1f)
-        fixture.getPart("Structure_StreetLightWall_socket")?.draw()
-        for (name in arrayOf("Glass_StreetLightWall_socket.002", "Light_StreetLightWall_socket.003")) {
-            val part = fixture.getPart(name)
-            if (lit) UtilsClient.drawLight(part) else part?.draw()
-        }
+        front.glRotateXnRef()
+        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
+        try {
+            GL11.glDisable(GL11.GL_TEXTURE_2D)
+            GL11.glColor3f(.46f, .49f, .52f)
+            fixture.getPart("Bracket")?.drawNoBind()
+            if (installed) {
+                GL11.glColor3f(.52f, .55f, .57f)
+                fixture.getPart("Transformer")?.drawNoBind()
+            }
+            GL11.glColor3f(.22f, .25f, .28f)
+            fixture.getPart("Housing")?.drawNoBind()
+            if (lit) {
+                UtilsClient.disableLight()
+                GL11.glColor3f(1f, .94f, .76f)
+                fixture.getPart("Lens")?.drawNoBind()
+                UtilsClient.enableLight()
+            } else {
+                GL11.glColor3f(.12f, .16f, .19f)
+                fixture.getPart("Lens")?.drawNoBind()
+            }
+        } finally { GL11.glPopAttrib() }
     }
     override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
         preserveMatrix {
@@ -67,5 +80,7 @@ class UtilityStreetLightDescriptor(name: String) : GridDescriptor(name, Eln.obj.
         list.add(tr("Grid-powered %1$ W street light with %2$-block pole connections", 60, 40))
         list.add(tr("Install a Mains Step-down Unit and select %1$ V or %2$ V", 120, 240))
         list.add(tr("Base terminals also supply the regulated output"))
+        list.add(tr("Right-click with a Mains Step-down Unit to install it"))
+        list.add(tr("Optional dusk control switches the lamp automatically"))
     }
 }
