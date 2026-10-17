@@ -44,17 +44,18 @@ class UtilityStreetLightDescriptor(name: String) : GridDescriptor(name, Eln.obj.
             addElement(-1, 3, 0)
         }
     }
-    fun drawLamp(front: Direction, lit: Boolean, installed: Boolean) = preserveMatrix {
+    fun drawLamp(front: Direction, lit: Boolean, installed: Boolean, heightStep: Int = 0) = preserveMatrix {
         front.glRotateXnRef()
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
             GL11.glDisable(GL11.GL_TEXTURE_2D)
-            GL11.glColor3f(.46f, .49f, .52f)
-            fixture.getPart("Bracket")?.drawNoBind()
             if (installed) {
                 GL11.glColor3f(.52f, .55f, .57f)
                 fixture.getPart("Transformer")?.drawNoBind()
             }
+            GL11.glTranslated(0.0, StreetLightMount.offset(heightStep), 0.0)
+            GL11.glColor3f(.46f, .49f, .52f)
+            fixture.getPart("Bracket")?.drawNoBind()
             GL11.glColor3f(.22f, .25f, .28f)
             fixture.getPart("Housing")?.drawNoBind()
             if (lit) {
@@ -82,5 +83,6 @@ class UtilityStreetLightDescriptor(name: String) : GridDescriptor(name, Eln.obj.
         list.add(tr("Base terminals also supply the regulated output"))
         list.add(tr("Right-click with a Mains Step-down Unit to install it"))
         list.add(tr("Optional dusk control switches the lamp automatically"))
+        list.add(tr("Adjust the lamp height with Up and Down in the menu"))
     }
 }

@@ -93,7 +93,8 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
         if (next != lightLevel) { lightLevel = next; needPublish() }
         if (lightLevel > 0) {
             // Light comes from the head, and must not load a remote chunk merely to refresh it.
-            val at = Coordinate(-1, 2, 0, 0).apply { applyTransformation(front, node!!.coordinate) }
+            val at = Coordinate(-1, StreetLightMount.lightY(unit.lampHeightStep), 0, 0)
+                .apply { applyTransformation(front, node!!.coordinate) }
             if (world.chunkSource.getChunkNow(at.x shr 4, at.z shr 4) != null)
                 LightBlockEntity.addLight(at, lightLevel, 5)
         }

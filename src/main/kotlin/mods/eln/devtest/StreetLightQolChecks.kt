@@ -7,7 +7,9 @@ import mods.eln.gridnode.GridElement
 import mods.eln.gridnode.GridLink
 import mods.eln.gui.GuiButtonEln
 import mods.eln.misc.Direction
+import mods.eln.misc.Coordinate
 import mods.eln.misc.tagCompound
+import mods.eln.node.transparent.TransparentNodeEntity
 import mods.eln.node.CircuitDiagnostics
 import mods.eln.node.NodeBlock
 import mods.eln.sixnode.electricalcable.UtilityCableDescriptor
@@ -25,6 +27,7 @@ import net.minecraft.world.level.*
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.levelgen.WorldOptions
 import net.minecraft.world.level.levelgen.presets.WorldPresets
+import net.minecraft.nbt.CompoundTag
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
@@ -75,6 +78,22 @@ object StreetLightQolChecks {
         check(e.unit.secondary.voltage in 239.0..241.0) { "Base outlet lost power: ${e.unit.waila()}" }
         check(if (on) e.lightLevel>=14 else e.lightLevel==0) { "Lamp state ${e.lightLevel}, expected on=$on" }
         check(e.unit.output.power > if (on) 290.0 else 230.0) { "Base load was not supplied" }
+    }
+    private fun checkHeight(p: ServerPlayer, step: Int) {
+        val e=lamp(p)
+        check(e.unit.lampHeightStep==step)
+        checkLight(p,true)
+        fun lightAt(y: Int): Boolean {
+            val c=Coordinate(-1,y,0,0).apply { applyTransformation(e.front,e.coordinate()) }
+            return p.serverLevel().getBlockState(BlockPos(c.x,c.y,c.z)).block===Eln.lightBlock
+        }
+        val lightY=StreetLightMount.lightY(step)
+        check(lightAt(lightY)) { "No light at the adjusted head height" }
+        check(!lightAt(if(lightY==1) 2 else 1)) { "The old head height kept emitting light" }
+    }
+    private fun checkClientHeight(step: Int) {
+        val render=(mc.level!!.getBlockEntity(at) as TransparentNodeEntity).elementRender as UtilityStreetLightRender
+        check(render.display.heightStep==step) { "The client did not receive the changed height" }
     }
     private fun finish(error: Throwable?) {
         done=true
@@ -171,12 +190,43 @@ object StreetLightQolChecks {
                 }
                 13 -> if (complete() && ticks>30) {
                     shot("wire-end"); record("Bare copper 250 kcmil spans render between level and elevated poles in side and end views")
-                    mc.level!!.disconnect(); mc.disconnect(TitleScreen()); step(14)
+                    server { gui(it) }; step(18)
                 }
                 14 -> if (ticks>40 && mc.singleplayerServer==null) { mc.createWorldOpenFlows().openWorld(worldName) { error("Cannot reopen world") }; step(15) }
                 15 -> if (mc.player!=null && mc.level!=null && mc.screen==null) { ready=mc.singleplayerServer!!.tickCount+100; step(16) }
-                16 -> if (settled()) { server { p -> check(lamp(p).installed && lamp(p).unit.lampAutomatic && lamp(p).unit.lampEnabled); checkLight(p,true) }; step(17) }
-                17 -> if (complete()) { record("Saved-world restart preserves the installed unit, automatic mode and 240 V selection"); finish(null) }
+                16 -> if (settled()) { server { p -> check(lamp(p).installed && lamp(p).unit.lampAutomatic && lamp(p).unit.lampEnabled); checkHeight(p,StreetLightMount.MAX_STEP) }; step(17) }
+                17 -> if (complete()) { checkClientHeight(StreetLightMount.MAX_STEP); record("Saved-world restart preserves the installed unit, automatic mode, 240 V selection and raised height"); finish(null) }
+                18 -> if (complete() && mc.screen is StepDownGui && ticks>20) {
+                    repeat(4) { click("heightDown") }; waitServer(19)
+                }
+                19 -> if (settled()) {
+                    checkClientHeight(StreetLightMount.MIN_STEP)
+                    shot("height-gui-low"); mc.setScreen(null)
+                    server { p ->
+                        checkHeight(p,StreetLightMount.MIN_STEP)
+                        val config=CompoundTag(); lamp(p).writeConfigTool(config,p)
+                        val copy=f(p).machine(at.east(24)) as UtilityStreetLightElement
+                        copy.readConfigTool(config,p)
+                        check(copy.unit.lampHeightStep==StreetLightMount.MIN_STEP)
+                        view(p,height=StreetLightMount.height(StreetLightMount.MIN_STEP))
+                    }; step(20)
+                }
+                20 -> if (complete() && ticks>20) {
+                    shot("height-low"); server { gui(it) }; step(21)
+                }
+                21 -> if (complete() && mc.screen is StepDownGui && ticks>20) {
+                    repeat(5) { click("heightUp") }; waitServer(22)
+                }
+                22 -> if (settled()) {
+                    checkClientHeight(StreetLightMount.MAX_STEP)
+                    shot("height-gui-high"); mc.setScreen(null)
+                    server { p -> checkHeight(p,StreetLightMount.MAX_STEP); view(p,height=StreetLightMount.height(StreetLightMount.MAX_STEP)) }; step(23)
+                }
+                23 -> if (complete() && ticks>20) {
+                    shot("height-high")
+                    record("GUI Up/Down moves the fixture and light through both limits, preserves the loaded outlet and copies with the configuration tool")
+                    mc.level!!.disconnect(); mc.disconnect(TitleScreen()); step(14)
+                }
             }
         } catch(t: Throwable) { finish(t) }
     }

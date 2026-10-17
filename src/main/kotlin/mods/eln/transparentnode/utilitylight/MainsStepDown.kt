@@ -34,6 +34,8 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
         private set
     var lampAutomatic = false
         private set
+    var lampHeightStep = 0
+        private set
     val primary = NbtElectricalLoad("mainsPrimary")
     val secondary = NbtElectricalLoad("mainsSecondary")
     private val inputPin = NbtElectricalLoad("mainsInputPin")
@@ -67,22 +69,30 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
         tag.putBoolean("mainsEnabled", enabled)
         tag.putBoolean("mainsLampEnabled", lampEnabled)
         tag.putBoolean("mainsLampAutomatic", lampAutomatic)
+        tag.putInt("mainsLampHeightStep", lampHeightStep)
     }
     fun read(tag: CompoundTag) {
         outputVoltage = tag.getInt("mainsOutputVoltage").takeIf(::validVoltage) ?: 120
         enabled = !tag.contains("mainsEnabled") || tag.getBoolean("mainsEnabled")
         lampEnabled = !tag.contains("mainsLampEnabled") || tag.getBoolean("mainsLampEnabled")
         lampAutomatic = tag.getBoolean("mainsLampAutomatic")
+        lampHeightStep = tag.getInt("mainsLampHeightStep").takeIf(StreetLightMount::validStep) ?: 0
         controller.resetFault()
     }
     fun packet(id: Byte, stream: DataInputStream): Boolean {
-        if (id.toInt() !in 80..83) return false
+        if (id.toInt() !in 80..84) return false
         try {
             when (id.toInt()) {
                 80 -> { val value = stream.readInt(); if (!validVoltage(value)) return true; outputVoltage = value }
                 81 -> enabled = stream.readBoolean()
                 82 -> lampEnabled = stream.readBoolean()
                 83 -> lampAutomatic = stream.readBoolean()
+                84 -> {
+                    val movement = stream.readInt()
+                    if (movement == -1 || movement == 1)
+                        lampHeightStep = (lampHeightStep + movement).coerceIn(StreetLightMount.MIN_STEP, StreetLightMount.MAX_STEP)
+                    return true // Moving the fixture must not reset the electrical controller.
+                }
             }
             controller.resetFault()
         } catch (_: IOException) { /* Reject truncated settings without mutating them. */ }
@@ -91,6 +101,7 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
     fun publish(stream: DataOutputStream, installed: Boolean, light: Int) {
         stream.writeInt(outputVoltage); stream.writeBoolean(enabled); stream.writeBoolean(lampEnabled); stream.writeBoolean(lampAutomatic)
         stream.writeBoolean(installed); stream.writeByte(light)
+        stream.writeByte(lampHeightStep)
         stream.writeDouble(primary.voltage); stream.writeDouble(secondary.voltage)
         stream.writeDouble(output.power); stream.writeUTF(controller.status)
         owner.node!!.lrduCubeMask.getTranslate(owner.front.down()).serialize(stream)

@@ -14,6 +14,9 @@ class StreetLightControlsTest {
     private fun pole() = UtilityStreetLightElement(TransparentNode(),
         Eln.transparentNodeItem.subItemList.values.filterIsInstance<UtilityStreetLightDescriptor>().single())
     private fun bool(value: Boolean) = DataInputStream(ByteArrayInputStream(byteArrayOf(if (value) 1 else 0)))
+    private fun movement(value: Int) = DataInputStream(ByteArrayInputStream(ByteArrayOutputStream().also {
+        DataOutputStream(it).writeInt(value)
+    }.toByteArray()))
 
     @Test fun duskSwitchingLeavesTheBaseOutputPoweredAndManualOffAlwaysWins() {
         val e = pole()
@@ -35,6 +38,8 @@ class StreetLightControlsTest {
         sample(0, false); sample(4, true); sample(3, true); sample(2, false); sample(11, true)
         e.unit.packet(82, bool(false)); sample(11, false)
         e.unit.packet(82, bool(true)); e.unit.packet(83, bool(false)); sample(0, true)
+        repeat(8) { e.unit.packet(84, movement(-1)); sample(0, true) }
+        repeat(8) { e.unit.packet(84, movement(1)); sample(0, true) }
         e.unit.packet(81, bool(false))
         e.updateAmbientDarkness(11); repeat(8) { root.step() }
         assertFalse(e.unit.output.enabled); assertTrue(e.lamp.power < 1e-6)
@@ -52,5 +57,37 @@ class StreetLightControlsTest {
         assertTrue(copy.lampEnabled)
         copy.packet(83, DataInputStream(ByteArrayInputStream(byteArrayOf())))
         assertFalse(copy.lampAutomatic)
+    }
+
+    @Test fun repeatedHeightMovementsRespectTheLimitsAndRejectInvalidOrTruncatedPackets() {
+        val unit = pole().unit
+        assertEquals(0, unit.lampHeightStep)
+        repeat(12) { unit.packet(84, movement(-1)) }
+        assertEquals(StreetLightMount.MIN_STEP, unit.lampHeightStep)
+        repeat(12) { unit.packet(84, movement(1)) }
+        assertEquals(StreetLightMount.MAX_STEP, unit.lampHeightStep)
+        for (invalid in listOf(0, 2, -2, Int.MAX_VALUE, Int.MIN_VALUE)) {
+            unit.packet(84, movement(invalid))
+            assertEquals(StreetLightMount.MAX_STEP, unit.lampHeightStep)
+        }
+        unit.packet(84, DataInputStream(ByteArrayInputStream(byteArrayOf(0, 0))))
+        assertEquals(StreetLightMount.MAX_STEP, unit.lampHeightStep)
+        unit.packet(84, movement(-1))
+        assertEquals(0, unit.lampHeightStep)
+    }
+
+    @Test fun savedHeightUsesTheExistingPositionForOldAndInvalidSaves() {
+        val unit = pole().unit
+        repeat(4) { unit.packet(84, movement(-1)) }
+        val saved = CompoundTag().also(unit::write)
+        val copy = pole().unit
+        copy.read(saved)
+        assertEquals(StreetLightMount.MIN_STEP, copy.lampHeightStep)
+        assertEquals(1, StreetLightMount.lightY(copy.lampHeightStep))
+        copy.read(CompoundTag())
+        assertEquals(0, copy.lampHeightStep)
+        assertEquals(2, StreetLightMount.lightY(copy.lampHeightStep))
+        copy.read(CompoundTag().apply { putInt("mainsLampHeightStep", Int.MAX_VALUE) })
+        assertEquals(0, copy.lampHeightStep)
     }
 }

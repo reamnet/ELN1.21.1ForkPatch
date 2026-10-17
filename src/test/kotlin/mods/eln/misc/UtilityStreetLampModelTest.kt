@@ -1,6 +1,7 @@
 package mods.eln.misc
 
 import org.junit.Test
+import mods.eln.transparentnode.utilitylight.StreetLightMount
 import kotlin.test.*
 
 class UtilityStreetLampModelTest {
@@ -19,5 +20,11 @@ class UtilityStreetLampModelTest {
         assertTrue(transformer.max.y < bracket.min.y + .2, "Keep the step-down can below the arm")
         assertTrue(lens.max.y <= housing.min.y + .01, "The emitting panel belongs underneath the head")
         assertTrue(fixture.getPart("Lens").faceGroup.all { it.textureResource == null }, "The off state must not bind the old on texture")
+        for (step in StreetLightMount.MIN_STEP..StreetLightMount.MAX_STEP) {
+            val offset = StreetLightMount.offset(step)
+            assertTrue(bracket.max.y + offset < conductor.min.y - .5, "Raised brackets must clear the conductors")
+            assertTrue(lens.min.y + offset > 1.0, "Lowered lamps must stay above the base")
+            assertEquals(kotlin.math.floor(lens.min.y + offset).toInt(), StreetLightMount.lightY(step))
+        }
     }
 }

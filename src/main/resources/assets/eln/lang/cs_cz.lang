@@ -2338,8 +2338,10 @@ Vertical_angle\:_%1$°=Vertikální úhel: %1$°
 Output_power=Output power
 
 # src/main/kotlin/mods/eln/transparentnode/utilitylight/UtilityLightClient.kt
+Down=Down
 Dusk\:_Auto=Dusk: Auto
 Dusk\:_Manual=Dusk: Manual
+Height\:_%1$_m=Height: %1$ m
 Insert_step-down_unit=Insert step-down unit
 Lamp\:_Off=Lamp: Off
 Lamp\:_On=Lamp: On
@@ -2348,9 +2350,11 @@ Output\:_%1$=Output: %1$
 Output\:_%1$_V=Output: %1$ V
 Step-down_unit_required=Step-down unit required
 Unit_installed=Unit installed
+Up=Up
 Utility_Pole_Street_Light=Utility Pole Street Light
 
 # src/main/kotlin/mods/eln/transparentnode/utilitylight/UtilityLightDescriptors.kt
+Adjust_the_lamp_height_with_Up_and_Down_in_the_menu=Adjust the lamp height with Up and Down in the menu
 Base_terminals_also_supply_the_regulated_output=Base terminals also supply the regulated output
 Grid-powered_%1$_W_street_light_with_%2$-block_pole_connections=Grid-powered %1$ W street light with %2$-block pole connections
 Install_a_Mains_Step-down_Unit_and_select_%1$_V_or_%2$_V=Install a Mains Step-down Unit and select %1$ V or %2$ V

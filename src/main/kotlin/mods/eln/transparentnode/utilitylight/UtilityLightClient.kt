@@ -16,6 +16,7 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import java.io.DataInputStream
+import java.util.Locale
 
 class StepDownContainer(player: Player, inventory: Container, pole: Boolean) : BasicContainer(player, inventory,
     if (pole) arrayOf(object : SlotWithSkinAndComment(inventory, 0, 9, 31, ISlotSkin.SlotSkin.medium,
@@ -31,6 +32,7 @@ class StepDownDisplay {
     var automatic = false
     var installed = false
     var light = 0
+    var heightStep = 0
     var inputVolts = 0.0
     var outputVolts = 0.0
     var watts = 0.0
@@ -39,6 +41,7 @@ class StepDownDisplay {
     fun read(stream: DataInputStream) {
         voltage = stream.readInt(); enabled = stream.readBoolean(); lampEnabled = stream.readBoolean(); automatic = stream.readBoolean()
         installed = stream.readBoolean(); light = stream.readUnsignedByte()
+        heightStep = stream.readByte().toInt().coerceIn(StreetLightMount.MIN_STEP, StreetLightMount.MAX_STEP)
         inputVolts = stream.readDouble(); outputVolts = stream.readDouble(); watts = stream.readDouble()
         status = stream.readUTF()
         connections.deserialize(stream)
@@ -73,7 +76,7 @@ class UtilityStreetLightRender(entity: TransparentNodeEntity, descriptor: Transp
     private var cable: CableRenderType? = null
     override fun draw() {
         super.draw()
-        (transparentNodeDescriptor as UtilityStreetLightDescriptor).drawLamp(front ?: Direction.XN, display.light > 0, display.installed)
+        (transparentNodeDescriptor as UtilityStreetLightDescriptor).drawLamp(front ?: Direction.XN, display.light > 0, display.installed, display.heightStep)
         cable = drawCable(front!!.down(), Eln.instance.stdCableRender200V, display.connections, cable)
     }
     override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream); display.read(stream) }
@@ -86,13 +89,17 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
     private lateinit var enabled: GuiButtonEln
     private lateinit var lamp: GuiButtonEln
     private lateinit var automatic: GuiButtonEln
-    override fun newHelper() = GuiHelperContainer(this, 176, 208, 8, 126)
+    private lateinit var heightDown: GuiButtonEln
+    private lateinit var heightUp: GuiButtonEln
+    override fun newHelper() = GuiHelperContainer(this, 176, if (pole) 232 else 208, 8, if (pole) 150 else 126)
     override fun initGui() {
         super.initGui()
         voltage = newGuiButton(8, 60, 102, "")
         enabled = newGuiButton(116, 60, 52, "")
         lamp = newGuiButton(8, 84, 75, "").apply { visible = pole }
         automatic = newGuiButton(87, 84, 81, "").apply { visible = pole }
+        heightDown = newGuiButton(8, 108, 36, tr("Down")).apply { visible = pole }
+        heightUp = newGuiButton(132, 108, 36, tr("Up")).apply { visible = pole }
         refresh()
     }
     private fun refresh() {
@@ -100,6 +107,8 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
         enabled.displayString = if (display.enabled) tr("On") else tr("Off")
         automatic.displayString = if (display.automatic) tr("Dusk: Auto") else tr("Dusk: Manual")
         lamp.displayString = if (display.lampEnabled) tr("Lamp: On") else tr("Lamp: Off")
+        heightDown.enabled = display.heightStep > StreetLightMount.MIN_STEP
+        heightUp.enabled = display.heightStep < StreetLightMount.MAX_STEP
     }
     override fun guiObjectEvent(obj: IGuiObject) {
         super.guiObjectEvent(obj)
@@ -108,6 +117,8 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
             enabled -> render.clientSendBoolean(81, !display.enabled)
             lamp -> render.clientSendBoolean(82, !display.lampEnabled)
             automatic -> render.clientSendBoolean(83, !display.automatic)
+            heightDown -> render.clientSendInt(84, -1)
+            heightUp -> render.clientSendInt(84, 1)
         }
     }
     override fun postDraw(f: Float, x: Int, y: Int) {
@@ -118,6 +129,10 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
             drawString(8, 30, tr("Input: %1$", Utils.plotVolt("", display.inputVolts).trim()))
             drawString(8, 43, tr("Output: %1$", Utils.plotVolt("", display.outputVolts).trim()))
         }
-        drawString(8, 108, font.plainSubstrByWidth(if (pole && !display.installed) tr("Step-down unit required") else converterStateText(display.status), 160))
+        if (pole) {
+            val height = tr("Height: %1$ m", String.format(Locale.ROOT, "%.2f", StreetLightMount.height(display.heightStep)))
+            drawString(88 - font.width(height) / 2, 114, height)
+        }
+        drawString(8, if (pole) 132 else 108, font.plainSubstrByWidth(if (pole && !display.installed) tr("Step-down unit required") else converterStateText(display.status), 160))
     }
 }
