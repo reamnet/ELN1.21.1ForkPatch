@@ -18,11 +18,12 @@ import java.io.IOException
 class MainsStepDown(private val owner: TransparentNodeElement, available: () -> Boolean = { true }) {
     companion object {
         const val MAX_INPUT_VOLTS = 51_200.0
-        const val MAX_OUTPUT_WATTS = 1_000.0
+        const val MAX_OUTPUT_WATTS = 10_000.0
+        const val MAX_INPUT_AMPS = 100.0
         const val EFFICIENCY = .95
         fun validVoltage(value: Int) = value == 120 || value == 240
         fun limits(voltage: Int) = ConverterLimits(voltage.toDouble(), MAX_INPUT_VOLTS, 240.0,
-            10.0, 10.0, MAX_OUTPUT_WATTS, EFFICIENCY, 1.0 / 1024, 1.0)
+            MAX_INPUT_AMPS, MAX_OUTPUT_WATTS / voltage, MAX_OUTPUT_WATTS, EFFICIENCY, 1.0 / 1024, 1.0)
     }
 
     var outputVoltage = 120
@@ -40,7 +41,7 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
     private val inputWinding = Resistor(primary, inputPin).apply { resistance = .01 }
     private val outputWinding = Resistor(outputPin, secondary).apply { resistance = .01 }
     val thermal = NbtThermalLoad("mainsThermal").apply {
-        heatCapacity = 2000.0; Rp = .8; Rs = .1; setAsSlow()
+        heatCapacity = 2000.0; Rp = .08; Rs = .1; setAsSlow()
     }
     val controller = RegulatedPowerProcess(inputPin, null, outputPin, null, input, output,
         { enabled && available() && thermal.temperatureCelsius < 100.0 },

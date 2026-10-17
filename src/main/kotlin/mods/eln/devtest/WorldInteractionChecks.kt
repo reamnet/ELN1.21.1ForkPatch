@@ -59,6 +59,8 @@ object WorldInteractionChecks {
     private val standalone = BlockPos(272, 66, 284)
     private val feed = BlockPos(256, 66, 312)
     private val pole = feed.east(8)
+    private const val longPoleCount = 20
+    private fun longPole(i: Int) = pole.east((i + 1) * 32)
     private fun fixture(player: ServerPlayer) = NativeCampaignFixtures(player.serverLevel(), player)
     private fun unit(f: NativeCampaignFixtures) = f.machine(standalone) as StepDownUnitElement
     private fun lamp(f: NativeCampaignFixtures) = f.machine(pole) as UtilityStreetLightElement
@@ -81,6 +83,18 @@ object WorldInteractionChecks {
             val actual = values["outputV"] as Double
             check(abs(actual - expected) < 1.0) { "${names[i/2]} did not resume: $values" }
             check((values["outputW"] as Double) > 10.0) { "Converter has no loaded output: $values" }
+        }
+    }
+    private fun sampleLongLine(f: NativeCampaignFixtures) {
+        repeat(longPoleCount) { i ->
+            val light = f.machine(longPole(i)) as UtilityStreetLightElement
+            val expected = if (i % 2 == 0) 120 else 240
+            check(light.installed && light.unit.outputVoltage == expected)
+            check(abs(light.unit.secondary.voltage - expected) < 1.0 && light.lightLevel >= 14 &&
+                light.unit.controller.status != "NON_CONVERGENT") { "Long-line pole $i lost power: ${light.unit.waila()}" }
+            check(light.unit.output.power > if (i == longPoleCount - 1) 8900.0 else 59.0) {
+                "Long-line pole $i has no loaded output: ${light.unit.waila()}"
+            }
         }
     }
     private fun look(player: ServerPlayer, target: BlockPos, dx: Double, dy: Double, dz: Double) {
@@ -149,11 +163,25 @@ object WorldInteractionChecks {
                         val stack = cable.newItemStack(1).also { cable.setRemainingLengthMeters(it,8.0) }
                         GridLink.addLink(direct,street,Direction.XP,Direction.XN,cable,8,stack)
                         f.wire(pole.east()); f.load(pole.east(2),240.0); f.ground(pole.east(3))
+                        var previous: GridElement = street
+                        repeat(longPoleCount) { i ->
+                            val at = longPole(i); foundation(player,at)
+                            val next = f.placeMachine(f.requiredItem("Utility Pole Street Light"),at) as UtilityStreetLightElement
+                            next.inventory.setItem(0,f.requiredItem("Mains Step-down Unit")); next.inventory.setChanged()
+                            next.unit.read(net.minecraft.nbt.CompoundTag().apply { putInt("mainsOutputVoltage",if (i % 2 == 0) 120 else 240) })
+                            val span = cable.newItemStack(1).also { cable.setRemainingLengthMeters(it,32.0) }
+                            GridLink.addLink(previous,next,Direction.XP,Direction.XN,cable,32,span)
+                            previous = next
+                        }
+                        // A real 9 kW load at the remote end, sharing its unit with the lamp.
+                        val end = longPole(longPoleCount - 1)
+                        f.wire(end.east()); f.load(end.east(2),240.0 * 240.0 / 9000.0); f.ground(end.east(3))
                     }; step(2,true)
                 }
                 2 -> if (complete() && ticks > 100) {
                     server { player ->
                         val f = fixture(player); sampleConverters(f)
+                        sampleLongLine(f)
                         check(unit(f).unit.secondary.voltage in 119.0..121.0)
                         check(lamp(f).unit.secondary.voltage < 1.0 && lamp(f).lightLevel == 0)
                         lamp(f).inventory.setItem(0,f.requiredItem("Mains Step-down Unit")); lamp(f).inventory.setChanged()
@@ -168,6 +196,7 @@ object WorldInteractionChecks {
                 3 -> if (complete() && ticks > 80) {
                     server { player ->
                         val f = fixture(player); sampleConverters(f)
+                        sampleLongLine(f)
                         check(lamp(f).unit.secondary.voltage in 119.0..121.0 && lamp(f).lightLevel >= 14)
                         check(lamp(f).unit.output.power > 110.0) { "Pole does not supply its external load: ${lamp(f).unit.waila()}" }
                         val head = Coordinate(-1,2,0,0).apply { applyTransformation(lamp(f).front,Coordinate(pole.x,pole.y,pole.z,player.serverLevel())) }
@@ -178,6 +207,7 @@ object WorldInteractionChecks {
                 }
                 4 -> if (complete() && ticks > 60) {
                     record("six variable/voltage-controlled converters recover without GUI toggles; removable grid-fed light powers its lamp and base output")
+                    record("twenty installed 120/240 V street lights span 640 metres, including a real remote 9 kW load")
                     screenshot("pole")
                     server { it.serverLevel().dayTime=6000L; look(it,cover,0.0,.5,3.0) }; step(5,true)
                 }
@@ -233,6 +263,7 @@ object WorldInteractionChecks {
                         val f=fixture(player)
                         check(player.serverLevel().chunkSource.getChunkNow(converter(0).x shr 4,converter(0).z shr 4) == null) { "Converter chunk never unloaded" }
                         sampleConverters(f)
+                        sampleLongLine(f)
                         check(unit(f).unit.secondary.voltage in 239.0..241.0)
                         check(lamp(f).unit.secondary.voltage in 239.0..241.0)
                         look(player,pole,5.0,2.0,7.0)
@@ -253,14 +284,21 @@ object WorldInteractionChecks {
                 14 -> if (mc.player != null && mc.level != null && mc.screen == null && ticks > 140) {
                     server { player ->
                         val f=fixture(player); sampleConverters(f)
+                        sampleLongLine(f)
                         check(unit(f).unit.outputVoltage == 240 && unit(f).unit.secondary.voltage in 239.0..241.0)
                         val light=lamp(f)
                         check(light.installed && light.unit.outputVoltage == 240 && light.lightLevel >= 14)
-                        check(light.gridLinkList.size == 1)
+                        check(light.gridLinkList.size == 2)
                         check((f.node(cover) as SixNode).sixNodeCacheBlock === Blocks.STONE)
                     }; step(15,true)
                 }
                 15 -> if (complete()) { record("saved-world restart preserves converters, pole span/module, selected voltages, light and cover"); finish(null) }
+            }
+            // Sample repeatedly through stable phases to catch a brief retry blink, rather
+            // than accepting a single successful screenshot before/after a longer outage.
+            if (phase in setOf(3, 10, 14) && ticks > 30 && ticks % 5 == 0 && (work == null || work!!.isDone)) {
+                work?.join()
+                server { sampleLongLine(fixture(it)) }
             }
         } catch (e: Throwable) { finish(e) }
     }

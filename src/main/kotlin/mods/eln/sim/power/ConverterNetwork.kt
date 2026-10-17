@@ -39,14 +39,8 @@ internal class ConverterRetry {
 fun probePort(positive: State, negative: State?, source: SwitchableVoltageSource): PortThevenin {
     val system = positive.subSystem ?: return PortThevenin(0.0, Double.POSITIVE_INFINITY)
     if (negative != null && negative.subSystem !== system) return PortThevenin(Double.NaN, Double.NaN)
-    val savedEnabled = source.enabled
-    try {
-        source.enabled = true
-        val response = system.sourceThevenin(source)
-        return PortThevenin(response.voltage, response.resistance)
-    } finally {
-        source.enabled = savedEnabled
-    }
+    val response = system.sourceThevenin(source)
+    return PortThevenin(response.voltage, response.resistance)
 }
 
 fun pendingSourcePower(source: SwitchableVoltageSource): Double {

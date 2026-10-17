@@ -11,8 +11,13 @@ import kotlin.math.max
  * together. Every trial still runs the real controller and must satisfy its unchanged limits and
  * power balance before RootSystem performs the one physical flush.
  */
-object ConverterConvergence {
-    @JvmStatic fun correct(processes: List<ConservativePowerProcess>) {
+class ConverterConvergence {
+    private data class Derivative(val sources: List<mods.eln.sim.mna.component.SwitchableVoltageSource>,
+        val scales: DoubleArray, val regions: List<String>, val matrix: Array<DoubleArray>)
+    private val derivatives = mutableMapOf<List<ConservativePowerProcess>, Derivative>()
+    fun clear() = derivatives.clear()
+
+    fun correct(processes: List<ConservativePowerProcess>) {
         // Do not combine unrelated networks into one dense numerical correction.
         val groups = mutableListOf<MutableList<ConservativePowerProcess>>()
         val scopes = mutableListOf<MutableSet<SubSystem>>()
@@ -27,6 +32,7 @@ object ConverterConvergence {
             }
             groups += group; scopes += scope
         }
+        derivatives.keys.retainAll(groups.map { it.toList() }.toSet())
         for (group in groups) if (group.any { !it.acceptsCandidate() }) correctGroup(group)
     }
 
@@ -36,7 +42,9 @@ object ConverterConvergence {
         if (active.isEmpty()) return
         val savedVolts = all.map { it.voltage }
         val savedEnabled = all.map { it.enabled }
-        val scales = DoubleArray(active.size) { max(1.0, abs(active[it].voltage)) }
+        val key = group.toList()
+        var cached = derivatives[key]?.takeIf { it.sources == active && it.regions == group.map { it.iterationRegion() } }
+        val scales = cached?.scales ?: DoubleArray(active.size) { max(1.0, abs(active[it].voltage)) }
         var x = DoubleArray(active.size) { active[it].voltage / scales[it] }
 
         fun evaluate(candidate: DoubleArray): DoubleArray? {
@@ -53,12 +61,17 @@ object ConverterConvergence {
             return group.all { it.acceptsCandidate() }
         }
 
-        repeat(8) {
+        repeat(8) { iteration ->
             val residual = evaluate(x) ?: return // Let ordinary iteration handle an active-set change.
             if (accepted()) return
             val regions = group.map { it.iterationRegion() }
-            val jacobian = Array(x.size) { DoubleArray(x.size) }
-            for (column in x.indices) {
+            // Reuse a previous derivative for nearby operating points (e.g. wind speed or
+            // wire temperature changes). Every candidate still passes the real physics checks;
+            // a changed limiter/mask or failed improvement rebuilds the derivative normally.
+            val reuse = cached?.takeIf { it.regions == regions && iteration < 3 }
+            val jacobian = reuse?.matrix?.map { it.clone() }?.toTypedArray()
+                ?: Array(x.size) { DoubleArray(x.size) }
+            if (reuse == null) for (column in x.indices) {
                 // Stay on the same limiter branch when differentiating. Near the
                 // transition from voltage regulation to current limit, a forward
                 // stencil may cross the target clamp and erase the bus's common-mode
@@ -82,6 +95,11 @@ object ConverterConvergence {
 
                 for (row in x.indices) jacobian[row][column] = (response!![row] - residual[row]) / difference
             }
+            if (reuse == null) {
+                cached = Derivative(active.toList(), scales.clone(), regions,
+                    jacobian.map { it.clone() }.toTypedArray())
+                derivatives[key] = cached!!
+            }
             val delta = solve(jacobian, DoubleArray(x.size) { -residual[it] })
             if (delta == null) { evaluate(x); return }
             // Trust region and backtracking prevent an ill-conditioned Jacobian from publishing
@@ -97,7 +115,11 @@ object ConverterConvergence {
                     else alpha *= .5
                 }
             }
-            if (!improved) { evaluate(x); return }
+            if (!improved) {
+                evaluate(x)
+                if (reuse == null) return
+                cached = null; derivatives.remove(key)
+            }
         }
         evaluate(x)
     }

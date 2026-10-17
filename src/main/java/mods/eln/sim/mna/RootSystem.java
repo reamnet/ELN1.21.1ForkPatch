@@ -19,6 +19,7 @@ public class RootSystem {
     private final MnaStepMetricsAccumulator stepMetricsAccumulator = new MnaStepMetricsAccumulator();
     private final MnaStepMetricsAccumulator publishMetricsAccumulator = new MnaStepMetricsAccumulator();
     private int publishTickCounter = 0;
+    private final ConverterConvergence converterConvergence = new ConverterConvergence();
 
     double dt;
     int interSystemOverSampling;
@@ -80,6 +81,7 @@ public class RootSystem {
 
     public void generate() {
         if (!addComponents.isEmpty() || !addStates.isEmpty()) {
+            converterConvergence.clear();
             Profiler p = new Profiler();
             p.add("*** Generate ***");
             generateLine();
@@ -260,8 +262,8 @@ public class RootSystem {
             for (SubSystem system : systems) system.stepCalc();
             converged = converters.stream().allMatch(ConservativePowerProcess::acceptsCandidate);
             if (converged) break;
-            if (trial == 3 || trial == 15) {
-                ConverterConvergence.correct(converters);
+            if (trial == 1 || trial == 7) {
+                converterConvergence.correct(converters);
                 for (SubSystem system : systems) system.stepCalc();
                 converged = converters.stream().allMatch(ConservativePowerProcess::acceptsCandidate);
                 if (converged) break;
@@ -465,10 +467,12 @@ public class RootSystem {
     }
 
     public void addProcess(IRootSystemPreStepProcess p) {
+        converterConvergence.clear();
         processPre.add(p);
     }
 
     public void removeProcess(IRootSystemPreStepProcess p) {
+        converterConvergence.clear();
         processPre.remove(p);
     }
 

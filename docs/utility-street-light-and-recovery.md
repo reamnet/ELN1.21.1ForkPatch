@@ -12,8 +12,9 @@ Select **120 V** or **240 V** to match the devices you want to supply. The built
 the converter's On/Off button controls the whole low-voltage supply.
 
 Base-level wire connections can supply other devices from the same regulated
-output. The lamp and those devices share the unit's **1 kW** rating and **10 A**
-output-current limit. Removing the unit disconnects the grid supply and turns the
+output. The lamp and those devices share the unit's **10 kW** rating, with an
+output-current limit of **83.3 A at 120 V** or **41.7 A at 240 V**.
+Removing the unit disconnects the grid supply and turns the
 lamp off. The installed unit is returned when the pole is broken.
 
 The head emits light beneath the fixture. It does not load remote chunks to keep
@@ -32,12 +33,16 @@ a suitably rated wire; a Direct Utility Pole can bring an overhead line down to
 these terminals. Open the menu to choose 120 V or 240 V.
 
 This is a step-down device, with a maximum input rating of **51.2 kV**, 95%
-electronics efficiency, a **1 kW** output limit and **10 A** input/output limits.
+electronics efficiency, a **10 kW** output limit and a **100 A** input-current limit.
+Output current is limited to 10 kW divided by the selected output voltage.
 The input must remain above the selected output under load. Winding resistance
 causes a small voltage drop at the terminals. It will not boost an undervoltage
 line or backfeed the grid; it opens its active branches when disabled or outside
 its operating range. Severe overloads can also leave the branches open instead
 of forcing an unsafe operating point. Electrical losses heat the unit.
+Cooling is sized for continuous rated operation. Use output wiring rated for the
+selected current; low grid voltages also require more input current. These ratings
+apply automatically to existing units and pole upgrades after updating the mod.
 
 Output selection and enabled state are saved and can be copied with the
 configuration tool. A standalone unit also retains them when broken and replaced.
@@ -74,6 +79,10 @@ setups, controlled numerical recovery, C-key camouflage, item grouping, both new
 devices, menu packets, travel to unloaded chunks and back, and a saved-world restart.
 It writes `run/client/world-interaction-checks.json` and screenshots under
 `run/client/screenshots/world-interaction-*.png`.
+The same check also builds twenty alternating 120/240 V street lights over a
+640-metre bare-aluminum overhead line, with a real 9 kW load at the far end.
+It repeatedly samples the pole outputs, travels away until chunks unload,
+changes the feed voltage and checks the installation again after a saved-world restart.
 
 For generator/grid cold starts, run `runClient` with
 `-Deln.generatorChecks=place -Deln.generatorWorld=<new-test-world>` in

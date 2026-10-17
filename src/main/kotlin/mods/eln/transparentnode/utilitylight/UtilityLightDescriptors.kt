@@ -27,7 +27,7 @@ class StepDownUnitDescriptor(name: String) :
     }
     override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<String>, par4: Boolean) {
         list.add(tr("Selectable output: %1$ V or %2$ V", 120, 240))
-        list.add(tr("Maximum input: %1$ V; maximum output: %2$ W", 51200, 1000))
+        list.add(tr("Maximum input: %1$ V; maximum output: %2$ W", MainsStepDown.MAX_INPUT_VOLTS.toInt(), MainsStepDown.MAX_OUTPUT_WATTS.toInt()))
         list.add(tr("Step-down only; grid voltage must reach the selected output"))
         list.add(tr("Place on its own or install in a Utility Pole Street Light"))
     }

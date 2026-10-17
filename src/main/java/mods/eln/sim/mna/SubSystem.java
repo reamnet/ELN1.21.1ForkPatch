@@ -48,6 +48,7 @@ public class SubSystem {
     private long inversionMaximumNanosecondsSinceLastDrain = 0L;
 
     DD[][] AInvdata;
+    private MnaFactorization factorization;
     double[] Idata;
 
     double[] XtempData;
@@ -150,15 +151,22 @@ public class SubSystem {
         try {
             boolean sameStates = statesTab != null && statesTab.length == stateCount;
             if (sameStates) for (int i=0;i<stateCount;i++) if (statesTab[i] != states.get(i)) { sameStates=false; break; }
-            DD[][] updated = sameStates && incrementalInversions < 32
-                    ? MatrixInverseUpdate.update(lastSolveMatrix, preciseSolveMatrix, AInvdata, SubSystem::invertMatrix) : null;
-            if (updated == null) {
-                AInvdata = invertMatrix(preciseSolveMatrix);
-                incrementalInversions=0;fullFactorizations++;
+            if (stateCount >= 64) {
+                factorization = new MnaFactorization(preciseSolveMatrix, sameStates ? factorization : null);
+                AInvdata = null; lastSolveMatrix = null; incrementalInversions = 0;
+                fullFactorizations++;
             } else {
-                AInvdata=updated;incrementalInversions++;updatedFactorizations++;
+                factorization = null;
+                DD[][] updated = sameStates && incrementalInversions < 32
+                        ? MatrixInverseUpdate.update(lastSolveMatrix, preciseSolveMatrix, AInvdata, SubSystem::invertMatrix) : null;
+                if (updated == null) {
+                    AInvdata = invertMatrix(preciseSolveMatrix);
+                    incrementalInversions=0;fullFactorizations++;
+                } else {
+                    AInvdata=updated;incrementalInversions++;updatedFactorizations++;
+                }
+                lastSolveMatrix=preciseSolveMatrix;
             }
-            lastSolveMatrix=preciseSolveMatrix;
             singularMatrix = false;
             if (captureMetrics) {
                 long inversionTimeNanoseconds = System.nanoTime() - inversionStartNanoseconds;
@@ -170,7 +178,7 @@ public class SubSystem {
             }
         } catch (Exception e) {
             singularMatrix = true;
-            AInvdata = null;lastSolveMatrix=null;incrementalInversions=0;
+            AInvdata = null; factorization = null; lastSolveMatrix=null;incrementalInversions=0;
             if (stateCount > 1) {
                 singularMatrixCountSinceLastDrain++;
                 Utils.println("//////////SingularMatrix////////////");
@@ -330,17 +338,32 @@ public class SubSystem {
             double[] solveRhs = Idata.clone();
             voltageGauge.applyRhs(solveRhs);
             boolean finite = true;
+            DD[] solution = solvePrecise(solveRhs);
             for (int idx2 = 0; idx2 < stateCount; idx2++) {
-                DD stack = DD.ZERO;
-                DD[] inverseRow = AInvdata[idx2];
-                for (int idx = 0; idx < stateCount; idx++) {
-                    stack = stack.add(inverseRow[idx].multiply(solveRhs[idx]));
-                }
-                XtempData[idx2] = stack.doubleValue();
+                XtempData[idx2] = solution[idx2].doubleValue();
                 finite &= Double.isFinite(XtempData[idx2]);
             }
             validStepSolution = finite && voltageGauge.valid(XtempData);
         }
+    }
+
+    private DD[] responseRow(int index) {
+        return factorization != null ? factorization.inverseRow(index) : AInvdata[index];
+    }
+
+    private static DD dot(DD[] row, double[] rhs) {
+        DD sum = DD.ZERO;
+        for (int col = 0; col < rhs.length; col++) {
+            if (rhs[col] != 0.0 && !row[col].isZero()) sum = sum.add(row[col].multiply(rhs[col]));
+        }
+        return sum;
+    }
+
+    private DD[] solvePrecise(double[] rhs) {
+        if (factorization != null) return factorization.solve(rhs);
+        DD[] value = new DD[stateCount];
+        for (int row = 0; row < stateCount; row++) value[row] = dot(AInvdata[row], rhs);
+        return value;
     }
 
     /** Speculative solve; legacy callers retain zero on failure. New power adapters use solveChecked. */
@@ -356,20 +379,15 @@ public class SubSystem {
         java.util.Arrays.fill(Idata, 0.0);
         for (ISubSystemProcessI p : processI) p.simProcessI(this);
         if (!voltageGauge.getActive()) {
-            DD sum = DD.ZERO;
-            int row = pin.getId();
-            for (int col = 0; col < stateCount; col++) sum = sum.add(AInvdata[row][col].multiply(Idata[col]));
+            DD sum = dot(responseRow(pin.getId()), Idata);
             double value = sum.doubleValue();
             return Double.isFinite(value) ? value : Double.NaN;
         }
         double[] solveRhs = Idata.clone();
         voltageGauge.applyRhs(solveRhs);
         double[] trial = new double[stateCount];
-        for (int row = 0; row < stateCount; row++) {
-            DD sum = DD.ZERO;
-            for (int col = 0; col < stateCount; col++) sum = sum.add(AInvdata[row][col].multiply(solveRhs[col]));
-            trial[row] = sum.doubleValue();
-        }
+        DD[] solution = solvePrecise(solveRhs);
+        for (int row = 0; row < stateCount; row++) trial[row] = solution[row].doubleValue();
         return voltageGauge.valid(trial) ? trial[pin.getId()] : Double.NaN;
     }
 
@@ -389,21 +407,19 @@ public class SubSystem {
         for (ISubSystemProcessI process : processI) process.simProcessI(this);
         double[] rhs = Idata.clone();
         voltageGauge.applyRhs(rhs);
+        if (source instanceof SwitchableVoltageSource && !((SwitchableVoltageSource) source).getEnabled()) {
+            return openSourceThevenin(source, rhs);
+        }
         int index = pin.getId();
-        DD current = DD.ZERO;
-        for (int column = 0; column < stateCount; column++)
-            current = current.add(AInvdata[index][column].multiply(rhs[column]));
+        DD[] portRow = responseRow(index);
+        DD current = dot(portRow, rhs);
         if (voltageGauge.getActive()) {
             double[] trial = new double[stateCount];
-            for (int row = 0; row < stateCount; row++) {
-                DD value = DD.ZERO;
-                for (int column = 0; column < stateCount; column++)
-                    value = value.add(AInvdata[row][column].multiply(rhs[column]));
-                trial[row] = value.doubleValue();
-            }
+            DD[] solution = solvePrecise(rhs);
+            for (int row = 0; row < stateCount; row++) trial[row] = solution[row].doubleValue();
             if (!voltageGauge.valid(trial)) return result;
         }
-        DD conductance = AInvdata[index][index].negate();
+        DD conductance = portRow[index].negate();
         DD intercept = current.add(conductance.multiply(source.getVoltage()));
         double g = conductance.doubleValue(), i = intercept.doubleValue();
         if (!Double.isFinite(g) || !Double.isFinite(i)) return result;
@@ -418,6 +434,49 @@ public class SubSystem {
         if (g < 0.0) return result;
         result.resistance = conductance.reciprocal().doubleValue();
         result.voltage = intercept.divide(conductance).doubleValue();
+        return result;
+    }
+
+    /** Probe an open branch with a unit-current response, without changing its matrix mask. */
+    private Thevenin openSourceThevenin(VoltageSource source, double[] rhs) {
+        Thevenin result = new Thevenin();
+        result.voltage = Double.NaN; result.resistance = Double.NaN;
+        State a = source.aPin, b = source.bPin;
+        if ((a != null && a.getSubSystem() != this) || (b != null && b.getSubSystem() != this)) return result;
+        DD[] aRow = a == null ? null : responseRow(a.getId());
+        DD[] bRow = b == null ? null : responseRow(b.getId());
+        if (voltageGauge.getActive()) {
+            // Reject an already unbalanced floating network before classifying a port as open.
+            if (!voltageGauge.valid(asDoubles(solvePrecise(rhs)))) return result;
+            double[] excitation = new double[stateCount];
+            if (a != null) excitation[a.getId()] += 1;
+            if (b != null) excitation[b.getId()] -= 1;
+            voltageGauge.applyRhs(excitation);
+            boolean supported = voltageGauge.valid(asDoubles(solvePrecise(excitation)));
+            voltageGauge.applyRhs(Idata.clone()); // Restore validation's original physical RHS.
+            if (!supported) {
+                result.voltage = 0.0; result.resistance = Double.POSITIVE_INFINITY;
+                return result;
+            }
+        }
+        DD volts = (aRow == null ? DD.ZERO : dot(aRow, rhs)).subtract(bRow == null ? DD.ZERO : dot(bRow, rhs));
+        DD resistance = DD.ZERO;
+        if (a != null) {
+            resistance = resistance.add(aRow[a.getId()]);
+            if (b != null) resistance = resistance.subtract(bRow[a.getId()]);
+        }
+        if (b != null) {
+            resistance = resistance.add(bRow[b.getId()]);
+            if (a != null) resistance = resistance.subtract(aRow[b.getId()]);
+        }
+        if (!volts.isFinite() || !resistance.isFinite() || resistance.doubleValue() <= 0.0) return result;
+        result.voltage = volts.doubleValue(); result.resistance = resistance.doubleValue();
+        return result;
+    }
+
+    private static double[] asDoubles(DD[] values) {
+        double[] result = new double[values.length];
+        for (int i = 0; i < values.length; i++) result[i] = values[i].doubleValue();
         return result;
     }
 

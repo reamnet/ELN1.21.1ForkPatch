@@ -65,14 +65,30 @@ class MainsStepDownTest {
     }
 
     @Test fun overloadRespectsCurrentAndPowerLimits() {
-        for (resistance in listOf(.1, 1.0)) {
+        for (resistance in listOf(.01, 1.0)) {
             val c = Circuit(3200.0, 120, resistance)
             c.settle()
-            // At 0.1 ohm even the minimum supported gain would exceed the current rating:
+            // At 0.01 ohm even the minimum supported gain would exceed the current rating:
             // remaining open is the correct protection response, rather than forcing output.
             if (resistance == 1.0) assertTrue(c.unit.output.enabled)
-            assertTrue(c.load.current <= 10.00001)
+            assertTrue(c.load.current <= MainsStepDown.limits(120).maxOutputAmps * 1.000001)
             assertTrue(c.unit.output.power <= MainsStepDown.MAX_OUTPUT_WATTS + .001)
+            assertTrue(c.load.power <= c.supply.power * MainsStepDown.EFFICIENCY + .001)
+        }
+    }
+
+    @Test fun tenKilowattRatingHasUsableCurrentAndCoolingAtBothOutputVoltages() {
+        for (target in listOf(120, 240)) for (grid in listOf(target * 2.0, 3200.0, 12800.0)) {
+            val c = Circuit(grid, target, target.toDouble() * target / 9900.0)
+            c.settle()
+            assertTrue(c.load.power > 9500.0, "$grid V -> $target V: ${c.unit.controller.status}, ${c.load.power} W")
+            assertTrue(c.unit.output.power <= MainsStepDown.MAX_OUTPUT_WATTS * 1.000001)
+            assertTrue(-c.unit.input.current <= MainsStepDown.MAX_INPUT_AMPS * 1.000001)
+            c.unit.thermal.PcTemp = 0.0
+            c.element.electricalProcessList.forEach { it.process(.01) }
+            val losses = c.unit.thermal.PcTemp
+            assertTrue(losses > 490.0)
+            assertTrue(losses * c.unit.thermal.Rp < 100.0, "Rated load would overheat continuously")
             assertTrue(c.load.power <= c.supply.power * MainsStepDown.EFFICIENCY + .001)
         }
     }
