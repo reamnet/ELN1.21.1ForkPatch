@@ -113,6 +113,7 @@ class RegulatedPowerProcess(
     }
 
     override fun failClosed() { retry.trip(); open("NON_CONVERGENT") }
+    override fun isolatesLoadOnFailure() = true
     override fun connectedSystems(): Set<SubSystem> = setOfNotNull(primary.subSystem, secondary.subSystem)
     override fun trialSources(): List<SwitchableVoltageSource> = listOf(input, output)
 }

@@ -51,6 +51,7 @@ object WorldInteractionChecks {
     private var phase = 0
     private var ticks = 0
     private var total = 0
+    private var serverReadyAt = 0
     private var done = false
     private var work: CompletableFuture<Void>? = null
     private val passed = mutableListOf<String>()
@@ -61,7 +62,7 @@ object WorldInteractionChecks {
     private val feed = BlockPos(256, 66, 312)
     private val pole = feed.east(8)
     private val olderPole = feed.east(4)
-    private const val longPoleCount = 20
+    private const val longPoleCount = 120
     private fun longPole(i: Int) = pole.east((i + 1) * 32)
     private fun fixture(player: ServerPlayer) = NativeCampaignFixtures(player.serverLevel(), player)
     private fun unit(f: NativeCampaignFixtures) = f.machine(standalone) as StepDownUnitElement
@@ -163,7 +164,7 @@ object WorldInteractionChecks {
                         f.wire(standalone.east()); f.load(standalone.east(2),240.0); f.ground(standalone.east(3))
                         foundation(player,feed); foundation(player,pole)
                         val direct = f.placeMachine(f.requiredItem("Direct Utility Pole"),feed) as GridElement
-                        f.wire(feed.west()); f.source(feed.west(2),12800.0)
+                        f.wire(feed.west()); f.source(feed.west(2),14000.0)
                         val street = f.placeMachine(f.requiredItem("Utility Pole Street Light"),pole) as UtilityStreetLightElement
                         val cable = UtilityCableDescriptor.allDescriptors().single { it.material == UtilityCableMaterial.ALUMINUM && it.sizeLabel == "1000 kcmil" && !it.insulated && !it.melted }
                         foundation(player,olderPole)
@@ -188,7 +189,13 @@ object WorldInteractionChecks {
                         f.wire(end.east()); f.load(end.east(2),240.0 * 240.0 / 9000.0); f.ground(end.east(3))
                     }; step(2,true)
                 }
-                2 -> if (complete() && ticks > 100) {
+                2 -> if (complete()) {
+                    // A 120-pole placement can outlast 100 client ticks. Wait for actual
+                    // simulation ticks after construction, rather than sampling on its return.
+                    serverReadyAt = mc.singleplayerServer!!.tickCount + 100
+                    step(17)
+                }
+                17 -> if (mc.singleplayerServer!!.tickCount >= serverReadyAt) {
                     server { player ->
                         val f = fixture(player); sampleConverters(f)
                         sampleLongLine(f)
@@ -217,7 +224,7 @@ object WorldInteractionChecks {
                 }
                 4 -> if (complete() && ticks > 60) {
                     record("six variable/voltage-controlled converters recover without GUI toggles; removable grid-fed light powers its lamp and base output")
-                    record("twenty installed 120/240 V street lights span 640 metres, including a real remote 9 kW load")
+                    record("120 installed 120/240 V street lights span 3840 metres, including a real remote 9 kW load")
                     record("the older utility pole transformer joins the same power-conserving solve on the overhead feeder")
                     screenshot("pole")
                     server { it.serverLevel().dayTime=6000L; look(it,cover,0.0,.5,3.0) }; step(5,true)
@@ -267,9 +274,10 @@ object WorldInteractionChecks {
                         light.inventory.setItem(0,f.requiredItem("Mains Step-down Unit")); light.inventory.setChanged()
                         f.voltage(feed.west(2),3200.0)
                         player.teleportTo(player.serverLevel(),4096.0,80.0,4096.0,0f,0f)
+                        serverReadyAt = player.server.tickCount + 650
                     }; step(10,true)
                 }
-                10 -> if (complete() && ticks > 650) {
+                10 -> if (complete() && mc.singleplayerServer!!.tickCount >= serverReadyAt) {
                     server { player ->
                         val f=fixture(player)
                         check(player.serverLevel().chunkSource.getChunkNow(converter(0).x shr 4,converter(0).z shr 4) == null) { "Converter chunk never unloaded" }
@@ -292,7 +300,11 @@ object WorldInteractionChecks {
                 13 -> if (ticks > 40 && mc.singleplayerServer == null) {
                     mc.createWorldOpenFlows().openWorld(worldName) { error("Cannot reopen world") }; step(14)
                 }
-                14 -> if (mc.player != null && mc.level != null && mc.screen == null && ticks > 140) {
+                14 -> if (mc.player != null && mc.level != null && mc.screen == null) {
+                    serverReadyAt = mc.singleplayerServer!!.tickCount + 140
+                    step(18)
+                }
+                18 -> if (mc.singleplayerServer!!.tickCount >= serverReadyAt) {
                     server { player ->
                         val f=fixture(player); sampleConverters(f)
                         sampleLongLine(f)

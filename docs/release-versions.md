@@ -10,6 +10,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.4` | ForkPatch 4 | Shared generator/converter solving to prevent low-voltage stalls and blinking |
 | `v3.0.5` | ForkPatch 5 | Faster pole converters, long-line stability and 10 kW mains step-down units |
 | `v3.0.6` | — | Stop multiplying converter probes by the legacy 50-pass setting; reduce gauge allocations |
+| `v3.0.7` | — | Recover large joined grids across source current limits; isolate rejected step-down loads before tripping healthy supplies |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`

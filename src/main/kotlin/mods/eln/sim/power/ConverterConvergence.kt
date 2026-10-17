@@ -17,8 +17,64 @@ class ConverterConvergence {
     private val derivatives = mutableMapOf<List<ConservativePowerProcess>, Derivative>()
     fun clear() = derivatives.clear()
 
+    /** A Newton tangent inside a constant-current plateau can point away from every
+     * finite solution. Try the actual source-law breakpoints on that electrical
+     * network, then run the unchanged controllers and acceptance checks again.
+     */
+    fun restartAtSourceBoundary(processes: List<ConservativePowerProcess>): Boolean {
+        var accepted = true
+        for (group in connectedGroups(processes)) {
+            if (group.any { !it.acceptsCandidate() } && !restartGroupAtSourceBoundary(group)) accepted = false
+        }
+        return accepted
+    }
+
+    private fun restartGroupAtSourceBoundary(processes: List<ConservativePowerProcess>): Boolean {
+        val all = processes.flatMap { it.trialSources() }.distinct()
+        val saved = all.map { it.voltage }
+        val enabled = all.map { it.enabled }
+        val systems = processes.flatMap { it.connectedSystems() }.distinct()
+        fun restore() {
+            all.indices.forEach { all[it].voltage = saved[it]; all[it].enabled = enabled[it] }
+        }
+        val candidates = processes.flatMap { it.voltageSearchHints().entries }.flatMap { (source, hints) ->
+            hints.filter { it.isFinite() && it > 0.0 && source.voltage.isFinite() && source.voltage > 0.0 }
+                .map { source to it }
+        }.distinctBy { (source, hint) -> source.subSystem to hint }
+            .sortedBy { (source, hint) -> abs(kotlin.math.ln(hint / source.voltage)) }
+        for ((source, hint) in candidates.take(8)) {
+            val sourceIndex = all.indexOf(source)
+            if (sourceIndex < 0 || !enabled[sourceIndex] || saved[sourceIndex] <= 0.0) continue
+            val network = source.subSystem ?: continue
+            restore()
+            val scale = hint / saved[sourceIndex]
+            for (i in all.indices) if (enabled[i] && all[i].subSystem === network) {
+                all[i].voltage = saved[i] * scale
+            }
+            derivatives.remove(processes.toList())
+            repeat(2) {
+                processes.forEach { it.rootSystemPreStepProcess() }
+                systems.forEach { it.stepCalc() }
+                if (processes.all { it.acceptsCandidate() }) return true
+                correctGroup(processes)
+                systems.forEach { it.stepCalc() }
+                if (processes.all { it.acceptsCandidate() }) return true
+            }
+        }
+        restore()
+        derivatives.remove(processes.toList())
+        systems.forEach { it.stepCalc() }
+        return false
+    }
+
     fun correct(processes: List<ConservativePowerProcess>) {
-        // Do not combine unrelated networks into one dense numerical correction.
+        val groups = connectedGroups(processes)
+        derivatives.keys.retainAll(groups.map { it.toList() }.toSet())
+        for (group in groups) if (group.any { !it.acceptsCandidate() }) correctGroup(group)
+    }
+
+    private fun connectedGroups(processes: List<ConservativePowerProcess>): List<List<ConservativePowerProcess>> {
+        // Do not combine unrelated networks into one dense numerical correction or restart.
         val groups = mutableListOf<MutableList<ConservativePowerProcess>>()
         val scopes = mutableListOf<MutableSet<SubSystem>>()
         for (process in processes) {
@@ -32,8 +88,7 @@ class ConverterConvergence {
             }
             groups += group; scopes += scope
         }
-        derivatives.keys.retainAll(groups.map { it.toList() }.toSet())
-        for (group in groups) if (group.any { !it.acceptsCandidate() }) correctGroup(group)
+        return groups
     }
 
     private fun correctGroup(group: List<ConservativePowerProcess>) {

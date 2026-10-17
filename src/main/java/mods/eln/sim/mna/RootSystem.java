@@ -273,7 +273,24 @@ public class RootSystem {
                 for (SubSystem system : systems) system.stepCalc();
                 converged = converters.stream().allMatch(ConservativePowerProcess::acceptsCandidate);
                 if (converged) break;
+                if (trial == 7 && converterConvergence.restartAtSourceBoundary(converters)) {
+                    sampleLegacy(legacy);
+                    for (SubSystem system : systems) system.stepCalc();
+                    converged = converters.stream().allMatch(ConservativePowerProcess::acceptsCandidate);
+                    if (converged) break;
+                }
             }
+        }
+        if (!converged) {
+            // A rejected load is not a reason to shut off every generator on its feeder.
+            // Open only those load ports first, then re-solve and validate everything left.
+            for (ConservativePowerProcess converter : converters) {
+                if (converter.isolatesLoadOnFailure() && !converter.acceptsCandidate()) {
+                    converter.failClosed();
+                    blocked.add(converter);
+                }
+            }
+            if (!blocked.isEmpty()) converged = settleUnblocked(converters, blocked, legacy);
         }
         if (!converged) {
             // Fail the connected converter group, not unrelated machines elsewhere in the world.
@@ -346,6 +363,22 @@ public class RootSystem {
         for (int sample = 0; sample < Math.max(1, interSystemOverSampling); sample++) {
             for (IRootSystemPreStepProcess process : processes) process.rootSystemPreStepProcess();
         }
+    }
+
+    private boolean settleUnblocked(List<ConservativePowerProcess> converters,
+                                    Set<ConservativePowerProcess> blocked,
+                                    List<IRootSystemPreStepProcess> legacy) {
+        List<ConservativePowerProcess> active = new ArrayList<>();
+        for (ConservativePowerProcess converter : converters) if (!blocked.contains(converter)) active.add(converter);
+        converterConvergence.clear();
+        for (int trial = 0; trial < 16; trial++) {
+            for (ConservativePowerProcess converter : active) converter.rootSystemPreStepProcess();
+            sampleLegacy(legacy);
+            for (SubSystem system : systems) system.stepCalc();
+            if (active.stream().allMatch(ConservativePowerProcess::acceptsCandidate)) return true;
+            if (trial == 1 || trial == 7) converterConvergence.correct(active);
+        }
+        return false;
     }
 
     private void buildSubSystem(State root) {

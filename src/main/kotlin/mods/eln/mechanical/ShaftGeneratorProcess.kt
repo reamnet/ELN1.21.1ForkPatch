@@ -64,11 +64,27 @@ class ShaftGeneratorProcess(
         // Check the physical I-V relation directly. Comparing successive voltage commands
         // misses huge current errors on short, low-resistance cables and stiff converter inputs.
         var expected = ((voltageTarget - volts) / droop).coerceIn(-currentLimit, currentLimit)
-        if (expected > 0.0 && volts > 0.0) expected = minOf(expected, outputPowerBudget / volts)
+        if (expected > 0.0) {
+            if (outputPowerBudget <= 0.0) expected = 0.0
+            else if (volts > 0.0) expected = minOf(expected, outputPowerBudget / volts)
+        }
         return abs(amps - expected) <= 1e-7 + 1e-6 * max(abs(amps), abs(expected))
     }
 
     override fun trialSources() = listOf(source)
+    override fun iterationRegion(): String {
+        if (!source.enabled) return "OPEN"
+        val requested = (voltageTarget - source.voltage) / droop
+        return when {
+            requested >= currentLimit -> "SOURCE_CURRENT_LIMIT"
+            requested <= -currentLimit -> "SINK_CURRENT_LIMIT"
+            requested > 0.0 && source.voltage > 0.0 && requested >= outputPowerBudget / source.voltage -> "ENERGY_LIMIT"
+            else -> "DROOP"
+        }
+    }
+    override fun voltageSearchHints() = mapOf(source to doubleArrayOf(
+        (voltageTarget - droop * currentLimit).coerceAtLeast(0.0),
+        voltageTarget + droop * currentLimit, voltageTarget))
     override fun connectedSystems(): Set<SubSystem> = setOfNotNull(positive.subSystem, negative?.subSystem)
     override fun failClosed() { retry.trip(); source.enabled = false }
 }

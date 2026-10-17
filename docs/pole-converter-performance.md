@@ -1,5 +1,9 @@
 # Pole converter performance and long lines
 
+For the 3.0.7 fix for large joined grids and source current limits, see
+[large-grid convergence](large-grid-convergence.md). The timing tables below
+record earlier performance comparisons.
+
 ## Version 3.0.6: use the default server workload
 
 The earlier regression fixture used `interSystemOverSampling=1`. Normal servers
@@ -116,8 +120,8 @@ resistance at 3.2, 12.8 and 51.2 kV, includes weak-feeder cases and a shaft-driv
 generator, then removes and restores the supply. The test checks every output
 repeatedly and verifies that unpowered probes do not cause new factorizations.
 
-The opt-in native `WorldInteractionChecks` places twenty actual street-light
-poles over a 640 m overhead line with the bare Aluminum 1000 kcmil cable and an
+The opt-in native `WorldInteractionChecks` now places 120 actual street-light
+poles over a 3,840 m overhead line with the bare Aluminum 1000 kcmil cable and an
 older transformer pole on the feeder. Their
 modules alternate 120/240 V; the last pole also supplies a real 9 kW load. Repeated
 samples cover voltage changes, actual chunk unloading/return and a saved-world

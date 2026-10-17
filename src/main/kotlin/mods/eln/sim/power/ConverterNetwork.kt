@@ -17,6 +17,10 @@ interface ConservativePowerProcess : IRootSystemPreStepProcess {
     fun trialSources(): List<SwitchableVoltageSource> = emptyList()
     /** Piecewise operating region for a one-sided numerical derivative only. */
     fun iterationRegion(): String = ""
+    /** Source I-V breakpoints for restarting a stalled algebraic solve; never bypass acceptance. */
+    fun voltageSearchHints(): Map<SwitchableVoltageSource, DoubleArray> = emptyMap()
+    /** Opening this load locally may let the remaining network settle safely. */
+    fun isolatesLoadOnFailure(): Boolean = false
     fun acceptsCandidate(): Boolean
     fun failClosed()
     fun connectedSystems(): Set<SubSystem>

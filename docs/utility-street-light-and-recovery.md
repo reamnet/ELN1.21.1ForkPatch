@@ -88,8 +88,8 @@ setups, controlled numerical recovery, C-key camouflage, item grouping, both new
 devices, menu packets, travel to unloaded chunks and back, and a saved-world restart.
 It writes `run/client/world-interaction-checks.json` and screenshots under
 `run/client/screenshots/world-interaction-*.png`.
-The same check also builds twenty alternating 120/240 V street lights over a
-640-metre bare-aluminum overhead line, fed through the older transformer pole,
+The same check also builds 120 alternating 120/240 V street lights over a
+3,840-metre bare-aluminum overhead line starting at 14 kV, fed through the older transformer pole,
 with a real 9 kW load at the far end.
 It repeatedly samples the pole outputs, travels away until chunks unload,
 changes the feed voltage and checks the installation again after a saved-world restart.
