@@ -54,14 +54,14 @@ class Mesh:
 m=Mesh();m.part('Base');m.cone(.01,.12,.19,.14)
 for y in [-.11,.11]:
     for z in [-.11,.11]:m.cone(.12,.145,.018,.018,y,z,n=8)
-m.part('Metal');m.cone(.12,3.40,.075,.05,n=12)
+m.part('Metal');m.cone(.12,5.40,.075,.05,n=12)
 for y in [-.8,.8]:
-    m.tube((3.34,0,0),(3.34,y,0),.045)
-    m.housing(3.17,3.40,y,0,.70,.58)
-    for offset in [-.23,-.11,.01,.13,.25]:m.box((3.4,y+offset,-.20),(3.43,y+offset+.018,.20))
+    m.tube((5.34,0,0),(5.34,y,0),.045)
+    m.housing(5.17,5.40,y,0,.70,.58)
+    for offset in [-.23,-.11,.01,.13,.25]:m.box((5.4,y+offset,-.20),(5.43,y+offset+.018,.20))
 m.part('Trim')
-for y in [-.8,.8]:m.box((3.155,y-.27,-.23),(3.175,y+.27,.23))
-for i,y in enumerate([-.8,.8]):m.part('Light'+str(i));m.box((3.145,y-.25,-.21),(3.157,y+.25,.21))
+for y in [-.8,.8]:m.box((5.155,y-.27,-.23),(5.175,y+.27,.23))
+for i,y in enumerate([-.8,.8]):m.part('Light'+str(i));m.box((5.145,y-.25,-.21),(5.157,y+.25,.21))
 m.save('twinparkinglight')
 
 m=Mesh();m.part('Base');m.box((.015,-.24,-.18),(.08,.24,.18))
@@ -106,3 +106,36 @@ for k in range(5):
 for k in range(5):
     a=k*2*pi/5;m.part('Light'+str(k));m.sphere((.68,.34*cos(a),.34*sin(a)),(.13,.06,.06))
 m.save('basicchandelier')
+
+# A small slug-shaped cylindrical spotlight, with a recessed circular lens.
+m=Mesh();m.part('Base');m.cone(.005,.025,.075,.075,n=24)
+m.part('Metal');m.cone(.025,.205,.065,.082,n=24,caps=False)
+for x in [.05,.08,.11]:m.cone(x,x+.012,.069,.069,n=24,caps=False)
+m.part('Trim');m.ring(.215,.083,.062,n=32);m.cone(.205,.218,.083,.083,n=32,caps=False)
+m.part('Light0');m.cone(.200,.205,.061,.061,n=32);m.save('minidotspotlight')
+
+# Bronze porch lantern: wall plate, curved bracket, peaked roof, cage and glass.
+m=Mesh();m.part('Base');m.box((.01,-.29,-.09),(.055,.32,.09))
+m.part('Metal')
+points=[(.04,.24,0),(.12,.32,0),(.27,.34,0),(.34,.29,0),(.34,.23,0)]
+for a,b in zip(points,points[1:]):m.tube(a,b,.018,n=8)
+x0,x1,z0,z1=.14,.48,-.17,.17
+for x in [x0,x1]:
+    for z in [z0,z1]:m.box((x-.012,-.30,z-.012),(x+.012,.19,z+.012))
+m.box((.115,-.33,-.195),(.505,-.29,.195))
+m.box((.105,.175,-.205),(.515,.205,.205))
+peak=(.31,.32,0)
+roof=[(.095,.205,-.215),(.525,.205,-.215),(.525,.205,.215),(.095,.205,.215)]
+for i in range(4):m.face([roof[i],peak,roof[(i+1)%4]])
+m.tube((.31,.31,0),(.31,.36,0),.018,n=8)
+m.box((.255,-.29,-.055),(.365,-.21,.055))
+m.part('Trim');m.tube((.31,-.39,0),(.31,-.32,0),.025,n=8)
+m.part('Light0');m.sphere((.31,-.07,0),(.058,.13,.058))
+m.part('Glass');m.box((.15,-.285,-.16),(.47,.17,.16));m.save('porchlanternsconce')
+
+# Plain porcelain-style holder with a screw collar and exposed replaceable bulb.
+m=Mesh();m.part('Base');m.cone(.005,.03,.125,.125,n=24);m.cone(.03,.08,.10,.055,n=24)
+m.part('Metal');m.cone(.08,.115,.052,.052,n=20)
+m.part('Trim')
+for x in [.083,.095,.107]:m.cone(x,x+.005,.055,.055,n=20,caps=False)
+m.part('Light0');m.cone(.105,.145,.038,.05,n=16);m.sphere((.215,0,0),(.10,.075,.075));m.save('basiclampholder')

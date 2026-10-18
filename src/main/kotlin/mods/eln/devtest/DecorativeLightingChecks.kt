@@ -3,6 +3,7 @@ package mods.eln.devtest
 import com.google.gson.GsonBuilder
 import mods.eln.Eln
 import mods.eln.GuiHandler
+import mods.eln.ghost.GhostGroup
 import mods.eln.gui.GuiButtonEln
 import mods.eln.item.lampitem.LampDescriptor
 import mods.eln.misc.*
@@ -46,9 +47,9 @@ object DecorativeLightingChecks {
     private val fixtures=buildList {
         for(wired in listOf(false,true)) for((i,style) in DecorativeLampStyle.entries.withIndex()) {
             if(wired && style.wirelessOnly) continue
-            val y=when(style) { DecorativeLampStyle.WAREHOUSE,DecorativeLampStyle.RECESSED,DecorativeLampStyle.CHANDELIER -> 3; DecorativeLampStyle.DESK -> 1; else -> 0 }
-            val side=when(style) { DecorativeLampStyle.WAREHOUSE -> Direction.XN; DecorativeLampStyle.RECESSED,DecorativeLampStyle.CHANDELIER -> Direction.YP; else -> Direction.YN }
-            add(Fixture(style,base.offset(i*8,y,if(wired) 12 else 0),side,wired))
+            val y=when(style) { DecorativeLampStyle.WAREHOUSE,DecorativeLampStyle.RECESSED,DecorativeLampStyle.CHANDELIER,DecorativeLampStyle.DOT,DecorativeLampStyle.PORCH,DecorativeLampStyle.HOLDER -> 3; DecorativeLampStyle.DESK -> 1; else -> 0 }
+            val side=when(style) { DecorativeLampStyle.WAREHOUSE,DecorativeLampStyle.PORCH,DecorativeLampStyle.HOLDER -> Direction.XN; DecorativeLampStyle.RECESSED,DecorativeLampStyle.CHANDELIER,DecorativeLampStyle.DOT -> Direction.YP; else -> Direction.YN }
+            add(Fixture(style,base.offset((i%4)*8,y,(i/4)*8+if(wired) 24 else 0),side,wired))
         }
     }
     private val bulbs get()=Eln.sharedItem.subItemList.values.filterIsInstance<LampDescriptor>()
@@ -101,11 +102,14 @@ object DecorativeLightingChecks {
     }
     private fun view(p: ServerPlayer,entry: Fixture) {
         val (dx,dy,dz,height)=when(entry.style) {
-            DecorativeLampStyle.PARKING -> listOf(4.0,1.2,5.0,1.8)
+            DecorativeLampStyle.PARKING -> listOf(5.0,1.8,6.0,2.8)
             DecorativeLampStyle.WAREHOUSE -> listOf(2.3,-1.6,2.3,.35)
             DecorativeLampStyle.DESK -> listOf(1.5,.2,1.8,.4)
             DecorativeLampStyle.RECESSED -> listOf(1.0,-1.9,1.2,.9)
             DecorativeLampStyle.CHANDELIER -> listOf(1.5,-1.5,1.8,.6)
+            DecorativeLampStyle.DOT -> listOf(.5,-1.4,.6,.8)
+            DecorativeLampStyle.PORCH -> listOf(1.1,-1.0,1.2,.45)
+            DecorativeLampStyle.HOLDER -> listOf(.65,-1.1,.8,.5)
         }
         val yaw=Math.toDegrees(atan2(dx,-dz)).toFloat()
         val pitch=Math.toDegrees(atan2(dy+p.eyeHeight-height,hypot(dx,dz))).toFloat()
@@ -140,7 +144,7 @@ object DecorativeLightingChecks {
                     server { p ->
                         p.setGameMode(GameType.CREATIVE);p.abilities.flying=true;p.onUpdateAbilities();view(p,fixtures[0])
                         val world=p.serverLevel();world.dayTime=6000
-                        for(x in 247..294)for(z in 250..276)world.setBlockAndUpdate(BlockPos(x,65,z),Blocks.STONE.defaultBlockState())
+                        for(x in 247..286)for(z in 250..294)world.setBlockAndUpdate(BlockPos(x,65,z),Blocks.STONE.defaultBlockState())
                         LampChannelMemory.remember(p.persistentData,channel)
                         val supply=place(p,Eln.findItemStack("240V Lamp Supply",1),supplyPos,Direction.YN) as LampSupplyElement
                         supply.front=Direction.YN.getLRDUGoingTo(Direction.XN)!!
@@ -154,6 +158,15 @@ object DecorativeLightingChecks {
                             if(entry.side==Direction.YP)for(x in -3..2)for(z in -1..1)world.setBlockAndUpdate(entry.pos.offset(x,1,z),Blocks.WHITE_CONCRETE.defaultBlockState())
                             if(entry.style==DecorativeLampStyle.DESK)world.setBlockAndUpdate(entry.pos.below(),Blocks.BIRCH_PLANKS.defaultBlockState())
                             val e=place(p,Eln.findItemStack(entry.style.itemName,1),entry.pos,entry.side) as LampSocketElement
+                            if(entry.style==DecorativeLampStyle.PARKING && !entry.wired) {
+                                // Simulate a saved 3.0.12 pole; the first process pass must migrate its old clearance.
+                                Eln.ghostManager.removeGhostAndBlockWithObserver(e.coordinate,e.descriptor.ghostGroupUuid)
+                                val old=GhostGroup().apply {
+                                    addElement(1,0,0);addElement(2,0,0)
+                                    for(y in -1..1)for(z in -1..1)addElement(3,y,z)
+                                }.newRotate(entry.side)
+                                check(old.plot(e.coordinate!!,e.coordinate!!,e.descriptor.ghostGroupUuid))
+                            }
                             check(e.lampSupplyChannel==channel)
                             val held=led.newItemStack(entry.style.bulbs+1);p.setItemInHand(InteractionHand.MAIN_HAND,held)
                             check(e.onBlockActivated(p,entry.side,.5f,.5f,.5f))
@@ -174,7 +187,14 @@ object DecorativeLightingChecks {
                     server { p ->
                         val led=bulbs.single { it.lampData.nominalU==120.0 && it.lampData.technology.lampType=="led" }
                         fixtures.filterNot { it.wired }.forEach { checkLit(p,it,led) }
-                        record("Five new fixtures place on their proper surfaces, accept bulb batches by hand and light from a real wireless supply")
+                        for(entry in fixtures.filter { it.style==DecorativeLampStyle.PARKING }) {
+                            val e=element(p,entry)
+                            val ghosts=Eln.ghostManager.ghostTable.values.filter { it.observatorCoordonate==e.coordinate }
+                            check(ghosts.size==13)
+                            check(ghosts.any { it.elementCoordinate!!.y==entry.pos.y+5 })
+                            check(ghosts.none { it.elementCoordinate!!.y==entry.pos.y+3 && (it.elementCoordinate!!.x!=entry.pos.x || it.elementCoordinate!!.z!=entry.pos.z) })
+                        }
+                        record("All fixtures place on their proper surfaces, accept bulb batches by hand and light wirelessly; old parking clearance migrates to the taller pole")
                         voltage(p,supplyPos.west(2),Direction.YN,0.0)
                     };waitFor(19,30)
                 }
@@ -186,7 +206,7 @@ object DecorativeLightingChecks {
                             val next=bulbs[variant];voltage(p,supplyPos.west(2),Direction.YN,next.lampData.nominalU)
                             fixtures.filterNot { it.wired }.forEach { bulb(p,element(p,it),next) }
                         } else {
-                            record("Every registered bulb technology and voltage works wirelessly in all five fixtures with per-bulb power draw")
+                            record("Every registered bulb technology and voltage works wirelessly in all fixtures with per-bulb power draw")
                             voltage(p,supplyPos.west(2),Direction.YN,0.0)
                         }
                     };step(4)
@@ -208,7 +228,7 @@ object DecorativeLightingChecks {
                         val led=bulbs.single { it.lampData.nominalU==120.0 && it.lampData.technology.lampType=="led" };checkLit(p,entry,led)
                     };mc.setScreen(null);step(8)
                 }
-                8 -> if(complete()) { ui++;if(ui<4)step(5) else { record("All four wired fixtures switch through the actual GUI and run on real same-plane cables");shot=0;step(9) } }
+                8 -> if(complete()) { ui++;if(ui<fixtures.count { it.wired })step(5) else { record("All wired fixtures switch through the actual GUI and run on real same-plane cables with correct client bulb counts");shot=0;step(9) } }
                 9 -> if(ticks>10) { server { p -> view(p,fixtures.filterNot { it.wired }[shot]) };step(10) }
                 10 -> if(complete() && ticks>20) {
                     mc.options.hideGui=true;step(11)
@@ -216,9 +236,9 @@ object DecorativeLightingChecks {
                 11 -> if(ticks>5) {
                     capture("${fixtures.filterNot { it.wired }[shot].style.model}-${if(off) "off" else "on"}")
                     shot++
-                    if(shot<5)step(9) else if(!off) {
+                    if(shot<DecorativeLampStyle.entries.size)step(9) else if(!off) {
                         off=true;shot=0;server { p ->voltage(p,supplyPos.west(2),Direction.YN,0.0);fixtures.filter { it.wired }.forEach { voltage(p,sourcePos(it),it.side,0.0) } };waitFor(12,100)
-                    } else { record("All five fixture models render lit and unlit, with dark off-state lenses");step(13) }
+                    } else { record("All fixture models render lit and unlit, with dark off-state lenses");step(13) }
                 }
                 12 -> if(settled()) { server { p -> fixtures.forEach { check(element(p,it).sixNode!!.lightValue==0) } };step(9) }
                 13 -> if(ticks>10) {
@@ -237,7 +257,7 @@ object DecorativeLightingChecks {
                         for(entry in fixtures) { val e=element(p,entry);check(e.poweredByLampSupply==!entry.wired);checkLit(p,entry,led) }
                     };step(18)
                 }
-                18 -> if(complete()) { record("Saved-world restart preserves all nine inventories, channels and power modes, with no cable replacement");finish(null) }
+                18 -> if(complete()) { record("Saved-world restart preserves all fixture inventories, channels and power modes, with no cable replacement");finish(null) }
                 19 -> if(settled()) {
                     server { p ->
                         val d=bulbs[variant];fixtures.filterNot { it.wired }.forEach { bulb(p,element(p,it),d) }

@@ -32,8 +32,17 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
 
     private var lampCountInInventory = 0
     private var cableInInventory = false
+    private var parkingClearanceReady = false
+    private var parkingClearanceRetry = 0.0
 
     override fun process(time: Double) {
+        if (element.descriptor.fixture == DecorativeLampStyle.PARKING && !parkingClearanceReady) {
+            parkingClearanceRetry -= time
+            if (parkingClearanceRetry <= 0) {
+                parkingClearanceReady = ParkingLightClearance.update(element)
+                parkingClearanceRetry = 1.0
+            }
+        }
         val lampStack = element.inventory.getItem(LampSocketContainer.LAMP_SLOT_ID)
         val cableStack = element.inventory.getItem(LampSocketContainer.CABLE_SLOT_ID)
 

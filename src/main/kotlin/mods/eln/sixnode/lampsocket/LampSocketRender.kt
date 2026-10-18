@@ -211,7 +211,7 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, sixNodeDescri
             tileEntity.yCoord.toDouble(),
             (tileEntity.zCoord - 1).toDouble(),
             (tileEntity.xCoord + 2).toDouble(),
-            (tileEntity.yCoord + 4).toDouble(),
+            (tileEntity.yCoord + if (descriptor.fixture == DecorativeLampStyle.PARKING) 6 else 4).toDouble(),
             (tileEntity.zCoord + 2).toDouble()
         )
     }

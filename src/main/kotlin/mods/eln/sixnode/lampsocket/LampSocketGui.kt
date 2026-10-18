@@ -32,7 +32,7 @@ class LampSocketGui(player: Player, val render: LampSocketRender) :
 
         buttonPowerSource = newGuiButton(16, 7, 144, "")
         buttonPowerSource.enabled = !render.descriptor.wirelessOnly
-        if (render.descriptor.wirelessOnly) buttonPowerSource.setComment(0,I18N.tr("This recessed light uses a wireless lamp supply"))
+        if (render.descriptor.wirelessOnly) buttonPowerSource.setComment(0,I18N.tr("This light uses a wireless lamp supply"))
 
         buttonGrounded = newGuiButton(16, 33, 144, "")
         buttonGrounded.setComment(0, "Toggle the internal ground connection")

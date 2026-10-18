@@ -2012,7 +2012,10 @@ Precipitation=Precipitação
 
 # src/main/kotlin/mods/eln/sixnode/lampsocket/DecorativeLampStyle.kt
 Basic_Chandelier.name=Basic Chandelier
+Basic_Lamp_Holder.name=Basic Lamp Holder
 Household_Desk_Lamp.name=Household Desk Lamp
+Mini_Dot_Spotlight.name=Mini Dot Spotlight
+Porch_Lantern_Sconce.name=Porch Lantern Sconce
 Round_Recessed_Ceiling_Light.name=Round Recessed Ceiling Light
 Twin_Parking_Lot_Light.name=Twin Parking Lot Light
 Warehouse_Wall_Floodlight.name=Warehouse Wall Floodlight
@@ -2040,7 +2043,7 @@ Lamp_slot_empty=Espaço de lâmpada vazio
 Powered_by_lamp_supply=Alimentado por fonte de lâmpadas
 Specify_the_lamp_supply_channel=Especifique o canal da fonte de lâmpadas
 This_currently_does_nothing.=Isso atualmente não faz nada.
-This_recessed_light_uses_a_wireless_lamp_supply=This recessed light uses a wireless lamp supply
+This_light_uses_a_wireless_lamp_supply=This light uses a wireless lamp supply
 Ungrounded=Não aterrado
 
 # src/main/kotlin/mods/eln/sixnode/mqttmeter/MqttEnergyMeterContainer.kt

@@ -10,7 +10,7 @@ class DecorativeLampObjRender(val style: DecorativeLampStyle) : ILampSocketObjRe
     private val model = Eln.obj.getObj(style.model)
     override fun connectionEdges(front: LRDU, offset: Double) = LampConnections.edges(model.getPart("Base"),front,offset-90)
     override fun draw(descriptor: LampSocketDescriptor, type: ItemRenderType, distanceToPlayer: Double) = preserveMatrix {
-        if (style == DecorativeLampStyle.WAREHOUSE || style == DecorativeLampStyle.RECESSED) {
+        if (style != DecorativeLampStyle.PARKING && style != DecorativeLampStyle.DESK && style != DecorativeLampStyle.CHANDELIER) {
             GL11.glRotatef(-70f,0f,1f,0f)
         } else GL11.glRotatef(90f,0f,0f,1f)
         val scale = 1.35/style.depth
@@ -27,13 +27,19 @@ class DecorativeLampObjRender(val style: DecorativeLampStyle) : ILampSocketObjRe
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
             GL11.glDisable(GL11.GL_TEXTURE_2D)
-            GL11.glColor3f(.20f,.23f,.26f); model.getPart("Base")?.drawNoBind()
-            GL11.glColor3f(.26f,.29f,.32f); model.getPart("Metal")?.drawNoBind()
+            when(style) {
+                DecorativeLampStyle.PORCH -> GL11.glColor3f(.20f,.14f,.09f)
+                DecorativeLampStyle.HOLDER -> GL11.glColor3f(.88f,.86f,.80f)
+                else -> GL11.glColor3f(.20f,.23f,.26f)
+            }
+            model.getPart("Base")?.drawNoBind()
+            if (style == DecorativeLampStyle.PORCH) GL11.glColor3f(.28f,.20f,.12f) else GL11.glColor3f(.26f,.29f,.32f)
+            model.getPart("Metal")?.drawNoBind()
             GL11.glColor3f(.65f,.68f,.71f); model.getPart("Trim")?.drawNoBind()
             GL11.glColor3f(.88f,.79f,.62f); model.getPart("Shade")?.drawNoBind()
             for (i in 0 until style.bulbs) {
                 val installed = i < count
-                if (!installed && (style == DecorativeLampStyle.DESK || style == DecorativeLampStyle.CHANDELIER)) continue
+                if (!installed && style.exposedBulbs) continue
                 if (installed && light >= LampSocketRender.MIN_LIGHT_ON_VALUE) {
                     UtilsClient.disableLight()
                     when(technology) {
@@ -47,6 +53,13 @@ class DecorativeLampObjRender(val style: DecorativeLampStyle) : ILampSocketObjRe
                     GL11.glColor3f(.18f,.21f,.24f)
                     model.getPart("Light$i")?.drawNoBind()
                 }
+            }
+            model.getPart("Glass")?.let {
+                GL11.glEnable(GL11.GL_BLEND)
+                GL11.glBlendFunc(GL11.GL_SRC_ALPHA,GL11.GL_ONE_MINUS_SRC_ALPHA)
+                GL11.glDepthMask(false)
+                GL11.glColor4f(.70f,.84f,.91f,.16f)
+                it.drawNoBind()
             }
         } finally { GL11.glPopAttrib() }
     }

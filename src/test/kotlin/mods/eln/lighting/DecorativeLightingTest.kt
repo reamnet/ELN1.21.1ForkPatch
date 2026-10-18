@@ -18,8 +18,13 @@ class DecorativeLightingTest {
     private val bulbs get() = Eln.sharedItem.subItemList.values.filterIsInstance<LampDescriptor>()
     private fun element(d: LampSocketDescriptor) = LampSocketElement(SixNode().apply { coordinate = Coordinate(0,64,0,0) },Direction.YN,d)
 
-    @Test fun allFiveNewIdentitiesAcceptEveryRegisteredBulbWithoutChangingOldFixtures() {
-        assertEquals(5,fixtures.size)
+    @Test fun allFixtureIdentitiesAcceptEveryRegisteredBulbWithoutChangingOldFixtures() {
+        assertEquals(8,fixtures.size)
+        val savedFixtures = listOf("Twin Parking Lot Light","Warehouse Wall Floodlight","Household Desk Lamp",
+            "Round Recessed Ceiling Light","Basic Chandelier")
+        savedFixtures.forEachIndexed { index,name ->
+            assertEquals(name,Eln.sixNodeItem.subItemList[(64 shl 6)+20+index]!!.name)
+        }
         assertEquals(LampLists.lampTechnologyList.map { it.lampType }.toSet(),bulbs.map { it.lampData.technology.lampType }.toSet())
         for (fixture in fixtures) {
             val index = DecorativeLampStyle.entries.indexOf(fixture.fixture)
@@ -45,6 +50,21 @@ class DecorativeLightingTest {
         }
     }
 
+    @Test fun newFixtureSizesAndTallerParkingLightMatchTheirClearance() {
+        fun mesh(style: DecorativeLampStyle) = Obj3D().apply { assertTrue(loadFile("${style.model}/${style.model}.obj")) }
+        val dot = mesh(DecorativeLampStyle.DOT)
+        val body = dot.getPart("Metal").boundingBox()
+        assertTrue(body.max.x < .24 && body.max.y-body.min.y < .18 && body.max.z-body.min.z < .18)
+        assertNotNull(mesh(DecorativeLampStyle.PORCH).getPart("Glass"))
+        val parking = fixtures.single { it.fixture == DecorativeLampStyle.PARKING }
+        assertEquals(5.15,parking.fixture!!.heads.first().x,1e-6) // Previous head height was 3.15.
+        assertEquals(5.43,mesh(DecorativeLampStyle.PARKING).getPart("Metal").boundingBox().max.x,1e-6)
+        val clearance = parking.getGhostGroup(Direction.YN,LRDU.Up)!!.elementList
+        assertEquals(13,clearance.size)
+        assertTrue(clearance.any { it.y == 5 && it.x != 0 })
+        assertTrue(clearance.none { it.y == 3 && it.x != 0 })
+    }
+
     @Test fun bulkInsertionRespectsCapacityComponentsAndCreativeConsumption() {
         val bulb = Eln.findItemStack("120V LED Light Bulb",7)
         val descriptor = mods.eln.generic.GenericItemUsingDamageDescriptor.getDescriptor(bulb) as LampDescriptor
@@ -64,7 +84,7 @@ class DecorativeLightingTest {
         assertFalse(FixtureBulbs.insert(inventory,Eln.findItemStack("Iron Plate",1),2,false))
     }
 
-    @Test fun wiredTerminalsExistForFourStylesWhileRecessedModeStaysWirelessOnLoad() {
+    @Test fun wiredTerminalsMatchFixtureModesAndWirelessOnlySurvivesLoad() {
         for (fixture in fixtures) {
             val e = element(fixture)
             e.inventory.setItem(1,Eln.instance.highVoltageCableDescriptor.newItemStack())

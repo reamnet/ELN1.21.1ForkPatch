@@ -16,6 +16,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.10` | — | Saved Up/Down streetlight height controls, with the fixture and emitted light moving together |
 | `v3.0.11` | — | Rotate streetlights around their poles to follow angled streets, with fine adjustment, saved angles and matching light positions |
 | `v3.0.12` | — | Five new lighting fixtures with all bulb technologies, wireless power, optional wired power, multi-bulb inventories and custom models |
+| `v3.0.13` | — | Compact dot spotlights, porch lantern sconces, basic lamp holders, and parking lights raised by two blocks with saved-pole clearance updates |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`
@@ -28,7 +29,7 @@ release assets remain available with their original filenames.
 `modVersion` in `gradle.properties` is the version source for the jar filename,
 NeoForge metadata and the in-game version. Increment it when preparing the next
 update and create the matching `vX.Y.Z` source tag. For unpublished experiments,
-use an explicit override such as `-PmodVersion=3.0.13-local.1`.
+use an explicit override such as `-PmodVersion=3.0.14-local.1`.
 
 Build with `./gradlew build` to retain previous versioned jars in `build/libs/`.
 `./gradlew clean` removes that directory, and recompiling the same version

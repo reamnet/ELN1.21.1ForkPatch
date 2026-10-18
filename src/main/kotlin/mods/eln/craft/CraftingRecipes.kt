@@ -282,6 +282,12 @@ object CraftingRecipes {
     }
 
     private fun recipeLampSocket() {
+        addRecipe(Eln.findItemStack("Basic Lamp Holder",2), " C ", " P ",
+            'C',findItemStack("Copper Ingot"),'P',findItemStack("Iron Plate"))
+        addRecipe(Eln.findItemStack("Mini Dot Spotlight",2), " I ", "GLG",
+            'I',ItemStack(Items.IRON_INGOT),'G',ItemStack(Blocks.GLASS_PANE),'L',findItemStack("Spot Lamp Socket"))
+        addRecipe(findItemStack("Porch Lantern Sconce"), " I ", "GLG", " P ",
+            'I',ItemStack(Items.IRON_INGOT),'G',ItemStack(Blocks.GLASS_PANE),'L',findItemStack("Classic Lamp Socket"),'P',findItemStack("Iron Plate"))
         addRecipe(findItemStack("Twin Parking Lot Light"), "L L", " I ", " P ",
             'L',findItemStack("Robust Lamp Socket"),'I',ItemStack(Items.IRON_INGOT),'P',findItemStack("Iron Plate"))
         addRecipe(findItemStack("Warehouse Wall Floodlight"), "IPI", "GLG", " I ",

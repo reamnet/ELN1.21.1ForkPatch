@@ -8,7 +8,7 @@ import mods.eln.sixnode.lampsocket.*
 import mods.eln.sixnode.lampsocket.objrender.DecorativeLampObjRender
 
 object DecorativeLightRegistration {
-    /** New slots 20..24 in group 64; all earlier lamp identities remain unchanged. */
+    /** Append new fixtures after slots 20..24; existing save identities stay fixed. */
     fun register(group: Int) {
         DecorativeLampStyle.entries.forEachIndexed { index,style ->
             val descriptor = LampSocketDescriptor(style.itemName,DecorativeLampObjRender(style),style.range,
@@ -19,13 +19,15 @@ object DecorativeLightRegistration {
                     DecorativeLampStyle.PARKING -> {
                         setPlaceDirection(Direction.YN)
                         ghostGroup = GhostGroup().apply {
-                            addElement(1,0,0); addElement(2,0,0)
-                            for(y in -1..1) for(z in -1..1) addElement(3,y,z)
+                            for(x in 1..4) addElement(x,0,0)
+                            for(y in -1..1) for(z in -1..1) addElement(5,y,z)
                         }
                     }
                     DecorativeLampStyle.DESK -> setPlaceDirection(Direction.YN)
                     DecorativeLampStyle.RECESSED, DecorativeLampStyle.CHANDELIER -> setPlaceDirection(Direction.YP)
-                    DecorativeLampStyle.WAREHOUSE -> setPlaceDirection(arrayOf(Direction.XN,Direction.XP,Direction.ZN,Direction.ZP))
+                    DecorativeLampStyle.WAREHOUSE, DecorativeLampStyle.PORCH -> setPlaceDirection(arrayOf(Direction.XN,Direction.XP,Direction.ZN,Direction.ZP))
+                    DecorativeLampStyle.DOT -> setPlaceDirection(arrayOf(Direction.YP,Direction.XN,Direction.XP,Direction.ZN,Direction.ZP))
+                    DecorativeLampStyle.HOLDER -> Unit // Plain holder mounts on any supporting face.
                 }
             }
             Eln.sixNodeItem.addDescriptor((group shl 6)+20+index,descriptor)
