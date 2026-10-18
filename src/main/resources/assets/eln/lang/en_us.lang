@@ -68,6 +68,7 @@ Inductance=Inductance
 Inductance\:_%1$H=Inductance: %1$H
 Input=Input
 Input\:_%1$=Input: %1$
+Input\:_%1$;_output\:_%2$=Input: %1$; output: %2$
 Input_/_Output_windings=Input / Output windings
 Input_voltage=Input voltage
 Inputs=Inputs
@@ -115,6 +116,7 @@ On=On
 Open=Open
 Operational=Operational
 Output=Output
+Output_power=Output power
 Output_voltage=Output voltage
 P\:_%1$_S\:_%2$=P: %1$ S: %2$
 Portable_battery_slot=Portable battery slot
@@ -1769,6 +1771,7 @@ Polarized_Shaft_Generator.name=Polarized Shaft Generator
 Polarized_Shaft_Motor.name=Polarized Shaft Motor
 Power_capacitor.name=Power capacitor
 Power_inductor.name=Power inductor
+Programmable_UPS.name=Programmable UPS
 Radial_Motor.name=Radial Motor
 Rolling_Shaft_Machine.name=Rolling Shaft Machine
 Shaft_Motor.name=Shaft Motor
@@ -2350,8 +2353,44 @@ Beam_width\:_%1$°=Beam width: %1$°
 Horizontal_angle\:_%1$°=Horizontal angle: %1$°
 Vertical_angle\:_%1$°=Vertical angle: %1$°
 
+# src/main/kotlin/mods/eln/transparentnode/ups/UpsClient.kt
+Backup\:_about_%1$_min=Backup: about %1$ min
+Backup\:_no_load=Backup: no load
+Batteries\:_%1$/48_(%2$_active)=Batteries: %1$/48 (%2$ active)
+Battery_empty=Battery empty
+Charge\:_%1$%_/_%2$_Wh=Charge: %1$% / %2$ Wh
+Charging;_output_off=Charging; output off
+Cooling_down=Cooling down
+In\:_%1$_/_%2$=In: %1$ / %2$
+Needs_a_full_rack_(24_cells)=Needs a full rack (24 cells)
+On_battery_backup=On battery backup
+Online=Online
+Online;_battery_assisting=Online; battery assisting
+Online;_charging=Online; charging
+Out\:_%1$_/_%2$=Out: %1$ / %2$
+Output_off=Output off
+Output_power_limited=Output power limited
+Output_protection;_retrying=Output protection; retrying
+Output_voltage\:_1_to_3200_V=Output voltage: 1 to 3200 V
+Portable_Battery_or_Portable_Battery_Pack=Portable Battery or Portable Battery Pack
+Programmable_UPS=Programmable UPS
+Rack_%1$/2_-_click_to_switch=Rack %1$/2 - click to switch
+Set_V=Set V
+
+# src/main/kotlin/mods/eln/transparentnode/ups/UpsDescriptor.kt
+Accepts_Portable_Battery_and_Portable_Battery_Pack=Accepts Portable Battery and Portable Battery Pack
+Batteries_retain_their_charge_when_removed=Batteries retain their charge when removed
+Blue_terminal\:_input;_orange_terminal\:_output=Blue terminal: input; orange terminal: output
+Install_one_or_two_complete_racks_of_24_portable_batteries=Install one or two complete racks of 24 portable batteries
+Programmable_output\:_1_to_3200_V;_up_to_10000_W=Programmable output: 1 to 3200 V; up to 10000 W
+
+# src/main/kotlin/mods/eln/transparentnode/ups/UpsElement.kt
+%1$/48_(%2$_active)=%1$/48 (%2$ active)
+Installed_batteries=Installed batteries
+Stored_energy=Stored energy
+UPS_status=UPS status
+
 # src/main/kotlin/mods/eln/transparentnode/utilitylight/MainsStepDown.kt
-Output_power=Output power
 
 # src/main/kotlin/mods/eln/transparentnode/utilitylight/UtilityLightClient.kt
 Angle\:_%1$°=Angle: %1$°
@@ -2387,7 +2426,6 @@ Step-down_only;_grid_voltage_must_reach_the_selected_output=Step-down only; grid
 
 # src/main/kotlin/mods/eln/transparentnode/utilitylight/UtilityLightDevices.kt
 Grid\:_%1$;_output\:_%2$=Grid: %1$; output: %2$
-Input\:_%1$;_output\:_%2$=Input: %1$; output: %2$
 Installed=Installed
 Lamp=Lamp
 Missing=Missing

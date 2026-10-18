@@ -1631,6 +1631,10 @@ object TransparentNodeRegistration {
             StepDownUnitDescriptor(TR_NAME(I18N.Type.NONE, "Mains Step-down Unit")).apply {
                 setCreativeTab(Eln.creativeTabPowerElectronics)
             })
+        transparentNodeItem.addDescriptor(11 + (id shl 6),
+            mods.eln.transparentnode.ups.UpsDescriptor(TR_NAME(I18N.Type.NONE, "Programmable UPS")).apply {
+                setCreativeTab(Eln.creativeTabPowerElectronics)
+            })
     }
 
 

@@ -908,6 +908,9 @@ object CraftingRecipes {
     }
 
     private fun recipeGridDevices(oreNames: HashSet<String>) {
+        addRecipe(findItemStack("Programmable UPS"), "CVC", "MFM", "CVC",
+            'C', findItemStack("Copper Cable"), 'V', findItemStack("Variable DC-DC Converter"),
+            'M', findItemStack("Machine Block"), 'F', findItemStack("Optimal Ferromagnetic Core"))
         var poleRecipes = 0
         for (oreName in arrayOf<String>("ingotAluminum", "ingotAluminium", "ingotSteel")) {
             if (oreNames.contains(oreName)) {

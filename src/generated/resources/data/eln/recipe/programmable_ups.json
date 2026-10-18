@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "eln:copper_cable"
+    },
+    "F": {
+      "item": "eln:optimal_ferromagnetic_core"
+    },
+    "M": {
+      "item": "eln:machine_block"
+    },
+    "V": {
+      "item": "eln:variable_dc-dc_converter"
+    }
+  },
+  "pattern": [
+    "CVC",
+    "MFM",
+    "CVC"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:programmable_ups"
+  }
+}
