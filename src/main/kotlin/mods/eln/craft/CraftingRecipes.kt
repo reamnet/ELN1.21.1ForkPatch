@@ -337,6 +337,12 @@ object CraftingRecipes {
             'C',ItemStack(Items.CHAIN),'I',ItemStack(Blocks.IRON_BARS),'L',findItemStack("Classic Lamp Socket"))
         addRecipe(findItemStack("Modern Sputnik Foyer Chandelier"), " L ", "LGL", " L ",
             'G',ItemStack(Items.GOLD_INGOT),'L',findItemStack("Classic Lamp Socket"))
+        addRecipe(findItemStack("Automatic Transfer Switch"), "IPI", "RCR", "IPI",
+            'I',findItemStack("Iron Plate"),'P',ItemStack(Items.COMPARATOR),'R',ItemStack(Items.REDSTONE),
+            'C',findItemStack("Copper Cable"))
+        addRecipe(findItemStack("Standby Gasoline Generator"), "PPP", "BGB", "CRC",
+            'P',findItemStack("Iron Plate"),'B',ItemStack(Items.BUCKET),'G',findItemStack("240V Fuel Generator"),
+            'C',findItemStack("Copper Cable"),'R',ItemStack(Items.REDSTONE))
         addRecipe(findItemStack("Gasoline Construction Work Light"), "L L", " G ", "IPI",
             'L',findItemStack("Warehouse Wall Floodlight"),'G',findItemStack("240V Fuel Generator"),
             'I',ItemStack(Items.IRON_INGOT),'P',findItemStack("Iron Plate"))

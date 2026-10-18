@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "minecraft:bucket"
+    },
+    "C": {
+      "item": "eln:copper_cable"
+    },
+    "G": {
+      "item": "eln:240v_fuel_generator"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "PPP",
+    "BGB",
+    "CRC"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:standby_gasoline_generator"
+  }
+}

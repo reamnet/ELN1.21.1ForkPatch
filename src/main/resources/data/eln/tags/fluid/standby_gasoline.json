@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {"id": "#c:gasoline", "required": false},
+    {"id": "#c:fuels/gasoline", "required": false},
+    {"id": "#forge:gasoline", "required": false},
+    {"id": "#forge:fuels/gasoline", "required": false}
+  ]
+}

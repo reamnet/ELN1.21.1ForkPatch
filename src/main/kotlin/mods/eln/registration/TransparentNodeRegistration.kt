@@ -1624,6 +1624,14 @@ object TransparentNodeRegistration {
             desc.ghostGroup = g
             transparentNodeItem.addDescriptor(subId + (id shl 6), desc)
         }
+        transparentNodeItem.addDescriptor(6+(124 shl 6),
+            mods.eln.transparentnode.standby.BackupDescriptor(TR_NAME(I18N.Type.NONE,"Automatic Transfer Switch"),false).apply {
+                setCreativeTab(Eln.creativeTabPowerElectronics)
+            })
+        transparentNodeItem.addDescriptor(7+(124 shl 6),
+            mods.eln.transparentnode.standby.BackupDescriptor(TR_NAME(I18N.Type.NONE,"Standby Gasoline Generator"),true).apply {
+                setCreativeTab(Eln.creativeTabMachines)
+            })
         mods.eln.transparentnode.kitchen.KitchenType.entries.forEachIndexed { index,type ->
             transparentNodeItem.addDescriptor(1+index+(124 shl 6),
                 mods.eln.transparentnode.kitchen.KitchenDescriptor(type).apply { setCreativeTab(Eln.creativeTabMachines) })

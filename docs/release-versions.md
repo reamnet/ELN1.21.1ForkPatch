@@ -19,6 +19,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.13` | — | Compact dot spotlights, porch lantern sconces, basic lamp holders, and parking lights raised by two blocks with saved-pole clearance updates |
 | `v3.0.14` | — | Programmable UPS with two 24-battery racks, automatic backup and charging, per-cell energy preservation, and a compact status GUI |
 | `v3.0.15` | — | 23 new lighting fixtures, slab/table mounting, five working kitchen appliances, UPS backup/overload beeps and corrected legacy generator voltage stamping |
+| `v3.0.16` | — | Automatic transfer switch, wireless generator start, 10 kW programmable gasoline standby generator and generic tagged/container/pipe fuel support |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`

@@ -80,7 +80,7 @@ class TransparentNodeEntityWithFluid(pos: net.minecraft.core.BlockPos, state: ne
      * @param fluid
      */
     override fun canFill(from: Direction?, fluid: Fluid?): Boolean {
-        return false
+        return fluidHandler.canFill(from, fluid)
     }
 
     /**
