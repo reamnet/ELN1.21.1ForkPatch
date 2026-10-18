@@ -282,6 +282,65 @@ object CraftingRecipes {
     }
 
     private fun recipeLampSocket() {
+        addRecipe(findItemStack("Up Down Cylinder Wall Sconce"), " L ", "IPI", " L ",
+            'L',findItemStack("Spot Lamp Socket"),'I',ItemStack(Items.IRON_INGOT),'P',findItemStack("Iron Plate"))
+        addRecipe(findItemStack("Fabric Shade Wall Sconce"), "WWW", " L ", " P ",
+            'W',ItemStack(Blocks.WHITE_WOOL),'L',findItemStack("Basic Lamp Holder"),'P',findItemStack("Iron Plate"))
+        addRecipe(findItemStack("Glass Globe Wall Sconce"), " G ", "GLG", " P ",
+            'G',ItemStack(Blocks.GLASS),'L',findItemStack("Basic Lamp Holder"),'P',findItemStack("Iron Plate"))
+        addRecipe(findItemStack("Industrial Cage Wall Sconce"), "III", "ILI", " P ",
+            'I',ItemStack(Blocks.IRON_BARS),'L',findItemStack("Basic Lamp Holder"),'P',findItemStack("Iron Plate"))
+        addRecipe(findItemStack("Double Candle Wall Sconce"), "L L", " G ", " P ",
+            'L',findItemStack("Basic Lamp Holder"),'G',ItemStack(Items.GOLD_INGOT),'P',findItemStack("Iron Plate"))
+        addRecipe(findItemStack("Ceramic Drum Table Lamp"), "WWW", " L ", " B ",
+            'W',ItemStack(Blocks.WHITE_WOOL),'L',findItemStack("Basic Lamp Holder"),'B',ItemStack(Blocks.TERRACOTTA))
+        addRecipe(findItemStack("Green Banker Table Lamp"), "GGG", " L ", " P ",
+            'G',ItemStack(Blocks.GREEN_STAINED_GLASS),'L',findItemStack("Basic Lamp Holder"),'P',findItemStack("Copper Ingot"))
+        addRecipe(findItemStack("Articulated Task Table Lamp"), " IL", " I ", " P ",
+            'I',ItemStack(Items.IRON_INGOT),'L',findItemStack("Spot Lamp Socket"),'P',findItemStack("Iron Plate"))
+        addRecipe(Eln.findItemStack("Deep Baffle Recessed Light",2), " I ", "BLB",
+            'I',findItemStack("Iron Plate"),'B',ItemStack(Items.BLACK_DYE),'L',findItemStack("Flat Lamp Socket"))
+        addRecipe(Eln.findItemStack("Trimless Recessed Downlight",2), " W ", "GLG",
+            'W',ItemStack(Items.WHITE_DYE),'G',ItemStack(Blocks.GLASS_PANE),'L',findItemStack("Flat Lamp Socket"))
+        addRecipe(Eln.findItemStack("Adjustable Gimbal Recessed Light",2), " I ", "ILI",
+            'I',ItemStack(Items.IRON_INGOT),'L',findItemStack("Spot Lamp Socket"))
+        addRecipe(findItemStack("Garden Bollard Light"), " G ", "ILI", " P ",
+            'G',ItemStack(Blocks.GLASS),'I',ItemStack(Items.IRON_INGOT),'L',findItemStack("Basic Lamp Holder"),'P',findItemStack("Iron Plate"))
+        addRecipe(findItemStack("Gooseneck Barn Light"), "IIL", "P  ",
+            'I',ItemStack(Items.IRON_INGOT),'L',findItemStack("Robust Lamp Socket"),'P',findItemStack("Iron Plate"))
+        addRecipe(findItemStack("Traditional Lantern Post Light"), " L ", " I ", " P ",
+            'L',findItemStack("Porch Lantern Sconce"),'I',ItemStack(Items.IRON_INGOT),'P',findItemStack("Iron Plate"))
+        addRecipe(findItemStack("Electric Microwave"), "PPP", "GRC", "PPP",
+            'P',findItemStack("Iron Plate"),'G',ItemStack(Blocks.GLASS_PANE),'R',ItemStack(Items.REDSTONE),'C',findItemStack("Copper Cable"))
+        addRecipe(findItemStack("Electric Toaster"), "I I", "PRP", "CCC",
+            'I',ItemStack(Items.IRON_INGOT),'P',findItemStack("Iron Plate"),'R',ItemStack(Items.REDSTONE),'C',findItemStack("Copper Cable"))
+        addRecipe(findItemStack("Flat Electric Cooktop"), "GGG", "RRR", "PCP",
+            'G',ItemStack(Blocks.BLACK_STAINED_GLASS),'R',ItemStack(Items.REDSTONE),'P',findItemStack("Iron Plate"),'C',findItemStack("Copper Cable"))
+        addRecipe(findItemStack("Electric Refrigerator"), "PPP", "GCG", "PRP",
+            'P',findItemStack("Iron Plate"),'G',ItemStack(Blocks.GLASS_PANE),'C',ItemStack(Blocks.CHEST),'R',findItemStack("Copper Cable"))
+        addRecipe(findItemStack("Electric Coffee Maker"), " I ", "GBG", "PCP",
+            'I',ItemStack(Items.IRON_INGOT),'G',ItemStack(Blocks.GLASS_PANE),'B',ItemStack(Items.BUCKET),'P',findItemStack("Iron Plate"),'C',findItemStack("Copper Cable"))
+
+        addRecipe(findItemStack("Thin Fluorescent Shop Light"), "PPP", "LLL",
+            'P',findItemStack("Iron Plate"),'L',findItemStack("Flat Lamp Socket"))
+        addRecipe(findItemStack("Suspended Factory Fluorescent Light"), "C C", "PPP", "LLL",
+            'C',ItemStack(Items.CHAIN),'P',findItemStack("Iron Plate"),'L',findItemStack("Thin Fluorescent Shop Light"))
+        addRecipe(findItemStack("Outdoor Motion Floodlight"), "L L", " S ", " P ",
+            'L',findItemStack("Spot Lamp Socket"),'S',findItemStack("Electrical Entity Sensor"),'P',findItemStack("Iron Plate"))
+        addRecipe(findItemStack("Candle Arm Foyer Chandelier"), " C ", "GLG", "LLL",
+            'C',ItemStack(Items.CHAIN),'G',ItemStack(Items.GOLD_INGOT),'L',findItemStack("Classic Lamp Socket"))
+        addRecipe(findItemStack("Crystal Tier Foyer Chandelier"), " C ", "GLG", "GGG",
+            'C',ItemStack(Items.CHAIN),'G',ItemStack(Blocks.GLASS_PANE),'L',findItemStack("Candle Arm Foyer Chandelier"))
+        addRecipe(findItemStack("Wagon Wheel Foyer Chandelier"), "CCC", "LPL", "LLL",
+            'C',ItemStack(Items.CHAIN),'P',ItemStack(Blocks.DARK_OAK_PLANKS),'L',findItemStack("Classic Lamp Socket"))
+        addRecipe(findItemStack("Lantern Cage Foyer Chandelier"), " C ", "ILI", "ILI",
+            'C',ItemStack(Items.CHAIN),'I',ItemStack(Blocks.IRON_BARS),'L',findItemStack("Classic Lamp Socket"))
+        addRecipe(findItemStack("Modern Sputnik Foyer Chandelier"), " L ", "LGL", " L ",
+            'G',ItemStack(Items.GOLD_INGOT),'L',findItemStack("Classic Lamp Socket"))
+        addRecipe(findItemStack("Gasoline Construction Work Light"), "L L", " G ", "IPI",
+            'L',findItemStack("Warehouse Wall Floodlight"),'G',findItemStack("240V Fuel Generator"),
+            'I',ItemStack(Items.IRON_INGOT),'P',findItemStack("Iron Plate"))
+
         addRecipe(Eln.findItemStack("Basic Lamp Holder",2), " C ", " P ",
             'C',findItemStack("Copper Ingot"),'P',findItemStack("Iron Plate"))
         addRecipe(Eln.findItemStack("Mini Dot Spotlight",2), " I ", "GLG",

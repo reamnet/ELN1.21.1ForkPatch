@@ -149,7 +149,7 @@ class SixNodeItem(b: Supplier<Block>) : GenericItemBlockUsingDamage<SixNodeDescr
                 sendMessage(player, error)
                 return false
             }
-            if (block.getIfOtherBlockIsSolid(world, x, y, z, direction)) {
+            if (block.getIfOtherBlockIsSolid(world, x, y, z, direction, getDescriptor(stack))) {
                 val ghostgroup = descriptor.getGhostGroup(direction, LRDU.Up)
                 ghostgroup?.plot(coord, coord, descriptor.ghostGroupUuid)
                 val sixNode = SixNode()
@@ -166,7 +166,7 @@ class SixNodeItem(b: Supplier<Block>) : GenericItemBlockUsingDamage<SixNodeDescr
                 world.setBlockToAir(x, y, z)
                 return false
             }
-            if (!sixNode.getSideEnable(direction) && block.getIfOtherBlockIsSolid(world, x, y, z, direction)) {
+            if (!sixNode.getSideEnable(direction) && block.getIfOtherBlockIsSolid(world, x, y, z, direction, getDescriptor(stack))) {
                 sixNode.createSubBlock(stack, direction, player)
                 block.onBlockPlacedBy(world, pos, fromFacing(side).inverse, player, metadata)
                 return true

@@ -1624,6 +1624,14 @@ object TransparentNodeRegistration {
             desc.ghostGroup = g
             transparentNodeItem.addDescriptor(subId + (id shl 6), desc)
         }
+        mods.eln.transparentnode.kitchen.KitchenType.entries.forEachIndexed { index,type ->
+            transparentNodeItem.addDescriptor(1+index+(124 shl 6),
+                mods.eln.transparentnode.kitchen.KitchenDescriptor(type).apply { setCreativeTab(Eln.creativeTabMachines) })
+        }
+        transparentNodeItem.addDescriptor(0 + (124 shl 6),
+            mods.eln.transparentnode.worklight.WorkLightDescriptor(TR_NAME(I18N.Type.NONE, "Gasoline Construction Work Light")).apply {
+                setCreativeTab(Eln.creativeTabLighting)
+            })
         // New sub-IDs only: existing poles, towers and switches retain their saved identities.
         transparentNodeItem.addDescriptor(9 + (id shl 6),
             UtilityStreetLightDescriptor(TR_NAME(I18N.Type.NONE, "Utility Pole Street Light")))

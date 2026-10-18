@@ -157,6 +157,7 @@ State=Stav
 Stored_energy\:_%1$J_(%2$%)=Uložená energie: %1$J (%2$%)
 Subsystem_Matrix_Size=Velikost matice subsystému
 Temperature=Teplota
+Temperature\:_%1$_C=Temperature: %1$ C
 Temperature\:_%1$°C=Teplota: %1$°C
 Temperature_gauge=Teploměr
 The_relay's_input_behaves\nlike_a_Schmitt_Trigger.=Vstup relé se chová\njako Schmittův klopný obvod.
@@ -1738,6 +1739,7 @@ Fixed_Shaft.name=Pevná hřídel
 Flywheel.name=Setrvačník
 Fuel_Heat_Furnace.name=Palivová tepelná pec
 Gas_Turbine.name=Plynová turbína
+Gasoline_Construction_Work_Light.name=Gasoline Construction Work Light
 Generator.name=Generátor
 Grid_DC-DC_Converter.name=Síťový DC-DC měnič
 Grid_Switch.name=Síťový spínač
@@ -2014,13 +2016,35 @@ Ambient_temperature=Okolní teplota
 Precipitation=Srážky
 
 # src/main/kotlin/mods/eln/sixnode/lampsocket/DecorativeLampStyle.kt
+Adjustable_Gimbal_Recessed_Light.name=Adjustable Gimbal Recessed Light
+Articulated_Task_Table_Lamp.name=Articulated Task Table Lamp
 Basic_Chandelier.name=Basic Chandelier
 Basic_Lamp_Holder.name=Basic Lamp Holder
+Candle_Arm_Foyer_Chandelier.name=Candle Arm Foyer Chandelier
+Ceramic_Drum_Table_Lamp.name=Ceramic Drum Table Lamp
+Crystal_Tier_Foyer_Chandelier.name=Crystal Tier Foyer Chandelier
+Deep_Baffle_Recessed_Light.name=Deep Baffle Recessed Light
+Double_Candle_Wall_Sconce.name=Double Candle Wall Sconce
+Fabric_Shade_Wall_Sconce.name=Fabric Shade Wall Sconce
+Garden_Bollard_Light.name=Garden Bollard Light
+Glass_Globe_Wall_Sconce.name=Glass Globe Wall Sconce
+Gooseneck_Barn_Light.name=Gooseneck Barn Light
+Green_Banker_Table_Lamp.name=Green Banker Table Lamp
 Household_Desk_Lamp.name=Household Desk Lamp
+Industrial_Cage_Wall_Sconce.name=Industrial Cage Wall Sconce
+Lantern_Cage_Foyer_Chandelier.name=Lantern Cage Foyer Chandelier
 Mini_Dot_Spotlight.name=Mini Dot Spotlight
+Modern_Sputnik_Foyer_Chandelier.name=Modern Sputnik Foyer Chandelier
+Outdoor_Motion_Floodlight.name=Outdoor Motion Floodlight
 Porch_Lantern_Sconce.name=Porch Lantern Sconce
 Round_Recessed_Ceiling_Light.name=Round Recessed Ceiling Light
+Suspended_Factory_Fluorescent_Light.name=Suspended Factory Fluorescent Light
+Thin_Fluorescent_Shop_Light.name=Thin Fluorescent Shop Light
+Traditional_Lantern_Post_Light.name=Traditional Lantern Post Light
+Trimless_Recessed_Downlight.name=Trimless Recessed Downlight
 Twin_Parking_Lot_Light.name=Twin Parking Lot Light
+Up_Down_Cylinder_Wall_Sconce.name=Up Down Cylinder Wall Sconce
+Wagon_Wheel_Foyer_Chandelier.name=Wagon Wheel Foyer Chandelier
 Warehouse_Wall_Floodlight.name=Warehouse Wall Floodlight
 
 # src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketDescriptor.kt
@@ -2037,14 +2061,20 @@ Bulb=Žárovka
 Bulb_Life_Left=Zbývající životnost žárovky
 
 # src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt
+Always_off=Always off
+Always_on=Always on
 Beam_orientation\:_%1$°=Orientace paprsku: %1$°
 Bulbs\:_%1$/%2$=Bulbs: %1$/%2$
 Cable_slot_empty=Slot pro kabel prázdný
 Connected_to_%1$=Připojeno k %1$
+Detects_living_entities_within_8_blocks_in_front_of_the_light=Detects living entities within 8 blocks in front of the light
 Grounded=Uzemněno
 Lamp_slot_empty=Slot pro lampu prázdný
+Motion\:_all_day=Motion: all day
+Motion\:_night=Motion: night
 Powered_by_lamp_supply=Napájeno napájením lamp
 Specify_the_lamp_supply_channel=Určete napájecí kanál lampy
+Stays_on_for_30_seconds_after_movement;_walls_block_detection=Stays on for 30 seconds after movement; walls block detection
 This_currently_does_nothing.=Toto v současnosti nic nedělá.
 This_light_uses_a_wireless_lamp_supply=This light uses a wireless lamp supply
 Ungrounded=Neuzemněno
@@ -2322,7 +2352,6 @@ Sensible\:_%1$_W;_evaporation\:_%2$_W;_motor_heat\:_%3$_W._Negative_net_means_wa
 Sensible_cooling=Sensible cooling
 Supply_voltage=Supply voltage
 Target\:_%1$_C=Target: %1$ C
-Temperature\:_%1$_C=Temperature: %1$ C
 Use_the_fan_above_target_+2_C_and_water_above_target_+5_C.=Use the fan above target +2 C and water above target +5 C.
 Verified=Verified
 Water\:_%1$_/_4.0_B=Water: %1$ / 4.0 B
@@ -2352,6 +2381,41 @@ Bulb_2_Life_Left=Zbývající životnost žárovky 2
 Beam_width\:_%1$°=Šířka paprsku: %1$°
 Horizontal_angle\:_%1$°=Horizontální úhel: %1$°
 Vertical_angle\:_%1$°=Vertikální úhel: %1$°
+
+# src/main/kotlin/mods/eln/transparentnode/kitchen/KitchenClient.kt
+%1$_V_/_%2$_W=%1$ V / %2$ W
+27_food-storage_slots;_freezes_a_water_bucket_into_ice_and_returns_the_bucket=27 food-storage slots; freezes a water bucket into ice and returns the bucket
+Bread_makes_toasted_bread=Bread makes toasted bread
+Brews_fresh_coffee_from_cocoa_beans_and_a_water_bottle=Brews fresh coffee from cocoa beans and a water bottle
+Cocoa_beans_+_water_bottle=Cocoa beans + water bottle
+Connect_a_floor_cable_to_any_horizontal_side=Connect a floor cable to any horizontal side
+Cooks_food_using_the_world's_smelting_recipes=Cooks food using the world's smelting recipes
+Cooling_the_refrigerator=Cooling the refrigerator
+Food_recipes;_no_fuel_needed=Food recipes; no fuel needed
+Food_storage=Food storage
+Needs_a_supporting_surface=Needs a supporting surface
+Needs_water_or_output_space=Needs water or output space
+Processing=Processing
+Rated_supply\:_%1$_V_/_%2$_W=Rated supply: %1$ V / %2$ W
+Ready=Ready
+Returned_container=Returned container
+Switched_off=Switched off
+Turns_bread_into_edible_toasted_bread=Turns bread into edible toasted bread
+Waiting_for_rated_supply_voltage=Waiting for rated supply voltage
+Water_bottle=Water bottle
+Work\:_%1$%_/_%2$_W=Work: %1$% / %2$ W
+Wrong_supply_voltage;_input_protected=Wrong supply voltage; input protected
+
+# src/main/kotlin/mods/eln/transparentnode/kitchen/KitchenFoods.kt
+Fresh_Coffee.name=Fresh Coffee
+Toasted_Bread.name=Toasted Bread
+
+# src/main/kotlin/mods/eln/transparentnode/kitchen/KitchenType.kt
+Electric_Coffee_Maker.name=Electric Coffee Maker
+Electric_Microwave.name=Electric Microwave
+Electric_Refrigerator.name=Electric Refrigerator
+Electric_Toaster.name=Electric Toaster
+Flat_Electric_Cooktop.name=Flat Electric Cooktop
 
 # src/main/kotlin/mods/eln/transparentnode/ups/UpsClient.kt
 Backup\:_about_%1$_min=Backup: about %1$ min
@@ -2430,6 +2494,29 @@ Installed=Installed
 Lamp=Lamp
 Missing=Missing
 Step-down_unit=Step-down unit
+
+# src/main/kotlin/mods/eln/transparentnode/worklight/WorkLight.kt
+%1$/2=%1$/2
+2000_W_generator;_output_follows_the_installed_bulb_voltage_(12,_120_or_240_V)=2000 W generator; output follows the installed bulb voltage (12, 120 or 240 V)
+Accepts_every_bulb_type;_cable_power_or_wireless_lamp_supply_also_supported=Accepts every bulb type; cable power or wireless lamp supply also supported
+Bulbs=Bulbs
+Generator_/_cable=Generator / cable
+Lighting_power=Lighting power
+Right-click_with_a_gasoline_container_to_refuel;_open_the_GUI_for_controls=Right-click with a gasoline container to refuel; open the GUI for controls
+Wheeled_gasoline_generator_with_two_replaceable_floodlight_bulbs=Wheeled gasoline generator with two replaceable floodlight bulbs
+Wireless_lamp_supply=Wireless lamp supply
+
+# src/main/kotlin/mods/eln/transparentnode/worklight/WorkLightClient.kt
+Construction_Work_Light=Construction Work Light
+Fuel\:_%1$%_(2-bucket_tank)=Fuel: %1$% (2-bucket tank)
+Gas_/_cable=Gas / cable
+Generator\:_2000_W_/_%1$_V=Generator: 2000 W / %1$ V
+Refuel_with_gasoline_in_hand=Refuel with gasoline in hand
+Start_engine=Start engine
+Stop_engine=Stop engine
+Two_matching_bulbs=Two matching bulbs
+Wireless=Wireless
+Wireless_lamp_supply_channel=Wireless lamp supply channel
 
 # src/main/kotlin/mods/eln/wiki/CircuitLessons.kt
 1._Hold_a_Multimeter_or_AllMeter._Normal_right-click_keeps_the_existing_machine_readings._Sneak-click_a_connector_to_select_reference_A,_then_sneak-click_a_second_connector_B.=1. Hold a Multimeter or AllMeter. Normal right-click keeps the existing machine readings. Sneak-click a connector to select reference A, then sneak-click a second connector B.

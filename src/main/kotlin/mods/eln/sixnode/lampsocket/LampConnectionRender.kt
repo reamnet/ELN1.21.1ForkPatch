@@ -10,7 +10,8 @@ object LampConnectionRender {
     private val collar = ResourceLocation.withDefaultNamespace("textures/block/iron_block.png")
     private val insulation = ResourceLocation.withDefaultNamespace("textures/block/black_concrete.png")
 
-    fun draw(side: LRDU, edge: Float, width: Float, height: Float) {
+    @JvmOverloads
+    fun draw(side: LRDU, edge: Float, width: Float, height: Float, mountInset: Float = 0f) {
         GL11.glPushMatrix()
         val angle = when (side) { LRDU.Right -> 0f; LRDU.Up -> -90f; LRDU.Left -> 180f; LRDU.Down -> 90f }
         GL11.glRotatef(angle, 1f, 0f, 0f)
@@ -19,10 +20,15 @@ object LampConnectionRender {
         val end = LampConnections.cableEnd(edge)
         val shoulder = edge + (end - edge) * 0.42f
         UtilsClient.bindTexture(collar)
-        box((centre - radius).coerceAtLeast(0.002f), centre + radius, -radius, radius, edge - 0.008f, shoulder)
+        box((centre - radius).coerceAtLeast(0.002f) - mountInset, centre + radius - mountInset, -radius, radius, edge - 0.008f, shoulder)
         UtilsClient.bindTexture(insulation)
         val inner = radius * 0.8f
-        box((centre - inner).coerceAtLeast(0.003f), centre + inner, -inner, inner, shoulder, end)
+        box((centre - inner).coerceAtLeast(0.003f) - mountInset, centre + inner - mountInset, -inner, inner, shoulder, end)
+        if (mountInset != 0f) {
+            // An insulated drop joins the normal cable plane to the partial block's surface.
+            box(minOf(centre,centre-mountInset)-inner,maxOf(centre,centre-mountInset)+inner,
+                -inner,inner,end-inner,end+inner)
+        }
         GL11.glPopMatrix()
     }
 

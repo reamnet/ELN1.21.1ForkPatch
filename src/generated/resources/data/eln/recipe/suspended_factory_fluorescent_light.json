@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "minecraft:chain"
+    },
+    "L": {
+      "item": "eln:thin_fluorescent_shop_light"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    "C C",
+    "PPP",
+    "LLL"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:suspended_factory_fluorescent_light"
+  }
+}

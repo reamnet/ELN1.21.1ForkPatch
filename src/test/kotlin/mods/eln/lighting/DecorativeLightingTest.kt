@@ -19,7 +19,7 @@ class DecorativeLightingTest {
     private fun element(d: LampSocketDescriptor) = LampSocketElement(SixNode().apply { coordinate = Coordinate(0,64,0,0) },Direction.YN,d)
 
     @Test fun allFixtureIdentitiesAcceptEveryRegisteredBulbWithoutChangingOldFixtures() {
-        assertEquals(8,fixtures.size)
+        assertEquals(30,fixtures.size)
         val savedFixtures = listOf("Twin Parking Lot Light","Warehouse Wall Floodlight","Household Desk Lamp",
             "Round Recessed Ceiling Light","Basic Chandelier")
         savedFixtures.forEachIndexed { index,name ->
@@ -41,7 +41,7 @@ class DecorativeLightingTest {
     @Test fun everyBulbVoltageDrawsItsOwnRatedPowerForEachInstalledBulb() {
         for (fixture in fixtures) for (bulb in bulbs) for (count in setOf(1,fixture.bulbCapacity)) {
             val e = element(fixture)
-            e.inventory.setItem(0,bulb.newItemStack(count)); e.computeInventory()
+            e.inventory.setItem(0,bulb.newItemStack(count)); e.apply { motionMode=2; updateMotion(.05) }; e.computeInventory()
             val root = RootSystem(.05,1)
             root.addState(e.electricalLoad); root.addComponent(e.lampResistor)
             root.addComponent(VoltageSource("testSupply",e.electricalLoad,null).apply { voltage = bulb.lampData.nominalU })

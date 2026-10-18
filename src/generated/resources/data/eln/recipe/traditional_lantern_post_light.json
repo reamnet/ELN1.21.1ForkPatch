@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "L": {
+      "item": "eln:porch_lantern_sconce"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    " L ",
+    " I ",
+    " P "
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:traditional_lantern_post_light"
+  }
+}

@@ -39,6 +39,7 @@ import kotlin.math.*
 @EventBusSubscriber(modid=Eln.MODID,value=[Dist.CLIENT])
 object DecorativeLightingChecks {
     private val mc get()=Minecraft.getInstance()
+    private val guiOnly=java.lang.Boolean.getBoolean("eln.decorativeGuiChecksOnly")
     private val worldName="decorative-lights-${System.currentTimeMillis()}"
     private val base=BlockPos(256,66,256)
     private val supplyPos=base.west(4).south(4)
@@ -47,9 +48,9 @@ object DecorativeLightingChecks {
     private val fixtures=buildList {
         for(wired in listOf(false,true)) for((i,style) in DecorativeLampStyle.entries.withIndex()) {
             if(wired && style.wirelessOnly) continue
-            val y=when(style) { DecorativeLampStyle.WAREHOUSE,DecorativeLampStyle.RECESSED,DecorativeLampStyle.CHANDELIER,DecorativeLampStyle.DOT,DecorativeLampStyle.PORCH,DecorativeLampStyle.HOLDER -> 3; DecorativeLampStyle.DESK -> 1; else -> 0 }
-            val side=when(style) { DecorativeLampStyle.WAREHOUSE,DecorativeLampStyle.PORCH,DecorativeLampStyle.HOLDER -> Direction.XN; DecorativeLampStyle.RECESSED,DecorativeLampStyle.CHANDELIER,DecorativeLampStyle.DOT -> Direction.YP; else -> Direction.YN }
-            add(Fixture(style,base.offset((i%4)*8,y,(i/4)*8+if(wired) 24 else 0),side,wired))
+            val y=if(style.ceiling || style.wallLamp) 3 else if(style.tableLamp) 1 else when(style) { DecorativeLampStyle.WAREHOUSE,DecorativeLampStyle.RECESSED,DecorativeLampStyle.CHANDELIER,DecorativeLampStyle.DOT,DecorativeLampStyle.PORCH,DecorativeLampStyle.HOLDER -> 3; DecorativeLampStyle.DESK -> 1; else -> 0 }
+            val side=if(style.ceiling) Direction.YP else if(style.wallLamp) Direction.XN else when(style) { DecorativeLampStyle.WAREHOUSE,DecorativeLampStyle.PORCH,DecorativeLampStyle.HOLDER -> Direction.XN; DecorativeLampStyle.RECESSED,DecorativeLampStyle.CHANDELIER,DecorativeLampStyle.DOT -> Direction.YP; else -> Direction.YN }
+            add(Fixture(style,base.offset((i%4)*8,y,(i/4)*8+if(wired) 80 else 0),side,wired))
         }
     }
     private val bulbs get()=Eln.sharedItem.subItemList.values.filterIsInstance<LampDescriptor>()
@@ -110,6 +111,13 @@ object DecorativeLightingChecks {
             DecorativeLampStyle.DOT -> listOf(.5,-1.4,.6,.8)
             DecorativeLampStyle.PORCH -> listOf(1.1,-1.0,1.2,.45)
             DecorativeLampStyle.HOLDER -> listOf(.65,-1.1,.8,.5)
+            DecorativeLampStyle.SHOP -> listOf(2.2,-2.0,2.4,.6)
+            DecorativeLampStyle.FACTORY -> listOf(2.2,-2.1,2.4,.0)
+            DecorativeLampStyle.MOTION -> listOf(1.5,-1.2,1.7,.3)
+            else -> if(entry.style.tableLamp) listOf(1.4,.1,1.7,.5)
+                else if(entry.style.wallLamp) listOf(1.5,-1.1,1.7,.4)
+                else if(entry.style.ceiling) listOf(2.2,-1.8,2.4,.0)
+                else listOf(2.0,.4,2.4,1.0)
         }
         val yaw=Math.toDegrees(atan2(dx,-dz)).toFloat()
         val pitch=Math.toDegrees(atan2(dy+p.eyeHeight-height,hypot(dx,dz))).toFloat()
@@ -125,7 +133,7 @@ object DecorativeLightingChecks {
     private fun finish(error: Throwable?) {
         done=true;mc.options.hideGui=false
         Files.writeString(mc.gameDirectory.toPath().resolve("decorative-light-checks.json"),GsonBuilder().setPrettyPrinting().create().toJson(
-            mapOf("world" to worldName,"bulbVariants" to bulbs.size,"passed" to passed,"failure" to error?.stackTraceToString())))
+            mapOf("world" to worldName,"bulbVariants" to bulbs.size,"bulbCycleExecuted" to !guiOnly,"passed" to passed,"failure" to error?.stackTraceToString())))
         if(error!=null)Eln.logger.error("DECORATIVE_LIGHT FAIL",error) else Eln.logger.info("DECORATIVE_LIGHT COMPLETE {} checks",passed.size)
         mc.execute { mc.stop();kotlin.concurrent.thread { Thread.sleep(1500);kotlin.system.exitProcess(if(error==null)0 else 1) } }
     }
@@ -144,7 +152,8 @@ object DecorativeLightingChecks {
                     server { p ->
                         p.setGameMode(GameType.CREATIVE);p.abilities.flying=true;p.onUpdateAbilities();view(p,fixtures[0])
                         val world=p.serverLevel();world.dayTime=6000
-                        for(x in 247..286)for(z in 250..294)world.setBlockAndUpdate(BlockPos(x,65,z),Blocks.STONE.defaultBlockState())
+                        for(x in 15..18) for(z in 15..25) world.setChunkForced(x,z,true)
+                        for(x in 247..286)for(z in 250..400)world.setBlockAndUpdate(BlockPos(x,65,z),Blocks.STONE.defaultBlockState())
                         LampChannelMemory.remember(p.persistentData,channel)
                         val supply=place(p,Eln.findItemStack("240V Lamp Supply",1),supplyPos,Direction.YN) as LampSupplyElement
                         supply.front=Direction.YN.getLRDUGoingTo(Direction.XN)!!
@@ -158,6 +167,7 @@ object DecorativeLightingChecks {
                             if(entry.side==Direction.YP)for(x in -3..2)for(z in -1..1)world.setBlockAndUpdate(entry.pos.offset(x,1,z),Blocks.WHITE_CONCRETE.defaultBlockState())
                             if(entry.style==DecorativeLampStyle.DESK)world.setBlockAndUpdate(entry.pos.below(),Blocks.BIRCH_PLANKS.defaultBlockState())
                             val e=place(p,Eln.findItemStack(entry.style.itemName,1),entry.pos,entry.side) as LampSocketElement
+                            e.motionMode=2
                             if(entry.style==DecorativeLampStyle.PARKING && !entry.wired) {
                                 // Simulate a saved 3.0.12 pole; the first process pass must migrate its old clearance.
                                 Eln.ghostManager.removeGhostAndBlockWithObserver(e.coordinate,e.descriptor.ghostGroupUuid)
@@ -195,8 +205,8 @@ object DecorativeLightingChecks {
                             check(ghosts.none { it.elementCoordinate!!.y==entry.pos.y+3 && (it.elementCoordinate!!.x!=entry.pos.x || it.elementCoordinate!!.z!=entry.pos.z) })
                         }
                         record("All fixtures place on their proper surfaces, accept bulb batches by hand and light wirelessly; old parking clearance migrates to the taller pole")
-                        voltage(p,supplyPos.west(2),Direction.YN,0.0)
-                    };waitFor(19,30)
+                        if(!guiOnly)voltage(p,supplyPos.west(2),Direction.YN,0.0)
+                    };if(guiOnly)waitFor(21,30) else waitFor(19,30)
                 }
                 3 -> if(settled()) {
                     server { p ->
@@ -214,7 +224,14 @@ object DecorativeLightingChecks {
                 4 -> if(complete()) { if(variant<bulbs.size)waitFor(3,140) else waitFor(20,30) }
                 5 -> if(ticks>20) {
                     val entry=fixtures.filter { it.wired }[ui]
-                    server { p ->view(p,entry);gui(p,entry) };step(6)
+                    server { p ->view(p,entry) };waitFor(50,if(ui==0)80 else 20)
+                }
+                50 -> if(settled()) {
+                    val entry=fixtures.filter { it.wired }[ui]
+                    val entity=mc.level?.getBlockEntity(entry.pos) as? mods.eln.node.six.SixNodeEntity
+                    if(entity?.elementRenderList?.get(entry.side.int) is LampSocketRender) {
+                        server { p ->gui(p,entry) };step(6)
+                    }
                 }
                 6 -> if(complete() && mc.screen is LampSocketGui && ticks>20) {
                     val render=(mc.screen as LampSocketGui).render

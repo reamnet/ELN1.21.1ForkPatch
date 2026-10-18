@@ -56,6 +56,7 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, sixNodeDescri
     var projectionRotationAngle = 0.0
     var paintColor = DEFAULT_PAINT_COLOR
     var grounded = true
+    var motionMode = 0
 
     private var boot = true
 
@@ -108,6 +109,7 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, sixNodeDescri
             val cableStack = unserialiseItemStack(stream)
             cableDescriptor = if (!cableStack.isNothing()) getItemObject(cableStack) as GenericCableDescriptor else null
             if (descriptor.fixture != null) bulbCount = stream.readUnsignedByte().coerceIn(0,descriptor.bulbCapacity)
+            if (descriptor.fixture == DecorativeLampStyle.MOTION) motionMode = stream.readUnsignedByte().coerceIn(0,3)
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -121,12 +123,14 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, sixNodeDescri
     override fun draw() {
         super.draw() // Only for colored cables
 
+        val inset=LampMounting.inset(tileEntity.level!!,tileEntity.blockPos,side,descriptor)
         val edges = descriptor.renderType.connectionEdges(front!!, descriptor.initialRenderAngleOffset)
         for (port in LRDU.entries) {
             val cable = getCableRender(port) ?: continue
-            if (connectedSide[port]) LampConnectionRender.draw(port, edges[port.dir], cable.width, cable.height)
+            if (connectedSide[port]) LampConnectionRender.draw(port, edges[port.dir], cable.width, cable.height,inset.toFloat())
         }
         GL11.glPushMatrix()
+        GL11.glTranslated(-inset,0.0,0.0)
         GL11.glRotated(descriptor.initialRenderAngleOffset, 1.0, 0.0, 0.0)
         descriptor.renderType.draw(this, UtilsClient.distanceFromClientPlayer(this.tileEntity).toDouble())
         GL11.glPopMatrix()
@@ -204,11 +208,11 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, sixNodeDescri
     }
 
     override fun getRenderBoundingBox(tileEntity: SixNodeEntity): AABB? {
-        if (!descriptor.extendedRenderBounds) return null
+        if (!descriptor.extendedRenderBounds && (tileEntity.level==null || LampMounting.inset(tileEntity.level!!,tileEntity.blockPos,side,descriptor)==0.0)) return null
 
         return AABB(
             (tileEntity.xCoord - 1).toDouble(),
-            tileEntity.yCoord.toDouble(),
+            (tileEntity.yCoord - 2).toDouble(),
             (tileEntity.zCoord - 1).toDouble(),
             (tileEntity.xCoord + 2).toDouble(),
             (tileEntity.yCoord + if (descriptor.fixture == DecorativeLampStyle.PARKING) 6 else 4).toDouble(),

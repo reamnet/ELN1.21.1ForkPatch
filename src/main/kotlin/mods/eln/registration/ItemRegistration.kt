@@ -136,6 +136,8 @@ object ItemRegistration {
         registerWireToolItems(123)
         registerWireMachineItems(118)
 
+        mods.eln.transparentnode.kitchen.KitchenFoods.register()
+
         registerArmor()
         registerTool()
         registerOre()

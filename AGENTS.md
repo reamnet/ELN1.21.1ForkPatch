@@ -24,3 +24,7 @@ If you learn things about making the Gradle build work in the sandbox, document 
 * When `./gradlew` fails inside the sandbox claiming it “Could not determine a usable wildcard IP”, rerun with `GRADLE_USER_HOME=$PWD/.gradle` and, if needed, request escalation—the build otherwise succeeds once it can write its cache and bind to an IP.
 
 * Managed cloud machines may provide only a Java 21 JRE. Use a full JDK 21 for NeoForm recompilation. In proxy-only environments Java also needs explicit `http.proxyHost`/`https.proxyHost` and port properties, and a truststore containing the environment CA. Keep TLS verification enabled and keep local tool installations/caches outside tracked repository files.
+
+* In NeoForge's layered JUnit runtime, Kotlin `assertFailsWith` can hit a `KClassImpl` / `ClassBasedDeclarationContainer` classloader conflict while checking an otherwise correct exception. Use JUnit's equivalent `Assert.assertThrows(ExceptionType::class.java) { ... }` for exception assertions in that runtime; the expected exception and behavior must still be checked.
+
+* Native sound checks on a cloud machine with no audio device can use `ALSOFT_DRIVERS=null`. OpenAL Soft then initializes the `No Output` device, so real sound loading/play events can be checked without a speaker. Keep this scoped to automated headless runs; omit it for normal audible gameplay.

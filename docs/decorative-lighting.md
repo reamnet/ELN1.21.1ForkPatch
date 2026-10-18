@@ -64,3 +64,8 @@ models, recipes and translations. The opt-in native client check
 uses `-Deln.decorativeLightChecks=true`; it exercises placement, all registered
 bulbs, power modes, actual GUIs and saved-world restart, and writes screenshots
 and `decorative-light-checks.json` under the client's run directory.
+
+Version 3.0.15 adds two commercial fluorescent fixtures, an outdoor motion light,
+five foyer chandeliers and a gasoline construction-light cart. See
+[commercial and foyer lighting](commercial-and-foyer-lighting.md) for bulb counts,
+mounting clearance, power options and controls.

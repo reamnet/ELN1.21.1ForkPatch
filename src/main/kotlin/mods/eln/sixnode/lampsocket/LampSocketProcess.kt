@@ -43,13 +43,15 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
                 parkingClearanceRetry = 1.0
             }
         }
+        val energized = element.updateMotion(time)
+        if(!energized && element.poweredByLampSupply) element.electricalLoad.state = 0.0
         val lampStack = element.inventory.getItem(LampSocketContainer.LAMP_SLOT_ID)
         val cableStack = element.inventory.getItem(LampSocketContainer.CABLE_SLOT_ID)
 
         var activeLampSupplyConnection = false
         var newLightValue = BoilerplateLampData.MIN_LIGHT_VALUE
 
-        if (!lampStack.isNothing() && !cableStack.isNothing()) {
+        if (energized && !lampStack.isNothing() && !cableStack.isNothing()) {
             val lampDescriptor = Utils.getItemObject(lampStack) as LampDescriptor
 
             if (element.poweredByLampSupply) {
@@ -183,7 +185,9 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
     }
 
     private fun raytrace(rotationVector: Vec3, vectorLengthModifier: Int): Coordinate {
-        val origin = element.sixNode!!.coordinate.toVec3()
+        val mounting=element.sixNode!!.coordinate
+        val inset=LampMounting.inset(mounting.world(),mounting.pos,element.side,element.descriptor)
+        val origin = mounting.toVec3().add(element.side.rotateFromXN(Vec3(-inset,0.0,0.0)))
         val lbCoordinate = Coordinate(origin, element.sixNode!!.coordinate.dimension)
 
         // Vec3 is immutable on 1.12, and this steps a ray one block at a time, so the position

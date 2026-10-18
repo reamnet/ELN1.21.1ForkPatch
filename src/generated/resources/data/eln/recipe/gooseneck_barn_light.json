@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "L": {
+      "item": "eln:robust_lamp_socket"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    "IIL",
+    "P  "
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:gooseneck_barn_light"
+  }
+}

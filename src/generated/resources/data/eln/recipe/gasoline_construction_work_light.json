@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": {
+      "item": "eln:240v_fuel_generator"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "L": {
+      "item": "eln:warehouse_wall_floodlight"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    "L L",
+    " G ",
+    "IPI"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:gasoline_construction_work_light"
+  }
+}

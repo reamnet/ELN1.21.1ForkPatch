@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "minecraft:chain"
+    },
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "L": {
+      "item": "eln:classic_lamp_socket"
+    }
+  },
+  "pattern": [
+    " C ",
+    "GLG",
+    "LLL"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:candle_arm_foyer_chandelier"
+  }
+}

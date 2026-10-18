@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_spot_lamp_socket": {
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:spot_lamp_socket"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "eln:up_down_cylinder_wall_sconce"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_spot_lamp_socket"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "eln:up_down_cylinder_wall_sconce"
+    ]
+  }
+}

@@ -73,3 +73,10 @@ review the generated resources. The native check uses `-Deln.upsChecks=true`
 with `runClient` and writes `ups-checks.json` and screenshots in the client run
 directory. It exercises the actual rack GUI, changing output voltage, outages,
 recharging, live cell removal, world restart and breaking the block.
+
+In 3.0.15 the UPS also sounds a nearby warning when grid power is lost or the
+output is overloaded. Battery backup beeps immediately and then every five
+seconds; overload/protection warnings repeat every second. The alarm stops
+when normal operation resumes or the output is switched off. An active battery
+rack must be installed. The warning uses the existing game sound system and is
+audible within eight blocks.

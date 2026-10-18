@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "L": {
+      "item": "eln:spot_lamp_socket"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    " L ",
+    "IPI",
+    " L "
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:up_down_cylinder_wall_sconce"
+  }
+}

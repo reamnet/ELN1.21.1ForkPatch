@@ -34,7 +34,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import mods.eln.misc.writeToNBT
 
-class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal val cable: ElectricalCableDescriptor,
+open class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal val cable: ElectricalCableDescriptor,
                               internal val nominalPower: Double, internal val maxVoltage: Double,
                               tankCapacityInSecondsAtNominalPower: Double)
     : TransparentNodeDescriptor(name, FuelGeneratorElement::class.java, FuelGeneratorRender::class.java) {
@@ -114,7 +114,7 @@ class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal v
     }
 }
 
-class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: TransparentNodeDescriptor) :
+open class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: TransparentNodeDescriptor) :
     TransparentNodeElement(transparentNode, descriptor_) {
     internal var positiveLoad = NbtElectricalLoad("positiveLoad")
     internal var powerSource = PowerSource("powerSource", positiveLoad)
@@ -125,6 +125,7 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
     internal var tankFluid: Fluid? = FluidRegistry.LAVA
     internal var on by published(false)
     internal var voltageGracePeriod = 0.0
+    internal open val operatingVoltage get() = descriptor.maxVoltage
 
     init {
         electricalLoadList.add(positiveLoad)
@@ -307,7 +308,7 @@ class FuelGeneratorSlowProcess(internal val generator: FuelGeneratorElement) : I
             if (generator.voltageGracePeriod > 0) {
                 generator.voltageGracePeriod -= time;
             } else if (generator.positiveLoad.voltage <
-                FuelGeneratorDescriptor.GeneratorBailOutVoltageRatio * generator.descriptor.maxVoltage) {
+                FuelGeneratorDescriptor.GeneratorBailOutVoltageRatio * generator.operatingVoltage) {
                 generator.on = false;
             }
         }

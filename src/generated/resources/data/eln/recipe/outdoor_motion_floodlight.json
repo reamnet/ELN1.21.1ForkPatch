@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "L": {
+      "item": "eln:spot_lamp_socket"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    },
+    "S": {
+      "item": "eln:electrical_entity_sensor"
+    }
+  },
+  "pattern": [
+    "L L",
+    " S ",
+    " P "
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:outdoor_motion_floodlight"
+  }
+}

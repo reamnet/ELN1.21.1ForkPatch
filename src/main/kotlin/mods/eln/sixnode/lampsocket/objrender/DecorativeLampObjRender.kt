@@ -8,11 +8,12 @@ import mods.eln.sixnode.lampsocket.*
 
 class DecorativeLampObjRender(val style: DecorativeLampStyle) : ILampSocketObjRender {
     private val model = Eln.obj.getObj(style.model)
+    override fun mountingBounds() = net.minecraft.world.phys.AABB(model.xMin.toDouble(),model.yMin.toDouble(),model.zMin.toDouble(),model.xMax.toDouble(),model.yMax.toDouble(),model.zMax.toDouble())
     override fun connectionEdges(front: LRDU, offset: Double) = LampConnections.edges(model.getPart("Base"),front,offset-90)
     override fun draw(descriptor: LampSocketDescriptor, type: ItemRenderType, distanceToPlayer: Double) = preserveMatrix {
-        if (style != DecorativeLampStyle.PARKING && style != DecorativeLampStyle.DESK && style != DecorativeLampStyle.CHANDELIER) {
+        if (!style.uprightItem) {
             GL11.glRotatef(-70f,0f,1f,0f)
-        } else GL11.glRotatef(90f,0f,0f,1f)
+        } else GL11.glRotatef(if(style.ceiling) -90f else 90f,0f,0f,1f)
         val scale = 1.35/style.depth
         GL11.glScaled(scale,scale,scale)
         GL11.glTranslated(-style.depth*.5,0.0,0.0)
@@ -33,10 +34,23 @@ class DecorativeLampObjRender(val style: DecorativeLampStyle) : ILampSocketObjRe
                 else -> GL11.glColor3f(.20f,.23f,.26f)
             }
             model.getPart("Base")?.drawNoBind()
-            if (style == DecorativeLampStyle.PORCH) GL11.glColor3f(.28f,.20f,.12f) else GL11.glColor3f(.26f,.29f,.32f)
+            when(style) {
+                DecorativeLampStyle.PORCH -> GL11.glColor3f(.28f,.20f,.12f)
+                DecorativeLampStyle.CANDLE, DecorativeLampStyle.CRYSTAL, DecorativeLampStyle.SPUTNIK -> GL11.glColor3f(.66f,.45f,.16f)
+                DecorativeLampStyle.WAGON, DecorativeLampStyle.LANTERN -> GL11.glColor3f(.12f,.13f,.14f)
+                DecorativeLampStyle.SHOP, DecorativeLampStyle.FACTORY -> GL11.glColor3f(.75f,.77f,.78f)
+                else -> GL11.glColor3f(.26f,.29f,.32f)
+            }
             model.getPart("Metal")?.drawNoBind()
             GL11.glColor3f(.65f,.68f,.71f); model.getPart("Trim")?.drawNoBind()
-            GL11.glColor3f(.88f,.79f,.62f); model.getPart("Shade")?.drawNoBind()
+            if(style == DecorativeLampStyle.TABLE_BANKER) GL11.glColor3f(.08f,.38f,.20f)
+            else GL11.glColor3f(.88f,.79f,.62f)
+            model.getPart("Shade")?.let {
+                GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
+                GL11.glDisable(GL11.GL_CULL_FACE)
+                it.drawNoBind()
+                GL11.glPopAttrib()
+            }
             for (i in 0 until style.bulbs) {
                 val installed = i < count
                 if (!installed && style.exposedBulbs) continue

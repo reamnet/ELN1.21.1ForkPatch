@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_basic_lamp_holder": {
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:basic_lamp_holder"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "eln:double_candle_wall_sconce"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_basic_lamp_holder"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "eln:double_candle_wall_sconce"
+    ]
+  }
+}

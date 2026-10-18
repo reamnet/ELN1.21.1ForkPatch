@@ -41,6 +41,10 @@ object UpsClientChecks {
     private val pos=BlockPos(256,66,256)
     private var phase=0;private var ticks=0;private var total=0;private var ready=0;private var done=false
     private var work: CompletableFuture<Void>?=null
+    private var alarmBeepCount=0
+    @SubscribeEvent fun sound(event: net.neoforged.neoforge.client.event.sound.PlaySoundEvent) {
+        if(java.lang.Boolean.getBoolean("eln.upsChecks") && event.sound?.location?.toString()=="eln:beep_error")alarmBeepCount++
+    }
     private var outage=false;private var minimumVoltage=Double.POSITIVE_INFINITY;private var before=0.0
     private var observer: IProcess?=null
     private val passed=mutableListOf<String>()
@@ -121,17 +125,27 @@ object UpsClientChecks {
                 6 -> if(complete()) { voltage(850.0);waitFor(7,50) }
                 7 -> if(settled()) {
                     check(display().target==850.0)
-                    server { p ->val e=element(p);check(abs(e.unit.secondary.voltage-850)<.1);check(e.unit.outputWatts>495);before=e.bank.energy;outage=true;minimumVoltage=Double.POSITIVE_INFINITY;fixture(p).voltage(pos.west(2),0.0) }
+                    server { p ->val e=element(p);check(abs(e.unit.secondary.voltage-850)<.1);check(e.unit.outputWatts>495);before=e.bank.energy;alarmBeepCount=0;outage=true;minimumVoltage=Double.POSITIVE_INFINITY;fixture(p).voltage(pos.west(2),0.0) }
                     waitFor(8,60)
                 }
                 8 -> if(settled()) {
                     capture("battery-backup")
                     server { p ->
-                        val e=element(p);check(minimumVoltage>849.0);check(e.bank.energy<before-1400)
+                        val e=element(p);check(alarmBeepCount>0) { "No client alarm sound received during grid loss" };check(minimumVoltage>849.0);check(e.bank.energy<before-1400)
                         check(e.unit.status=="BACKUP");check(e.unit.inputWatts<.01);outage=false
-                        record("A real 24-to-48 battery upgrade, paged GUI and 850 V setting work; input loss causes no output interruption or input backfeed")
+                        record("A real 24-to-48 battery upgrade, paged GUI and 850 V setting work; grid loss plays a client alarm beep and causes no output interruption or input backfeed")
                         fixture(p).voltage(pos.west(2),3200.0)
-                    };waitFor(9,50)
+                    };waitFor(25,50)
+                }
+                25 -> if(settled()) {
+                    server { p ->alarmBeepCount=0;fixture(p).load(pos.east(2),850.0*850/15000.0) };waitFor(26,60)
+                }
+                26 -> if(settled()) {
+                    server { p ->val e=element(p);check(e.unit.status in setOf("LIMITED","PROTECTED","OVERTEMPERATURE")) { "No overload status: ${e.unit.status}" }
+                        check(alarmBeepCount>=2) { "Overload alarm did not repeat at the client" }
+                        record("A real 15 kW demand triggers the faster repeating overload alarm on the client")
+                        fixture(p).load(pos.east(2),850.0*850/500)
+                    };waitFor(9,60)
                 }
                 9 -> if(settled()) {
                     server { p ->

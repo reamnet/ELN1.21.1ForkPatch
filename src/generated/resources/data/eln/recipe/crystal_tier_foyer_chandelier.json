@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "minecraft:chain"
+    },
+    "G": {
+      "item": "minecraft:glass_pane"
+    },
+    "L": {
+      "item": "eln:candle_arm_foyer_chandelier"
+    }
+  },
+  "pattern": [
+    " C ",
+    "GLG",
+    "GGG"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:crystal_tier_foyer_chandelier"
+  }
+}

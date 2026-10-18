@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_porch_lantern_sconce": {
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:porch_lantern_sconce"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "eln:traditional_lantern_post_light"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_porch_lantern_sconce"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "eln:traditional_lantern_post_light"
+    ]
+  }
+}

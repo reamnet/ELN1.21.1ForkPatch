@@ -354,7 +354,8 @@ class SixNodeBlock : NodeBlock(nodeProperties().strength(0.3f, 1.0f), 0) {
         return -(look.x * nx + look.y * ny + look.z * nz)
     }
 
-    fun getIfOtherBlockIsSolid(world: Level, x: Int, y: Int, z: Int, direction: Direction): Boolean {
+    @JvmOverloads
+    fun getIfOtherBlockIsSolid(world: Level, x: Int, y: Int, z: Int, direction: Direction, descriptor: SixNodeDescriptor? = null): Boolean {
         val vect = IntArray(3)
         vect[0] = x
         vect[1] = y
@@ -369,7 +370,9 @@ class SixNodeBlock : NodeBlock(nodeProperties().strength(0.3f, 1.0f), 0) {
         if (state.isAir) return false
         val controlSupport = state.block as? mods.eln.generic.SignalWireSupport
         if (controlSupport != null) return controlSupport.acceptsSignalWire(state, direction.inverse.toFacing())
-        return state.isSolidRender(world, other)
+        if(state.isSolidRender(world, other))return true
+        val fixture=descriptor ?: ((world.getBlockEntity(BlockPos(x,y,z)) as? SixNodeEntity)?.node as? SixNode)?.getElement(direction)?.sixNodeElementDescriptor
+        return mods.eln.sixnode.lampsocket.LampMounting.supports(world,BlockPos(x,y,z),direction,fixture)
     }
 
     /**

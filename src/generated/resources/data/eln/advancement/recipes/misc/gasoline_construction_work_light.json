@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "eln:gasoline_construction_work_light"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_warehouse_wall_floodlight": {
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:warehouse_wall_floodlight"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_warehouse_wall_floodlight"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "eln:gasoline_construction_work_light"
+    ]
+  }
+}

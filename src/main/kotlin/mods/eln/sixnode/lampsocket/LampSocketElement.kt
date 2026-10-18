@@ -72,6 +72,16 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     var lampSupplyChannel = LampChannelMemory.DEFAULT_CHANNEL
     var activeLampSupplyConnection = false
     var projectionRotationAngle = 0.0
+    var motionMode = 0
+    var motionEnergized = false
+        private set
+    private val motion = MotionLightControl()
+    fun updateMotion(time: Double): Boolean {
+        if(descriptor.fixture != DecorativeLampStyle.MOTION) return true
+        val next = motion.update(this,time)
+        if(next != motionEnergized) { motionEnergized=next; computeInventory() }
+        return next
+    }
     private var paintColor = LampSocketRender.DEFAULT_PAINT_COLOR
     private var grounded = true
 
@@ -182,6 +192,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
             lampSupplyChannel = nbt.getString("lampSupplyChannel")
         }
 
+        motionMode = nbt.getInt("motionMode").coerceIn(0,3)
         projectionRotationAngle = nbt.getDouble("projectionRotationAngle")
         lampSocketProcess.stableLightProbability = nbt.getDouble("stableLightProbability")
     }
@@ -193,6 +204,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
         nbt.putInt("paintColor", paintColor)
         nbt.putBoolean("poweredByLampSupply", poweredByLampSupply)
         nbt.putString("lampSupplyChannel", lampSupplyChannel)
+        nbt.putInt("motionMode",motionMode)
         nbt.putDouble("projectionRotationAngle", projectionRotationAngle)
         nbt.putDouble("stableLightProbability", lampSocketProcess.stableLightProbability)
     }
@@ -234,7 +246,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
 
         // 1.11+: an empty slot is ItemStack.EMPTY, never null
         when {
-            lampStack.isEmpty -> lampResistor.highImpedance()
+            lampStack.isEmpty || (descriptor.fixture == DecorativeLampStyle.MOTION && !motionEnergized) -> lampResistor.highImpedance()
             else -> {
                 (getItemObject(lampStack) as LampDescriptor).applyTo(lampResistor)
                 lampResistor.resistance /= installedBulbs.coerceAtLeast(1)
@@ -296,6 +308,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
             serialiseItemStack(stream, inventory.getItem(LampSocketContainer.CABLE_SLOT_ID))
             // The legacy item summary carries identity only, not the stack count.
             if (descriptor.fixture != null) stream.writeByte(installedBulbs)
+            if (descriptor.fixture == DecorativeLampStyle.MOTION) stream.writeByte(motionMode)
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -308,6 +321,9 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     private fun readSettings(stream: DataInputStream, player: ServerPlayer?) {
         try {
             when (stream.readByte()) {
+                LampSocketGui.MOTION_MODE_EVENT -> if(descriptor.fixture == DecorativeLampStyle.MOTION) {
+                    motionMode = (motionMode+1)%4
+                }
                 LampSocketGui.TOGGLE_GROUNDED_EVENT -> {
                     grounded = !grounded
                     reconnect()

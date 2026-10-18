@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "minecraft:terracotta"
+    },
+    "L": {
+      "item": "eln:basic_lamp_holder"
+    },
+    "W": {
+      "item": "minecraft:white_wool"
+    }
+  },
+  "pattern": [
+    "WWW",
+    " L ",
+    " B "
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:ceramic_drum_table_lamp"
+  }
+}

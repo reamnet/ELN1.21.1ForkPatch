@@ -13,11 +13,13 @@ class LampSocketGui(player: Player, val render: LampSocketRender) :
         const val TOGGLE_POWER_SOURCE_EVENT: Byte = 1
         const val UPDATE_LAMP_SUPPLY_CHANNEL_EVENT: Byte = 2
         const val ADJUST_ROTATION_ANGLE_EVENT: Byte = 3
+        const val MOTION_MODE_EVENT: Byte = 4
 
         const val MIN_ROTATION_ANGLE = -90.0
         const val MAX_ROTATION_ANGLE = 90.0
     }
 
+    private var motionButton: GuiButtonEln? = null
     private lateinit var buttonGrounded: GuiButtonEln
     private lateinit var buttonPowerSource: GuiButtonEln
     private lateinit var textboxLampSupplyChannel: GuiTextFieldEln
@@ -50,6 +52,12 @@ class LampSocketGui(player: Player, val render: LampSocketRender) :
         trackbarRotationAngle.setStepIdMax((MAX_ROTATION_ANGLE - MIN_ROTATION_ANGLE).toInt())
         trackbarRotationAngle.value = render.projectionRotationAngle.toFloat()
         trackbarRotationAngle.visible = render.descriptor.enableProjectionRotation
+        if(render.descriptor.fixture == DecorativeLampStyle.MOTION) {
+            motionButton = newGuiButton(40,57,96,"").apply {
+                setComment(0,I18N.tr("Detects living entities within 8 blocks in front of the light"))
+                setComment(1,I18N.tr("Stays on for 30 seconds after movement; walls block detection"))
+            }
+        }
     }
 
     override fun preDraw(f: Float, x: Int, y: Int) {
@@ -78,6 +86,12 @@ class LampSocketGui(player: Player, val render: LampSocketRender) :
             buttonPowerSource.displayString = I18N.tr("Powered by cable")
         }
 
+        motionButton?.displayString = when(render.motionMode) {
+            0 -> I18N.tr("Motion: night")
+            1 -> I18N.tr("Motion: all day")
+            2 -> I18N.tr("Always on")
+            else -> I18N.tr("Always off")
+        }
         trackbarRotationAngle.setComment(0, I18N.tr("Beam orientation: %1$\u00B0", trackbarRotationAngle.value.toInt()))
     }
 
@@ -85,6 +99,7 @@ class LampSocketGui(player: Player, val render: LampSocketRender) :
         super.guiObjectEvent(obj)
 
         when (obj) {
+            motionButton -> render.clientSend(MOTION_MODE_EVENT.toInt())
             buttonGrounded -> render.clientSend(TOGGLE_GROUNDED_EVENT.toInt())
             buttonPowerSource -> render.clientSend(TOGGLE_POWER_SOURCE_EVENT.toInt())
             textboxLampSupplyChannel -> render.clientSetString(UPDATE_LAMP_SUPPLY_CHANNEL_EVENT, textboxLampSupplyChannel.text)
@@ -93,6 +108,6 @@ class LampSocketGui(player: Player, val render: LampSocketRender) :
     }
     override fun postDraw(f: Float, x: Int, y: Int) {
         super.postDraw(f,x,y)
-        if (render.descriptor.fixture != null) drawString(46,65,I18N.tr("Bulbs: %1$/%2$",render.bulbCount,render.descriptor.bulbCapacity))
+        if (render.descriptor.fixture != null && motionButton == null) drawString(46,65,I18N.tr("Bulbs: %1$/%2$",render.bulbCount,render.descriptor.bulbCapacity))
     }
 }

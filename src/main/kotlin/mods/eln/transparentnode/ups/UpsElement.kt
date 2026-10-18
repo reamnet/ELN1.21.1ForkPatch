@@ -19,7 +19,14 @@ class UpsElement(node: TransparentNode, descriptor: TransparentNodeDescriptor) :
     override val inventory=UpsInventory(this)
     val bank=UpsBatteryBank(inventory)
     val unit=UpsPowerUnit(this,bank)
-    init { slowProcessList.add(NodePeriodicPublishProcess(node,.5,0.0)) }
+    private val alarm=UpsAlarm()
+    init {
+        slowProcessList.add(NodePeriodicPublishProcess(node,.5,0.0))
+        slowProcessList.add(mods.eln.sim.IProcess { seconds ->
+            if(alarm.step(seconds,unit.status,unit.enabled && bank.activeCount>0))
+                play(mods.eln.sound.SoundCommand("eln:beep_error").smallRange().mulVolume(.45f,if(unit.status=="BACKUP")1.5f else 1f))
+        })
+    }
     override fun initialize() { bank.invalidate();connect() }
     override fun connectJob() { super.connectJob();unit.controllers.forEach(Eln.simulator.mna::addProcess) }
     override fun disconnectJob() { unit.controllers.forEach(Eln.simulator.mna::removeProcess);super.disconnectJob() }
