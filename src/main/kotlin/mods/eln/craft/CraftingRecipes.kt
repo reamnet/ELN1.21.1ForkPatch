@@ -343,6 +343,18 @@ object CraftingRecipes {
         addRecipe(findItemStack("Standby Gasoline Generator"), "PPP", "BGB", "CRC",
             'P',findItemStack("Iron Plate"),'B',ItemStack(Items.BUCKET),'G',findItemStack("240V Fuel Generator"),
             'C',findItemStack("Copper Cable"),'R',ItemStack(Items.REDSTONE))
+        addRecipe(findItemStack("MPPT Solar Controller"), "IPI", "RCR", "IPI",
+            'I',findItemStack("Iron Plate"),'P',ItemStack(Items.COMPARATOR),'R',ItemStack(Items.REDSTONE),
+            'C',findItemStack("Small Solar Panel"))
+        addRecipe(findItemStack("Hybrid Solar Inverter"), "PPP", "MCM", "CRC",
+            'P',findItemStack("Iron Plate"),'M',findItemStack("MPPT Solar Controller"),
+            'C',findItemStack("Copper Cable"),'R',ItemStack(Items.REDSTONE))
+        addRecipe(findItemStack("Utility Wind Turbine 3.2kV"), " P ", "PWP", "ICI",
+            'P',findItemStack("Iron Plate"),'W',findItemStack("Wind Turbine"),
+            'I',ItemStack(Blocks.IRON_BLOCK),'C',findItemStack("Copper Cable"))
+        addRecipe(findItemStack("Large Watermill 3.2kV"), "PPP", "PWP", "ICI",
+            'P',ItemStack(Blocks.OAK_PLANKS),'W',findItemStack("Water Turbine"),
+            'I',ItemStack(Blocks.IRON_BLOCK),'C',findItemStack("Copper Cable"))
         addRecipe(findItemStack("Gasoline Construction Work Light"), "L L", " G ", "IPI",
             'L',findItemStack("Warehouse Wall Floodlight"),'G',findItemStack("240V Fuel Generator"),
             'I',ItemStack(Items.IRON_INGOT),'P',findItemStack("Iron Plate"))

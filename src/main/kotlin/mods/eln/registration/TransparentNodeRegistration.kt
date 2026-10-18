@@ -1632,6 +1632,18 @@ object TransparentNodeRegistration {
             mods.eln.transparentnode.standby.BackupDescriptor(TR_NAME(I18N.Type.NONE,"Standby Gasoline Generator"),true).apply {
                 setCreativeTab(Eln.creativeTabMachines)
             })
+        listOf(
+            TR_NAME(I18N.Type.NONE,"MPPT Solar Controller"),
+            TR_NAME(I18N.Type.NONE,"Hybrid Solar Inverter"),
+            TR_NAME(I18N.Type.NONE,"Utility Wind Turbine 3.2kV"),
+            TR_NAME(I18N.Type.NONE,"Large Watermill 3.2kV")
+        ).forEachIndexed { index,name ->
+            transparentNodeItem.addDescriptor(8+index+(124 shl 6),
+                mods.eln.transparentnode.renewable.RenewableDescriptor(name,
+                    mods.eln.transparentnode.renewable.RenewableKind.entries[index]).apply {
+                    setCreativeTab(if(index<2)Eln.creativeTabPowerElectronics else Eln.creativeTabMachines)
+                })
+        }
         mods.eln.transparentnode.kitchen.KitchenType.entries.forEachIndexed { index,type ->
             transparentNodeItem.addDescriptor(1+index+(124 shl 6),
                 mods.eln.transparentnode.kitchen.KitchenDescriptor(type).apply { setCreativeTab(Eln.creativeTabMachines) })

@@ -20,6 +20,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.14` | — | Programmable UPS with two 24-battery racks, automatic backup and charging, per-cell energy preservation, and a compact status GUI |
 | `v3.0.15` | — | 23 new lighting fixtures, slab/table mounting, five working kitchen appliances, UPS backup/overload beeps and corrected legacy generator voltage stamping |
 | `v3.0.16` | — | Automatic transfer switch, wireless generator start, 10 kW programmable gasoline standby generator and generic tagged/container/pipe fuel support |
+| `v3.0.17` | — | MPPT solar controller, hybrid 120/240 V inverter with selectable grid priority, large 3.2 kV wind turbine and watermill |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`
@@ -32,7 +33,7 @@ release assets remain available with their original filenames.
 `modVersion` in `gradle.properties` is the version source for the jar filename,
 NeoForge metadata and the in-game version. Increment it when preparing the next
 update and create the matching `vX.Y.Z` source tag. For unpublished experiments,
-use an explicit override such as `-PmodVersion=3.0.15-local.1`.
+use an explicit override such as `-PmodVersion=3.0.18-local.1`.
 
 Build with `./gradlew build` to retain previous versioned jars in `build/libs/`.
 `./gradlew clean` removes that directory, and recompiling the same version

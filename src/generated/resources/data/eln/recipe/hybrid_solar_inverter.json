@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "eln:copper_cable"
+    },
+    "M": {
+      "item": "eln:mppt_solar_controller"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "PPP",
+    "MCM",
+    "CRC"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:hybrid_solar_inverter"
+  }
+}

@@ -87,6 +87,12 @@ public class SolarPanelPowerProcess implements IRootSystemPreStepProcess, INBTTR
     @Override
     public void rootSystemPreStepProcess() {
         double panelVoltage = Math.max(0.0, aPin.state - bPin.state);
+        // Choose the I-V segment using the current algebraic circuit, not last tick's
+        // voltage. MPPT changes the input load without advancing physical time.
+        if (aPin.getSubSystem() != null && aPin.getSubSystem() == bPin.getSubSystem()) {
+            double trial = aPin.getSubSystem().solveChecked(aPin) - bPin.getSubSystem().solveChecked(bPin);
+            if (Double.isFinite(trial)) panelVoltage = Math.max(0.0, trial);
+        }
         applyNortonEquivalent(panelVoltage);
     }
 

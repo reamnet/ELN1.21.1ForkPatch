@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "eln:small_solar_panel"
+    },
+    "I": {
+      "item": "eln:iron_plate"
+    },
+    "P": {
+      "item": "minecraft:comparator"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "IPI",
+    "RCR",
+    "IPI"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:mppt_solar_controller"
+  }
+}
