@@ -2010,9 +2010,20 @@ Provides_an_electrical_signal\nfor_biome_relative_humidity.=根据生物群系�
 Ambient_temperature=环境温度
 Precipitation=降水
 
+# src/main/kotlin/mods/eln/sixnode/lampsocket/DecorativeLampStyle.kt
+Basic_Chandelier.name=Basic Chandelier
+Household_Desk_Lamp.name=Household Desk Lamp
+Round_Recessed_Ceiling_Light.name=Round Recessed Ceiling Light
+Twin_Parking_Lot_Light.name=Twin Parking Lot Light
+Warehouse_Wall_Floodlight.name=Warehouse Wall Floodlight
+
 # src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketDescriptor.kt
 Angle\:_%1$°_to_%2$°=角度: %1$° 到 %2$°
+Holds_up_to_%1$_matching_bulbs=Holds up to %1$ matching bulbs
+Insert_matching_bulbs_together;_power_draw_scales_with_bulb_count=Insert matching bulbs together; power draw scales with bulb count
 Spot_range\:_%1$_blocks=照射范围: %1$ 格
+Wireless_lamp_supply_or_wired_power=Wireless lamp supply or wired power
+Wireless_lamp_supply_power_only=Wireless lamp supply power only
 Wireless_mode_of_lights_is_intended_\nto_pretend_wires_are_in_the_walls.=灯的无线模式是用来\n假装墙里有电线的。
 
 # src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketElement.kt
@@ -2021,6 +2032,7 @@ Bulb_Life_Left=灯泡剩余寿命
 
 # src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt
 Beam_orientation\:_%1$°=光束方向: %1$°
+Bulbs\:_%1$/%2$=Bulbs: %1$/%2$
 Cable_slot_empty=导线槽没有导线
 Connected_to_%1$=已连接到 %1$
 Grounded=已接地
@@ -2028,6 +2040,7 @@ Lamp_slot_empty=灯泡槽没有灯泡
 Powered_by_lamp_supply=由无线照明控制盒供电
 Specify_the_lamp_supply_channel=指定照明供电盒频道
 This_currently_does_nothing.=此功能暂未实现。
+This_recessed_light_uses_a_wireless_lamp_supply=This recessed light uses a wireless lamp supply
 Ungrounded=未接地
 
 # src/main/kotlin/mods/eln/sixnode/mqttmeter/MqttEnergyMeterContainer.kt

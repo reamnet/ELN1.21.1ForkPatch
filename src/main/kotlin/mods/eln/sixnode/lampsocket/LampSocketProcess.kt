@@ -30,7 +30,7 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
     var stableLightProbability = 0.0
     var fastLightValue = 0
 
-    private var lampInInventory = false
+    private var lampCountInInventory = 0
     private var cableInInventory = false
 
     override fun process(time: Double) {
@@ -49,7 +49,7 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
                 val bestLampSupply = cachedBestChannelHandle?.second
 
                 if (bestLampSupply != null && bestLampSupply.element.getChannelState(bestLampSupply.id)) {
-                    bestLampSupply.element.addToRp(lampDescriptor.lampData.resistance)
+                    bestLampSupply.element.addToRp(lampDescriptor.lampData.resistance / element.installedBulbs.coerceAtLeast(1))
                     element.electricalLoad.state = bestLampSupply.element.powerLoad.state
                 } else {
                     element.electricalLoad.state = 0.0
@@ -110,7 +110,10 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
         }
 
         // Only run raytracing when the lamp socket is actually on.
-        if (newLightValue > BoilerplateLampData.MIN_LIGHT_VALUE) placeSpot(newLightValue)
+        if (newLightValue > BoilerplateLampData.MIN_LIGHT_VALUE) {
+            val fixture = element.descriptor.fixture
+            if (fixture != null) DecorativeLampLighting.update(element,fixture,newLightValue) else placeSpot(newLightValue)
+        }
 
         updateFastLight(newLightValue)
         updateInventoryAndPublish(lampStack, cableStack, activeLampSupplyConnection, newLightValue)
@@ -232,8 +235,8 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
         var inventoryChanged = false
         var publishChanges = false
 
-        if (lampInInventory != (!lampStack.isNothing())) {
-            lampInInventory = (!lampStack.isNothing())
+        if (lampCountInInventory != element.installedBulbs) {
+            lampCountInInventory = element.installedBulbs
             inventoryChanged = true
         }
 

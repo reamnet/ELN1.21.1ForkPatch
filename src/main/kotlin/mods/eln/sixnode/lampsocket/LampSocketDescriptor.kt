@@ -8,6 +8,7 @@ import mods.eln.misc.VoltageLevelColor
 import mods.eln.node.six.SixNodeDescriptor
 import mods.eln.sixnode.lampsocket.objrender.ILampSocketObjRender
 import mods.eln.sixnode.lampsocket.objrender.LampSocketSuspendedObjRender
+import mods.eln.sixnode.lampsocket.objrender.DecorativeLampObjRender
 import mods.eln.wiki.Data
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Item
@@ -31,6 +32,9 @@ class LampSocketDescriptor(itemName: String, val renderType: ILampSocketObjRende
     var initialRenderAngleOffset = 0.0
     var renderSideCables = true
     var extendedRenderBounds = false
+    var fixture: DecorativeLampStyle? = null
+    val bulbCapacity get() = fixture?.bulbs ?: 1
+    val wirelessOnly get() = fixture?.wirelessOnly == true
 
     private var acceptedLampTypesString: String = ""
 
@@ -53,6 +57,7 @@ class LampSocketDescriptor(itemName: String, val renderType: ILampSocketObjRende
     }
 
     override fun shouldUseRenderHelper(type: ItemRenderType, item: ItemStack, helper: ItemRendererHelper): Boolean {
+        if (renderType is DecorativeLampObjRender && helper == ItemRendererHelper.INVENTORY_BLOCK) return true
         return type != ItemRenderType.INVENTORY
     }
 
@@ -61,6 +66,7 @@ class LampSocketDescriptor(itemName: String, val renderType: ILampSocketObjRende
     }
 
     override fun renderItem(type: ItemRenderType, item: ItemStack, vararg data: Any) {
+        if (renderType is DecorativeLampObjRender) { renderType.draw(this,type,0.0); return }
         if (type == ItemRenderType.INVENTORY) {
             super.renderItem(type, item, *data)
         } else {
@@ -82,6 +88,11 @@ class LampSocketDescriptor(itemName: String, val renderType: ILampSocketObjRende
         if (range != 0) list.add(I18N.tr("Spot range: %1$ blocks", range))
         if (enableProjectionRotation) list.add(I18N.tr("Angle: %1$\u00B0 to %2$\u00B0", LampSocketGui.MIN_ROTATION_ANGLE.toInt(), LampSocketGui.MAX_ROTATION_ANGLE.toInt()))
         list.add(I18N.tr("Accepted lamp types: %1$", acceptedLampTypesString))
+        if (fixture != null) {
+            list.add(if (wirelessOnly) I18N.tr("Wireless lamp supply power only") else I18N.tr("Wireless lamp supply or wired power"))
+            list.add(I18N.tr("Holds up to %1$ matching bulbs",bulbCapacity))
+            list.add(I18N.tr("Insert matching bulbs together; power draw scales with bulb count"))
+        }
     }
 
     override fun addRealismContext(list: MutableList<String>): RealisticEnum {

@@ -142,6 +142,7 @@ object SixNodeRegistration {
             registerConduit(127)
         }
         registerLampSocket(64)
+        DecorativeLightRegistration.register(64)
         registerPowerSocket(67)
         registerLampSupply(65)
 

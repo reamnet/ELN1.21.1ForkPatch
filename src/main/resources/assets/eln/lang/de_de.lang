@@ -2010,9 +2010,20 @@ Provides_an_electrical_signal\nfor_biome_relative_humidity.=Liefert ein elektris
 Ambient_temperature=Umgebungstemperatur
 Precipitation=Niederschlag
 
+# src/main/kotlin/mods/eln/sixnode/lampsocket/DecorativeLampStyle.kt
+Basic_Chandelier.name=Basic Chandelier
+Household_Desk_Lamp.name=Household Desk Lamp
+Round_Recessed_Ceiling_Light.name=Round Recessed Ceiling Light
+Twin_Parking_Lot_Light.name=Twin Parking Lot Light
+Warehouse_Wall_Floodlight.name=Warehouse Wall Floodlight
+
 # src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketDescriptor.kt
 Angle\:_%1$°_to_%2$°=Winkel: %1$° bis %2$°
+Holds_up_to_%1$_matching_bulbs=Holds up to %1$ matching bulbs
+Insert_matching_bulbs_together;_power_draw_scales_with_bulb_count=Insert matching bulbs together; power draw scales with bulb count
 Spot_range\:_%1$_blocks=Spot-Reichweite: %1$ Blöcke
+Wireless_lamp_supply_or_wired_power=Wireless lamp supply or wired power
+Wireless_lamp_supply_power_only=Wireless lamp supply power only
 Wireless_mode_of_lights_is_intended_\nto_pretend_wires_are_in_the_walls.=Der Funkmodus der Lampen soll \nso tun, als wären Kabel in den Wänden.
 
 # src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketElement.kt
@@ -2021,6 +2032,7 @@ Bulb_Life_Left=Restlebensdauer Lampe
 
 # src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt
 Beam_orientation\:_%1$°=Strahlausrichtung: %1$°
+Bulbs\:_%1$/%2$=Bulbs: %1$/%2$
 Cable_slot_empty=Kabelslot leer
 Connected_to_%1$=Verbunden mit %1$
 Grounded=Geerdet
@@ -2028,6 +2040,7 @@ Lamp_slot_empty=Lampen-Slot leer
 Powered_by_lamp_supply=Von Lampenversorgung gespeist
 Specify_the_lamp_supply_channel=Lampenversorgungskanal angeben
 This_currently_does_nothing.=Dies bewirkt derzeit nichts.
+This_recessed_light_uses_a_wireless_lamp_supply=This recessed light uses a wireless lamp supply
 Ungrounded=Ungeerdet
 
 # src/main/kotlin/mods/eln/sixnode/mqttmeter/MqttEnergyMeterContainer.kt

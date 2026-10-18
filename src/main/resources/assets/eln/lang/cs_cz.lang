@@ -2010,9 +2010,20 @@ Provides_an_electrical_signal\nfor_biome_relative_humidity.=Poskytuje elektrick�
 Ambient_temperature=Okolní teplota
 Precipitation=Srážky
 
+# src/main/kotlin/mods/eln/sixnode/lampsocket/DecorativeLampStyle.kt
+Basic_Chandelier.name=Basic Chandelier
+Household_Desk_Lamp.name=Household Desk Lamp
+Round_Recessed_Ceiling_Light.name=Round Recessed Ceiling Light
+Twin_Parking_Lot_Light.name=Twin Parking Lot Light
+Warehouse_Wall_Floodlight.name=Warehouse Wall Floodlight
+
 # src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketDescriptor.kt
 Angle\:_%1$°_to_%2$°=Úhel: %1$° až %2$°
+Holds_up_to_%1$_matching_bulbs=Holds up to %1$ matching bulbs
+Insert_matching_bulbs_together;_power_draw_scales_with_bulb_count=Insert matching bulbs together; power draw scales with bulb count
 Spot_range\:_%1$_blocks=Dosah bodu: %1$ bloků
+Wireless_lamp_supply_or_wired_power=Wireless lamp supply or wired power
+Wireless_lamp_supply_power_only=Wireless lamp supply power only
 Wireless_mode_of_lights_is_intended_\nto_pretend_wires_are_in_the_walls.=Bezdrátový režim světel má\npředstírat, že ve zdech jsou dráty.
 
 # src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketElement.kt
@@ -2021,6 +2032,7 @@ Bulb_Life_Left=Zbývající životnost žárovky
 
 # src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketGui.kt
 Beam_orientation\:_%1$°=Orientace paprsku: %1$°
+Bulbs\:_%1$/%2$=Bulbs: %1$/%2$
 Cable_slot_empty=Slot pro kabel prázdný
 Connected_to_%1$=Připojeno k %1$
 Grounded=Uzemněno
@@ -2028,6 +2040,7 @@ Lamp_slot_empty=Slot pro lampu prázdný
 Powered_by_lamp_supply=Napájeno napájením lamp
 Specify_the_lamp_supply_channel=Určete napájecí kanál lampy
 This_currently_does_nothing.=Toto v současnosti nic nedělá.
+This_recessed_light_uses_a_wireless_lamp_supply=This recessed light uses a wireless lamp supply
 Ungrounded=Neuzemněno
 
 # src/main/kotlin/mods/eln/sixnode/mqttmeter/MqttEnergyMeterContainer.kt

@@ -47,6 +47,7 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, sixNodeDescri
     val descriptor = sixNodeDescriptor as LampSocketDescriptor
 
     var lampDescriptor: LampDescriptor? = null
+    var bulbCount = 0
     private var cableDescriptor: GenericCableDescriptor? = null
 
     var poweredByLampSupply = true
@@ -102,9 +103,11 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, sixNodeDescri
 
             val lampStack = unserialiseItemStack(stream)
             lampDescriptor = if (!lampStack.isNothing()) getItemObject(lampStack) as LampDescriptor else null
+            bulbCount = if (lampStack.isNothing()) 0 else lampStack.count.coerceIn(0,descriptor.bulbCapacity)
 
             val cableStack = unserialiseItemStack(stream)
             cableDescriptor = if (!cableStack.isNothing()) getItemObject(cableStack) as GenericCableDescriptor else null
+            if (descriptor.fixture != null) bulbCount = stream.readUnsignedByte().coerceIn(0,descriptor.bulbCapacity)
         } catch (e: IOException) {
             e.printStackTrace()
         }

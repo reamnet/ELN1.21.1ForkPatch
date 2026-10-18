@@ -56,6 +56,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
         .acceptIfEmpty(LampSocketContainer.CABLE_SLOT_ID, ElectricalCableDescriptor::class.java, CurrentCableDescriptor::class.java)
 
     val descriptor = sixNodeDescriptor as LampSocketDescriptor
+    val installedBulbs get() = inventory.getItem(LampSocketContainer.LAMP_SLOT_ID).count.coerceIn(0,descriptor.bulbCapacity)
 
     val electricalLoad = NbtElectricalLoad("electricalLoad")
     val lampResistor = Resistor(electricalLoad, null)
@@ -118,6 +119,12 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
 
             is LampDescriptor -> {
                 takeItem = equippedItemDescriptor.lampData.technology in descriptor.acceptedLampTypes
+                if (takeItem && descriptor.fixture != null) {
+                    val free = Eln.config.getBooleanOrElse("gameplay.qol.creativeNoConsumeInsertedItems",false) && entityPlayer is ServerPlayer && isCreative(entityPlayer)
+                    val accepted = FixtureBulbs.insert(inventory,entityPlayer.mainHandItem,descriptor.bulbCapacity,free)
+                    if (accepted) { inventory.setChanged(); inventoryChange(inventory) }
+                    return accepted
+                }
             }
 
             // ElectricalCableDescriptor here covers utility cables (utility cables are not signal cables)
@@ -166,7 +173,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
             paintColor = if (descriptor.paintable) nbt.getInt("paintColor") else LampSocketRender.DEFAULT_PAINT_COLOR
         }
 
-        poweredByLampSupply = nbt.getBoolean("poweredByLampSupply")
+        poweredByLampSupply = descriptor.wirelessOnly || nbt.getBoolean("poweredByLampSupply")
 
         if (nbt.contains("channel")) {
             lampSupplyChannel = nbt.getString("channel")
@@ -201,7 +208,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     }
 
     override fun connectJob() {
-        if (!poweredByLampSupply) {
+        if (!poweredByLampSupply && !descriptor.wirelessOnly) {
             electricalLoadList.add(electricalLoad)
             electricalComponentList.add(lampResistor)
         }
@@ -228,7 +235,10 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
         // 1.11+: an empty slot is ItemStack.EMPTY, never null
         when {
             lampStack.isEmpty -> lampResistor.highImpedance()
-            else -> (getItemObject(lampStack) as LampDescriptor).applyTo(lampResistor)
+            else -> {
+                (getItemObject(lampStack) as LampDescriptor).applyTo(lampResistor)
+                lampResistor.resistance /= installedBulbs.coerceAtLeast(1)
+            }
         }
 
         when {
@@ -245,6 +255,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     }
 
     override fun getElectricalLoad(lrdu: LRDU, mask: Int): ElectricalLoad? {
+        if (descriptor.wirelessOnly) return null
         if (!descriptor.renderSideCables && lrdu != front && lrdu != front.inverse()) return null
         return when {
             inventory.getItem(LampSocketContainer.CABLE_SLOT_ID).isNothing() -> null
@@ -259,6 +270,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     }
 
     override fun getConnectionMask(lrdu: LRDU): Int {
+        if (descriptor.wirelessOnly) return 0
         if (!descriptor.renderSideCables && lrdu != front && lrdu != front.inverse()) return 0
         return when {
             inventory.getItem(LampSocketContainer.CABLE_SLOT_ID).isNothing() -> 0
@@ -282,6 +294,8 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
             stream.writeInt(sixNode!!.lightValue)
             serialiseItemStack(stream, inventory.getItem(LampSocketContainer.LAMP_SLOT_ID))
             serialiseItemStack(stream, inventory.getItem(LampSocketContainer.CABLE_SLOT_ID))
+            // The legacy item summary carries identity only, not the stack count.
+            if (descriptor.fixture != null) stream.writeByte(installedBulbs)
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -299,7 +313,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
                     reconnect()
                 }
                 LampSocketGui.TOGGLE_POWER_SOURCE_EVENT -> {
-                    poweredByLampSupply = !poweredByLampSupply
+                    poweredByLampSupply = descriptor.wirelessOnly || !poweredByLampSupply
                     reconnect()
                 }
                 LampSocketGui.UPDATE_LAMP_SUPPLY_CHANNEL_EVENT -> {
@@ -354,7 +368,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
         var inventoryChanged = false
 
         if (compound.contains("poweredByLampSupply")) {
-            poweredByLampSupply = compound.getBoolean("poweredByLampSupply")
+            poweredByLampSupply = descriptor.wirelessOnly || compound.getBoolean("poweredByLampSupply")
             publishChanges = true
         }
 

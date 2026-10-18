@@ -31,6 +31,8 @@ class LampSocketGui(player: Player, val render: LampSocketRender) :
         super.initGui()
 
         buttonPowerSource = newGuiButton(16, 7, 144, "")
+        buttonPowerSource.enabled = !render.descriptor.wirelessOnly
+        if (render.descriptor.wirelessOnly) buttonPowerSource.setComment(0,I18N.tr("This recessed light uses a wireless lamp supply"))
 
         buttonGrounded = newGuiButton(16, 33, 144, "")
         buttonGrounded.setComment(0, "Toggle the internal ground connection")
@@ -88,5 +90,9 @@ class LampSocketGui(player: Player, val render: LampSocketRender) :
             textboxLampSupplyChannel -> render.clientSetString(UPDATE_LAMP_SUPPLY_CHANNEL_EVENT, textboxLampSupplyChannel.text)
             trackbarRotationAngle -> render.clientSetDouble(ADJUST_ROTATION_ANGLE_EVENT, trackbarRotationAngle.value.toDouble())
         }
+    }
+    override fun postDraw(f: Float, x: Int, y: Int) {
+        super.postDraw(f,x,y)
+        if (render.descriptor.fixture != null) drawString(46,65,I18N.tr("Bulbs: %1$/%2$",render.bulbCount,render.descriptor.bulbCapacity))
     }
 }

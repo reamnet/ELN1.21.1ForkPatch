@@ -282,6 +282,16 @@ object CraftingRecipes {
     }
 
     private fun recipeLampSocket() {
+        addRecipe(findItemStack("Twin Parking Lot Light"), "L L", " I ", " P ",
+            'L',findItemStack("Robust Lamp Socket"),'I',ItemStack(Items.IRON_INGOT),'P',findItemStack("Iron Plate"))
+        addRecipe(findItemStack("Warehouse Wall Floodlight"), "IPI", "GLG", " I ",
+            'I',ItemStack(Items.IRON_INGOT),'P',findItemStack("Iron Plate"),'G',ItemStack(Blocks.GLASS_PANE),'L',findItemStack("Spot Lamp Socket"))
+        addRecipe(findItemStack("Household Desk Lamp"), "WWW", " L ", " P ",
+            'W',ItemStack(Blocks.WHITE_WOOL),'L',findItemStack("Classic Lamp Socket"),'P',findItemStack("Iron Plate"))
+        addRecipe(Eln.findItemStack("Round Recessed Ceiling Light",2), " P ", "GLG",
+            'P',findItemStack("Iron Plate"),'G',ItemStack(Blocks.GLASS_PANE),'L',findItemStack("Flat Lamp Socket"))
+        addRecipe(findItemStack("Basic Chandelier"), " I ", "LIL", "LLL",
+            'I',ItemStack(Items.IRON_INGOT),'L',findItemStack("Classic Lamp Socket"))
         addRecipe(
             Eln.findItemStack("Classic Lamp Socket", 3), "GIG", " G ",
             'G', ItemStack(Blocks.GLASS_PANE), 'I', findItemStack("Iron Cable")

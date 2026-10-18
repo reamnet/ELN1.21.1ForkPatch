@@ -9,7 +9,7 @@ import net.minecraft.world.Container
 class LampSocketContainer(player: Player, inventory: Container, descriptor: LampSocketDescriptor) :
     BasicContainer(
         player, inventory, arrayOf(
-            LampItemSlot(inventory, LAMP_SLOT_ID, 16 + 1, 59 + 1, 1, descriptor.acceptedLampTypes),
+            LampItemSlot(inventory, LAMP_SLOT_ID, 16 + 1, 59 + 1, descriptor.bulbCapacity, descriptor.acceptedLampTypes),
             CableItemSlot(inventory, CABLE_SLOT_ID, 142 + 1, 59 + 1, 1, false, REQUIRED_CABLE_LENGTH)
         )
     ) {
