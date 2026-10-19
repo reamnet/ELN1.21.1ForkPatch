@@ -32,6 +32,8 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
 
     private var lampCountInInventory = 0
     private var cableInInventory = false
+    private var lampClearanceReady = false
+    private var lampClearanceRetry = 0.0
     private var parkingClearanceReady = false
     private var parkingClearanceRetry = 0.0
 
@@ -41,6 +43,13 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
             if (parkingClearanceRetry <= 0) {
                 parkingClearanceReady = ParkingLightClearance.update(element)
                 parkingClearanceRetry = 1.0
+            }
+        }
+        if (element.descriptor.fixture != null && !lampClearanceReady) {
+            lampClearanceRetry -= time
+            if (lampClearanceRetry <= 0) {
+                lampClearanceReady = LampClearance.update(element)
+                lampClearanceRetry = 1.0
             }
         }
         val energized = element.updateMotion(time)

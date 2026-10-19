@@ -48,7 +48,7 @@ class GhostBlock : Block(Properties.of().mapColor(MapColor.METAL).strength(0.5f)
         builder.add(SHAPE)
     }
 
-    override fun stateForMeta(meta: Int): BlockState = defaultBlockState().setValue(SHAPE, meta.coerceIn(tCube, tLadder))
+    override fun stateForMeta(meta: Int): BlockState = defaultBlockState().setValue(SHAPE, meta.coerceIn(tCube, tClearance))
 
     override fun metaOfState(state: BlockState): Int = state.getValue(SHAPE)
 
@@ -57,7 +57,7 @@ class GhostBlock : Block(Properties.of().mapColor(MapColor.METAL).strength(0.5f)
     override fun getCollisionShape(state: BlockState, world: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape =
         when (shapeOf(state)) {
             tFloor -> FLOOR_SHAPE
-            tLadder -> Shapes.empty()  // a ladder ghost is passable
+            tLadder, tClearance -> Shapes.empty()
             else -> {
                 val element = (world as? Level)?.let { getElement(it, pos.x, pos.y, pos.z) }
                 val te = element?.observatorCoordonate?.tileEntity
@@ -130,9 +130,11 @@ class GhostBlock : Block(Properties.of().mapColor(MapColor.METAL).strength(0.5f)
         const val tCube = 0
         const val tFloor = 1
         const val tLadder = 2
+        // Reserves placement space without an invisible wall or ladder behavior.
+        const val tClearance = 3
 
         @JvmField
-        val SHAPE: IntegerProperty = IntegerProperty.create("shape", tCube, tLadder)
+        val SHAPE: IntegerProperty = IntegerProperty.create("shape", tCube, tClearance)
 
         private val FLOOR_SHAPE: VoxelShape = Shapes.create(AABB(0.0, 0.0, 0.0, 1.0, 0.0625, 1.0))
     }

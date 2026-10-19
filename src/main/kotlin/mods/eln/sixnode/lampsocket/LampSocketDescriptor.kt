@@ -79,7 +79,7 @@ class LampSocketDescriptor(itemName: String, val renderType: ILampSocketObjRende
     }
 
     override fun hasVolume(): Boolean {
-        return hasGhostGroup()
+        return fixture == null && hasGhostGroup()
     }
 
     override fun addInformation(itemStack: ItemStack, entityPlayer: Player?, list: MutableList<String>, par4: Boolean) {

@@ -84,6 +84,8 @@ object DecorativeLightRegistration {
                     }
                 }
             }
+            // These cells reserve model clearance, not full cubes of solid machinery.
+            descriptor.ghostGroup?.elementList?.forEach { it.meta=mods.eln.ghost.GhostBlock.tClearance }
             descriptor.creativeTab=Eln.creativeTabLighting
             Eln.sixNodeItem.addDescriptor(idFor(style),descriptor)
         }

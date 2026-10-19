@@ -4,6 +4,14 @@ This update adds 30 bulb-based fixtures, four wireless wall controls, three UPS
 battery sizes and two utility-pole street lights. Existing item identities and
 saved installations are preserved.
 
+## Movement around fixtures (3.0.19)
+
+Decorative lights reserve space for their models without creating solid invisible
+cubes. You can walk through the empty space around chandeliers, long strips and
+other decorative fittings. Normal machine and camouflage collision stays solid.
+Already-placed lamps update their clearance cells automatically as their chunks
+load, preserving bulbs, channels and wiring. Replacing the lights is unnecessary.
+
 ## Fixtures
 
 * **Home:** Window Candle Light and a two-block Standing Drum Floor Lamp.
@@ -83,3 +91,7 @@ interactive client check, add `-Deln.lightingExpansionChecks=true` to
 `JAVA_TOOL_OPTIONS` and run `./gradlew runClient`. It creates an isolated gallery
 world, checks wired/wireless lighting and ATS sound events, captures the models,
 reopens the saved world, writes `run/client/lighting-expansion-checks.json` and exits.
+
+Use `-Deln.lampClearanceChecks=true` with `runClient` for the focused collision
+regression. It simulates old solid reservations, checks server/client collision
+and real player movement, reloads an old-state world and checks fixture removal.
