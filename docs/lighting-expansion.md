@@ -119,3 +119,7 @@ a cable in the fixture, including in wireless mode, just as for other lamp socke
 Wireless paddle and toggle controls now snap in roughly a tenth of a second,
 play a quiet click on operation, and show a small green marker when on. Momentary
 buttons click again when released automatically; loading a saved switch is silent.
+
+Both ceiling-fan styles have quiet motor and airflow loops as of 3.0.22. Their
+sound follows actual motor power and stops when the motor is disabled, even if
+the light remains on. Removing or unloading a fan releases its sound instance.

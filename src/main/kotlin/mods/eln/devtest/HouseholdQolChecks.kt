@@ -48,7 +48,7 @@ object HouseholdQolChecks {
     private val base=BlockPos(256,80,256)
     private val styles=DecorativeLampStyle.entries.filter { it.aimHeadCount>0 || it.fan }
     private val lamps=styles.mapIndexed { i,s -> Triple(s,base.offset(i%5*9,if(s.ceiling)6 else 2,i/5*9),if(s.ceiling)Direction.YP else Direction.XN) }
-    private val machines=KitchenType.entries.drop(5).mapIndexed { i,t -> t to base.offset(i*10,0,36) }
+    private val machines=listOf(KitchenType.KETTLE,KitchenType.BLENDER,KitchenType.RICE).mapIndexed { i,t -> t to base.offset(i*10,0,36) }
     private val climates=ClimateType.entries.mapIndexed { i,t -> t to base.offset(i*10,if(t.cooling)2 else 0,48) }
     private val ups=base.offset(0,2,60);private val cart=base.offset(12,0,60);private val switch=base.offset(24,2,60)
     private var phase=0;private var ticks=0;private var total=0;private var ready=0;private var done=false;private var view=0

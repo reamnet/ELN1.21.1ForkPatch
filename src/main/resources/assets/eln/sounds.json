@@ -395,5 +395,133 @@
         "stream": false
       }
     ]
+  },
+  "appliance_microwave": {
+    "sounds": [
+      {
+        "name": "eln:appliance_microwave",
+        "stream": false
+      }
+    ]
+  },
+  "appliance_toaster": {
+    "sounds": [
+      {
+        "name": "eln:appliance_toaster",
+        "stream": false
+      }
+    ]
+  },
+  "appliance_stove": {
+    "sounds": [
+      {
+        "name": "eln:appliance_stove",
+        "stream": false
+      }
+    ]
+  },
+  "appliance_fridge": {
+    "sounds": [
+      {
+        "name": "eln:appliance_fridge",
+        "stream": false
+      }
+    ]
+  },
+  "appliance_coffee": {
+    "sounds": [
+      {
+        "name": "eln:appliance_coffee",
+        "stream": false
+      }
+    ]
+  },
+  "appliance_kettle": {
+    "sounds": [
+      {
+        "name": "eln:appliance_kettle",
+        "stream": false
+      }
+    ]
+  },
+  "appliance_blender": {
+    "sounds": [
+      {
+        "name": "eln:appliance_blender",
+        "stream": false
+      }
+    ]
+  },
+  "appliance_rice": {
+    "sounds": [
+      {
+        "name": "eln:appliance_rice",
+        "stream": false
+      }
+    ]
+  },
+  "appliance_oven": {
+    "sounds": [
+      {
+        "name": "eln:appliance_oven",
+        "stream": false
+      }
+    ]
+  },
+  "appliance_heater": {
+    "sounds": [
+      {
+        "name": "eln:appliance_heater",
+        "stream": false
+      }
+    ]
+  },
+  "appliance_ceiling_fan": {
+    "sounds": [
+      {
+        "name": "eln:appliance_ceiling_fan",
+        "stream": false
+      }
+    ]
+  },
+  "appliance_window_ac": {
+    "sounds": [
+      {
+        "name": "eln:appliance_window_ac",
+        "stream": false
+      }
+    ]
+  },
+  "appliance_minisplit": {
+    "sounds": [
+      {
+        "name": "eln:appliance_minisplit",
+        "stream": false
+      }
+    ]
+  },
+  "appliance_battery_hiss": {
+    "sounds": [
+      {
+        "name": "eln:appliance_battery_hiss",
+        "stream": false
+      }
+    ]
+  },
+  "appliance_done": {
+    "sounds": [
+      {
+        "name": "eln:appliance_done",
+        "stream": false
+      }
+    ]
+  },
+  "appliance_toaster_pop": {
+    "sounds": [
+      {
+        "name": "eln:appliance_toaster_pop",
+        "stream": false
+      }
+    ]
   }
 }

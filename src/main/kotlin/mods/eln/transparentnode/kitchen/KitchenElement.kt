@@ -28,6 +28,11 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
     val load=NbtElectricalLoad("applianceInput")
     val resistor=Resistor(load,null)
     val work=KitchenWork()
+    val batteryHeat=MicrowaveBatteryHeat()
+    val batteryJob get()=type==KitchenType.MICROWAVE && MicrowaveBatteryHeat.accepts(inventory.getItem(0))
+    var detonating=false
+        private set
+    private var cachedInputReference: ItemStack?=null
     var enabled=true
     var active=false
         private set
@@ -48,12 +53,14 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
     override fun initialize() { rebuildRecipe(false);configure();connect() }
     private fun rebuildRecipe(reset: Boolean) {
         val input=inventory.getItem(0)
-        if(reset && !ItemStack.isSameItemSameComponents(input,cachedInput))work.joules=0.0
+        if(reset && (input!==cachedInputReference || input.count!=cachedInput.count || !ItemStack.isSameItemSameComponents(input,cachedInput))) {
+            work.joules=0.0;batteryHeat.reset()
+        }
         recipe=(coordinate().world() as? ServerLevel)?.let { KitchenRecipe.find(it,type,inventory) }
-        cachedInput=input.copy();cacheReady=true
+        cachedInput=input.copy();cachedInputReference=input;cacheReady=true
     }
     override fun inventoryChange(inventory: Container?) { rebuildRecipe(true);configure();needPublish() }
-    private val requested get()=enabled && (recipe?.canFit(inventory)==true || type==KitchenType.FRIDGE && temperature>4.5)
+    private val requested get()=enabled && !detonating && (batteryJob || recipe?.canFit(inventory)==true || type==KitchenType.FRIDGE && temperature>4.5)
     private fun configure() {
         val connected=requested && abs(load.voltage)<=type.volts*1.2
         active=connected && abs(load.voltage)>=type.volts*.8
@@ -67,11 +74,15 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
             val cooling=(power/type.watts).coerceIn(0.0,1.0)*.85
             temperature=(temperature+seconds*(.025-cooling)).coerceIn(3.5,20.0)
         }
+        if(batteryJob && active && power>0 && batteryHeat.advance(seconds,power))detonateBattery()
         val job=recipe
         status=when {
+            detonating -> "EXPLODING"
             !enabled -> "OFF"
             abs(load.voltage)>type.volts*1.2 -> "OVERVOLTAGE"
             requested && abs(load.voltage)<type.volts*.8 -> "NO_POWER"
+            batteryJob && batteryHeat.hissing -> "HISSING"
+            batteryJob -> "HEATING_BATTERY"
             job!=null && !job.canFit(inventory) -> "BLOCKED"
             type==KitchenType.FRIDGE && temperature>5.0 -> "COOLING"
             job!=null && power>1 -> "WORKING"
@@ -80,10 +91,34 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
         if(job!=null && job.canFit(inventory) && enabled && power>0 && (type!=KitchenType.FRIDGE || temperature<=5.0)) {
             if(work.advance(seconds,power,type.watts*type.seconds)) {
                 work.joules=0.0;job.complete(inventory)
-                play(SoundCommand("eln:beep_accept").verySmallRange().mulVolume(.25f,1.3f))
+                play(SoundCommand(if(type==KitchenType.TOASTER)"eln:appliance_toaster_pop" else "eln:appliance_done").verySmallRange().mulVolume(.35f,1f))
             }
         }
         if(publishedStatus!=status) { publishedStatus=status;needPublish() }
+    }
+    private fun detonateBattery() {
+        if(detonating)return
+        detonating=true;active=false;resistor.resistance=1e9;needPublish()
+        // Slow-process lists are snapshotted; defer world removal until the next tick.
+        mods.eln.sim.process.destruct.DelayedDestruction(object : mods.eln.sim.process.destruct.IDestructible {
+            override fun describe()="Microwaved battery"
+            override fun destructImpl() {
+                val n=node ?: return
+                if(n.isDestructing)return
+                val c=coordinate();val world=c.world() as? ServerLevel ?: return
+                inventory.getItem(0).shrink(1)
+                n.physicalSelfDestruction(0f)
+                world.explode(null as net.minecraft.world.entity.Entity?,c.x+.5,c.y+.5,c.z+.5,2f,false,
+                    if(mods.eln.Eln.config.getBooleanOrElse("gameplay.hazards.explosionsEnabled",false))
+                        net.minecraft.world.level.Level.ExplosionInteraction.BLOCK else net.minecraft.world.level.Level.ExplosionInteraction.NONE)
+            }
+        },0.0)
+    }
+    override fun onBreakElement() {
+        if(!detonating) { super.onBreakElement();return }
+        // A ruptured microwave is destroyed; spare contents drop once, not the appliance.
+        if(useUuid())stop(getUuid())
+        node!!.dropInventory(inventory)
     }
     override fun getElectricalLoad(side: Direction,lrdu: LRDU)=if(side.isNotY && lrdu==LRDU.Down)load else null
     override fun getConnectionMask(side: Direction,lrdu: LRDU)=if(getElectricalLoad(side,lrdu)!=null)NodeBase.maskElectricalPower else 0
@@ -97,7 +132,7 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
     }
     override fun networkSerialize(stream: DataOutputStream) {
         super.networkSerialize(stream)
-        stream.writeBoolean(enabled);stream.writeBoolean(active);stream.writeDouble(work.joules/(type.watts*type.seconds))
+        stream.writeBoolean(enabled);stream.writeBoolean(active);stream.writeDouble(if(batteryJob)batteryHeat.joules/MicrowaveBatteryHeat.BLAST_JOULES else work.joules/(type.watts*type.seconds))
         stream.writeDouble(load.voltage);stream.writeDouble(resistor.power);stream.writeDouble(temperature);stream.writeUTF(status)
         node!!.lrduCubeMask.getTranslate(Direction.YN).serialize(stream)
     }
@@ -106,10 +141,10 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
         enabled=!nbt.contains("kitchenEnabled") || nbt.getBoolean("kitchenEnabled")
         work.joules=nbt.getDouble("kitchenJoules").takeIf { it.isFinite() }?.coerceIn(0.0,type.watts*type.seconds) ?: 0.0
         temperature=if(nbt.contains("kitchenTemperature"))nbt.getDouble("kitchenTemperature").takeIf { it.isFinite() }?.coerceIn(3.5,20.0) ?: 20.0 else 20.0
-        cacheReady=false
+        batteryHeat.read(nbt);cacheReady=false
     }
     override fun writeToNBT(nbt: CompoundTag) {
-        super.writeToNBT(nbt);nbt.putBoolean("kitchenEnabled",enabled);nbt.putDouble("kitchenJoules",work.joules);nbt.putDouble("kitchenTemperature",temperature)
+        super.writeToNBT(nbt);nbt.putBoolean("kitchenEnabled",enabled);nbt.putDouble("kitchenJoules",work.joules);nbt.putDouble("kitchenTemperature",temperature);batteryHeat.write(nbt)
     }
     override fun multiMeterString(side: Direction)=Utils.plotVolt("U:",load.voltage)+Utils.plotPower("P:",resistor.power)
     override fun getWaila()=linkedMapOf(tr("State") to kitchenStatus(status),tr("Voltage") to Utils.plotVolt("",load.voltage),tr("Power") to Utils.plotPower("",resistor.power))

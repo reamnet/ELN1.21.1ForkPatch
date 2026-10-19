@@ -24,8 +24,8 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.18` | — | 30 home, LED, grand chandelier, heavy-duty, offshore, street and seasonal lights; wireless wall controls; larger UPS cells; two pole variants; standby engine sound and exhaust; ATS contactor clicks |
 | `v3.0.19` | — | Remove invisible movement barriers around decorative fixtures and long LED strips; automatically upgrade existing lamp clearance cells |
 | `v3.0.20` | — | Wall-mounted ATS, MPPT and hybrid solar inverter variants with shallow cabinets, wall cables and survival recipes; stable UPS charging on standby generators |
-
 | `v3.0.21` | — | Quick, audible wireless switches; adjustable fixture heads; miniature dots, twin eave light and ceiling fans; wall UPS and manual bypass; kettle, blender and rice cooker; thermostat heaters, fireplace TV stands and window/wall AC |
+| `v3.0.22` | — | Working countertop mini oven; energy-driven microwave battery hiss and explosion; operating sounds for all kitchen appliances, heaters, ceiling fans and both AC units |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`

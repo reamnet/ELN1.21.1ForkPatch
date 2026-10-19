@@ -7,6 +7,7 @@ import mods.eln.client.itemrender.IItemRenderer
 import mods.eln.gui.*
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
+import mods.eln.sound.LoopedSound
 import mods.eln.node.transparent.*
 import net.minecraft.core.BlockPos
 import net.minecraft.world.entity.player.Player
@@ -79,6 +80,10 @@ class ClimateDisplay {
 class ClimateRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDescriptor) : TransparentNodeElementRender(entity,descriptor) {
     override val inventory=TransparentNodeElementInventory(0,1,this)
     val display=ClimateDisplay()
+    val operatingSound=object : LoopedSound("eln:${(descriptor as ClimateDescriptor).type.sound}",Coordinate(entity.blockPos.x,entity.blockPos.y,entity.blockPos.z,0)) {
+        override fun getVolume()=if(display.enabled && display.active && display.watts>1).20f else 0f
+    }
+    init { addLoopedSound(operatingSound) }
     private var cable: CableRenderType?=null
     override fun draw() {
         val d=transparentNodeDescriptor as ClimateDescriptor;val facing=front ?: return

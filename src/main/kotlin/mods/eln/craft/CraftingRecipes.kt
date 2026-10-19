@@ -416,6 +416,8 @@ object CraftingRecipes {
         for(name in listOf("Classic Four Blade Ceiling Fan","Modern Three Blade Ceiling Fan"))
             addRecipe(findItemStack(name)," M ","PLP"," P ",
                 'M',findItemStack("Electrical Motor"),'P',if(name=="Classic Four Blade Ceiling Fan")ItemStack(Blocks.OAK_PLANKS) else findItemStack("Iron Plate"),'L',findItemStack("Basic Lamp Holder"))
+        addRecipe(findItemStack("Electric Mini Oven"),"PPP","GCG","PRP",
+            'P',findItemStack("Iron Plate"),'G',ItemStack(Blocks.GLASS_PANE),'C',findItemStack("Copper Cable"),'R',ItemStack(Items.REDSTONE))
         addRecipe(findItemStack("Electric Kettle")," P ","BCP"," R ",
             'P',findItemStack("Iron Plate"),'B',ItemStack(Items.BUCKET),'C',findItemStack("Copper Cable"),'R',ItemStack(Items.REDSTONE))
         addRecipe(findItemStack("Countertop Blender"),"G G","GGG","PMC",

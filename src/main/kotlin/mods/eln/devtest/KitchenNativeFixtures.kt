@@ -118,7 +118,7 @@ internal object KitchenNativeFixtures {
             val e=machine(p,i);val type=entry.first;val out=e.inventory.getItem(2)
             check(!out.isEmpty) { "$type did not produce food/ice; ${e.getWaila()}, progress=${e.work.joules}, temp=${e.temperature}" }
             when(type) {
-                KitchenType.MICROWAVE,KitchenType.STOVE -> check(out.`is`(Items.COOKED_BEEF) && out.count==2)
+                KitchenType.MICROWAVE,KitchenType.STOVE,KitchenType.MINI_OVEN -> check(out.`is`(Items.COOKED_BEEF) && out.count==2)
                 KitchenType.TOASTER -> check(out.`is`(KitchenFoods.toast.get()) && out.count==2)
                 KitchenType.COFFEE -> { check(out.`is`(KitchenFoods.coffee.get()) && out.count==1);check(e.inventory.getItem(0).count==1);check(e.inventory.getItem(1).isEmpty) }
                 KitchenType.KETTLE -> check(out.`is`(KitchenFoods.hotWater.get()) && out.count==1)

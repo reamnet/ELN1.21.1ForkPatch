@@ -31,7 +31,7 @@ class KitchenRecipe(val output: ItemStack,val water: Boolean=false,val container
             stack.get(DataComponents.POTION_CONTENTS)?.potion()?.orElse(null)==Potions.WATER
         fun find(world: ServerLevel,type: KitchenType,inventory: Container): KitchenRecipe? {
             val input=inventory.getItem(0)
-            if(input.isEmpty)return null
+            if(input.isEmpty || type==KitchenType.MICROWAVE && MicrowaveBatteryHeat.accepts(input))return null
             return when(type) {
                 KitchenType.TOASTER -> if(input.`is`(Items.BREAD)) KitchenRecipe(ItemStack(KitchenFoods.toast.get())) else null
                 KitchenType.COFFEE -> if(input.`is`(Items.COCOA_BEANS)) KitchenRecipe(ItemStack(KitchenFoods.coffee.get()),water=true) else null
@@ -53,6 +53,7 @@ class KitchenRecipe(val output: ItemStack,val water: Boolean=false,val container
             slot>=3 -> type==KitchenType.FRIDGE && (stack.has(DataComponents.FOOD) || stack.`is`(Items.POTION))
             slot==2 -> false
             slot==1 -> type in listOf(KitchenType.COFFEE,KitchenType.BLENDER,KitchenType.RICE) && waterBottle(stack)
+            type==KitchenType.MICROWAVE && MicrowaveBatteryHeat.accepts(stack) -> true
             type==KitchenType.KETTLE -> waterBottle(stack)
             type==KitchenType.BLENDER -> fruit(stack)
             type==KitchenType.RICE -> grain(stack)

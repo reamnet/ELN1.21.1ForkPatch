@@ -1660,8 +1660,8 @@ object TransparentNodeRegistration {
                     setCreativeTab(if(index<2)Eln.creativeTabPowerElectronics else Eln.creativeTabMachines)
                 })
         }
-        mods.eln.transparentnode.kitchen.KitchenType.entries.forEachIndexed { index,type ->
-            transparentNodeItem.addDescriptor((if(index<5)1+index else 18+index-5)+(124 shl 6),
+        mods.eln.transparentnode.kitchen.KitchenType.entries.forEach { type ->
+            transparentNodeItem.addDescriptor(type.subId+(124 shl 6),
                 mods.eln.transparentnode.kitchen.KitchenDescriptor(type).apply { setCreativeTab(Eln.creativeTabMachines) })
         }
         transparentNodeItem.addDescriptor(0 + (124 shl 6),

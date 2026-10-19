@@ -10,7 +10,22 @@ enum class KitchenType(val model: String,val title: String,val volts: Double,val
     COFFEE("kitchencoffeemaker",I18N.TR_NAME(I18N.Type.NONE,"Electric Coffee Maker"),120.0,900.0,10.0),
     KETTLE("kitchenkettle",I18N.TR_NAME(I18N.Type.NONE,"Electric Kettle"),120.0,1500.0,8.0),
     BLENDER("kitchenblender",I18N.TR_NAME(I18N.Type.NONE,"Countertop Blender"),120.0,400.0,5.0),
-    RICE("kitchenricecooker",I18N.TR_NAME(I18N.Type.NONE,"Electric Rice Cooker"),120.0,700.0,12.0)
+    RICE("kitchenricecooker",I18N.TR_NAME(I18N.Type.NONE,"Electric Rice Cooker"),120.0,700.0,12.0),
+    MINI_OVEN("kitchenminioven",I18N.TR_NAME(I18N.Type.NONE,"Electric Mini Oven"),120.0,1300.0,8.0);
+
+    // Existing IDs 21..26 belong to the climate appliances.
+    val subId get()=when(ordinal) { in 0..4 -> 1+ordinal;in 5..7 -> 18+ordinal-5;else -> 27+ordinal-8 }
+    val sound get()=when(this) {
+        MICROWAVE -> "appliance_microwave"
+        TOASTER -> "appliance_toaster"
+        STOVE -> "appliance_stove"
+        FRIDGE -> "appliance_fridge"
+        COFFEE -> "appliance_coffee"
+        KETTLE -> "appliance_kettle"
+        BLENDER -> "appliance_blender"
+        RICE -> "appliance_rice"
+        MINI_OVEN -> "appliance_oven"
+    }
 }
 
 /** Processing is paid for by electrical joules, so an outage cannot finish a job. */

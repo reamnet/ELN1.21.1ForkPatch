@@ -12,6 +12,11 @@ enum class ClimateType(val model: String,val title: String,val watts: Double,val
     WINDOW("windowairconditioner",I18N.TR_NAME(I18N.Type.NONE,"Window Air Conditioner"),1000.0,true),
     MINI_SPLIT("wallminisplit",I18N.TR_NAME(I18N.Type.NONE,"Wall-mounted Mini-split Air Conditioner"),900.0,true);
     val volts get()=120.0
+    val sound get()=when(this) {
+        WINDOW -> "appliance_window_ac"
+        MINI_SPLIT -> "appliance_minisplit"
+        else -> "appliance_heater"
+    }
 }
 
 /** Hysteresis applies only at physical ticks; a brownout supplies no artificial heat or cooling. */

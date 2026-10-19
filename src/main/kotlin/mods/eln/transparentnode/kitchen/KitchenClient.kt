@@ -7,6 +7,7 @@ import mods.eln.client.itemrender.IItemRenderer
 import mods.eln.gui.*
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
+import mods.eln.sound.LoopedSound
 import mods.eln.node.transparent.*
 import net.minecraft.core.BlockPos
 import net.minecraft.world.Container
@@ -17,6 +18,9 @@ import net.minecraft.world.phys.AABB
 import java.io.DataInputStream
 
 fun kitchenStatus(status: String)=when(status) {
+    "HISSING" -> tr("Battery hissing - explosion imminent!")
+    "HEATING_BATTERY" -> tr("Heating battery")
+    "EXPLODING" -> tr("Battery rupturing!")
     "OFF" -> tr("Switched off")
     "OVERVOLTAGE" -> tr("Wrong supply voltage; input protected")
     "NO_POWER" -> tr("Waiting for rated supply voltage")
@@ -67,8 +71,9 @@ class KitchenDescriptor(val type: KitchenType) : TransparentNodeDescriptor(type.
     override fun addInformation(itemStack: ItemStack?,entityPlayer: Player?,list: MutableList<String>,par4: Boolean) {
         list.add(tr("Rated supply: %1$ V / %2$ W",type.volts.toInt(),type.watts.toInt()))
         list.add(tr("Connect a floor cable to any horizontal side"))
+        if(type==KitchenType.MICROWAVE)list.add(tr("Batteries hiss and explode when microwaved"))
         list.add(when(type) {
-            KitchenType.MICROWAVE,KitchenType.STOVE -> tr("Cooks food using the world's smelting recipes")
+            KitchenType.MICROWAVE,KitchenType.STOVE,KitchenType.MINI_OVEN -> tr("Cooks food using the world's smelting recipes")
             KitchenType.TOASTER -> tr("Turns bread into edible toasted bread")
             KitchenType.COFFEE -> tr("Brews fresh coffee from cocoa beans and a water bottle")
             KitchenType.KETTLE -> tr("Heats a water bottle into drinkable hot water")
@@ -101,6 +106,13 @@ class KitchenRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDes
     val type=(descriptor as KitchenDescriptor).type
     override val inventory=TransparentNodeElementInventory(if(type==KitchenType.FRIDGE)30 else 3,64,this)
     val display=KitchenDisplay()
+    val operatingSound=object : LoopedSound("eln:${type.sound}",Coordinate(entity.blockPos.x,entity.blockPos.y,entity.blockPos.z,0)) {
+        override fun getVolume()=if(display.enabled && display.active && display.watts>1 && display.status!="EXPLODING").18f else 0f
+    }
+    val warningSound=if(type==KitchenType.MICROWAVE)object : LoopedSound("eln:appliance_battery_hiss",Coordinate(entity.blockPos.x,entity.blockPos.y,entity.blockPos.z,0)) {
+        override fun getVolume()=if(display.enabled && display.active && display.status=="HISSING").65f else 0f
+    } else null
+    init { addLoopedSound(operatingSound);warningSound?.let(::addLoopedSound) }
     private var cable: CableRenderType?=null
     override fun draw() {
         cable=drawCable(Direction.YN,Eln.instance.meduimVoltageCableDescriptor.render,display.connections,cable)

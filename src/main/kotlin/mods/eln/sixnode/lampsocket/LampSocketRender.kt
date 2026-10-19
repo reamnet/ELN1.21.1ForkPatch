@@ -15,6 +15,7 @@ import mods.eln.node.six.SixNodeEntity
 import mods.eln.sixnode.genericcable.GenericCableDescriptor
 import mods.eln.sixnode.lampsocket.objrender.LampSocketSuspendedObjRender
 import mods.eln.sound.SoundCommand
+import mods.eln.sound.LoopedSound
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
@@ -57,6 +58,12 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, sixNodeDescri
     val aim=descriptor.fixture?.newAim() ?: LightAim(0)
     var fanEnabled=true
     var fanPower=0.0
+    val operatingSound=if(descriptor.fixture?.fan==true)object : LoopedSound("eln:appliance_ceiling_fan",
+        Coordinate(tileEntity.blockPos.x,tileEntity.blockPos.y,tileEntity.blockPos.z,0)) {
+        override fun getVolume()=if(fanEnabled && fanPower.isFinite()).16f*fanPower.coerceIn(0.0,1.0).toFloat() else 0f
+        override fun getPitch()=.7f+.3f*(fanPower.takeIf { it.isFinite() } ?: 0.0).coerceIn(0.0,1.0).toFloat()
+    } else null
+    init { operatingSound?.let(::addLoopedSound) }
     var fanAngle=0f
         private set
     var paintColor = DEFAULT_PAINT_COLOR
@@ -153,6 +160,7 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, sixNodeDescri
     }
 
     override fun refresh(deltaT: Float) {
+        super.refresh(deltaT)
         if(descriptor.fixture?.fan==true)fanAngle=(fanAngle+deltaT.coerceIn(0f,.25f)*540f*fanPower.toFloat())%360f
         if (descriptor.renderType is LampSocketSuspendedObjRender) {
             entityTimeout -= deltaT
