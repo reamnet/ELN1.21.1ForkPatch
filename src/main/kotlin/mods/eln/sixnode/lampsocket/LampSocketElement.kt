@@ -72,6 +72,19 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     var lampSupplyChannel = LampChannelMemory.DEFAULT_CHANNEL
     var activeLampSupplyConnection = false
     var projectionRotationAngle = 0.0
+    val aim=descriptor.fixture?.newAim() ?: LightAim(0)
+    var fanEnabled=true
+    var fanPower=0.0
+        private set
+    val fanMotor=Resistor(electricalLoad,null).apply { resistance=1e19 }
+    val fanNominal get()=(getItemObject(inventory.getItem(0)) as? LampDescriptor)?.lampData?.nominalU ?: 120.0
+    fun updateFan() {
+        if(descriptor.fixture?.fan!=true)return
+        val ready=fanEnabled && !inventory.getItem(LampSocketContainer.CABLE_SLOT_ID).isEmpty
+        val level=if(ready)(kotlin.math.abs(electricalLoad.voltage)/fanNominal).coerceIn(0.0,1.0) else 0.0
+        val next=if(level>=.5)level else 0.0
+        if(kotlin.math.abs(next-fanPower)>.01) { fanPower=next;needPublish() }
+    }
     var motionMode = 0
     var motionEnergized = false
         private set
@@ -194,6 +207,8 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
 
         motionMode = nbt.getInt("motionMode").coerceIn(0,3)
         projectionRotationAngle = nbt.getDouble("projectionRotationAngle")
+        aim.read(nbt)
+        fanEnabled=!nbt.contains("fanEnabled") || nbt.getBoolean("fanEnabled")
         lampSocketProcess.stableLightProbability = nbt.getDouble("stableLightProbability")
     }
 
@@ -206,6 +221,8 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
         nbt.putString("lampSupplyChannel", lampSupplyChannel)
         nbt.putInt("motionMode",motionMode)
         nbt.putDouble("projectionRotationAngle", projectionRotationAngle)
+        aim.write(nbt)
+        if(descriptor.fixture?.fan==true)nbt.putBoolean("fanEnabled",fanEnabled)
         nbt.putDouble("stableLightProbability", lampSocketProcess.stableLightProbability)
     }
 
@@ -223,6 +240,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
         if (!poweredByLampSupply && !descriptor.wirelessOnly) {
             electricalLoadList.add(electricalLoad)
             electricalComponentList.add(lampResistor)
+            if(descriptor.fixture?.fan==true)electricalComponentList.add(fanMotor)
         }
         super.connectJob()
     }
@@ -231,6 +249,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
         super.disconnectJob()
         electricalLoadList.remove(electricalLoad)
         electricalComponentList.remove(lampResistor)
+        electricalComponentList.remove(fanMotor)
         electricalLoad.state = 0.0
     }
 
@@ -243,6 +262,8 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     fun computeInventory() {
         val lampStack = inventory.getItem(LampSocketContainer.LAMP_SLOT_ID)
         val cableStack = inventory.getItem(LampSocketContainer.CABLE_SLOT_ID)
+        if(descriptor.fixture?.fan==true)fanMotor.resistance=if(fanEnabled && !cableStack.isEmpty)
+            fanNominal*fanNominal/descriptor.fixture!!.fanWatts else 1e19
 
         // 1.11+: an empty slot is ItemStack.EMPTY, never null
         when {
@@ -309,6 +330,8 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
             // The legacy item summary carries identity only, not the stack count.
             if (descriptor.fixture != null) stream.writeByte(installedBulbs)
             if (descriptor.fixture == DecorativeLampStyle.MOTION) stream.writeByte(motionMode)
+            aim.write(stream)
+            if(descriptor.fixture?.fan==true) { stream.writeBoolean(fanEnabled);stream.writeDouble(fanPower) }
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -320,7 +343,12 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
 
     private fun readSettings(stream: DataInputStream, player: ServerPlayer?) {
         try {
-            when (stream.readByte()) {
+            val event=stream.readByte()
+            when (event) {
+                9.toByte() -> if(descriptor.fixture?.fan==true) { fanEnabled=!fanEnabled;computeInventory() }
+                in 5..8 -> {
+                    aim.set((event.toInt()-5)/2,(event.toInt()-5)%2,stream.readDouble())
+                }
                 LampSocketGui.MOTION_MODE_EVENT -> if(descriptor.fixture == DecorativeLampStyle.MOTION) {
                     motionMode = (motionMode+1)%4
                 }
@@ -382,6 +410,10 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     override fun readConfigTool(compound: CompoundTag, invoker: Player) {
         var publishChanges = false
         var inventoryChanged = false
+        if(aim.heads>0) { aim.read(compound);publishChanges=true }
+        if(descriptor.fixture?.fan==true && compound.contains("fanEnabled")) {
+            fanEnabled=compound.getBoolean("fanEnabled");inventoryChanged=true
+        }
 
         if (compound.contains("poweredByLampSupply")) {
             poweredByLampSupply = descriptor.wirelessOnly || compound.getBoolean("poweredByLampSupply")
@@ -424,6 +456,8 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     }
 
     override fun writeConfigTool(compound: CompoundTag, invoker: Player) {
+        aim.write(compound)
+        if(descriptor.fixture?.fan==true)compound.putBoolean("fanEnabled",fanEnabled)
         compound.putBoolean("poweredByLampSupply", poweredByLampSupply)
         compound.putString("lampSupplyChannel", lampSupplyChannel)
         if (descriptor.enableProjectionRotation) compound.putDouble("projectionRotationAngle", projectionRotationAngle)

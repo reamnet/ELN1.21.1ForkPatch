@@ -8,13 +8,14 @@ import mods.eln.misc.Direction
 import mods.eln.misc.UtilsClient
 import mods.eln.misc.preserveMatrix
 import mods.eln.node.transparent.TransparentNodeDescriptor
+import mods.eln.node.transparent.PowerCabinetDescriptor
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 
-class UpsDescriptor(name: String) : TransparentNodeDescriptor(name,UpsElement::class.java,UpsRender::class.java) {
-    private val model=Eln.obj.getObj("programmableups")
+class UpsDescriptor(name: String,wallMounted: Boolean=false) : PowerCabinetDescriptor(name,UpsElement::class.java,UpsRender::class.java,wallMounted) {
+    private val model=Eln.obj.getObj(if(wallMounted)"wallups" else "programmableups")
     fun draw(front: Direction, state: UpsDisplay?=null)=preserveMatrix {
-        front.glRotateXnRef()
+        if(wallMounted)front.inverse.glRotateZnRef() else front.glRotateXnRef()
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
             GL11.glDisable(GL11.GL_TEXTURE_2D)
@@ -23,7 +24,7 @@ class UpsDescriptor(name: String) : TransparentNodeDescriptor(name,UpsElement::c
             GL11.glColor3f(.04f,.05f,.06f);model.getPart("Vents")?.drawNoBind()
             GL11.glColor3f(.18f,.36f,.65f);model.getPart("Input")?.drawNoBind()
             GL11.glColor3f(.85f,.40f,.12f);model.getPart("Output")?.drawNoBind()
-            val lit=state!=null && state.active>0 && state.energy>0
+            val lit=state!=null && (state.active>0 && state.energy>0 || state.bypass && state.inputVolts>1)
             if(lit)UtilsClient.disableLight()
             GL11.glColor3f(if(lit).08f else .015f,if(lit).45f else .04f,if(lit).52f else .05f)
             model.getPart("Display")?.drawNoBind()
@@ -42,5 +43,7 @@ class UpsDescriptor(name: String) : TransparentNodeDescriptor(name,UpsElement::c
         list.add(tr("Accepts portable batteries and AGM, LiFePO4 or industrial UPS cells"))
         list.add(tr("Blue terminal: input; orange terminal: output"))
         list.add(tr("Batteries retain their charge when removed"))
+        list.add(tr("Manual bypass passes input voltage straight through; no regulation or battery backup"))
+        if(wallMounted)list.add(tr("Place against a vertical wall; connect cables on the same wall face"))
     }
 }

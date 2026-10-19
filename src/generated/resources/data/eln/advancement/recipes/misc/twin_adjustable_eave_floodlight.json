@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_mini_bezel_dot_spotlight": {
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:mini_bezel_dot_spotlight"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "eln:twin_adjustable_eave_floodlight"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_mini_bezel_dot_spotlight"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "eln:twin_adjustable_eave_floodlight"
+    ]
+  }
+}

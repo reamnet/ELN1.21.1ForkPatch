@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "L": {
+      "item": "eln:basic_lamp_holder"
+    },
+    "M": {
+      "item": "eln:electrical_motor"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    " M ",
+    "PLP",
+    " P "
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:modern_three_blade_ceiling_fan"
+  }
+}

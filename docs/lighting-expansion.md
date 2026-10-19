@@ -95,3 +95,27 @@ reopens the saved world, writes `run/client/lighting-expansion-checks.json` and 
 Use `-Deln.lampClearanceChecks=true` with `runClient` for the focused collision
 regression. It simulates old solid reservations, checks server/client collision
 and real player movement, reloads an old-state world and checks fixture removal.
+
+## Adjustable heads and ceiling fans (3.0.21)
+
+Warehouse, stadium and offshore floodlights, the adjustable gimbal recessed lamp,
+and the gasoline construction cart now have **Pan**, **Tilt** and **Reset aim**
+controls. On a twin fixture, select **Head 1/2** to adjust each head independently.
+The housing and emitted beam rotate together. Settings survive world saves and
+can be copied with the configuration tool.
+
+Five more compact dot styles are available: pinhole, bezel, eyeball, deep baffle
+and twin dot. The Twin Adjustable Eave Floodlight has two independent swivel
+heads and mounts below ceilings or on walls. All accept every bulb technology;
+the miniature dots use wireless supply power, while the eave fixture also accepts
+wired power. Slab mounting and passable fixture clearance apply to these lights.
+
+The Classic Four Blade and Modern Three Blade Ceiling Fans accept wired or
+wireless lamp-supply power. Their **Fan: On/Off** button controls the motor
+independently of the lamp. Motors draw 55 W and 28 W respectively at the installed
+bulb's rated voltage (120 V without a bulb). Supply loss stops the blades. Install
+a cable in the fixture, including in wireless mode, just as for other lamp sockets.
+
+Wireless paddle and toggle controls now snap in roughly a tenth of a second,
+play a quiet click on operation, and show a small green marker when on. Momentary
+buttons click again when released automatically; loading a saved switch is silent.

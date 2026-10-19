@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "minecraft:bucket"
+    },
+    "C": {
+      "item": "eln:copper_cable"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "PPP",
+    "BCB",
+    "PRP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:electric_rice_cooker"
+  }
+}

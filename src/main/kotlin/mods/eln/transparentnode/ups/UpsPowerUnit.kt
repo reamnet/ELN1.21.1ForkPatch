@@ -28,9 +28,12 @@ class UpsPowerUnit(owner: TransparentNodeElement, val bank: UpsBatteryBank) {
         private set
     var enabled=true
         private set
+    var bypass=false
+        private set
     private var stepSeconds=.05
     val primary=NbtElectricalLoad("upsPrimary")
     val secondary=NbtElectricalLoad("upsSecondary")
+    val bypassContact=mods.eln.transparentnode.standby.TransferContact(primary,secondary)
     private val inputPin=NbtElectricalLoad("upsInputPin")
     private val outputPin=NbtElectricalLoad("upsOutputPin")
     private val batteryPin=NbtElectricalLoad("upsBatteryPin")
@@ -60,7 +63,7 @@ class UpsPowerUnit(owner: TransparentNodeElement, val bank: UpsBatteryBank) {
                 min(requestedChargeWatts(),chargeControl.outputBudget(chargerInput.voltage)),EFFICIENCY,1.0/4096,8.0)
         }, { 49.0 })
     val inverter=RegulatedPowerProcess(inverterPin,null,outputPin,null,inverterInput,inverterOutput,
-        { enabled && cool && bank.activeCount>0 && bank.energy>1e-7 },
+        { !bypass && enabled && cool && bank.activeCount>0 && bank.energy>1e-7 },
         {
             val available=bank.availableDischargeWatts(stepSeconds)
             ConverterLimits(40.0,52.0,MAX_OUTPUT_VOLTS,min(400.0,available/BUS_VOLTS),200.0,
@@ -75,6 +78,12 @@ class UpsPowerUnit(owner: TransparentNodeElement, val bank: UpsBatteryBank) {
             chargeControl.advance(seconds,input.volts,requestedChargeWatts()/EFFICIENCY,chargerInput.enabled && inputWatts>1)
         }
         override fun rootSystemPreStepProcess() {}
+        override fun prepareStep() {
+            // Open the inverter before the direct feed, or open the feed before
+            // the inverter is prepared. No accepted solve connects both outputs.
+            if(bypass) { inverterInput.enabled=false;inverterOutput.enabled=false }
+            bypassContact.closed=bypass && enabled
+        }
         override fun acceptsCandidate()=true
         override fun failClosed() {}
         override fun connectedSystems()=emptySet<mods.eln.sim.mna.SubSystem>()
@@ -82,9 +91,10 @@ class UpsPowerUnit(owner: TransparentNodeElement, val bank: UpsBatteryBank) {
     val controllers get()=listOf(clock,charger,inverter)
     var batteryWatts=0.0
         private set
-    val outputWatts get()=inverterOutput.power.coerceAtLeast(0.0)
-    val inputWatts get()=(-chargerInput.power).coerceAtLeast(0.0)
+    val outputWatts get()=if(bypassContact.closed)(secondary.voltage*bypassContact.current).coerceAtLeast(0.0) else inverterOutput.power.coerceAtLeast(0.0)
+    val inputWatts get()=(-chargerInput.power).coerceAtLeast(0.0)+(if(bypassContact.closed)primary.voltage*bypassContact.current else 0.0).coerceAtLeast(0.0)
     val status: String get()=when {
+        bypass && enabled -> if(primary.voltage>1.0)"BYPASS" else "BYPASS_NO_INPUT"
         bank.activeCount==0 -> "NEEDS_BATTERIES"
         !cool -> "OVERTEMPERATURE"
         !enabled -> if(inputWatts>1) "CHARGING_OFF" else "DISABLED"
@@ -101,7 +111,7 @@ class UpsPowerUnit(owner: TransparentNodeElement, val bank: UpsBatteryBank) {
             it.serialResistance=.000001;owner.electricalLoadList.add(it)
         }
         owner.electricalComponentList.addAll(listOf(batterySource,batteryWire,inputWire,outputWire,chargeWire,inverterWire,
-            chargerInput,chargerOutput,inverterInput,inverterOutput))
+            chargerInput,chargerOutput,inverterInput,inverterOutput,bypassContact))
         owner.thermalLoadList.add(thermal)
         owner.electricalProcessList.add(IProcess { seconds -> account(seconds) })
     }
@@ -113,21 +123,23 @@ class UpsPowerUnit(owner: TransparentNodeElement, val bank: UpsBatteryBank) {
         // Excess charging at a full cell is dissipated; it never becomes extra stored energy.
         val rejected=(requested-actual).coerceAtLeast(0.0)/seconds
         val electronics=(-chargerInput.power-chargerOutput.power-inverterInput.power-inverterOutput.power).coerceAtLeast(0.0)
-        thermal.movePowerTo(rejected+electronics+batteryWire.power+inputWire.power+outputWire.power+chargeWire.power+inverterWire.power)
+        thermal.movePowerTo(rejected+electronics+batteryWire.power+inputWire.power+outputWire.power+chargeWire.power+inverterWire.power+bypassContact.power)
     }
     fun settings(tag: CompoundTag) {
         val value=tag.getDouble("upsOutputVoltage")
         outputVoltage=value.takeIf(::validVoltage) ?: 120.0
         enabled=!tag.contains("upsEnabled") || tag.getBoolean("upsEnabled")
+        bypass=tag.getBoolean("upsBypass")
         charger.resetFault();inverter.resetFault()
     }
-    fun write(tag: CompoundTag) { tag.putDouble("upsOutputVoltage",outputVoltage);tag.putBoolean("upsEnabled",enabled) }
+    fun write(tag: CompoundTag) { tag.putDouble("upsOutputVoltage",outputVoltage);tag.putBoolean("upsEnabled",enabled);tag.putBoolean("upsBypass",bypass) }
     fun packet(id: Byte, stream: DataInputStream): Boolean {
-        if(id.toInt() !in 80..81)return false
+        if(id.toInt() !in 80..82)return false
         try {
             when(id.toInt()) {
                 80 -> { val value=stream.readDouble();if(!validVoltage(value))return true;outputVoltage=value }
                 81 -> enabled=stream.readBoolean()
+                82 -> bypass=stream.readBoolean()
             }
             charger.resetFault();inverter.resetFault()
         } catch(_: IOException) {}

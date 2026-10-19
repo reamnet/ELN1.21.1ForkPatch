@@ -11,7 +11,7 @@ import net.minecraft.world.item.crafting.SingleRecipeInput
 
 class KitchenRecipe(val output: ItemStack,val water: Boolean=false,val container: ItemStack=ItemStack.EMPTY) {
     fun canFit(inventory: Container): Boolean = mergeFits(inventory.getItem(2),output) &&
-        (container.isEmpty || mergeFits(inventory.getItem(1),container)) && (!water || waterBottle(inventory.getItem(1)))
+        (container.isEmpty || mergeFits(inventory.getItem(1).copy().also { if(water)it.shrink(1) },container)) && (!water || waterBottle(inventory.getItem(1)))
     fun complete(inventory: Container) {
         check(canFit(inventory))
         inventory.getItem(0).shrink(1)
@@ -35,6 +35,9 @@ class KitchenRecipe(val output: ItemStack,val water: Boolean=false,val container
             return when(type) {
                 KitchenType.TOASTER -> if(input.`is`(Items.BREAD)) KitchenRecipe(ItemStack(KitchenFoods.toast.get())) else null
                 KitchenType.COFFEE -> if(input.`is`(Items.COCOA_BEANS)) KitchenRecipe(ItemStack(KitchenFoods.coffee.get()),water=true) else null
+                KitchenType.KETTLE -> if(waterBottle(input)) KitchenRecipe(ItemStack(KitchenFoods.hotWater.get())) else null
+                KitchenType.BLENDER -> if(fruit(input)) KitchenRecipe(ItemStack(KitchenFoods.smoothie.get()),water=true) else null
+                KitchenType.RICE -> if(grain(input)) KitchenRecipe(ItemStack(KitchenFoods.grains.get()),water=true,container=ItemStack(Items.GLASS_BOTTLE)) else null
                 KitchenType.FRIDGE -> if(input.`is`(Items.WATER_BUCKET)) KitchenRecipe(ItemStack(Items.ICE),container=ItemStack(Items.BUCKET)) else null
                 else -> {
                     val recipe=world.recipeManager.getRecipeFor(RecipeType.SMELTING,SingleRecipeInput(input),world).orElse(null) ?: return null
@@ -43,10 +46,16 @@ class KitchenRecipe(val output: ItemStack,val water: Boolean=false,val container
                 }
             }
         }
+        private fun fruit(stack: ItemStack)=stack.`is`(Items.APPLE) || stack.`is`(Items.MELON_SLICE) || stack.`is`(Items.SWEET_BERRIES)
+        private fun grain(stack: ItemStack)=stack.`is`(Items.WHEAT) || stack.`is`(net.minecraft.tags.TagKey.create(
+            net.minecraft.core.registries.Registries.ITEM,net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("c","crops/rice")))
         fun allowed(type: KitchenType,slot: Int,stack: ItemStack): Boolean = when {
             slot>=3 -> type==KitchenType.FRIDGE && (stack.has(DataComponents.FOOD) || stack.`is`(Items.POTION))
             slot==2 -> false
-            slot==1 -> type==KitchenType.COFFEE && waterBottle(stack)
+            slot==1 -> type in listOf(KitchenType.COFFEE,KitchenType.BLENDER,KitchenType.RICE) && waterBottle(stack)
+            type==KitchenType.KETTLE -> waterBottle(stack)
+            type==KitchenType.BLENDER -> fruit(stack)
+            type==KitchenType.RICE -> grain(stack)
             type==KitchenType.TOASTER -> stack.`is`(Items.BREAD)
             type==KitchenType.COFFEE -> stack.`is`(Items.COCOA_BEANS)
             type==KitchenType.FRIDGE -> stack.`is`(Items.WATER_BUCKET)

@@ -30,7 +30,9 @@ class UpsElement(node: TransparentNode, descriptor: TransparentNodeDescriptor) :
     override fun initialize() { bank.invalidate();connect() }
     override fun connectJob() { super.connectJob();unit.controllers.forEach(Eln.simulator.mna::addProcess) }
     override fun disconnectJob() { unit.controllers.forEach(Eln.simulator.mna::removeProcess);super.disconnectJob() }
-    override fun getElectricalLoad(side: Direction, lrdu: LRDU)=if(lrdu!=LRDU.Down)null else when(side) {
+    private val cabinet get()=transparentNodeDescriptor as UpsDescriptor
+    override fun onNeighborBlockChange() { super.onNeighborBlockChange();cabinet.checkWallSupport(this) }
+    override fun getElectricalLoad(side: Direction, lrdu: LRDU)=if(!cabinet.acceptsCable(front,side,lrdu))null else when(side) {
         front.left() -> unit.primary
         front.right() -> unit.secondary
         else -> null
@@ -60,7 +62,8 @@ class UpsElement(node: TransparentNode, descriptor: TransparentNodeDescriptor) :
         stream.writeDouble(bank.energy);stream.writeDouble(bank.capacity)
         stream.writeDouble(unit.primary.voltage);stream.writeDouble(unit.secondary.voltage)
         stream.writeDouble(unit.inputWatts);stream.writeDouble(unit.outputWatts);stream.writeUTF(unit.status)
-        node!!.lrduCubeMask.getTranslate(front.down()).serialize(stream)
+        stream.writeBoolean(unit.bypass)
+        node!!.lrduCubeMask.getTranslate(cabinet.connectionPlane(front)).serialize(stream)
     }
     override fun multiMeterString(side: Direction)=tr("Input: %1$; output: %2$",Utils.plotVolt("",unit.primary.voltage),Utils.plotVolt("",unit.secondary.voltage))
     override fun getWaila()=linkedMapOf(

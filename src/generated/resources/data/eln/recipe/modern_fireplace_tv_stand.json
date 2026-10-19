@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "H": {
+      "item": "eln:portable_electric_space_heater"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    },
+    "W": {
+      "item": "minecraft:oak_planks"
+    }
+  },
+  "pattern": [
+    "PPP",
+    "WHW",
+    "WWW"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:modern_fireplace_tv_stand"
+  }
+}

@@ -66,6 +66,7 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
                 if (timeout - time <= 0) {
                     if (state) {
                         state = false;
+                        onStateChanged();
                         needPublish();
                     }
                 }
@@ -146,10 +147,16 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
             return false;
 
         state = descriptor.autoReset || !state;
+        onStateChanged();
         if (state && autoResetProcess != null) autoResetProcess.reset();
         needPublish();
         return true;
     }
+
+    /** Physical user/button transitions only; loading and network retries stay silent. */
+    protected void onStateChanged() {}
+
+    public boolean isOn() { return state; }
 
     @Override
     public void destroy(ServerPlayer entityPlayer) {

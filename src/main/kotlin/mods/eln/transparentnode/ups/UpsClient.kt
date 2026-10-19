@@ -15,6 +15,8 @@ import java.io.DataInputStream
 import java.util.Locale
 
 fun upsStatusText(status: String)=when(status) {
+    "BYPASS" -> tr("Bypass: direct input voltage")
+    "BYPASS_NO_INPUT" -> tr("Bypass: no input; no battery backup")
     "NEEDS_BATTERIES" -> tr("Needs a full rack (24 cells)")
     "OVERTEMPERATURE" -> tr("Cooling down")
     "CHARGING_OFF" -> tr("Charging; output off")
@@ -63,11 +65,12 @@ class UpsDisplay {
     var target=120.0;var enabled=true;var installed=0;var active=0
     var energy=0.0;var capacity=0.0;var inputVolts=0.0;var outputVolts=0.0;var inputWatts=0.0;var outputWatts=0.0
     var status="NEEDS_BATTERIES"
+    var bypass=false
     val connections=LRDUMask()
     fun read(stream: DataInputStream) {
         target=stream.readDouble();enabled=stream.readBoolean();installed=stream.readInt();active=stream.readInt()
         energy=stream.readDouble();capacity=stream.readDouble();inputVolts=stream.readDouble();outputVolts=stream.readDouble()
-        inputWatts=stream.readDouble();outputWatts=stream.readDouble();status=stream.readUTF();connections.deserialize(stream)
+        inputWatts=stream.readDouble();outputWatts=stream.readDouble();status=stream.readUTF();bypass=stream.readBoolean();connections.deserialize(stream)
     }
 }
 class UpsRender(entity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor) : TransparentNodeElementRender(entity,descriptor) {
@@ -77,11 +80,12 @@ class UpsRender(entity: TransparentNodeEntity, descriptor: TransparentNodeDescri
     override fun draw() {
         (transparentNodeDescriptor as UpsDescriptor).draw(front ?: Direction.XN,display)
         val direction=front ?: return
-        val a=direction.down().getLRDUGoingTo(direction.left())!!
-        val b=direction.down().getLRDUGoingTo(direction.right())!!
+        val plane=(transparentNodeDescriptor as UpsDescriptor).connectionPlane(direction)
+        val a=plane.getLRDUGoingTo(direction.left())!!
+        val b=plane.getLRDUGoingTo(direction.right())!!
         left.set(0);right.set(0);left[a]=display.connections[a];right[b]=display.connections[b]
-        cable=drawCable(direction.down(),Eln.instance.stdCableRender3200V,left,cable)
-        cable=drawCable(direction.down(),Eln.instance.stdCableRender3200V,right,cable)
+        cable=drawCable(plane,Eln.instance.stdCableRender3200V,left,cable)
+        cable=drawCable(plane,Eln.instance.stdCableRender3200V,right,cable)
     }
     override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream);display.read(stream) }
     override fun newGuiDraw(side: Direction, player: Player)=UpsGui(player,inventory,this,display)
@@ -92,6 +96,7 @@ class UpsGui(player: Player, inventory: Container, private val render: UpsRender
     private lateinit var apply: GuiButtonEln
     private lateinit var enabled: GuiButtonEln
     private lateinit var rack: GuiButtonEln
+    private lateinit var bypass: GuiButtonEln
     private val bankMenu get()=menu as UpsContainer
     override fun newHelper()=GuiHelperContainer(this,176,290,8,205)
     override fun initGui() {
@@ -99,13 +104,15 @@ class UpsGui(player: Player, inventory: Container, private val render: UpsRender
         voltage=newGuiTextField(8,99,72).apply { text=display.target.toString();setComment(0,tr("Output voltage: 1 to 3200 V")) }
         apply=newGuiButton(84,95,38,tr("Set V"))
         enabled=newGuiButton(126,95,42,"")
-        rack=newGuiButton(8,117,160,"")
+        bypass=newGuiButton(8,117,76,"").apply { setComment(0,tr("Passes input voltage unchanged; the inverter and battery backup are disconnected")) }
+        rack=newGuiButton(88,117,80,"").apply { setComment(0,tr("Click to switch battery racks")) }
     }
     override fun guiObjectEvent(obj: IGuiObject) {
         super.guiObjectEvent(obj)
         when(obj) {
             apply -> voltage.text.toDoubleOrNull()?.takeIf(UpsPowerUnit::validVoltage)?.let { render.clientSendDouble(80,it) }
             enabled -> render.clientSendBoolean(81,!display.enabled)
+            bypass -> render.clientSendBoolean(82,!display.bypass)
             rack -> {
                 val next=1-bankMenu.page
                 bankMenu.selectPage(next)
@@ -115,9 +122,11 @@ class UpsGui(player: Player, inventory: Container, private val render: UpsRender
     }
     override fun postDraw(f: Float, x: Int, y: Int) {
         super.postDraw(f,x,y)
-        apply.enabled=voltage.text.toDoubleOrNull()?.let(UpsPowerUnit::validVoltage)==true
+        apply.enabled=!display.bypass && voltage.text.toDoubleOrNull()?.let(UpsPowerUnit::validVoltage)==true
+        voltage.enabled=!display.bypass
+        bypass.displayString=if(display.bypass)tr("Bypass: On") else tr("Bypass: Off")
         enabled.displayString=if(display.enabled)tr("On") else tr("Off")
-        rack.displayString=tr("Rack %1$/2 - click to switch",bankMenu.page+1)
+        rack.displayString=tr("Rack %1$/2",bankMenu.page+1)
         drawString(8,8,tr("Programmable UPS"))
         drawString(8,22,font.plainSubstrByWidth(upsStatusText(display.status),160))
         val percent=if(display.capacity>0)100*display.energy/display.capacity else 0.0
@@ -125,7 +134,7 @@ class UpsGui(player: Player, inventory: Container, private val render: UpsRender
         drawString(8,46,tr("Batteries: %1$/48 (%2$ active)",display.installed,display.active))
         drawString(8,58,tr("In: %1$ / %2$",Utils.plotVolt("",display.inputVolts).trim(),Utils.plotPower("",display.inputWatts).trim()))
         drawString(8,70,tr("Out: %1$ / %2$",Utils.plotVolt("",display.outputVolts).trim(),Utils.plotPower("",display.outputWatts).trim()))
-        drawString(8,82,if(display.outputWatts>1)tr("Backup: about %1$ min",format(display.energy*UpsPowerUnit.EFFICIENCY/display.outputWatts/60)) else tr("Backup: no load"))
+        drawString(8,82,if(display.bypass)tr("Bypass: no battery backup") else if(display.outputWatts>1)tr("Backup: about %1$ min",format(display.energy*UpsPowerUnit.EFFICIENCY/display.outputWatts/60)) else tr("Backup: no load"))
     }
     private fun format(value: Double)=String.format(Locale.ROOT,"%.1f",value)
 }

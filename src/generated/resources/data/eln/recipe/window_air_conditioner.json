@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "eln:copper_cable"
+    },
+    "M": {
+      "item": "eln:electrical_motor"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    },
+    "R": {
+      "item": "eln:electric_refrigerator"
+    }
+  },
+  "pattern": [
+    "PPP",
+    "MCM",
+    "PRP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:window_air_conditioner"
+  }
+}

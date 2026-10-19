@@ -20,17 +20,23 @@ class LampSocketGui(player: Player, val render: LampSocketRender) :
     }
 
     private var motionButton: GuiButtonEln? = null
+    private var fanButton: GuiButtonEln?=null
+    private var aiming: LightAimControls?=null
     private lateinit var buttonGrounded: GuiButtonEln
     private lateinit var buttonPowerSource: GuiButtonEln
     private lateinit var textboxLampSupplyChannel: GuiTextFieldEln
     private lateinit var trackbarRotationAngle: GuiVerticalTrackBar
 
     override fun newHelper(): GuiHelperContainer {
-        return HelperStdContainer(this)
+        return if(render.aim.heads>0)GuiHelperContainer(this,176,242,8,160) else HelperStdContainer(this)
     }
 
     override fun initGui() {
         super.initGui()
+        if(render.aim.heads>0)aiming=LightAimControls(this,82,render.aim) { head,axis,value ->
+            render.clientSetDouble((5+head*2+axis).toByte(),value)
+        }
+        if(render.descriptor.fixture?.fan==true)fanButton=newGuiButton(40,57,96,"")
 
         buttonPowerSource = newGuiButton(16, 7, 144, "")
         buttonPowerSource.enabled = !render.descriptor.wirelessOnly
@@ -62,6 +68,8 @@ class LampSocketGui(player: Player, val render: LampSocketRender) :
 
     override fun preDraw(f: Float, x: Int, y: Int) {
         super.preDraw(f, x, y)
+        aiming?.refresh()
+        fanButton?.displayString=if(render.fanEnabled)I18N.tr("Fan: On") else I18N.tr("Fan: Off")
 
         if (render.grounded) buttonGrounded.displayString = I18N.tr("Grounded")
         else buttonGrounded.displayString = I18N.tr("Ungrounded")
@@ -97,8 +105,10 @@ class LampSocketGui(player: Player, val render: LampSocketRender) :
 
     override fun guiObjectEvent(obj: IGuiObject) {
         super.guiObjectEvent(obj)
+        aiming?.event(obj)
 
         when (obj) {
+            fanButton -> render.clientSend(9)
             motionButton -> render.clientSend(MOTION_MODE_EVENT.toInt())
             buttonGrounded -> render.clientSend(TOGGLE_GROUNDED_EVENT.toInt())
             buttonPowerSource -> render.clientSend(TOGGLE_POWER_SOURCE_EVENT.toInt())
@@ -108,6 +118,6 @@ class LampSocketGui(player: Player, val render: LampSocketRender) :
     }
     override fun postDraw(f: Float, x: Int, y: Int) {
         super.postDraw(f,x,y)
-        if (render.descriptor.fixture != null && motionButton == null) drawString(46,65,I18N.tr("Bulbs: %1$/%2$",render.bulbCount,render.descriptor.bulbCapacity))
+        if (render.descriptor.fixture != null && motionButton == null && fanButton==null) drawString(46,65,I18N.tr("Bulbs: %1$/%2$",render.bulbCount,render.descriptor.bulbCapacity))
     }
 }

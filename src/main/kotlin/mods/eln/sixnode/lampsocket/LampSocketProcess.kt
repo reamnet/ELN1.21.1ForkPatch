@@ -59,6 +59,18 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
 
         var activeLampSupplyConnection = false
         var newLightValue = BoilerplateLampData.MIN_LIGHT_VALUE
+        if(element.descriptor.fixture?.fan==true) {
+            if(element.poweredByLampSupply) {
+                findBestLampSupply(element.sixNode!!.coordinate)
+                val h=cachedBestChannelHandle?.second
+                activeLampSupplyConnection=h!=null
+                if(h!=null && h.element.getChannelState(h.id) && !cableStack.isEmpty) {
+                    h.element.addToRp(element.fanMotor.resistance)
+                    element.electricalLoad.state=h.element.powerLoad.state
+                } else element.electricalLoad.state=0.0
+            }
+            element.updateFan()
+        }
 
         if (energized && !lampStack.isNothing() && !cableStack.isNothing()) {
             val lampDescriptor = Utils.getItemObject(lampStack) as LampDescriptor

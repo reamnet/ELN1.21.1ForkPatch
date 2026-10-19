@@ -84,3 +84,25 @@ the wired GUI, lit/unlit rendering and gallery reload stages passed in a
 separate focused run. The work-light/kitchen, UPS and fresh-process reload
 checks also passed, including actual appliance outputs, partial-block clicking,
 power outages, fuel consumption and client backup/overload sound events.
+
+## Household update native checks
+
+With a full JDK 21, a graphical session and the normal development runtime, run:
+
+```bash
+JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS -Deln.householdQolChecks=true" ./gradlew runClient
+```
+
+This opt-in campaign creates its own flat world, places real lamps, cables,
+appliances and wall-mounted devices, then checks powered behavior, independent
+head aiming through the actual GUI, switch sound events, raw-voltage UPS bypass
+and return to regulation, AC on/off, enclosed-room cooling and a world restart.
+It saves `run/client/household-qol-checks.json` and screenshots. Success requires
+11 recorded checks and no `failure` entry. For headless Linux graphics, use the
+existing X display, software GL and `ALSOFT_DRIVERS=null` for sound-event checking.
+
+JUnit coverage includes legal renderable triangle meshes, all bulb technologies,
+independent aim/save/network state, fast switch animation without overshoot,
+fan motor power, both wall UPS ports on every wall, direct bypass without cells,
+return to battery operation, thermostat hysteresis, heat conservation, unique
+saved IDs and the rice cooker's water/container handling.

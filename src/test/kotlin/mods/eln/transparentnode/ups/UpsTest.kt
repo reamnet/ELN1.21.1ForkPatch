@@ -13,7 +13,7 @@ import java.io.*
 import kotlin.test.*
 
 class UpsTest {
-    private fun element()=UpsElement(TransparentNode(),Eln.transparentNodeItem.subItemList.values.filterIsInstance<UpsDescriptor>().single())
+    private fun element()=UpsElement(TransparentNode(),Eln.transparentNodeItem.subItemList.values.filterIsInstance<UpsDescriptor>().single { !it.wallMounted })
     private fun fill(e: UpsElement,count: Int=24,fraction: Double=.5,name: String="Portable Battery Pack") {
         repeat(count) { i ->
             val stack=Eln.findItemStack(name,1);val type=upsBattery(stack)!!
@@ -158,5 +158,43 @@ class UpsTest {
         val item=e.getItemStackNBT();assertFalse(item.contains("inv"))
         val placed=element();placed.readItemStackNBT(item)
         assertEquals(0,placed.bank.installed);assertEquals(850.0,placed.unit.outputVoltage)
+    }
+
+    @Test fun bypassCarriesRawInputWithoutCellsAndDisconnectsTheInverter() {
+        val c=Circuit(target=120.0,watts=1000.0,cells=0,grid=240.0)
+        c.u.settings(CompoundTag().apply { putBoolean("upsBypass",true);putDouble("upsOutputVoltage",120.0) })
+        repeat(10) { c.tick() }
+        assertEquals("BYPASS",c.u.status);assertTrue(c.u.bypassContact.closed)
+        assertFalse(c.u.inverterInput.enabled);assertFalse(c.u.inverterOutput.enabled)
+        assertTrue(c.u.secondary.voltage>239.0);assertTrue(c.u.outputWatts>3900.0)
+        c.supply.enabled=false;repeat(5) { c.tick() }
+        assertEquals("BYPASS_NO_INPUT",c.u.status);assertEquals(0.0,c.u.secondary.voltage,1e-5)
+    }
+    @Test fun returningFromBypassRestoresProgrammedVoltageAndBatteryBackup() {
+        val c=Circuit(target=120.0,watts=500.0,grid=240.0);c.settle()
+        repeat(4) {
+            c.u.settings(CompoundTag().apply { putDouble("upsOutputVoltage",120.0);putBoolean("upsBypass",true) })
+            repeat(5) { c.tick();assertFalse(c.u.inverterOutput.enabled) }
+            assertTrue(c.u.secondary.voltage>220.0,"Bypass output ${c.u.secondary.voltage} V, input ${c.u.primary.voltage} V")
+            assertEquals(c.u.primary.voltage-c.u.bypassContact.current*c.u.bypassContact.resistance,c.u.secondary.voltage,1e-7)
+            c.u.settings(CompoundTag().apply { putDouble("upsOutputVoltage",120.0) })
+            repeat(10) { c.tick();assertFalse(c.u.bypassContact.closed) }
+            assertEquals(120.0,c.u.secondary.voltage,.1)
+        }
+        c.supply.enabled=false;c.settle();assertEquals(120.0,c.u.secondary.voltage,.1)
+        assertEquals("BACKUP",c.u.status)
+    }
+    @Test fun wallUpsHasExactlyTwoPortsOnEachWallAndKeepsAll48Cells() {
+        val d=Eln.transparentNodeItem.subItemList.values.filterIsInstance<UpsDescriptor>().single { it.wallMounted }
+        for(front in mods.eln.misc.Direction.entries.filter { it.isNotY }) {
+            val e=UpsElement(TransparentNode(),d);e.front=front
+            var ports=0
+            for(side in mods.eln.misc.Direction.entries)for(lrdu in mods.eln.misc.LRDU.entries) {
+                val expected=if(side.getLRDUGoingTo(front.inverse)==lrdu)when(side) { front.left()->e.unit.primary;front.right()->e.unit.secondary;else->null } else null
+                assertSame(expected,e.getElectricalLoad(side,lrdu));if(expected!=null)ports++
+            }
+            assertEquals(2,ports);assertEquals(48,e.inventory.containerSize)
+            assertFalse(d.wallBox(front).contains(.5,.5,.5))
+        }
     }
 }

@@ -94,3 +94,18 @@ actual reverse power. Its real reverse-power and overload protection remain
 active. If a generator already saved the old false reverse-power trip, use its
 **Reset protection** button once after updating. Wire generator output to the
 UPS's **blue input**, with the protected loads on its orange output.
+
+## Wall mounting and manual bypass (3.0.21)
+
+Craft a Programmable UPS with an Iron Plate to make the wall-mounted variant.
+It keeps both 24-cell racks, all compatible cell types and programmable output.
+Place it against a vertical solid wall and run cables on that same wall face.
+The blue input is on the left and orange output on the right when facing the cabinet.
+
+The **Bypass** GUI button opens the inverter and connects input directly to output.
+**Bypass passes the actual input voltage unchanged and provides no battery backup.**
+For example, a 240 V input produces approximately 240 V in bypass even if the
+programmed output is 120 V. Match the connected load to the incoming voltage
+before using this mode. Bypass works without installed cells. Switching it off
+restores the programmed voltage and battery operation. Charging can continue
+while bypassed; no inverter output is paralleled with the direct feed.

@@ -6,7 +6,7 @@ class UpsAlarm {
     private var countdown=0.0
     fun step(seconds: Double,status: String,enabled: Boolean): Boolean {
         val warning=if(enabled) when(status) {
-            "BACKUP","EMPTY" -> "BACKUP"
+            "BACKUP","EMPTY","BYPASS_NO_INPUT" -> "BACKUP"
             "LIMITED","PROTECTED","OVERTEMPERATURE" -> "OVERLOAD"
             else -> ""
         } else ""

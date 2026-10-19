@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_programmable_ups": {
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:programmable_ups"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "eln:wall-mounted_programmable_ups"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_programmable_ups"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "eln:wall-mounted_programmable_ups"
+    ]
+  }
+}

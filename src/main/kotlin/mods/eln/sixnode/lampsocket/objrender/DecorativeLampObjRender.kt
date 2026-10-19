@@ -17,14 +17,24 @@ class DecorativeLampObjRender(val style: DecorativeLampStyle) : ILampSocketObjRe
         val scale = 1.35/style.depth
         GL11.glScaled(scale,scale,scale)
         GL11.glTranslated(-style.depth*.5,0.0,0.0)
-        drawModel(0,style.bulbs,"led")
+        drawModel(0,style.bulbs,"led",style.newAim())
     }
     override fun draw(render: LampSocketRender, distanceToPlayer: Double) = preserveMatrix {
         render.front!!.glRotateOnX()
         GL11.glRotatef(-90f,1f,0f,0f)
-        drawModel(render.lightValue,render.bulbCount,render.lampDescriptor?.lampData?.technology?.lampType ?: "led")
+        drawModel(render.lightValue,render.bulbCount,render.lampDescriptor?.lampData?.technology?.lampType ?: "led",render.aim,render.fanAngle)
     }
-    private fun drawModel(light: Int, count: Int, technology: String) {
+    private fun swivel(aim: LightAim,head: Int,draw: ()->Unit)=preserveMatrix {
+        val p=style.aimPivot(head)
+        GL11.glTranslated(p.x,p.y,p.z)
+        GL11.glRotated(-aim.pan(head),0.0,1.0,0.0);GL11.glRotated(aim.tilt(head),0.0,0.0,1.0)
+        GL11.glTranslated(-p.x,-p.y,-p.z);draw()
+    }
+    private fun lens(index: Int,aim: LightAim) {
+        if(style.aimHeadCount>0)swivel(aim,style.aimHead(index)) { model.getPart("Light$index")?.drawNoBind() }
+        else model.getPart("Light$index")?.drawNoBind()
+    }
+    private fun drawModel(light: Int, count: Int, technology: String,aim: LightAim,fanAngle: Float=0f) {
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
             GL11.glDisable(GL11.GL_TEXTURE_2D)
@@ -45,6 +55,16 @@ class DecorativeLampObjRender(val style: DecorativeLampStyle) : ILampSocketObjRe
             if(style == DecorativeLampStyle.RIG_CAGE || style == DecorativeLampStyle.RIG_LINEAR || style == DecorativeLampStyle.RIG_FLOOD)GL11.glColor3f(.82f,.64f,.12f)
             model.getPart("Metal")?.drawNoBind()
             GL11.glColor3f(.65f,.68f,.71f); model.getPart("Trim")?.drawNoBind()
+            if(style.fan)preserveMatrix {
+                GL11.glRotatef(fanAngle,1f,0f,0f)
+                if(style==DecorativeLampStyle.FAN_CLASSIC)GL11.glColor3f(.34f,.20f,.10f) else GL11.glColor3f(.12f,.14f,.16f)
+                model.getPart("Rotor")?.drawNoBind()
+            }
+            for(head in 0 until style.aimHeadCount)swivel(aim,head) {
+                if(style==DecorativeLampStyle.RIG_FLOOD)GL11.glColor3f(.82f,.64f,.12f) else GL11.glColor3f(.22f,.25f,.28f)
+                model.getPart("Head${head}Metal")?.drawNoBind()
+                GL11.glColor3f(.65f,.68f,.71f);model.getPart("Head${head}Trim")?.drawNoBind()
+            }
             if(style == DecorativeLampStyle.TABLE_BANKER) GL11.glColor3f(.08f,.38f,.20f)
             else if(style == DecorativeLampStyle.HALLOWEEN_GHOST) GL11.glColor3f(.93f,.94f,.96f)
             else GL11.glColor3f(.88f,.79f,.62f)
@@ -76,11 +96,11 @@ class DecorativeLampObjRender(val style: DecorativeLampStyle) : ILampSocketObjRe
                         DecorativeLampStyle.HALLOWEEN_BAT -> GL11.glColor3f(.68f,.15f,1f)
                         else -> Unit
                     }
-                    model.getPart("Light$i")?.drawNoBind()
+                    lens(i,aim)
                     UtilsClient.enableLight()
                 } else {
                     GL11.glColor3f(.18f,.21f,.24f)
-                    model.getPart("Light$i")?.drawNoBind()
+                    lens(i,aim)
                 }
             }
             model.getPart("Glass")?.let {

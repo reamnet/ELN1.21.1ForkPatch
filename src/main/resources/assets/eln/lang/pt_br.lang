@@ -137,6 +137,7 @@ Primary_%1$_ohm;_secondary_%2$_ohm=Primary %1$ ohm; secondary %2$ ohm
 Primary_winding=Primary winding
 Produced_power=Potência produzida
 Range\:_%1$_blocks=Alcance: %1$ blocos
+Rated_supply\:_%1$_V_/_%2$_W=Rated supply: %1$ V / %2$ W
 Ratio=Razão
 Read=Ler
 Redstone_slot=Espaço de Redstone
@@ -865,6 +866,16 @@ Invalid_grid_cable_span=Invalid grid cable span
 Closed?=Fechado?
 Drive=Acionamento
 Transfer=Transferência
+
+# src/main/kotlin/mods/eln/gui/LightAimControls.kt
+Head_%1$/%2$=Head %1$/%2$
+Pan\:_%1$°=Pan: %1$°
+Pan_left=Pan left
+Pan_right=Pan right
+Reset_aim=Reset aim
+Tilt\:_%1$°=Tilt: %1$°
+Tilt_down=Tilt down
+Tilt_up=Tilt up
 
 # src/main/kotlin/mods/eln/integration/create/CreateAdapterClient.kt
 %1$\:1=%1$:1
@@ -1818,6 +1829,7 @@ Voltage_Oriented_Battery.name=Bateria Orientada a Tensão
 Wall-mounted_Automatic_Transfer_Switch.name=Wall-mounted Automatic Transfer Switch
 Wall-mounted_Hybrid_Solar_Inverter.name=Wall-mounted Hybrid Solar Inverter
 Wall-mounted_MPPT_Solar_Controller.name=Wall-mounted MPPT Solar Controller
+Wall-mounted_Programmable_UPS.name=Wall-mounted Programmable UPS
 Water_Turbine.name=Turbina Hidráulica
 Wind_Turbine.name=Turbina Eólica
 Wire_Combiner.name=Combinador de Fios
@@ -2051,6 +2063,7 @@ Candle_Arm_Foyer_Chandelier.name=Candle Arm Foyer Chandelier
 Ceramic_Drum_Table_Lamp.name=Ceramic Drum Table Lamp
 Christmas_Icicle_Lights.name=Christmas Icicle Lights
 Christmas_Star_Wall_Light.name=Christmas Star Wall Light
+Classic_Four_Blade_Ceiling_Fan.name=Classic Four Blade Ceiling Fan
 Crystal_Tier_Foyer_Chandelier.name=Crystal Tier Foyer Chandelier
 Deep_Baffle_Recessed_Light.name=Deep Baffle Recessed Light
 Double_Candle_Wall_Sconce.name=Double Candle Wall Sconce
@@ -2074,9 +2087,15 @@ Industrial_Wall_Pack_Light.name=Industrial Wall Pack Light
 Industrial_Yard_Area_Light.name=Industrial Yard Area Light
 Jack_O_Lantern_Table_Lamp.name=Jack O Lantern Table Lamp
 Lantern_Cage_Foyer_Chandelier.name=Lantern Cage Foyer Chandelier
+Mini_Bezel_Dot_Spotlight.name=Mini Bezel Dot Spotlight
+Mini_Deep_Baffle_Dot_Light.name=Mini Deep Baffle Dot Light
 Mini_Dot_Spotlight.name=Mini Dot Spotlight
+Mini_Eyeball_Dot_Spotlight.name=Mini Eyeball Dot Spotlight
+Mini_Pinhole_Dot_Light.name=Mini Pinhole Dot Light
+Mini_Twin_Dot_Light.name=Mini Twin Dot Light
 Modern_LED_Street_Light.name=Modern LED Street Light
 Modern_Sputnik_Foyer_Chandelier.name=Modern Sputnik Foyer Chandelier
+Modern_Three_Blade_Ceiling_Fan.name=Modern Three Blade Ceiling Fan
 Multicolor_Christmas_String_Lights.name=Multicolor Christmas String Lights
 Offshore_Caged_Wellglass_Light.name=Offshore Caged Wellglass Light
 Offshore_Platform_Floodlight.name=Offshore Platform Floodlight
@@ -2094,6 +2113,7 @@ Suspended_Factory_Fluorescent_Light.name=Suspended Factory Fluorescent Light
 Thin_Fluorescent_Shop_Light.name=Thin Fluorescent Shop Light
 Traditional_Lantern_Post_Light.name=Traditional Lantern Post Light
 Trimless_Recessed_Downlight.name=Trimless Recessed Downlight
+Twin_Adjustable_Eave_Floodlight.name=Twin Adjustable Eave Floodlight
 Twin_Parking_Lot_Light.name=Twin Parking Lot Light
 Under_Cabinet_LED_Strip.name=Under Cabinet LED Strip
 Up_Down_Cylinder_Wall_Sconce.name=Up Down Cylinder Wall Sconce
@@ -2104,12 +2124,14 @@ Window_Candle_Light.name=Window Candle Light
 
 # src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketDescriptor.kt
 Angle\:_%1$°_to_%2$°=Ângulo: %1$° a %2$°
+Fan_motor\:_%1$_W;_use_a_bulb_matching_the_supply_voltage=Fan motor: %1$ W; use a bulb matching the supply voltage
 Holds_up_to_%1$_matching_bulbs=Holds up to %1$ matching bulbs
 Insert_matching_bulbs_together;_power_draw_scales_with_bulb_count=Insert matching bulbs together; power draw scales with bulb count
 Spot_range\:_%1$_blocks=Alcance do foco: %1$ blocos
 Wireless_lamp_supply_or_wired_power=Wireless lamp supply or wired power
 Wireless_lamp_supply_power_only=Wireless lamp supply power only
 Wireless_mode_of_lights_is_intended_\nto_pretend_wires_are_in_the_walls.=O modo sem fio das luzes é destinado\na fingir que há fios nas paredes.
+Without_a_bulb_the_motor_is_rated_for_120_V;_the_GUI_switches_the_fan_separately=Without a bulb the motor is rated for 120 V; the GUI switches the fan separately
 
 # src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketElement.kt
 Bulb=Lâmpada
@@ -2123,6 +2145,8 @@ Bulbs\:_%1$/%2$=Bulbs: %1$/%2$
 Cable_slot_empty=Espaço de cabo vazio
 Connected_to_%1$=Conectado a %1$
 Detects_living_entities_within_8_blocks_in_front_of_the_light=Detects living entities within 8 blocks in front of the light
+Fan\:_Off=Fan: Off
+Fan\:_On=Fan: On
 Grounded=Aterrado
 Lamp_slot_empty=Espaço de lâmpada vazio
 Motion\:_all_day=Motion: all day
@@ -2179,6 +2203,7 @@ Biome_temperature=Temperatura do bioma
 # src/main/kotlin/mods/eln/sixnode/wirelesssignal/WallWirelessControl.kt
 Pairs_with_the_existing_Wireless_Signal_Receiver;_connect_its_output_to_a_Lamp_Supply_control=Pairs with the existing Wireless Signal Receiver; connect its output to a Lamp Supply control
 Right-click_to_operate;_use_a_wrench_to_configure_the_wireless_channel=Right-click to operate; use a wrench to configure the wireless channel
+Small_green_marker\:_on;_dark_marker\:_off=Small green marker: on; dark marker: off
 
 # src/main/kotlin/mods/eln/transparentnode/DcDc.kt
 This_DC/DC_has_unrealistic_capacitance_effects_and_can_sink/source_power_that_violates_Newton's_laws=Este CC/CC tem efeitos de capacitância irrealistas e pode consumir/fornecer potência que viola as leis de Newton
@@ -2350,6 +2375,37 @@ No_charge=Sem carga
 Power_in\:=Potência de entrada:
 Power_out\:=Potência de saída:
 
+# src/main/kotlin/mods/eln/transparentnode/climate/ClimateClient.kt
+Air\:_%1$_C_/_target\:_%2$_C=Air: %1$ C / target: %2$ C
+Connect_a_floor_cable;_heats_the_surrounding_simulated_room=Connect a floor cable; heats the surrounding simulated room
+Connect_cables_on_the_same_wall_face=Connect cables on the same wall face
+Cooling=Cooling
+Enclosed_room_detected=Enclosed room detected
+Exhaust\:_%1$_C=Exhaust: %1$ C
+Heat_exchanger\:_%1$_C=Heat exchanger: %1$ C
+Heating=Heating
+Input_or_temperature_protection=Input or temperature protection
+Mount_on_an_exterior_wall;_heat_is_exhausted_behind_the_wall=Mount on an exterior wall; heat is exhausted behind the wall
+Open_air;_using_outdoor_temperature=Open air; using outdoor temperature
+Power\:_%1$_W=Power: %1$ W
+Set_C=Set C
+Thermostat\:_16_to_32_C=Thermostat: 16 to 32 C
+Thermostat\:_16_to_32_C;_uses_simulated_room_temperature=Thermostat: 16 to 32 C; uses simulated room temperature
+Thermostat_satisfied=Thermostat satisfied
+Waiting_for_120_V_supply=Waiting for 120 V supply
+
+# src/main/kotlin/mods/eln/transparentnode/climate/ClimateElement.kt
+%1$_C=%1$ C
+Thermostat=Thermostat
+
+# src/main/kotlin/mods/eln/transparentnode/climate/ClimateType.kt
+Corner_Fireplace_TV_Stand.name=Corner Fireplace TV Stand
+Farmhouse_Fireplace_TV_Stand.name=Farmhouse Fireplace TV Stand
+Modern_Fireplace_TV_Stand.name=Modern Fireplace TV Stand
+Portable_Electric_Space_Heater.name=Portable Electric Space Heater
+Wall-mounted_Mini-split_Air_Conditioner.name=Wall-mounted Mini-split Air Conditioner
+Window_Air_Conditioner.name=Window Air Conditioner
+
 # src/main/kotlin/mods/eln/transparentnode/evaporative/EvaporativeCooler.kt
 %1$_/_4000_mB=%1$ / 4000 mB
 Airflow_blocked_-_passive_cooling=Airflow blocked - passive cooling
@@ -2444,6 +2500,7 @@ Vertical_angle\:_%1$°=Ângulo vertical: %1$°
 # src/main/kotlin/mods/eln/transparentnode/kitchen/KitchenClient.kt
 %1$_V_/_%2$_W=%1$ V / %2$ W
 27_food-storage_slots;_freezes_a_water_bucket_into_ice_and_returns_the_bucket=27 food-storage slots; freezes a water bucket into ice and returns the bucket
+Blends_an_apple,_melon_slice_or_sweet_berries_with_a_water_bottle=Blends an apple, melon slice or sweet berries with a water bottle
 Bread_makes_toasted_bread=Bread makes toasted bread
 Brews_fresh_coffee_from_cocoa_beans_and_a_water_bottle=Brews fresh coffee from cocoa beans and a water bottle
 Cocoa_beans_+_water_bottle=Cocoa beans + water bottle
@@ -2452,26 +2509,36 @@ Cooks_food_using_the_world's_smelting_recipes=Cooks food using the world's smelt
 Cooling_the_refrigerator=Cooling the refrigerator
 Food_recipes;_no_fuel_needed=Food recipes; no fuel needed
 Food_storage=Food storage
+Fruit_+_water_makes_a_smoothie=Fruit + water makes a smoothie
+Heats_a_water_bottle_into_drinkable_hot_water=Heats a water bottle into drinkable hot water
 Needs_a_supporting_surface=Needs a supporting surface
 Needs_water_or_output_space=Needs water or output space
 Processing=Processing
-Rated_supply\:_%1$_V_/_%2$_W=Rated supply: %1$ V / %2$ W
 Ready=Ready
 Returned_container=Returned container
+Steams_wheat_or_tagged_rice_with_a_water_bottle;_returns_the_empty_bottle=Steams wheat or tagged rice with a water bottle; returns the empty bottle
 Turns_bread_into_edible_toasted_bread=Turns bread into edible toasted bread
 Waiting_for_rated_supply_voltage=Waiting for rated supply voltage
 Water_bottle=Water bottle
+Water_bottle_makes_hot_water=Water bottle makes hot water
+Wheat_or_rice_+_water_bottle=Wheat or rice + water bottle
 Work\:_%1$%_/_%2$_W=Work: %1$% / %2$ W
 Wrong_supply_voltage;_input_protected=Wrong supply voltage; input protected
 
 # src/main/kotlin/mods/eln/transparentnode/kitchen/KitchenFoods.kt
 Fresh_Coffee.name=Fresh Coffee
+Fruit_Smoothie.name=Fruit Smoothie
+Hot_Water.name=Hot Water
+Steamed_Grains.name=Steamed Grains
 Toasted_Bread.name=Toasted Bread
 
 # src/main/kotlin/mods/eln/transparentnode/kitchen/KitchenType.kt
+Countertop_Blender.name=Countertop Blender
 Electric_Coffee_Maker.name=Electric Coffee Maker
+Electric_Kettle.name=Electric Kettle
 Electric_Microwave.name=Electric Microwave
 Electric_Refrigerator.name=Electric Refrigerator
+Electric_Rice_Cooker.name=Electric Rice Cooker
 Electric_Toaster.name=Electric Toaster
 Flat_Electric_Cooktop.name=Flat Electric Cooktop
 
@@ -2589,8 +2656,14 @@ Backup\:_about_%1$_min=Backup: about %1$ min
 Backup\:_no_load=Backup: no load
 Batteries\:_%1$/48_(%2$_active)=Batteries: %1$/48 (%2$ active)
 Battery_empty=Battery empty
+Bypass\:_Off=Bypass: Off
+Bypass\:_On=Bypass: On
+Bypass\:_direct_input_voltage=Bypass: direct input voltage
+Bypass\:_no_battery_backup=Bypass: no battery backup
+Bypass\:_no_input;_no_battery_backup=Bypass: no input; no battery backup
 Charge\:_%1$%_/_%2$_Wh=Charge: %1$% / %2$ Wh
 Charging;_output_off=Charging; output off
+Click_to_switch_battery_racks=Click to switch battery racks
 Cooling_down=Cooling down
 In\:_%1$_/_%2$=In: %1$ / %2$
 Needs_a_full_rack_(24_cells)=Needs a full rack (24 cells)
@@ -2602,9 +2675,10 @@ Output_off=Output off
 Output_power_limited=Output power limited
 Output_protection;_retrying=Output protection; retrying
 Output_voltage\:_1_to_3200_V=Output voltage: 1 to 3200 V
+Passes_input_voltage_unchanged;_the_inverter_and_battery_backup_are_disconnected=Passes input voltage unchanged; the inverter and battery backup are disconnected
 Portable_battery_or_larger_UPS_cell=Portable battery or larger UPS cell
 Programmable_UPS=Programmable UPS
-Rack_%1$/2_-_click_to_switch=Rack %1$/2 - click to switch
+Rack_%1$/2=Rack %1$/2
 Set_V=Set V
 
 # src/main/kotlin/mods/eln/transparentnode/ups/UpsDescriptor.kt
@@ -2612,6 +2686,7 @@ Accepts_portable_batteries_and_AGM,_LiFePO4_or_industrial_UPS_cells=Accepts port
 Batteries_retain_their_charge_when_removed=Batteries retain their charge when removed
 Blue_terminal\:_input;_orange_terminal\:_output=Blue terminal: input; orange terminal: output
 Install_one_or_two_complete_racks_of_24_portable_batteries=Install one or two complete racks of 24 portable batteries
+Manual_bypass_passes_input_voltage_straight_through;_no_regulation_or_battery_backup=Manual bypass passes input voltage straight through; no regulation or battery backup
 Programmable_output\:_1_to_3200_V;_up_to_10000_W=Programmable output: 1 to 3200 V; up to 10000 W
 
 # src/main/kotlin/mods/eln/transparentnode/ups/UpsElement.kt

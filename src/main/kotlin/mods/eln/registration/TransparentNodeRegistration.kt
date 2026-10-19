@@ -1646,6 +1646,8 @@ object TransparentNodeRegistration {
         transparentNodeItem.addDescriptor(16+(124 shl 6),
             mods.eln.transparentnode.renewable.RenewableDescriptor(TR_NAME(I18N.Type.NONE,"Wall-mounted Hybrid Solar Inverter"),
                 mods.eln.transparentnode.renewable.RenewableKind.HYBRID,true).apply { setCreativeTab(Eln.creativeTabPowerElectronics) })
+        transparentNodeItem.addDescriptor(17+(124 shl 6),
+            mods.eln.transparentnode.ups.UpsDescriptor(TR_NAME(I18N.Type.NONE,"Wall-mounted Programmable UPS"),true).apply { setCreativeTab(Eln.creativeTabPowerElectronics) })
         listOf(
             TR_NAME(I18N.Type.NONE,"MPPT Solar Controller"),
             TR_NAME(I18N.Type.NONE,"Hybrid Solar Inverter"),
@@ -1659,13 +1661,17 @@ object TransparentNodeRegistration {
                 })
         }
         mods.eln.transparentnode.kitchen.KitchenType.entries.forEachIndexed { index,type ->
-            transparentNodeItem.addDescriptor(1+index+(124 shl 6),
+            transparentNodeItem.addDescriptor((if(index<5)1+index else 18+index-5)+(124 shl 6),
                 mods.eln.transparentnode.kitchen.KitchenDescriptor(type).apply { setCreativeTab(Eln.creativeTabMachines) })
         }
         transparentNodeItem.addDescriptor(0 + (124 shl 6),
             mods.eln.transparentnode.worklight.WorkLightDescriptor(TR_NAME(I18N.Type.NONE, "Gasoline Construction Work Light")).apply {
                 setCreativeTab(Eln.creativeTabLighting)
             })
+        mods.eln.transparentnode.climate.ClimateType.entries.forEachIndexed { index,type ->
+            transparentNodeItem.addDescriptor(21+index+(124 shl 6),
+                mods.eln.transparentnode.climate.ClimateDescriptor(type).apply { setCreativeTab(Eln.creativeTabMachines) })
+        }
         // New sub-IDs only: existing poles, towers and switches retain their saved identities.
         transparentNodeItem.addDescriptor(9 + (id shl 6),
             UtilityStreetLightDescriptor(TR_NAME(I18N.Type.NONE, "Utility Pole Street Light")))

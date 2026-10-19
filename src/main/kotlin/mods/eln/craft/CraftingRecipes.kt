@@ -407,6 +407,29 @@ object CraftingRecipes {
         addRecipe(findItemStack("Hybrid Solar Inverter"), "PPP", "MCM", "CRC",
             'P',findItemStack("Iron Plate"),'M',findItemStack("MPPT Solar Controller"),
             'C',findItemStack("Copper Cable"),'R',ItemStack(Items.REDSTONE))
+        addShapelessRecipe(findItemStack("Wall-mounted Programmable UPS"),findItemStack("Programmable UPS"),findItemStack("Iron Plate"))
+        for((name,detail) in listOf<Pair<String,net.minecraft.world.level.ItemLike>>("Mini Pinhole Dot Light" to Items.IRON_NUGGET,"Mini Bezel Dot Spotlight" to Items.GOLD_NUGGET,
+            "Mini Eyeball Dot Spotlight" to Blocks.LEVER,"Mini Deep Baffle Dot Light" to Items.BLACK_DYE,"Mini Twin Dot Light" to Blocks.GLASS_PANE))
+            addShapelessRecipe(findItemStack(name),findItemStack("Mini Dot Spotlight"),findItemStack("Iron Plate"),ItemStack(detail))
+        addRecipe(findItemStack("Twin Adjustable Eave Floodlight"),"L L"," P ",
+            'L',findItemStack("Mini Bezel Dot Spotlight"),'P',findItemStack("Iron Plate"))
+        for(name in listOf("Classic Four Blade Ceiling Fan","Modern Three Blade Ceiling Fan"))
+            addRecipe(findItemStack(name)," M ","PLP"," P ",
+                'M',findItemStack("Electrical Motor"),'P',if(name=="Classic Four Blade Ceiling Fan")ItemStack(Blocks.OAK_PLANKS) else findItemStack("Iron Plate"),'L',findItemStack("Basic Lamp Holder"))
+        addRecipe(findItemStack("Electric Kettle")," P ","BCP"," R ",
+            'P',findItemStack("Iron Plate"),'B',ItemStack(Items.BUCKET),'C',findItemStack("Copper Cable"),'R',ItemStack(Items.REDSTONE))
+        addRecipe(findItemStack("Countertop Blender"),"G G","GGG","PMC",
+            'G',ItemStack(Blocks.GLASS_PANE),'P',findItemStack("Iron Plate"),'M',findItemStack("Electrical Motor"),'C',findItemStack("Copper Cable"))
+        addRecipe(findItemStack("Electric Rice Cooker"),"PPP","BCB","PRP",
+            'P',findItemStack("Iron Plate"),'B',ItemStack(Items.BUCKET),'C',findItemStack("Copper Cable"),'R',ItemStack(Items.REDSTONE))
+        addRecipe(findItemStack("Portable Electric Space Heater"),"IPI","CRC","IPI",
+            'I',ItemStack(Items.IRON_INGOT),'P',findItemStack("Iron Plate"),'C',findItemStack("Copper Cable"),'R',ItemStack(Items.REDSTONE))
+        for((name,wood) in listOf("Modern Fireplace TV Stand" to Blocks.OAK_PLANKS,"Farmhouse Fireplace TV Stand" to Blocks.BIRCH_PLANKS,"Corner Fireplace TV Stand" to Blocks.DARK_OAK_PLANKS))
+            addRecipe(findItemStack(name),"PPP","WHW","WWW",'P',findItemStack("Iron Plate"),
+                'W',ItemStack(wood),'H',findItemStack("Portable Electric Space Heater"))
+        addRecipe(findItemStack("Window Air Conditioner"),"PPP","MCM","PRP",'P',findItemStack("Iron Plate"),
+            'M',findItemStack("Electrical Motor"),'C',findItemStack("Copper Cable"),'R',findItemStack("Electric Refrigerator"))
+        addShapelessRecipe(findItemStack("Wall-mounted Mini-split Air Conditioner"),findItemStack("Window Air Conditioner"),findItemStack("Iron Plate"))
         addShapelessRecipe(findItemStack("Wall-mounted Automatic Transfer Switch"),findItemStack("Automatic Transfer Switch"),findItemStack("Iron Plate"))
         addShapelessRecipe(findItemStack("Wall-mounted MPPT Solar Controller"),findItemStack("MPPT Solar Controller"),findItemStack("Iron Plate"))
         addShapelessRecipe(findItemStack("Wall-mounted Hybrid Solar Inverter"),findItemStack("Hybrid Solar Inverter"),findItemStack("Iron Plate"))

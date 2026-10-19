@@ -25,6 +25,8 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.19` | — | Remove invisible movement barriers around decorative fixtures and long LED strips; automatically upgrade existing lamp clearance cells |
 | `v3.0.20` | — | Wall-mounted ATS, MPPT and hybrid solar inverter variants with shallow cabinets, wall cables and survival recipes; stable UPS charging on standby generators |
 
+| `v3.0.21` | — | Quick, audible wireless switches; adjustable fixture heads; miniature dots, twin eave light and ceiling fans; wall UPS and manual bypass; kettle, blender and rice cooker; thermostat heaters, fireplace TV stands and window/wall AC |
+
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`
 tags remain available for the original source history. The numbered tags add
@@ -36,7 +38,7 @@ release assets remain available with their original filenames.
 `modVersion` in `gradle.properties` is the version source for the jar filename,
 NeoForge metadata and the in-game version. Increment it when preparing the next
 update and create the matching `vX.Y.Z` source tag. For unpublished experiments,
-use an explicit override such as `-PmodVersion=3.0.21-local.1`.
+use an explicit override such as `-PmodVersion=3.0.22-local.1`.
 
 Build with `./gradlew build` to retain previous versioned jars in `build/libs/`.
 `./gradlew clean` removes that directory, and recompiling the same version

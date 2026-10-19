@@ -110,9 +110,9 @@ class DecorativeLightingTest {
             for (i in 0 until style.bulbs) {
                 val light = assertNotNull(model.getPart("Light$i"))
                 val box = light.boundingBox()
-                assertTrue(box.max.x > box.min.x)
-                assertTrue(box.max.y > box.min.y)
-                assertTrue(box.max.z > box.min.z)
+                assertTrue(box.max.x > box.min.x,"${style.name} Light$i X extent")
+                assertTrue(box.max.y > box.min.y,"${style.name} Light$i Y extent")
+                assertTrue(box.max.z > box.min.z,"${style.name} Light$i Z extent")
             }
             for (side in listOf(Direction.YN,Direction.YP,Direction.XN,Direction.XP,Direction.ZN,Direction.ZP)) for(front in LRDU.entries) {
                 val origin = net.minecraft.world.phys.Vec3(-.5,64.5,-.5)

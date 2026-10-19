@@ -54,6 +54,11 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, sixNodeDescri
     var lampSupplyChannel = "Default channel"
     var activeLampSupplyConnection = false
     var projectionRotationAngle = 0.0
+    val aim=descriptor.fixture?.newAim() ?: LightAim(0)
+    var fanEnabled=true
+    var fanPower=0.0
+    var fanAngle=0f
+        private set
     var paintColor = DEFAULT_PAINT_COLOR
     var grounded = true
     var motionMode = 0
@@ -110,6 +115,8 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, sixNodeDescri
             cableDescriptor = if (!cableStack.isNothing()) getItemObject(cableStack) as GenericCableDescriptor else null
             if (descriptor.fixture != null) bulbCount = stream.readUnsignedByte().coerceIn(0,descriptor.bulbCapacity)
             if (descriptor.fixture == DecorativeLampStyle.MOTION) motionMode = stream.readUnsignedByte().coerceIn(0,3)
+            aim.read(stream)
+            if(descriptor.fixture?.fan==true) { fanEnabled=stream.readBoolean();fanPower=stream.readDouble().coerceIn(0.0,1.0) }
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -146,6 +153,7 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, sixNodeDescri
     }
 
     override fun refresh(deltaT: Float) {
+        if(descriptor.fixture?.fan==true)fanAngle=(fanAngle+deltaT.coerceIn(0f,.25f)*540f*fanPower.toFloat())%360f
         if (descriptor.renderType is LampSocketSuspendedObjRender) {
             entityTimeout -= deltaT
 

@@ -23,7 +23,7 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
     override val inventory=object : TransparentNodeElementInventory(if(type==KitchenType.FRIDGE)30 else 3,64,this) {
         override fun getAccessibleSlotsFromSide(side: Int)=IntArray(containerSize) { it }
         override fun canPlaceItemThroughFace(slot: Int,stack: ItemStack?,side: Int)=stack!=null && KitchenRecipe.allowed(type,slot,stack)
-        override fun canTakeItemThroughFace(slot: Int,stack: ItemStack?,side: Int)=slot==2 || slot==1 && type==KitchenType.FRIDGE || slot>=3
+        override fun canTakeItemThroughFace(slot: Int,stack: ItemStack?,side: Int)=slot==2 || slot==1 && (stack?.`is`(net.minecraft.world.item.Items.BUCKET)==true || stack?.`is`(net.minecraft.world.item.Items.GLASS_BOTTLE)==true) || slot>=3
     }
     val load=NbtElectricalLoad("applianceInput")
     val resistor=Resistor(load,null)

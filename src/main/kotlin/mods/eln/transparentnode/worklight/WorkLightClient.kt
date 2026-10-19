@@ -13,9 +13,10 @@ import net.minecraft.client.resources.sounds.SoundInstance
 import net.minecraft.world.Container
 import net.minecraft.world.entity.player.Player
 import java.io.DataInputStream
+import mods.eln.sixnode.lampsocket.LightAim
 
 object WorkLightMesh {
-    fun draw(model: Obj3D,light: Int,count: Int,technology: String) {
+    fun draw(model: Obj3D,light: Int,count: Int,technology: String,aim: LightAim) {
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
             GL11.glDisable(GL11.GL_TEXTURE_2D)
@@ -24,6 +25,11 @@ object WorkLightMesh {
             GL11.glColor3f(.39f,.43f,.46f);model.getPart("Trim")?.drawNoBind()
             GL11.glColor3f(.04f,.045f,.05f);model.getPart("Rubber")?.drawNoBind()
             for(i in 0..1) {
+                GL11.glPushMatrix()
+                val p=WorkLightOptics.pivot(i)
+                GL11.glTranslated(p.x,p.y,p.z);GL11.glRotated(-aim.pan(i),0.0,1.0,0.0);GL11.glRotated(-aim.tilt(i),1.0,0.0,0.0);GL11.glTranslated(-p.x,-p.y,-p.z)
+                GL11.glColor3f(.93f,.62f,.08f);model.getPart("Head${i}Metal")?.drawNoBind()
+                GL11.glColor3f(.39f,.43f,.46f);model.getPart("Head${i}Trim")?.drawNoBind()
                 val lit=i<count && light>=8
                 if(lit)UtilsClient.disableLight()
                 if(!lit)GL11.glColor3f(.17f,.20f,.22f)
@@ -32,6 +38,7 @@ object WorkLightMesh {
                 else GL11.glColor3f(1f,.9f,.65f)
                 model.getPart("Light$i")?.drawNoBind()
                 if(lit)UtilsClient.enableLight()
+                GL11.glPopMatrix()
             }
         } finally { GL11.glPopAttrib() }
     }
@@ -49,6 +56,7 @@ class WorkLightRender(entity: TransparentNodeEntity,descriptor: TransparentNodeD
     var wireless=false;private set
     var channel="";private set
     var voltage=120.0;private set
+    val aim=LightAim(2,-12.0)
     private var light=0;private var count=0;private var technology="led"
     init { addLoopedSound(object : LoopedSound("eln:fuelgenerator",coordinate(),SoundInstance.Attenuation.LINEAR) {
         override fun getVolume()=if(running).18f else 0f
@@ -56,7 +64,7 @@ class WorkLightRender(entity: TransparentNodeEntity,descriptor: TransparentNodeD
     }) }
     override fun draw() {
         cable=drawCable(Direction.YN,fixture.cableRenderDescriptor,connections,cable)
-        preserveMatrix { front!!.inverse.glRotateZnRef();fixture.drawFixture(light,count,technology) }
+        preserveMatrix { front!!.inverse.glRotateZnRef();fixture.drawFixture(light,count,technology,aim) }
     }
     override fun cameraDrawOptimisation()=false
     override fun networkUnserialize(stream: DataInputStream) {
@@ -64,6 +72,7 @@ class WorkLightRender(entity: TransparentNodeEntity,descriptor: TransparentNodeD
         connections.deserialize(stream);running=stream.readBoolean();stream.readFloat()
         fuel=stream.readDouble();wireless=stream.readBoolean();channel=stream.readUTF()
         light=stream.readInt();count=stream.readInt();technology=stream.readUTF();voltage=stream.readDouble();cable=null
+        aim.read(stream)
     }
     override fun newGuiDraw(side: Direction,player: Player)=WorkLightGui(player,this)
 }
@@ -71,15 +80,18 @@ class WorkLightGui(player: Player,private val render: WorkLightRender) : GuiCont
     private lateinit var engine: GuiButtonEln
     private lateinit var mode: GuiButtonEln
     private lateinit var channel: GuiTextFieldEln
-    override fun newHelper()=GuiHelperContainer(this,176,211,8,130)
+    private lateinit var aiming: LightAimControls
+    override fun newHelper()=GuiHelperContainer(this,176,290,8,208)
     override fun initGui() {
         super.initGui()
         engine=newGuiButton(8,82,76,"")
         mode=newGuiButton(88,82,80,"")
         channel=newGuiTextField(9,111,158).apply { text=render.channel;setComment(0,tr("Wireless lamp supply channel")) }
+        aiming=LightAimControls(this,132,render.aim) { head,axis,value -> render.clientSendDouble((83+head*2+axis).toByte(),value) }
     }
     override fun guiObjectEvent(obj: IGuiObject) {
         super.guiObjectEvent(obj)
+        aiming.event(obj)
         when(obj) {
             engine -> render.clientSendId(80)
             mode -> render.clientSendId(81)
@@ -88,6 +100,7 @@ class WorkLightGui(player: Player,private val render: WorkLightRender) : GuiCont
     }
     override fun postDraw(f: Float,x: Int,y: Int) {
         super.postDraw(f,x,y)
+        aiming.refresh()
         engine.displayString=if(render.running)tr("Stop engine") else tr("Start engine")
         engine.enabled=!render.wireless && render.fuel>0
         mode.displayString=if(render.wireless)tr("Wireless") else tr("Gas / cable")

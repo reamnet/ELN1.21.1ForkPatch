@@ -57,6 +57,8 @@ object DecorativeLightRegistration {
                     DecorativeLampStyle.HOLDER -> Unit // Plain holder mounts on any supporting face.
                     else -> {
                         when {
+                            style.miniDot || style==DecorativeLampStyle.EAVE_TWIN ->
+                                setPlaceDirection(arrayOf(Direction.YP,Direction.XN,Direction.XP,Direction.ZN,Direction.ZP))
                             style.tableLamp -> setPlaceDirection(Direction.YN)
                             style == DecorativeLampStyle.FLOOR_DRUM -> {
                                 setPlaceDirection(Direction.YN)
@@ -81,6 +83,9 @@ object DecorativeLightRegistration {
                         }
                         if(style == DecorativeLampStyle.STRIP_SURFACE || style == DecorativeLampStyle.RIG_LINEAR || style.seasonalString)
                             ghostGroup=GhostGroup().apply { addElement(0,0,-1);addElement(0,0,1) }
+                        if(style.fan)ghostGroup=GhostGroup().apply {
+                            for(y in -1..1)for(z in -1..1)if(y!=0 || z!=0)addElement(0,y,z)
+                        }
                     }
                 }
             }

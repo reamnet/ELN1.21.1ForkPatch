@@ -71,6 +71,9 @@ class KitchenDescriptor(val type: KitchenType) : TransparentNodeDescriptor(type.
             KitchenType.MICROWAVE,KitchenType.STOVE -> tr("Cooks food using the world's smelting recipes")
             KitchenType.TOASTER -> tr("Turns bread into edible toasted bread")
             KitchenType.COFFEE -> tr("Brews fresh coffee from cocoa beans and a water bottle")
+            KitchenType.KETTLE -> tr("Heats a water bottle into drinkable hot water")
+            KitchenType.BLENDER -> tr("Blends an apple, melon slice or sweet berries with a water bottle")
+            KitchenType.RICE -> tr("Steams wheat or tagged rice with a water bottle; returns the empty bottle")
             KitchenType.FRIDGE -> tr("27 food-storage slots; freezes a water bucket into ice and returns the bucket")
         })
     }
@@ -81,7 +84,7 @@ class KitchenContainer(player: Player,inventory: Container,type: KitchenType) : 
         val y=if(index>=3)110+(index-3)/9*18 else 79
         object : SlotWithSkinAndComment(inventory,index,x,y,ISlotSkin.SlotSkin.medium,arrayOf(
             if(index==2)tr("Output") else if(index==1) {
-                if(type==KitchenType.COFFEE)tr("Water bottle") else tr("Returned container")
+                if(type in listOf(KitchenType.COFFEE,KitchenType.BLENDER,KitchenType.RICE))tr("Water bottle") else tr("Returned container")
             } else if(index>=3)tr("Food storage") else tr("Input"))) {
             override fun mayPlace(stack: ItemStack)=KitchenRecipe.allowed(type,index,stack)
         }
@@ -126,6 +129,9 @@ class KitchenGui(player: Player,private val render: KitchenRender) : GuiContaine
         drawString(16,68,tr("Input"));drawString(132,68,tr("Output"))
         if(render.type==KitchenType.FRIDGE)drawString(8,99,tr("Temperature: %1$ C",String.format(java.util.Locale.ROOT,"%.1f",state.temperature)))
         else drawString(8,110,font.plainSubstrByWidth(when(render.type) {
+            KitchenType.KETTLE -> tr("Water bottle makes hot water")
+            KitchenType.BLENDER -> tr("Fruit + water makes a smoothie")
+            KitchenType.RICE -> tr("Wheat or rice + water bottle")
             KitchenType.COFFEE -> tr("Cocoa beans + water bottle")
             KitchenType.TOASTER -> tr("Bread makes toasted bread")
             else -> tr("Food recipes; no fuel needed")

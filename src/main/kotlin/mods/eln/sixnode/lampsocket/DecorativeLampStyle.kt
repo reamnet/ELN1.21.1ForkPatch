@@ -129,7 +129,42 @@ enum class DecorativeLampStyle(val model: String, val itemName: String, val bulb
     HALLOWEEN_BAT("halloweenbatlight", I18N.TR_NAME(I18N.Type.NONE, "Halloween Bat Wall Light"), 1, 1.0, 0,
         listOf(Vec3(.07,0.0,0.0)),Vec3(1.0,0.0,0.0)),
     HALLOWEEN_JACK("jackolanternlamp", I18N.TR_NAME(I18N.Type.NONE, "Jack O Lantern Table Lamp"), 1, .8, 0,
-        listOf(Vec3(.42,0.0,0.0)),Vec3(1.0,0.0,0.0));
+        listOf(Vec3(.42,0.0,0.0)),Vec3(1.0,0.0,0.0)),
+    DOT_PINHOLE("minipinholedot", I18N.TR_NAME(I18N.Type.NONE,"Mini Pinhole Dot Light"),1,.16,6,
+        listOf(Vec3(.10,0.0,0.0)),Vec3(1.0,0.0,0.0),true),
+    DOT_BEZEL("minibezeldot", I18N.TR_NAME(I18N.Type.NONE,"Mini Bezel Dot Spotlight"),1,.23,8,
+        listOf(Vec3(.18,0.0,0.0)),Vec3(1.0,0.0,0.0),true),
+    DOT_EYEBALL("minieyeballdot", I18N.TR_NAME(I18N.Type.NONE,"Mini Eyeball Dot Spotlight"),1,.24,8,
+        listOf(Vec3(.17,0.0,0.0)),Vec3(1.0,0.0,0.0),true),
+    DOT_DEEP("minideepbaffledot", I18N.TR_NAME(I18N.Type.NONE,"Mini Deep Baffle Dot Light"),1,.18,7,
+        listOf(Vec3(.10,0.0,0.0)),Vec3(1.0,0.0,0.0),true),
+    DOT_TWIN("minitwindot", I18N.TR_NAME(I18N.Type.NONE,"Mini Twin Dot Light"),2,.24,8,
+        listOf(Vec3(.17,0.0,-.09),Vec3(.17,0.0,.09)),Vec3(1.0,0.0,0.0),true),
+    EAVE_TWIN("twineavefloodlight", I18N.TR_NAME(I18N.Type.NONE,"Twin Adjustable Eave Floodlight"),2,.60,12,
+        listOf(Vec3(.38,0.0,-.20),Vec3(.38,0.0,.20)),Vec3(.94,-.34,0.0)),
+    FAN_CLASSIC("classicceilingfan", I18N.TR_NAME(I18N.Type.NONE,"Classic Four Blade Ceiling Fan"),1,1.8,0,
+        listOf(Vec3(.56,0.0,0.0)),Vec3(1.0,0.0,0.0)),
+    FAN_MODERN("modernceilingfan", I18N.TR_NAME(I18N.Type.NONE,"Modern Three Blade Ceiling Fan"),1,1.8,0,
+        listOf(Vec3(.49,0.0,0.0)),Vec3(1.0,0.0,0.0));
+
+    val fan get()=this==FAN_CLASSIC || this==FAN_MODERN
+    val fanWatts get()=if(this==FAN_CLASSIC)55.0 else if(this==FAN_MODERN)28.0 else 0.0
+
+    val miniDot get()=this in DOT_PINHOLE..DOT_TWIN
+    val aimHeadCount get()=when {
+        this==EAVE_TWIN || this==DOT_TWIN -> 2
+        miniDot || this==WAREHOUSE || this==POT_GIMBAL || this==HEAVY_FLOOD || this==RIG_FLOOD -> 1
+        else -> 0
+    }
+    val defaultTilt get()=Math.toDegrees(atan2(beam.y,beam.x))
+    fun aimPivot(head: Int)=when {
+        this==EAVE_TWIN -> Vec3(.13,0.0,if(head==0)-.20 else .20)
+        this==DOT_TWIN -> Vec3(.045,0.0,if(head==0)-.09 else .09)
+        miniDot || this==POT_GIMBAL -> Vec3(.045,0.0,0.0)
+        else -> Vec3(.25,0.0,0.0)
+    }
+    fun aimHead(bulb: Int)=if(aimHeadCount==2)bulb else 0
+    fun newAim()=LightAim(aimHeadCount,defaultTilt)
 
     val tableLamp get() = this == DESK || this == TABLE_DRUM || this == TABLE_BANKER || this == TABLE_TASK || this == WINDOW_CANDLE || this == HALLOWEEN_JACK
     val wallLamp get() = when(this) {
@@ -144,7 +179,7 @@ enum class DecorativeLampStyle(val model: String, val itemName: String, val bulb
     val seasonalString get() = this == CHRISTMAS_FAIRY || this == CHRISTMAS_COLOR || this == CHRISTMAS_ICICLE || this == HALLOWEEN_PUMPKIN || this == HALLOWEEN_GHOST
     val strip get() = this in STRIP_CABINET..STRIP_NEON
     val street get() = this == STREET_LED || this == STREET_BOULEVARD
-    val ceiling get() = luxury || this == HEAVY_CANOPY || this == RIG_CAGE || this == RIG_LINEAR || this == STRIP_RECESSED || this == RECESSED || this == CHANDELIER || this == SHOP || this == FACTORY || foyer || this == POT_BAFFLE || this == POT_TRIMLESS || this == POT_GIMBAL
+    val ceiling get() = fan || miniDot || this==EAVE_TWIN || luxury || this == HEAVY_CANOPY || this == RIG_CAGE || this == RIG_LINEAR || this == STRIP_RECESSED || this == RECESSED || this == CHANDELIER || this == SHOP || this == FACTORY || foyer || this == POT_BAFFLE || this == POT_TRIMLESS || this == POT_GIMBAL
     val uprightItem get() = this == FLOOR_DRUM || street || this == PARKING || tableLamp || this == OUTDOOR_BOLLARD || this == OUTDOOR_POST || ceiling
     val exposedBulbs get() = luxury || this == FLOOR_DRUM || this == WINDOW_CANDLE || this == HALLOWEEN_JACK || this == STREET_BOULEVARD || foyer || tableLamp || this == SCONCE_CANDLE || this == SCONCE_CAGE || this == SCONCE_GLOBE || this == OUTDOOR_POST || this == DESK || this == CHANDELIER || this == PORCH || this == HOLDER
 
