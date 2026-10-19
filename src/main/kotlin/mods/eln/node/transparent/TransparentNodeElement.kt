@@ -1,5 +1,6 @@
 package mods.eln.node.transparent
 
+import mods.eln.transparentnode.cord.CordDevice
 import mods.eln.Eln
 import mods.eln.ghost.GhostObserver
 import mods.eln.integration.waila.TransparentNodeWailaEntry
@@ -98,6 +99,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
     }
 
     open fun disconnectJob() {
+        (this as? CordDevice)?.cord?.disconnect()
         for (load in thermalLoadList) load.clearSimCoordinate()
         Eln.simulator.removeAllSlowProcess(slowProcessList)
         for (p in slowPreProcessList) Eln.simulator.removeSlowPreProcess(p)
@@ -235,6 +237,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
     }
 
     open fun onBreakElement() {
+        (this as? CordDevice)?.cord?.onBroken()
         if (useUuid()) stop(uuid)
         if (transparentNodeDescriptor.ghostGroup != null) {
             Eln.ghostManager.removeObserver(node!!.coordinate)
@@ -290,6 +293,8 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
     open fun networkSerialize(stream: DataOutputStream) {
         try {
             stream.writeByte(front.int + if (grounded) 8 else 0)
+            stream.writeBoolean(this is CordDevice)
+            (this as? CordDevice)?.cord?.writeNetwork(stream)
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -308,6 +313,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
     open fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean = false
 
     open fun readFromNBT(nbt: CompoundTag) {
+        (this as? CordDevice)?.cord?.read(nbt)
         val inv = inventory
         if (inv != null) {
             readFromNBT(nbt, "inv", inv)
@@ -334,6 +340,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
     }
 
     open fun writeToNBT(nbt: CompoundTag) {
+        (this as? CordDevice)?.cord?.write(nbt)
         val inv = inventory
         if (inv != null) {
             writeToNBT(nbt, "inv", inv)

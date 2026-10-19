@@ -9,6 +9,7 @@
 (Increases_capacity)=(Erhöht Kapazität)
 (Increases_inductance)=(Erhöht Induktivität)
 *_Missing_an_inductive_voltage_spike_on_field_collapse=* Induktive Spannungsspitze beim Feldzusammenbruch fehlt
+240_V_Appliance_Cord.name=240 V Appliance Cord
 A_relay_is_an_electrical\ncontact_that_conducts\ncurrent_when_a_signal\nvoltage_is_applied.=Ein Relais ist ein elektrischer\nKontakt, der Strom leitet,\nwenn eine Signalspannung\nangelegt wird.
 Accepted_lamp_types\:_%1$=Akzeptierte Lampentypen: %1$
 Acts_like_a\npush_button.=Verhält sich wie\nein Taster.
@@ -56,6 +57,7 @@ Evaporative_cooling=Evaporative cooling
 External_control=Externe Steuerung
 Falstad_import\:_clipboard_is_not_valid_Falstad_data.=Falstad-Import: Zwischenablage enthält keine gültigen Falstad-Daten.
 Ferromagnetic_core_slot=Ferromagnetkern-Slot
+Flexible_Appliance_Cord.name=Flexible Appliance Cord
 Fuel_usage=Brennstoffverbrauch
 Generated_power=Erzeugte Leistung
 Generates_heat_when_supplied_with_fuel.=Erzeugt Wärme bei Brennstoffzufuhr.
@@ -188,6 +190,8 @@ Voltage_drop=Spannungsabfall
 Voltages=Spannungen
 Winding_ratio=Winding ratio
 Winding_resistance=Winding resistance
+Wireless_lamp_supply=Wireless lamp supply
+Wireless_lamp_supply_channel=Wireless lamp supply channel
 Write=Schreiben
 Yes=Ja
 You_can't_place_this_block_at_this_side=Dieser Block kann nicht an dieser Seite platziert werden
@@ -1177,7 +1181,6 @@ Electrical_age_wrench,\nCan_be_used_to_turn\nsmall_wall_blocks=Electrical-Age-Sc
 Falstad_Import_Tool.name=Falstad-Importwerkzeug
 Fast_Electrical_Drill.name=Schnelle elektrische Bohrmaschine
 Ferrite_Ingot.name=Ferritbarren
-Flexible_Appliance_Cord.name=Flexible Appliance Cord
 Gold_Clutch_Plate.name=Gold-Kupplungsscheibe
 Gold_Dust.name=Goldstaub
 Gold_Plate.name=Goldplatte
@@ -2087,6 +2090,7 @@ Heavy_Duty_Stadium_Wall_Floodlight.name=Heavy Duty Stadium Wall Floodlight
 Household_Desk_Lamp.name=Household Desk Lamp
 Indirect_Cove_LED_Strip.name=Indirect Cove LED Strip
 Industrial_Cage_Wall_Sconce.name=Industrial Cage Wall Sconce
+Industrial_Five_Block_Ceiling_Fan.name=Industrial Five Block Ceiling Fan
 Industrial_Wall_Pack_Light.name=Industrial Wall Pack Light
 Industrial_Yard_Area_Light.name=Industrial Yard Area Light
 Jack_O_Lantern_Table_Lamp.name=Jack O Lantern Table Lamp
@@ -2129,6 +2133,7 @@ Window_Candle_Light.name=Window Candle Light
 # src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketDescriptor.kt
 Angle\:_%1$°_to_%2$°=Winkel: %1$° bis %2$°
 Fan_motor\:_%1$_W;_use_a_bulb_matching_the_supply_voltage=Fan motor: %1$ W; use a bulb matching the supply voltage
+Five_block_blade_span;_blade_contact_deals_5_damage_per_second_at_full_speed=Five block blade span; blade contact deals 5 damage per second at full speed
 Holds_up_to_%1$_matching_bulbs=Holds up to %1$ matching bulbs
 Insert_matching_bulbs_together;_power_draw_scales_with_bulb_count=Insert matching bulbs together; power draw scales with bulb count
 Spot_range\:_%1$_blocks=Spot-Reichweite: %1$ Blöcke
@@ -2155,6 +2160,7 @@ Grounded=Geerdet
 Lamp_slot_empty=Lampen-Slot leer
 Motion\:_all_day=Motion: all day
 Motion\:_night=Motion: night
+Powered_by_cord=Powered by cord
 Powered_by_lamp_supply=Von Lampenversorgung gespeist
 Specify_the_lamp_supply_channel=Lampenversorgungskanal angeben
 Stays_on_for_30_seconds_after_movement;_walls_block_detection=Stays on for 30 seconds after movement; walls block detection
@@ -2414,30 +2420,40 @@ Window_Air_Conditioner.name=Window Air Conditioner
 Cord_connected=Cord connected
 Cord_out_of_reach_(8_blocks)=Cord out of reach (8 blocks)
 Cord_outlet_missing=Cord outlet missing
+Cord_voltage_does_not_match_this_device=Cord voltage does not match this device
 No_cord_connected=No cord connected
 Outlet_already_occupied=Outlet already occupied
 Outlet_breaker_tripped=Outlet breaker tripped
 
 # src/main/kotlin/mods/eln/transparentnode/cord/CordInteraction.kt
-Connect_this_cord_to_a_small_120_V_appliance_or_box_fan=Connect this cord to a small 120 V appliance or box fan
+%1$\:_%2$_V,_20_A=%1$: %2$ V, 20 A
+Connect_this_cord_to_a_lamp_or_appliance=Connect this cord to a lamp or appliance
 Cord_connected;_sneak_with_an_empty_hand_to_move_the_appliance=Cord connected; sneak with an empty hand to move the appliance
-Cord_plugged_into_outlet;_select_a_small_appliance=Cord plugged into outlet; select a small appliance
-Could_not_connect\:_check_cord_reach,_outlet_occupancy_and_the_existing_plug=Could not connect: check cord reach, outlet occupancy and the existing plug
+Cord_plugged_into_outlet;_select_a_lamp_or_appliance=Cord plugged into outlet; select a lamp or appliance
+Could_not_connect\:_check_matching_voltage,_cord_reach,_outlet_occupancy_and_the_existing_plug=Could not connect: check matching voltage, cord reach, outlet occupancy and the existing plug
 Experimental_flexible_cord\:_8_block_reach=Experimental flexible cord: 8 block reach
+Select_a_matching_outlet_first=Select a matching outlet first
 Select_a_wall_outlet_first=Select a wall outlet first
 Sneak-use_a_cord_on_the_appliance_to_unplug_it=Sneak-use a cord on the appliance to unplug it
 Sneak_with_an_empty_hand_to_carry_a_plugged_appliance=Sneak with an empty hand to carry a plugged appliance
-Use_on_a_wall_outlet,_then_on_a_small_appliance=Use on a wall outlet, then on a small appliance
+This_cord_requires_a_%1$_outlet=This cord requires a %1$ outlet
+Use_on_a_matching_wall_outlet,_then_on_a_lamp_or_appliance=Use on a matching wall outlet, then on a lamp or appliance
+
+# src/main/kotlin/mods/eln/transparentnode/cord/CordRating.kt
+240_V_Wall_Outlet.name=240 V Wall Outlet
+Experimental_Wall_Outlet.name=Experimental Wall Outlet
 
 # src/main/kotlin/mods/eln/transparentnode/cord/OutletClient.kt
+%1$\:_%2$_V,_20_A;_one_flexible_cord=%1$: %2$ V, 20 A; one flexible cord
+%1$_/_%2$_V=%1$ / %2$ V
 %1$_V_/_%2$_A=%1$ V / %2$ A
 20_A;_one_8-block_cord=20 A; one 8-block cord
-Experimental_Wall_Outlet.name=Experimental Wall Outlet
-One_flexible_cord;_120/240_V,_20_A_breaker=One flexible cord; 120/240 V, 20 A breaker
+Cable_power=Cable power
+Choose_cable_or_wireless_lamp_supply_in_the_GUI;_voltage_is_not_converted=Choose cable or wireless lamp supply in the GUI; voltage is not converted
+No_active_supply_in_range=No active supply in range
 Release_lost_cord=Release lost cord
 Reset_breaker=Reset breaker
-Wall_outlet=Wall outlet
-Wire_the_wall_outlet_to_your_grid;_it_does_not_change_voltage=Wire the wall outlet to your grid; it does not change voltage
+Supply_connected=Supply connected
 
 # src/main/kotlin/mods/eln/transparentnode/evaporative/EvaporativeCooler.kt
 %1$_/_4000_mB=%1$ / 4000 mB
@@ -2804,7 +2820,6 @@ Generator_/_cable=Generator / cable
 Lighting_power=Lighting power
 Right-click_with_a_gasoline_container_to_refuel;_open_the_GUI_for_controls=Right-click with a gasoline container to refuel; open the GUI for controls
 Wheeled_gasoline_generator_with_two_replaceable_floodlight_bulbs=Wheeled gasoline generator with two replaceable floodlight bulbs
-Wireless_lamp_supply=Wireless lamp supply
 
 # src/main/kotlin/mods/eln/transparentnode/worklight/WorkLightClient.kt
 Construction_Work_Light=Construction Work Light
@@ -2816,7 +2831,6 @@ Start_engine=Start engine
 Stop_engine=Stop engine
 Two_matching_bulbs=Two matching bulbs
 Wireless=Wireless
-Wireless_lamp_supply_channel=Wireless lamp supply channel
 
 # src/main/kotlin/mods/eln/wiki/CircuitLessons.kt
 1._Hold_a_Multimeter_or_AllMeter._Normal_right-click_keeps_the_existing_machine_readings._Sneak-click_a_connector_to_select_reference_A,_then_sneak-click_a_second_connector_B.=1. Hold a Multimeter or AllMeter. Normal right-click keeps the existing machine readings. Sneak-click a connector to select reference A, then sneak-click a second connector B.

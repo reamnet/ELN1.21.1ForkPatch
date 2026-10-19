@@ -52,54 +52,55 @@ def blades(m,cy,r,n):
   back=[(x,y,z+.045) for x,y,z in verts]
   m.poly('Rotor',list(reversed(verts)));m.poly('Rotor',back)
   for k in range(4):m.poly('Rotor',[verts[k],verts[(k+1)%4],back[(k+1)%4],back[k]])
-for name,compact,shop in [('classicboxfan',False,False),('metalboxfan',False,True),('compactboxfan',True,False)]:
- m=Mesh();s=.64 if compact else 1;cy=-.18 if compact else -.02;r=.22 if compact else .39
- w=.46*s;h=.46*s
- for x in [-w,w-.045*s]:m.box('Case',x,cy-h,-.15*s,.045*s,2*h,.30*s)
- for y in [cy-h,cy+h-.045*s]:m.box('Case',-w,y,-.15*s,2*w,.045*s,.30*s)
- m.box('Black',-w*.8,-.50,-.18*s,w*1.6,.07,.36*s)
- ring(m,'Trim',0,cy,-.145*s,r,r+.018*s,.02*s,48)
- blades(m,cy,r*.94,3 if shop else 4 if compact else 5)
- for z in [-.153*s,.153*s]:
-  for k in range(-9,10):
-   y=cy+k*r/10;half=sqrt(max(0,r*r-(y-cy)**2))
-   m.box('Trim',-half,y-.0035*s,z,half*2,.007*s,.007*s)
-  for k in range(-5,6):
-   x=k*r/6;half=sqrt(max(0,r*r-x*x))
-   m.box('Trim',x-.0035*s,cy-half,z,.007*s,half*2,.007*s)
- m.cyl('Black',2,(0,cy,.156*s),.015*s,.07*s,n=24)
- m.box('Case',-.13*s,cy+h,.0,.26*s,.04*s,.06*s)
- m.cyl('Black',1,(w-.09*s,cy+h,.0),.025*s,.022*s,n=12)
- if shop:
-  for x in [-.38,.30]:m.box('Black',x,-.50,-.22,.08,.12,.44)
- m.save(name)
-m=Mesh();cy=1.9;r=2.28
-ring(m,'Case',0,cy,-.16,r,r+.17,.32,96)
-for x in [-2.42,2.34]:m.box('Case',x,-.49,-.17,.08,4.78,.34)
-for y in [-.49,4.21]:m.box('Case',-2.42,y,-.17,4.84,.08,.34)
-m.box('Black',-.42,-.50,-.32,.84,.15,.64)
-m.box('Black',-.11,-.35,-.19,.22,2.25,.38)
-for y in [1.8,2.0]:m.box('Black',-2.28,y,-.17,4.56,.06,.06)
-m.cyl('Black',2,(0,cy,-.25),.20,.30,n=32)
-blades(m,cy,2.22,6)
-for i in range(12):m.box('Black',-2.42+i*.4,4.24,.171,.18,.045,.002)
-m.save('industrialfloorfan')
-m=Mesh()
-m.box('Case',-.17,-.31,-.49,.34,.62,.035)
-m.box('Case',-.135,-.23,-.455,.27,.46,.09)
-for y in [-.11,.07]:
- for x in [-.055,.035]:m.box('Black',x,y,-.362,.020,.065,.005)
- m.cyl('Black',2,(0,y-.045,-.362),.005,.018,n=16)
-for y in [-.27,.26]:m.cyl('Trim',2,(0,y,-.453),.006,.014,n=12)
-m.box('Display',.08,-.19,-.36,.024,.025,.005)
-m.save('appliancewalloutlet')
-# A coiled cord item with a moulded plug and two brass prongs.
-from PIL import Image,ImageDraw
-im=Image.new('RGBA',(32,32));d=ImageDraw.Draw(im)
-for rad in [11,7,3]:
- d.ellipse((15-rad,17-rad,15+rad,17+rad),outline=(25,29,33,255),width=3)
- d.arc((15-rad,17-rad,15+rad,17+rad),200,300,fill=(80,85,89,255),width=1)
-d.line([(26,17),(29,13),(26,6),(22,6)],fill=(30,34,37,255),width=3)
-d.rounded_rectangle((16,2,24,9),radius=2,fill=(48,51,53,255),outline=(100,105,108,255))
-d.rectangle((17,0,18,2),fill=(192,151,70,255));d.rectangle((22,0,23,2),fill=(192,151,70,255))
-im.save(root.parent/'textures/items/flexibleappliancecord.png')
+if __name__ == '__main__':
+ for name,compact,shop in [('classicboxfan',False,False),('metalboxfan',False,True),('compactboxfan',True,False)]:
+  m=Mesh();s=.64 if compact else 1;cy=-.18 if compact else -.02;r=.22 if compact else .39
+  w=.46*s;h=.46*s
+  for x in [-w,w-.045*s]:m.box('Case',x,cy-h,-.15*s,.045*s,2*h,.30*s)
+  for y in [cy-h,cy+h-.045*s]:m.box('Case',-w,y,-.15*s,2*w,.045*s,.30*s)
+  m.box('Black',-w*.8,-.50,-.18*s,w*1.6,.07,.36*s)
+  ring(m,'Trim',0,cy,-.145*s,r,r+.018*s,.02*s,48)
+  blades(m,cy,r*.94,3 if shop else 4 if compact else 5)
+  for z in [-.153*s,.153*s]:
+   for k in range(-9,10):
+    y=cy+k*r/10;half=sqrt(max(0,r*r-(y-cy)**2))
+    m.box('Trim',-half,y-.0035*s,z,half*2,.007*s,.007*s)
+   for k in range(-5,6):
+    x=k*r/6;half=sqrt(max(0,r*r-x*x))
+    m.box('Trim',x-.0035*s,cy-half,z,.007*s,half*2,.007*s)
+  m.cyl('Black',2,(0,cy,.156*s),.015*s,.07*s,n=24)
+  m.box('Case',-.13*s,cy+h,.0,.26*s,.04*s,.06*s)
+  m.cyl('Black',1,(w-.09*s,cy+h,.0),.025*s,.022*s,n=12)
+  if shop:
+   for x in [-.38,.30]:m.box('Black',x,-.50,-.22,.08,.12,.44)
+  m.save(name)
+ m=Mesh();cy=1.9;r=2.28
+ ring(m,'Case',0,cy,-.16,r,r+.17,.32,96)
+ for x in [-2.42,2.34]:m.box('Case',x,-.49,-.17,.08,4.78,.34)
+ for y in [-.49,4.21]:m.box('Case',-2.42,y,-.17,4.84,.08,.34)
+ m.box('Black',-.42,-.50,-.32,.84,.15,.64)
+ m.box('Black',-.11,-.35,-.19,.22,2.25,.38)
+ for y in [1.8,2.0]:m.box('Black',-2.28,y,-.17,4.56,.06,.06)
+ m.cyl('Black',2,(0,cy,-.25),.20,.30,n=32)
+ blades(m,cy,2.22,6)
+ for i in range(12):m.box('Black',-2.42+i*.4,4.24,.171,.18,.045,.002)
+ m.save('industrialfloorfan')
+ m=Mesh()
+ m.box('Case',-.17,-.31,-.49,.34,.62,.035)
+ m.box('Case',-.135,-.23,-.455,.27,.46,.09)
+ for y in [-.11,.07]:
+  for x in [-.055,.035]:m.box('Black',x,y,-.362,.020,.065,.005)
+  m.cyl('Black',2,(0,y-.045,-.362),.005,.018,n=16)
+ for y in [-.27,.26]:m.cyl('Trim',2,(0,y,-.453),.006,.014,n=12)
+ m.box('Display',.08,-.19,-.36,.024,.025,.005)
+ m.save('appliancewalloutlet')
+ # A coiled cord item with a moulded plug and two brass prongs.
+ from PIL import Image,ImageDraw
+ im=Image.new('RGBA',(32,32));d=ImageDraw.Draw(im)
+ for rad in [11,7,3]:
+  d.ellipse((15-rad,17-rad,15+rad,17+rad),outline=(25,29,33,255),width=3)
+  d.arc((15-rad,17-rad,15+rad,17+rad),200,300,fill=(80,85,89,255),width=1)
+ d.line([(26,17),(29,13),(26,6),(22,6)],fill=(30,34,37,255),width=3)
+ d.rounded_rectangle((16,2,24,9),radius=2,fill=(48,51,53,255),outline=(100,105,108,255))
+ d.rectangle((17,0,18,2),fill=(192,151,70,255));d.rectangle((22,0,23,2),fill=(192,151,70,255))
+ im.save(root.parent/'textures/items/flexibleappliancecord.png')

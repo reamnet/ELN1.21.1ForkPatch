@@ -1663,6 +1663,7 @@ object TransparentNodeRegistration {
         mods.eln.transparentnode.fan.FanType.entries.forEachIndexed { i,type ->
             transparentNodeItem.addDescriptor(28+i+(124 shl 6),mods.eln.transparentnode.fan.FanDescriptor(type).apply { setCreativeTab(Eln.creativeTabMachines) })
         }
+        transparentNodeItem.addDescriptor(33+(124 shl 6),mods.eln.transparentnode.cord.OutletDescriptor(mods.eln.transparentnode.cord.CordRating.V240).apply { setCreativeTab(Eln.creativeTabPowerElectronics) })
         transparentNodeItem.addDescriptor(32+(124 shl 6),mods.eln.transparentnode.cord.OutletDescriptor().apply { setCreativeTab(Eln.creativeTabPowerElectronics) })
         mods.eln.transparentnode.kitchen.KitchenType.entries.forEach { type ->
             transparentNodeItem.addDescriptor(type.subId+(124 shl 6),

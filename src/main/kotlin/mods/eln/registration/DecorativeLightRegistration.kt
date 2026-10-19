@@ -84,7 +84,8 @@ object DecorativeLightRegistration {
                         if(style == DecorativeLampStyle.STRIP_SURFACE || style == DecorativeLampStyle.RIG_LINEAR || style.seasonalString)
                             ghostGroup=GhostGroup().apply { addElement(0,0,-1);addElement(0,0,1) }
                         if(style.fan)ghostGroup=GhostGroup().apply {
-                            for(y in -1..1)for(z in -1..1)if(y!=0 || z!=0)addElement(0,y,z)
+                            val radius=if(style==DecorativeLampStyle.FAN_INDUSTRIAL)2 else 1
+                            for(y in -radius..radius)for(z in -radius..radius)if(y!=0 || z!=0)addElement(0,y,z)
                         }
                     }
                 }

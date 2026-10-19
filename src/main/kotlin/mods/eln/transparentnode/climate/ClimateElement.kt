@@ -18,12 +18,15 @@ import java.io.DataOutputStream
 import java.io.IOException
 import kotlin.math.abs
 
-class ClimateElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) : TransparentNodeElement(node,descriptor),IConfigurable {
+class ClimateElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) : TransparentNodeElement(node,descriptor),IConfigurable,mods.eln.transparentnode.cord.CordDevice {
     override val inventory=TransparentNodeElementInventory(0,1,this)
     val type=(descriptor as ClimateDescriptor).type
     private val cabinet get()=transparentNodeDescriptor as ClimateDescriptor
     val control=ClimateControl(type.cooling)
     val load=NbtElectricalLoad("climateInput").apply { serialResistance=.002 }
+    override val cord=mods.eln.transparentnode.cord.ApplianceCord(this,load)
+    override val cordVoltage get()=type.volts
+    override val cordPortable get()=type==ClimateType.PORTABLE
     val resistor=Resistor(load,null).apply { resistance=1e19 }
     val indoor=NbtThermalLoad("climateIndoor").apply { set(.2,.012,4000.0);setAsSlow() }
     val outdoor=NbtThermalLoad("climateOutdoor").apply { set(.2,.006,6000.0);setAsSlow() }
@@ -91,7 +94,7 @@ class ClimateElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
         if(next!=status) { status=next;needPublish() }
     }
     override fun onNeighborBlockChange() { super.onNeighborBlockChange();cabinet.checkWallSupport(this) }
-    override fun getElectricalLoad(side: Direction,lrdu: LRDU)=if(cabinet.acceptsCable(front,side,lrdu))load else null
+    override fun getElectricalLoad(side: Direction,lrdu: LRDU)=if(!cord.plugged && cabinet.acceptsCable(front,side,lrdu))load else null
     override fun getConnectionMask(side: Direction,lrdu: LRDU)=if(getElectricalLoad(side,lrdu)!=null)NodeBase.maskElectricalPower else 0
     override fun getThermalLoad(side: Direction,lrdu: LRDU)=if(side==front && getElectricalLoad(side,lrdu)!=null)indoor else null
     override fun hasGui()=true
@@ -114,7 +117,11 @@ class ClimateElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
     }
     override fun readFromNBT(nbt: CompoundTag) { super.readFromNBT(nbt);control.read(nbt) }
     override fun writeToNBT(nbt: CompoundTag) { super.writeToNBT(nbt);control.write(nbt) }
-    override fun readItemStackNBT(nbt: CompoundTag?) { if(nbt!=null)control.read(nbt) }
+    override fun readItemStackNBT(nbt: CompoundTag?) {
+        if(nbt==null)return
+        if(nbt.contains("carriedAppliance")) { val facing=front;readFromNBT(nbt.getCompound("carriedAppliance"));front=facing } else control.read(nbt)
+    }
+    override fun onBreakElement() { if(cord.moving) { if(useUuid())stop(getUuid());return };super.onBreakElement() }
     override fun getItemStackNBT()=CompoundTag().also(control::write)
     override fun readConfigTool(compound: CompoundTag,invoker: Player) { control.read(compound);needPublish() }
     override fun writeConfigTool(compound: CompoundTag,invoker: Player)=control.write(compound)

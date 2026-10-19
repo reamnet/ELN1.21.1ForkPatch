@@ -1,5 +1,6 @@
 package mods.eln.node.six
 
+import mods.eln.misc.tagCompound
 import mods.eln.Eln
 import mods.eln.ServerKeyHandler
 import mods.eln.item.IConfigurable
@@ -95,7 +96,12 @@ class SixNode : Node() {
             sideElementIdList[direction.int] = 0
             disconnect()
             sideElementList[direction.int]!!.front = descriptor.getFrontFromPlace(direction, player!!)!!
-            sideElementList[direction.int]!!.initialize()
+            val placed=sideElementList[direction.int]!!
+            val snapshot=itemStack.tagCompound?.takeIf { it.contains("carriedAppliance") }?.getCompound("carriedAppliance")
+            if(placed is mods.eln.transparentnode.cord.CordDevice && placed.cordPortable && snapshot!=null) {
+                val facing=placed.front;placed.readFromNBT(snapshot);placed.front=facing
+            }
+            placed.initialize()
             sideElementIdList[direction.int] = descriptor.parentItemDamage
             connect()
             println("createSubBlock " + sideElementIdList[direction.int] + " " + direction)

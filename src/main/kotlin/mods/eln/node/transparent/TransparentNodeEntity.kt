@@ -101,11 +101,12 @@ open class TransparentNodeEntity(type: BlockEntityType<*>, pos: BlockPos, state:
     }
 
     override fun cameraDrawOptimisation(): Boolean {
-        return if (elementRender == null) super.cameraDrawOptimisation() else elementRender!!.cameraDrawOptimisation()
+        return if(elementRender?.cord?.endpoint!=null)false else if (elementRender == null) super.cameraDrawOptimisation() else elementRender!!.cameraDrawOptimisation()
     }
 
     override fun unoptimizedRenderBoundingBox(): AABB {
-        return if (elementRender == null) super.unoptimizedRenderBoundingBox() else elementRender!!.unoptimizedRenderBoundingBox()
+        val box=if (elementRender == null) super.unoptimizedRenderBoundingBox() else elementRender!!.unoptimizedRenderBoundingBox()
+        return elementRender?.cord?.endpoint?.let { box.minmax(AABB(it.first).inflate(.5)) } ?: box
     }
 
     @Suppress("UNUSED_PARAMETER") fun getDamageValue(world: Level, x: Int, y: Int, z: Int): Int {

@@ -29,6 +29,7 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
     val load=NbtElectricalLoad("applianceInput")
     val resistor=Resistor(load,null)
     override val cord=ApplianceCord(this,load)
+    override val cordVoltage get()=type.volts
     override val cordPortable get()=type.volts==120.0 && type!=KitchenType.FRIDGE
     val work=KitchenWork()
     val batteryHeat=MicrowaveBatteryHeat()
@@ -117,7 +118,6 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
             }
         },0.0)
     }
-    override fun disconnectJob() { cord.disconnect();super.disconnectJob() }
     override fun readItemStackNBT(nbt: CompoundTag?) {
         nbt?.takeIf { it.contains("carriedAppliance") }?.let {
             val placedFront=front;readFromNBT(it.getCompound("carriedAppliance"));front=placedFront
@@ -145,17 +145,17 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
         super.networkSerialize(stream)
         stream.writeBoolean(enabled);stream.writeBoolean(active);stream.writeDouble(if(batteryJob)batteryHeat.joules/MicrowaveBatteryHeat.BLAST_JOULES else work.joules/(type.watts*type.seconds))
         stream.writeDouble(load.voltage);stream.writeDouble(resistor.power);stream.writeDouble(temperature);stream.writeUTF(status)
-        node!!.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);cord.writeNetwork(stream)
+        node!!.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);
     }
     override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
         enabled=!nbt.contains("kitchenEnabled") || nbt.getBoolean("kitchenEnabled")
         work.joules=nbt.getDouble("kitchenJoules").takeIf { it.isFinite() }?.coerceIn(0.0,type.watts*type.seconds) ?: 0.0
         temperature=if(nbt.contains("kitchenTemperature"))nbt.getDouble("kitchenTemperature").takeIf { it.isFinite() }?.coerceIn(3.5,20.0) ?: 20.0 else 20.0
-        batteryHeat.read(nbt);cord.read(nbt);cacheReady=false
+        batteryHeat.read(nbt);cacheReady=false
     }
     override fun writeToNBT(nbt: CompoundTag) {
-        super.writeToNBT(nbt);nbt.putBoolean("kitchenEnabled",enabled);nbt.putDouble("kitchenJoules",work.joules);nbt.putDouble("kitchenTemperature",temperature);batteryHeat.write(nbt);cord.write(nbt)
+        super.writeToNBT(nbt);nbt.putBoolean("kitchenEnabled",enabled);nbt.putDouble("kitchenJoules",work.joules);nbt.putDouble("kitchenTemperature",temperature);batteryHeat.write(nbt)
     }
     override fun multiMeterString(side: Direction)=Utils.plotVolt("U:",load.voltage)+Utils.plotPower("P:",resistor.power)
     override fun getWaila()=linkedMapOf(tr("State") to kitchenStatus(status),tr("Voltage") to Utils.plotVolt("",load.voltage),tr("Power") to Utils.plotPower("",resistor.power))

@@ -27,6 +27,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.21` | — | Quick, audible wireless switches; adjustable fixture heads; miniature dots, twin eave light and ceiling fans; wall UPS and manual bypass; kettle, blender and rice cooker; thermostat heaters, fireplace TV stands and window/wall AC |
 | `v3.0.22` | — | Working countertop mini oven; energy-driven microwave battery hiss and explosion; operating sounds for all kitchen appliances, heaters, ceiling fans and both AC units |
 | `v3.0.23` | — | Fan spin-up/coast-down; five-block industrial fan with blade damage; three box fans; flexible cord and wired wall-outlet prototype with portable appliance pickup |
+| `v3.0.24` | — | Cords for all lamps and appliances; visible NEMA 5-20/6-20 plugs; 240 V outlets; wireless Lamp Supply outlet mode; five-block industrial ceiling fan with 5 damage/s blade contact |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`

@@ -136,7 +136,7 @@ class SixNodeEntity(pos: BlockPos, state: BlockState) : NodeBlockEntity(TYPE.get
 
     override fun cameraDrawOptimisation(): Boolean {
         for (e in elementRenderList) {
-            if (e != null && !e.cameraDrawOptimisation()) return false
+            if (e != null && (e.cord.endpoint!=null || !e.cameraDrawOptimisation())) return false
         }
         return true
     }
@@ -144,6 +144,7 @@ class SixNodeEntity(pos: BlockPos, state: BlockState) : NodeBlockEntity(TYPE.get
     override fun unoptimizedRenderBoundingBox(): AABB {
         var bb = localRenderBoundingBox()
         for (render in elementRenderList) {
+            render?.cord?.endpoint?.let { bb=bb.minmax(AABB(it.first).inflate(.5)) }
             val custom = render?.getRenderBoundingBox(this) ?: continue
             bb = AABB(
                 minOf(bb.minX, custom.minX),

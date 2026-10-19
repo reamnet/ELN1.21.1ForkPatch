@@ -106,7 +106,6 @@ class KitchenRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDes
     val type=(descriptor as KitchenDescriptor).type
     override val inventory=TransparentNodeElementInventory(if(type==KitchenType.FRIDGE)30 else 3,64,this)
     val display=KitchenDisplay()
-    val cord=mods.eln.transparentnode.cord.CordDisplay()
     val operatingSound=object : LoopedSound("eln:${type.sound}",Coordinate(entity.blockPos.x,entity.blockPos.y,entity.blockPos.z,0)) {
         override fun getVolume()=if(display.enabled && display.active && display.watts>1 && display.status!="EXPLODING").18f else 0f
     }
@@ -116,14 +115,13 @@ class KitchenRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDes
     init { addLoopedSound(operatingSound);warningSound?.let(::addLoopedSound) }
     private var cable: CableRenderType?=null
     override fun draw() {
-        cord.draw(tileEntity.level!!,tileEntity.blockPos,front ?: Direction.ZP)
         cable=drawCable(Direction.YN,Eln.instance.meduimVoltageCableDescriptor.render,display.connections,cable)
         val below=tileEntity.blockPos.below();val world=tileEntity.level!!
         val height=mods.eln.sixnode.lampsocket.LampMounting.surface(world.getBlockState(below).getCollisionShape(world,below).toAabbs(),Direction.YN) ?: 1.0
         (transparentNodeDescriptor as KitchenDescriptor).draw(front ?: Direction.ZP,display.active,(1-height).coerceIn(-.5,1.0))
     }
     override fun cameraDrawOptimisation()=false
-    override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream);display.read(stream);cord.read(stream);cable=null }
+    override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream);display.read(stream);cable=null }
     override fun newGuiDraw(side: Direction,player: Player)=KitchenGui(player,this)
 }
 class KitchenGui(player: Player,private val render: KitchenRender) : GuiContainerEln(KitchenContainer(player,render.inventory,render.type)) {

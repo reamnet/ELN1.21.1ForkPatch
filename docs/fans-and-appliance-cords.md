@@ -1,3 +1,6 @@
+> Updated in 3.0.24: see [all lamps, appliances and NEMA outlets](cords-and-nema-outlets.md).
+> The prototype limits below describe 3.0.23.
+
 # Fans and experimental appliance cords (3.0.23)
 
 Both ceiling fans now accelerate over about five seconds and coast for about ten

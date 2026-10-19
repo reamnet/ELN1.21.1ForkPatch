@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "L": {
+      "item": "eln:basic_lamp_holder"
+    },
+    "M": {
+      "item": "eln:electrical_motor"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    "PMP",
+    "MLM",
+    "PPP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:industrial_five_block_ceiling_fan"
+  }
+}

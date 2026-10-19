@@ -15,8 +15,8 @@ import net.minecraft.world.phys.Vec3
 import java.io.DataInputStream
 import java.util.UUID
 
-class OutletDescriptor: PowerCabinetDescriptor(I18N.TR_NAME(I18N.Type.NONE,"Experimental Wall Outlet"),OutletElement::class.java,OutletRender::class.java,true) {
-    private val model=Eln.obj.getObj("appliancewalloutlet")
+class OutletDescriptor(val rating: CordRating=CordRating.V120): PowerCabinetDescriptor(rating.outletName,OutletElement::class.java,OutletRender::class.java,true) {
+    private val model=Eln.obj.getObj(if(rating==CordRating.V120)"appliancewalloutlet" else "walloutlet240")
     fun draw(front: Direction,tripped: Boolean)=preserveMatrix {
         front.inverse.glRotateZnRef();GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
@@ -39,38 +39,47 @@ class OutletDescriptor: PowerCabinetDescriptor(I18N.TR_NAME(I18N.Type.NONE,"Expe
     override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType,item: ItemStack,helper: IItemRenderer.ItemRendererHelper)=true
     override fun renderItem(type: IItemRenderer.ItemRenderType,item: ItemStack,vararg data: Any)=draw(Direction.ZP,false)
     override fun addInformation(itemStack: ItemStack?,entityPlayer: Player?,list: MutableList<String>,par4: Boolean) {
-        list.add(tr("One flexible cord; 120/240 V, 20 A breaker"))
-        list.add(tr("Wire the wall outlet to your grid; it does not change voltage"))
+        list.add(tr("%1$: %2$ V, 20 A; one flexible cord",rating.socket,rating.volts.toInt()))
+        list.add(tr("Choose cable or wireless lamp supply in the GUI; voltage is not converted"))
     }
 }
 class OutletRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDescriptor): TransparentNodeElementRender(entity,descriptor) {
     override val inventory=TransparentNodeElementInventory(0,1,this)
+    var wireless=false;var channel="";var supplied=false;var occupied=false
     var id=UUID(0,0);var tripped=false;var volts=0.0;var amps=0.0
     val connections=LRDUMask();private var cable: CableRenderType?=null
     override fun draw() {
         val facing=front ?: return
         (transparentNodeDescriptor as OutletDescriptor).draw(facing,tripped)
+        if(occupied)NemaPlug.draw(facing,(transparentNodeDescriptor as OutletDescriptor).rating)
         cable=drawCable(facing.inverse,Eln.instance.meduimVoltageCableDescriptor.render,connections,cable)
         val world=tileEntity.level!!;val origin=Vec3.atCenterOf(tileEntity.blockPos)
+        var plugDrawn=occupied
         for(p in world.players()) {
             val a=CordInteraction.heldAnchor(p.mainHandItem) ?: continue
             if(a.id!=id || p.distanceToSqr(origin.x,origin.y,origin.z)>100)continue
+            if(!plugDrawn) { NemaPlug.draw(facing,a.rating);plugDrawn=true }
             val end=p.position().add(.2,.8,.2)
             CordPath.draw(CordPath.samples(a.tip(),end) { x,z,y -> CordPath.floor(world,x,z,y) },origin)
         }
     }
     override fun cameraDrawOptimisation()=false
-    override fun networkUnserialize(input: DataInputStream) { super.networkUnserialize(input);id=UUID(input.readLong(),input.readLong());tripped=input.readBoolean();volts=input.readDouble();amps=input.readDouble();connections.deserialize(input);cable=null }
+    override fun networkUnserialize(input: DataInputStream) { super.networkUnserialize(input);id=UUID(input.readLong(),input.readLong());wireless=input.readBoolean();channel=input.readUTF();supplied=input.readBoolean();occupied=input.readBoolean();tripped=input.readBoolean();volts=input.readDouble();amps=input.readDouble();connections.deserialize(input);cable=null }
     override fun newGuiDraw(side: Direction,player: Player)=OutletGui(player,this)
 }
 class OutletGui(player: Player,private val render: OutletRender): GuiContainerEln(BasicContainer(player,render.inventory,emptyArray())) {
     private lateinit var reset: GuiButtonEln
     private lateinit var release: GuiButtonEln
-    override fun newHelper()=GuiHelperContainer(this,176,210,8,128)
-    override fun initGui() { super.initGui();reset=newGuiButton(8,72,160,tr("Reset breaker"));release=newGuiButton(8,97,160,tr("Release lost cord")) }
-    override fun guiObjectEvent(obj: IGuiObject) { super.guiObjectEvent(obj);if(obj==reset)render.clientSendId(80);if(obj==release)render.clientSendId(81) }
+    private lateinit var mode: GuiButtonEln
+    private lateinit var channel: GuiTextFieldEln
+    override fun newHelper()=GuiHelperContainer(this,176,270,8,188)
+    override fun initGui() { super.initGui();reset=newGuiButton(8,72,160,tr("Reset breaker"));release=newGuiButton(8,97,160,tr("Release lost cord"));mode=newGuiButton(8,122,160,"");channel=newGuiTextField(9,153,158).apply { text=render.channel;setComment(0,tr("Wireless lamp supply channel")) } }
+    override fun guiObjectEvent(obj: IGuiObject) { super.guiObjectEvent(obj);if(obj==reset)render.clientSendId(80);if(obj==release)render.clientSendId(81);if(obj==mode)render.clientSendId(82);if(obj==channel)render.clientSendString(83,channel.text) }
     override fun postDraw(f: Float,x: Int,y: Int) {
-        super.postDraw(f,x,y);drawString(8,8,tr("Wall outlet"))
+        super.postDraw(f,x,y);drawString(8,8,tr("%1$ / %2$ V",(render.transparentNodeDescriptor as OutletDescriptor).rating.socket,(render.transparentNodeDescriptor as OutletDescriptor).rating.volts.toInt()))
+        mode.displayString=if(render.wireless)tr("Wireless lamp supply") else tr("Cable power")
+        channel.enabled=render.wireless
+        if(render.wireless)drawString(8,173,if(render.supplied)tr("Supply connected") else tr("No active supply in range"))
         drawString(8,28,if(render.tripped)tr("Breaker tripped") else tr("Ready"))
         drawString(8,44,tr("%1$ V / %2$ A",render.volts.toInt(),String.format(java.util.Locale.ROOT,"%.1f",render.amps)))
         drawString(8,60,tr("20 A; one 8-block cord"))

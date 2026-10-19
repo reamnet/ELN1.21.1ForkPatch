@@ -1,5 +1,6 @@
 package mods.eln.node.six
 
+import mods.eln.transparentnode.cord.CordDevice
 import mods.eln.Eln
 import mods.eln.ghost.GhostObserver
 import mods.eln.misc.Coordinate
@@ -215,6 +216,8 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
     open fun networkSerialize(stream: DataOutputStream) {
         try {
             stream.writeByte(sixNode!!.lrduElementMask[side]!!.mask + (front.dir shl 4))
+            stream.writeBoolean(this is CordDevice)
+            (this as? CordDevice)?.cord?.writeNetwork(stream)
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -234,6 +237,8 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
     }
 
     open fun destroy(entityPlayer: ServerPlayer?) {
+        if((this as? CordDevice)?.cord?.moving==true) { if(useUuid())stop(uuid);return }
+        (this as? CordDevice)?.cord?.onBroken()
         if (useUuid()) {
             stop(uuid)
         }
@@ -262,6 +267,7 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
         get() = Eln.sixNodeItem.getDescriptor(itemStackDamageId)?.newItemStack(1) ?: ItemStack.EMPTY //sixNode.sideElementIdList[side.getInt()]
 
     open fun readFromNBT(nbt: CompoundTag) {
+        (this as? CordDevice)?.cord?.read(nbt)
         front = readFromNBT(nbt, "sixFront")
         val inv = inventory
         if (inv != null) {
@@ -289,6 +295,7 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
     }
 
     open fun writeToNBT(nbt: CompoundTag) {
+        (this as? CordDevice)?.cord?.write(nbt)
         front.writeToNBT(nbt, "sixFront")
         val inv = inventory
         if (inv != null) {
@@ -324,6 +331,8 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
     }
 
     open fun disconnectJob() {
+        mods.eln.transparentnode.cord.WirelessOutletPower.disconnectSupply(this)
+        (this as? CordDevice)?.cord?.disconnect()
         for (load in thermalLoadList) load.clearSimCoordinate()
         Eln.simulator.removeAllElectricalComponent(electricalComponentList)
         Eln.simulator.removeAllElectricalComponent(signalReadComponentList)

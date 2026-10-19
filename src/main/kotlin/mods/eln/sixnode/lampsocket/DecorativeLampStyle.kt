@@ -145,10 +145,12 @@ enum class DecorativeLampStyle(val model: String, val itemName: String, val bulb
     FAN_CLASSIC("classicceilingfan", I18N.TR_NAME(I18N.Type.NONE,"Classic Four Blade Ceiling Fan"),1,1.8,0,
         listOf(Vec3(.56,0.0,0.0)),Vec3(1.0,0.0,0.0)),
     FAN_MODERN("modernceilingfan", I18N.TR_NAME(I18N.Type.NONE,"Modern Three Blade Ceiling Fan"),1,1.8,0,
-        listOf(Vec3(.49,0.0,0.0)),Vec3(1.0,0.0,0.0));
+        listOf(Vec3(.49,0.0,0.0)),Vec3(1.0,0.0,0.0)),
+    FAN_INDUSTRIAL("industrialceilingfan", I18N.TR_NAME(I18N.Type.NONE,"Industrial Five Block Ceiling Fan"),1,.65,0,
+        listOf(Vec3(.59,0.0,0.0)),Vec3(1.0,0.0,0.0));
 
-    val fan get()=this==FAN_CLASSIC || this==FAN_MODERN
-    val fanWatts get()=if(this==FAN_CLASSIC)55.0 else if(this==FAN_MODERN)28.0 else 0.0
+    val fan get()=this==FAN_CLASSIC || this==FAN_MODERN || this==FAN_INDUSTRIAL
+    val fanWatts get()=if(this==FAN_CLASSIC)55.0 else if(this==FAN_MODERN)28.0 else if(this==FAN_INDUSTRIAL)300.0 else 0.0
 
     val miniDot get()=this in DOT_PINHOLE..DOT_TWIN
     val aimHeadCount get()=when {

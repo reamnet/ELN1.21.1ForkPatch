@@ -90,7 +90,7 @@ class EmergencyLampDescriptor(name: String, val cable: ElectricalCableDescriptor
 }
 
 class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescriptor)
-    : SixNodeElement(sixNode, side, descriptor) {
+    : SixNodeElement(sixNode, side, descriptor),mods.eln.transparentnode.cord.CordDevice {
 
     enum class Event(val value: Byte) {
         TOGGLE_POWERED_BY_CABLE(1),
@@ -99,6 +99,8 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
 
     val desc = descriptor as EmergencyLampDescriptor
     val load = NbtElectricalLoad("load")
+    override val cord=mods.eln.transparentnode.cord.ApplianceCord(this,load)
+    override val cordVoltage get()=desc.nominalVoltage
     val chargingResistor = ResistorSwitch("chargingResistor", load, null)
     var on by published(false, {
         sixNode.lightValue = if (it) desc.lightLevel else 0
@@ -111,7 +113,7 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
     var isConnectedToLampSupply by published(false)
 
     val process = IProcess { deltaT ->
-        if (!poweredByCable) {
+        if (!poweredByCable && !cord.plugged) {
             var closestPowerSupply: LampSupplyElement.PowerSupplyChannelHandle? = null
             var closestDistance = 10000f
 
@@ -171,6 +173,7 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
     }
 
     override fun getConnectionMask(lrdu: LRDU) = when {
+        cord.plugged -> 0
         poweredByCable && side == Direction.YP -> NodeBase.maskElectricalPower
         poweredByCable && (lrdu == front.left() || lrdu == front.right()) -> NodeBase.maskElectricalPower
         else -> 0

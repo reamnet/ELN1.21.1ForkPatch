@@ -14,7 +14,7 @@ class DecorativeLampObjRender(val style: DecorativeLampStyle) : ILampSocketObjRe
         if (!style.uprightItem) {
             GL11.glRotatef(-70f,0f,1f,0f)
         } else GL11.glRotatef(if(style.ceiling) -90f else 90f,0f,0f,1f)
-        val scale = 1.35/style.depth
+        val scale = 1.35/if(style==DecorativeLampStyle.FAN_INDUSTRIAL)5.0 else style.depth
         GL11.glScaled(scale,scale,scale)
         GL11.glTranslated(-style.depth*.5,0.0,0.0)
         drawModel(0,style.bulbs,"led",style.newAim())

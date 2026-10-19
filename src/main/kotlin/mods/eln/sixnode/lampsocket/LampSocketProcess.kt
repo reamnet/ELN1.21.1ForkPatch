@@ -53,18 +53,18 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
             }
         }
         val energized = element.updateMotion(time)
-        if(!energized && element.poweredByLampSupply) element.electricalLoad.state = 0.0
+        if(!energized && element.wirelessPower) element.electricalLoad.state = 0.0
         val lampStack = element.inventory.getItem(LampSocketContainer.LAMP_SLOT_ID)
         val cableStack = element.inventory.getItem(LampSocketContainer.CABLE_SLOT_ID)
 
         var activeLampSupplyConnection = false
         var newLightValue = BoilerplateLampData.MIN_LIGHT_VALUE
         if(element.descriptor.fixture?.fan==true) {
-            if(element.poweredByLampSupply) {
+            if(element.wirelessPower) {
                 findBestLampSupply(element.sixNode!!.coordinate)
                 val h=cachedBestChannelHandle?.second
                 activeLampSupplyConnection=h!=null
-                if(h!=null && h.element.getChannelState(h.id) && !cableStack.isEmpty) {
+                if(h!=null && h.element.getChannelState(h.id) && element.hasPowerLead) {
                     h.element.addToRp(element.fanMotor.resistance)
                     element.electricalLoad.state=h.element.powerLoad.state
                 } else element.electricalLoad.state=0.0
@@ -72,10 +72,10 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
             element.updateFan(time)
         }
 
-        if (energized && !lampStack.isNothing() && !cableStack.isNothing()) {
+        if (energized && !lampStack.isNothing() && element.hasPowerLead) {
             val lampDescriptor = Utils.getItemObject(lampStack) as LampDescriptor
 
-            if (element.poweredByLampSupply) {
+            if (element.wirelessPower) {
                 findBestLampSupply(element.sixNode!!.coordinate)
 
                 val bestLampSupply = cachedBestChannelHandle?.second
@@ -274,8 +274,8 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
             inventoryChanged = true
         }
 
-        if (cableInInventory != (!cableStack.isNothing())) {
-            cableInInventory = (!cableStack.isNothing())
+        if (cableInInventory != (element.hasPowerLead)) {
+            cableInInventory = (element.hasPowerLead)
             inventoryChanged = true
         }
 

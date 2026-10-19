@@ -18,6 +18,7 @@ class TransparentNodeRender : BlockEntityRenderer<TransparentNodeEntity> {
             GL11.glPushMatrix()
             GL11.glTranslatef(.5f, .5f, .5f)
             elementRender.draw()
+            elementRender.cord.draw(entity.level!!,entity.blockPos,elementRender.front ?: mods.eln.misc.Direction.ZP)
             GL11.glPopMatrix()
         } finally {
             FixedFunction.finish()

@@ -65,6 +65,8 @@ object CordPath {
 class CordDisplay {
     var endpoint: Pair<BlockPos,Direction>?=null
         private set
+    var rating=CordRating.V120
+        private set
     var state="UNPLUGGED"
         private set
     private var cached: List<Vec3> = emptyList()
@@ -72,17 +74,41 @@ class CordDisplay {
     fun read(input: DataInputStream) {
         val next=if(input.readBoolean())BlockPos(input.readInt(),input.readInt(),input.readInt()) to Direction.fromInt(input.readUnsignedByte())!! else null
         if(next!=endpoint) { cached=emptyList();nextUpdate=0L }
+        if(next!=null)rating=CordRating.entries[input.readUnsignedByte()]
         endpoint=next;state=input.readUTF()
     }
-    fun draw(world: Level,pos: BlockPos,front: Direction) {
+    fun draw(world: Level,pos: BlockPos,front: Direction,entry: Vec3?=null) {
         val (target,facing)=endpoint ?: return
         val origin=Vec3.atCenterOf(pos)
-        val start=Vec3.atCenterOf(target).add(mods.eln.transparentnode.worklight.WorkLightOptics.world(facing,Vec3(0.0,-.1,-.33)))
-        val end=origin.add(mods.eln.transparentnode.worklight.WorkLightOptics.world(front,Vec3(0.0,-.43,-.25)))
+        val start=Vec3.atCenterOf(target).add(mods.eln.transparentnode.worklight.WorkLightOptics.world(facing,Vec3(0.0,-.1,-.224)))
+        val end=origin.add(entry ?: mods.eln.transparentnode.worklight.WorkLightOptics.world(front,Vec3(0.0,-.43,-.25)))
         if(start.distanceTo(end)>ApplianceCord.MAX_REACH+1)return
         if(cached.isEmpty() || world.gameTime>=nextUpdate) {
             nextUpdate=world.gameTime+20;cached=CordPath.samples(start,end) { x,z,y -> CordPath.floor(world,x,z,y,pos) }
         }
+        if(((world.getBlockEntity(target) as? mods.eln.node.transparent.TransparentNodeEntity)?.elementRender as? OutletRender)?.occupied!=true)NemaPlug.draw(facing,rating,target.subtract(pos))
         CordPath.draw(cached,origin)
+    }
+}
+
+/** Moulded body, finger rings, badge, strain relief and the mating metal blades. */
+object NemaPlug {
+    fun draw(front: Direction,rating: CordRating,offset: BlockPos=BlockPos.ZERO)=preserveMatrix {
+        GL11.glTranslated(offset.x.toDouble(),offset.y.toDouble(),offset.z.toDouble())
+        front.inverse.glRotateZnRef()
+        drawLocal(rating)
+    }
+    fun drawLocal(rating: CordRating)=preserveMatrix {
+        val model=mods.eln.Eln.obj.getObj(if(rating==CordRating.V120)"nema520plug" else "nema620plug")
+        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
+        try {
+            GL11.glDisable(GL11.GL_TEXTURE_2D)
+            GL11.glColor3f(.075f,.080f,.085f);model.getPart("Case")?.drawNoBind()
+            GL11.glColor3f(.14f,.15f,.16f);model.getPart("Grip")?.drawNoBind()
+            GL11.glColor3f(.73f,.61f,.31f);model.getPart("Blades")?.drawNoBind()
+            if(rating==CordRating.V120)GL11.glColor3f(.22f,.52f,.80f) else GL11.glColor3f(.85f,.48f,.10f)
+            model.getPart("Badge")?.drawNoBind()
+        } finally { GL11.glPopAttrib() }
+        Unit
     }
 }

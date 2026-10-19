@@ -46,7 +46,7 @@ import mods.eln.misc.isNothing
 import mods.eln.misc.writeToNBT
 
 class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor) :
-    SixNodeElement(sixNode, side, sixNodeDescriptor), IConfigurable {
+    SixNodeElement(sixNode, side, sixNodeDescriptor), IConfigurable,mods.eln.transparentnode.cord.CordDevice {
 
     override val inventory = SixNodeElementInventory(2, 64, this, LampSocketContainer.REQUIRED_CABLE_LENGTH)
 
@@ -59,6 +59,12 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     val installedBulbs get() = inventory.getItem(LampSocketContainer.LAMP_SLOT_ID).count.coerceIn(0,descriptor.bulbCapacity)
 
     val electricalLoad = NbtElectricalLoad("electricalLoad")
+    override val cord=mods.eln.transparentnode.cord.ApplianceCord(this,electricalLoad)
+    override val cordVoltage get()=fanNominal
+    override val cordPortable get()=descriptor.fixture?.tableLamp==true
+    val wirelessPower get()=poweredByLampSupply && !cord.plugged
+    val hasPowerLead get()=cord.plugged || !inventory.getItem(LampSocketContainer.CABLE_SLOT_ID).isEmpty
+    override fun cordChanged() { computeInventory() }
     val lampResistor = Resistor(electricalLoad, null)
 
     private val voltageWatchdog = VoltageStateWatchDog(electricalLoad)
@@ -76,14 +82,16 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     var fanEnabled=true
     val rotor=mods.eln.transparentnode.fan.FanDynamics()
     val fanPower get()=rotor.speed
+    private val fanHazard=CeilingFanHazard(this)
     private var publishedFanSpeed=0.0
     val fanMotor=Resistor(electricalLoad,null).apply { resistance=1e19 }
     val fanNominal get()=(getItemObject(inventory.getItem(0)) as? LampDescriptor)?.lampData?.nominalU ?: 120.0
     fun updateFan(seconds: Double=.05) {
         if(descriptor.fixture?.fan!=true)return
-        val ready=fanEnabled && !inventory.getItem(LampSocketContainer.CABLE_SLOT_ID).isEmpty
+        val ready=fanEnabled && hasPowerLead
         val level=if(ready)(kotlin.math.abs(electricalLoad.voltage)/fanNominal).coerceIn(0.0,1.0) else 0.0
         rotor.step(seconds,if(level>=.5)level else 0.0)
+        if(descriptor.fixture==DecorativeLampStyle.FAN_INDUSTRIAL)fanHazard.tick()
         if(kotlin.math.abs(fanPower-publishedFanSpeed)>.009 || fanPower==0.0 && publishedFanSpeed!=0.0) {
             publishedFanSpeed=fanPower;needPublish()
         }
@@ -240,7 +248,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     }
 
     override fun connectJob() {
-        if (!poweredByLampSupply && !descriptor.wirelessOnly) {
+        if (cord.plugged || (!poweredByLampSupply && !descriptor.wirelessOnly)) {
             electricalLoadList.add(electricalLoad)
             electricalComponentList.add(lampResistor)
             if(descriptor.fixture?.fan==true)electricalComponentList.add(fanMotor)
@@ -265,7 +273,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     fun computeInventory() {
         val lampStack = inventory.getItem(LampSocketContainer.LAMP_SLOT_ID)
         val cableStack = inventory.getItem(LampSocketContainer.CABLE_SLOT_ID)
-        if(descriptor.fixture?.fan==true)fanMotor.resistance=if(fanEnabled && !cableStack.isEmpty)
+        if(descriptor.fixture?.fan==true)fanMotor.resistance=if(fanEnabled && hasPowerLead)
             fanNominal*fanNominal/descriptor.fixture!!.fanWatts else 1e19
 
         // 1.11+: an empty slot is ItemStack.EMPTY, never null
@@ -278,6 +286,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
         }
 
         when {
+            cord.plugged -> electricalLoad.serialResistance=.002
             cableStack.isEmpty -> electricalLoad.highImpedance()
             else -> {
                 val cableDescriptor = Eln.sixNodeItem.getDescriptor(cableStack)
@@ -291,7 +300,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     }
 
     override fun getElectricalLoad(lrdu: LRDU, mask: Int): ElectricalLoad? {
-        if (descriptor.wirelessOnly) return null
+        if (cord.plugged || descriptor.wirelessOnly) return null
         if (!descriptor.renderSideCables && lrdu != front && lrdu != front.inverse()) return null
         return when {
             inventory.getItem(LampSocketContainer.CABLE_SLOT_ID).isNothing() -> null
@@ -306,7 +315,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     }
 
     override fun getConnectionMask(lrdu: LRDU): Int {
-        if (descriptor.wirelessOnly) return 0
+        if (cord.plugged || descriptor.wirelessOnly) return 0
         if (!descriptor.renderSideCables && lrdu != front && lrdu != front.inverse()) return 0
         return when {
             inventory.getItem(LampSocketContainer.CABLE_SLOT_ID).isNothing() -> 0

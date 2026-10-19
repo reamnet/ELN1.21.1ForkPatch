@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_experimental_wall_outlet": {
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:experimental_wall_outlet"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "eln:240_v_wall_outlet"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_experimental_wall_outlet"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "eln:240_v_wall_outlet"
+    ]
+  }
+}

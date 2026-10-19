@@ -48,8 +48,13 @@ class WorkLightDescriptor(name: String) : FuelGeneratorDescriptor(name,Eln.obj.g
     }
 }
 
-class WorkLightElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) : FuelGeneratorElement(node,descriptor),mods.eln.item.IConfigurable {
+class WorkLightElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) : FuelGeneratorElement(node,descriptor),mods.eln.item.IConfigurable,mods.eln.transparentnode.cord.CordDevice {
     override val inventory=TransparentNodeElementInventory(1,2,this)
+    override val cord=mods.eln.transparentnode.cord.ApplianceCord(this,positiveLoad)
+    override val cordVoltage get()=operatingVoltage
+    override fun cordChanged() { if(cord.plugged)on=false;configureBulbs() }
+    override fun getElectricalLoad(side: Direction,lrdu: LRDU)=if(cord.plugged)null else super.getElectricalLoad(side,lrdu)
+    override fun getConnectionMask(side: Direction,lrdu: LRDU)=if(cord.plugged)0 else super.getConnectionMask(side,lrdu)
     private val wiredLamp=Resistor(positiveLoad,null)
     var wireless=false
     var channel=LampChannelMemory.DEFAULT_CHANNEL
@@ -70,7 +75,7 @@ class WorkLightElement(node: TransparentNode,descriptor: TransparentNodeDescript
     override fun initialize() { super.initialize();configureBulbs() }
     fun configureBulbs() {
         val d=bulb
-        wiredLamp.resistance=if(!wireless && d!=null && bulbCount>0)d.lampData.resistance/bulbCount else 1e19
+        wiredLamp.resistance=if((cord.plugged || !wireless) && d!=null && bulbCount>0)d.lampData.resistance/bulbCount else 1e19
         val voltage=operatingVoltage
         powerSource.setMaximumVoltage(voltage)
         powerSource.setMaximumCurrent(descriptor.nominalPower*5/voltage)
@@ -94,10 +99,10 @@ class WorkLightElement(node: TransparentNode,descriptor: TransparentNodeDescript
         return false
     }
     private fun updateLight(time: Double) {
-        if(wireless && on)on=false
+        if((wireless || cord.plugged) && on)on=false
         val d=bulb
         var volts=positiveLoad.voltage
-        if(wireless) {
+        if(wireless && !cord.plugged) {
             supplyRefresh-=time
             if(supplyRefresh<=0) {
                 supplyRefresh=1.0
@@ -151,7 +156,7 @@ class WorkLightElement(node: TransparentNode,descriptor: TransparentNodeDescript
     override fun networkUnserialize(stream: DataInputStream): Byte {
         val id=super.networkUnserialize(stream)
         try { when(id.toInt()) {
-            80 -> { if(on)on=false else if(!wireless && tankLevel>0) { on=true;voltageGracePeriod=FuelGeneratorDescriptor.VoltageStabilizationGracePeriod } }
+            80 -> { if(on)on=false else if(!wireless && !cord.plugged && tankLevel>0) { on=true;voltageGracePeriod=FuelGeneratorDescriptor.VoltageStabilizationGracePeriod } }
             81 -> { wireless=!wireless;if(wireless)on=false;configureBulbs() }
             82 -> { channel=stream.readUTF().take(128);supply=null;supplyRefresh=0.0 }
             in 83..86 -> aim.set((id.toInt()-83)/2,(id.toInt()-83)%2,stream.readDouble())

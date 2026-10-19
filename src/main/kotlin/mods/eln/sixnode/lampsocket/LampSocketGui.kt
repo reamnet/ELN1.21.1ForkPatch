@@ -74,7 +74,13 @@ class LampSocketGui(player: Player, val render: LampSocketRender) :
         if (render.grounded) buttonGrounded.displayString = I18N.tr("Grounded")
         else buttonGrounded.displayString = I18N.tr("Ungrounded")
 
-        if (render.poweredByLampSupply) {
+        buttonPowerSource.enabled=render.cord.endpoint==null && !render.descriptor.wirelessOnly
+        if(render.cord.endpoint!=null) {
+            textboxLampSupplyChannel.visible=false
+            buttonGrounded.visible=false
+            buttonPowerSource.displayString=I18N.tr("Powered by cord")
+            buttonPowerSource.setComment(0,mods.eln.transparentnode.cord.cordState(render.cord.state))
+        } else if (render.poweredByLampSupply) {
             textboxLampSupplyChannel.visible = true
             buttonGrounded.visible = false
             buttonPowerSource.displayString = I18N.tr("Powered by lamp supply")

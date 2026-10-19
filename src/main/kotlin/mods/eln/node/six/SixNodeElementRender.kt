@@ -31,6 +31,7 @@ import java.io.DataOutputStream
 import java.io.IOException
 
 abstract class SixNodeElementRender(open var tileEntity: SixNodeEntity, @JvmField var side: Direction, @JvmField var sixNodeDescriptor: SixNodeDescriptor) {
+    val cord=mods.eln.transparentnode.cord.CordDisplay()
     @JvmField
     var connectedSide = LRDUMask()
     var glList = 0
@@ -134,6 +135,7 @@ abstract class SixNodeElementRender(open var tileEntity: SixNodeEntity, @JvmFiel
             val b = stream.readByte()
             connectedSide.set(b.toInt() and 0xF)
             front = fromInt(b.toInt() shr 4 and 0x3)
+            if(stream.readBoolean())cord.read(stream)
             needRedraw = true
         } catch (e: IOException) {
             e.printStackTrace()

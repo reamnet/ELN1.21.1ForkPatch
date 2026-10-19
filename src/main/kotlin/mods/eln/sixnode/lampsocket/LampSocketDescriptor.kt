@@ -88,6 +88,7 @@ class LampSocketDescriptor(itemName: String, val renderType: ILampSocketObjRende
         if (range != 0) list.add(I18N.tr("Spot range: %1$ blocks", range))
         if (enableProjectionRotation) list.add(I18N.tr("Angle: %1$\u00B0 to %2$\u00B0", LampSocketGui.MIN_ROTATION_ANGLE.toInt(), LampSocketGui.MAX_ROTATION_ANGLE.toInt()))
         list.add(I18N.tr("Accepted lamp types: %1$", acceptedLampTypesString))
+        if(fixture==DecorativeLampStyle.FAN_INDUSTRIAL)list.add(I18N.tr("Five block blade span; blade contact deals 5 damage per second at full speed"))
         if(fixture?.fan==true) {
             list.add(I18N.tr("Fan motor: %1$ W; use a bulb matching the supply voltage",fixture!!.fanWatts.toInt()))
             list.add(I18N.tr("Without a bulb the motor is rated for 120 V; the GUI switches the fan separately"))

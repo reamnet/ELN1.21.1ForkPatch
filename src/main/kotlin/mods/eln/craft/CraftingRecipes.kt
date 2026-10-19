@@ -420,6 +420,10 @@ object CraftingRecipes {
             addRecipe(findItemStack(name),"PPP","PMP","CRC",
                 'P',when(name) { "Metal Shop Box Fan" -> ItemStack(Items.IRON_INGOT);"Compact Desktop Box Fan" -> findItemStack("Rubber");else -> findItemStack("Iron Plate") },
                 'M',findItemStack("Electrical Motor"),'C',findItemStack("Copper Cable"),'R',ItemStack(Items.REDSTONE))
+        addRecipe(findItemStack("Industrial Five Block Ceiling Fan"),"PMP","MLM","PPP",
+            'P',findItemStack("Iron Plate"),'M',findItemStack("Electrical Motor"),'L',findItemStack("Basic Lamp Holder"))
+        addShapelessRecipe(findItemStack("240 V Wall Outlet"),findItemStack("Experimental Wall Outlet"),ItemStack(Items.ORANGE_DYE))
+        addShapelessRecipe(findItemStack("240 V Appliance Cord"),findItemStack("Flexible Appliance Cord"),ItemStack(Items.ORANGE_DYE))
         addRecipe(findItemStack("Industrial Five Block Fan"),"PMP","MCM","PMP",'P',findItemStack("Iron Plate"),'M',findItemStack("Electrical Motor"),'C',findItemStack("Copper Cable"))
         addRecipe(findItemStack("Experimental Wall Outlet")," P ","CRC"," P ",'P',findItemStack("Iron Plate"),'C',findItemStack("Copper Cable"),'R',ItemStack(Items.REDSTONE))
         addShapelessRecipe(findItemStack("Flexible Appliance Cord"),findItemStack("Copper Cable"),findItemStack("Copper Cable"),findItemStack("Rubber"))

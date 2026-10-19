@@ -33,6 +33,7 @@ import mods.eln.misc.yCoord
 import mods.eln.misc.zCoord
 
 abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeEntity, var transparentNodeDescriptor: TransparentNodeDescriptor) {
+    val cord=mods.eln.transparentnode.cord.CordDisplay()
     @JvmField
     var front: Direction? = null
     var grounded = false
@@ -56,6 +57,7 @@ abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeEntit
             val b = stream.readByte()
             front = fromInt(b.toInt() and 0x7)
             grounded = b.toInt() and 8 != 0
+            if(stream.readBoolean())cord.read(stream)
         } catch (e: IOException) {
             e.printStackTrace()
         }

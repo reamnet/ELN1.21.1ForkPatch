@@ -14,7 +14,7 @@ import kotlin.test.*
 class LampClearanceTest {
     @Test fun everyDecorativeFixtureReservesSpaceWithoutCreatingASolidMasterOrGhostCube() {
         val fixtures=Eln.sixNodeItem.subItemList.values.filterIsInstance<LampSocketDescriptor>().filter { it.fixture!=null }
-        assertEquals(68,fixtures.size)
+        assertEquals(69,fixtures.size)
         assertTrue(fixtures.any { it.hasGhostGroup() })
         for(d in fixtures) {
             assertFalse(d.hasVolume(),d.name)

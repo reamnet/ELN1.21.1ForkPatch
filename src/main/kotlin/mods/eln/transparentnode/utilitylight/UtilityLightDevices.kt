@@ -58,18 +58,21 @@ class StepDownUnitElement(node: TransparentNode, descriptor: TransparentNodeDesc
 }
 
 class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNodeDescriptor) :
-    GridElement(node, descriptor, (descriptor as GridDescriptor).connectRange), IConfigurable {
+    GridElement(node, descriptor, (descriptor as GridDescriptor).connectRange), IConfigurable,mods.eln.transparentnode.cord.CordDevice {
     override val inventory = object : TransparentNodeElementInventory(1, 1, this@UtilityStreetLightElement) {
         override fun getAccessibleSlotsFromSide(side: Int) = intArrayOf(0)
         override fun canPlaceItemThroughFace(slot: Int, stack: ItemStack?, side: Int) = slot == 0 && isStepDownUnit(stack)
         override fun canTakeItemThroughFace(slot: Int, stack: ItemStack?, side: Int) = slot == 0
     }
-    val unit = MainsStepDown(this) { installed }
+    val unit: MainsStepDown = MainsStepDown(this) { installed && !cord.plugged }
+    override val cord=mods.eln.transparentnode.cord.ApplianceCord(this,unit.secondary)
+    override val cordVoltage get()=unit.outputVoltage.toDouble()
+    override fun cordChanged() { configureLamp() }
     val installed get() = isStepDownUnit(inventory.getItem(0))
     internal val lamp = Resistor(unit.secondary, null)
     private var darkOutside = false
     private val fixture get() = transparentNodeDescriptor as UtilityStreetLightDescriptor
-    private val lampRequested get() = installed && unit.enabled && unit.lampEnabled && (!unit.lampAutomatic || darkOutside)
+    private val lampRequested get() = (installed || cord.plugged) && unit.enabled && unit.lampEnabled && (!unit.lampAutomatic || darkOutside)
     var lightLevel = 0
         private set
     init {
@@ -106,7 +109,7 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
     override fun disconnectJob() { Eln.simulator.mna.removeProcess(unit.controller); super.disconnectJob() }
     override fun getGridElectricalLoad(side: Direction) = unit.primary
     override fun getElectricalLoad(side: Direction, lrdu: LRDU) =
-        if (side != Direction.YN && side != Direction.YP && lrdu == LRDU.Down) unit.secondary else null
+        if (!cord.plugged && side != Direction.YN && side != Direction.YP && lrdu == LRDU.Down) unit.secondary else null
     override fun getConnectionMask(side: Direction, lrdu: LRDU) =
         if (getElectricalLoad(side, lrdu) != null) NodeBase.maskElectricalPower else 0
     override fun getThermalLoad(side: Direction, lrdu: LRDU) = if (getElectricalLoad(side, lrdu) != null) unit.thermal else null

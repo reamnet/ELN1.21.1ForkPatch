@@ -15,10 +15,13 @@ import net.minecraft.world.entity.player.Player
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class UpsElement(node: TransparentNode, descriptor: TransparentNodeDescriptor) : TransparentNodeElement(node,descriptor), IConfigurable {
+class UpsElement(node: TransparentNode, descriptor: TransparentNodeDescriptor) : TransparentNodeElement(node,descriptor), IConfigurable,mods.eln.transparentnode.cord.CordDevice {
     override val inventory=UpsInventory(this)
     val bank=UpsBatteryBank(inventory)
     val unit=UpsPowerUnit(this,bank)
+    override val cord=mods.eln.transparentnode.cord.ApplianceCord(this,unit.primary)
+    override val cordVoltage get()=cord.anchor?.rating?.volts ?: 120.0
+    override fun acceptsCord(rating: mods.eln.transparentnode.cord.CordRating)=true
     private val alarm=UpsAlarm()
     init {
         slowProcessList.add(NodePeriodicPublishProcess(node,.5,0.0))
@@ -33,7 +36,7 @@ class UpsElement(node: TransparentNode, descriptor: TransparentNodeDescriptor) :
     private val cabinet get()=transparentNodeDescriptor as UpsDescriptor
     override fun onNeighborBlockChange() { super.onNeighborBlockChange();cabinet.checkWallSupport(this) }
     override fun getElectricalLoad(side: Direction, lrdu: LRDU)=if(!cabinet.acceptsCable(front,side,lrdu))null else when(side) {
-        front.left() -> unit.primary
+        front.left() -> if(cord.plugged)null else unit.primary
         front.right() -> unit.secondary
         else -> null
     }

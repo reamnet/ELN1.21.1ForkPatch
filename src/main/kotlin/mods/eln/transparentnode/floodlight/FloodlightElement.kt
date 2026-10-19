@@ -41,7 +41,7 @@ import mods.eln.misc.isNothing
 import mods.eln.misc.writeToNBT
 
 class FloodlightElement(transparentNode: TransparentNode, transparentNodeDescriptor: TransparentNodeDescriptor) :
-    TransparentNodeElement(transparentNode, transparentNodeDescriptor), IConfigurable {
+    TransparentNodeElement(transparentNode, transparentNodeDescriptor), IConfigurable,mods.eln.transparentnode.cord.CordDevice {
 
     override val inventory = TransparentNodeElementInventory(2, 64, this)
 
@@ -65,6 +65,8 @@ class FloodlightElement(transparentNode: TransparentNode, transparentNodeDescrip
     var beamWidth by published(0.0)
 
     val electricalLoad = NbtElectricalLoad("electricalLoad")
+    override val cord=mods.eln.transparentnode.cord.ApplianceCord(this,electricalLoad)
+    override val cordVoltage get()=(0..1).mapNotNull { (getItemObject(inventory.getItem(it)) as? LampDescriptor)?.lampData?.nominalU }.let { values -> if(values.distinct().size>1)Double.NaN else values.firstOrNull() ?: if(motorized)240.0 else 120.0 }
     private val lamp1Resistor = Resistor(electricalLoad, null)
     private val lamp2Resistor = Resistor(electricalLoad, null)
 
@@ -199,6 +201,7 @@ class FloodlightElement(transparentNode: TransparentNode, transparentNodeDescrip
     }
 
     override fun getElectricalLoad(side: Direction, lrdu: LRDU): ElectricalLoad? {
+        if (cord.plugged && side.toHybridNodeDirection()==blockFacing.back()) return null
         if (!FloodlightOptics.isMountingPlanePort(rotationAxis, side, lrdu)) return null
 
         return if (motorized) when (side.toHybridNodeDirection()) {
@@ -218,6 +221,7 @@ class FloodlightElement(transparentNode: TransparentNode, transparentNodeDescrip
     }
 
     override fun getConnectionMask(side: Direction, lrdu: LRDU): Int {
+        if (cord.plugged && side.toHybridNodeDirection()==blockFacing.back()) return 0
         if (!FloodlightOptics.isMountingPlanePort(rotationAxis, side, lrdu)) return 0
 
         return if (motorized) when (side.toHybridNodeDirection()) {

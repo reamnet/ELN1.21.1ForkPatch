@@ -26,7 +26,7 @@ class LightingExpansionTest {
         .invoke(e,null,Direction.XN,0f,0f,0f)
 
     @Test fun appendedFixturesNeverOverwriteLampSuppliesOrExistingIdentities() {
-        assertEquals(68,DecorativeLampStyle.entries.size)
+        assertEquals(69,DecorativeLampStyle.entries.size)
         val ids=DecorativeLampStyle.entries.map(DecorativeLightRegistration::idFor)
         assertEquals(ids.size,ids.toSet().size)
         assertTrue(ids.drop(30).all { it shr 6==68 })

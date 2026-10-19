@@ -73,7 +73,6 @@ class FanRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDescrip
     override val inventory=TransparentNodeElementInventory(0,1,this)
     var enabled=true;var setting=1.0;var speed=0.0;var volts=0.0;var watts=0.0
     val visual=FanVisual()
-    val cord=CordDisplay()
     val connections=LRDUMask()
     private var cable: CableRenderType?=null
     val operatingSound=object: LoopedSound(if(type.industrial)"eln:appliance_industrial_fan" else "eln:appliance_box_fan",Coordinate(entity.blockPos.x,entity.blockPos.y,entity.blockPos.z,0)) {
@@ -83,13 +82,12 @@ class FanRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDescrip
     init { addLoopedSound(operatingSound) }
     override fun refresh(deltaT: Float) { visual.step(deltaT,speed,type.rpm);super.refresh(deltaT) }
     override fun draw() {
-        cord.draw(tileEntity.level!!,tileEntity.blockPos,front ?: Direction.ZP)
         cable=drawCable(Direction.YN,Eln.instance.meduimVoltageCableDescriptor.render,connections,cable)
         (transparentNodeDescriptor as FanDescriptor).draw(front ?: Direction.ZP,visual.angle)
     }
     override fun cameraDrawOptimisation()=false
     override fun networkUnserialize(input: DataInputStream) {
-        super.networkUnserialize(input);enabled=input.readBoolean();setting=input.readDouble();speed=input.readDouble();volts=input.readDouble();watts=input.readDouble();connections.deserialize(input);cord.read(input);cable=null
+        super.networkUnserialize(input);enabled=input.readBoolean();setting=input.readDouble();speed=input.readDouble();volts=input.readDouble();watts=input.readDouble();connections.deserialize(input);cable=null
     }
     override fun newGuiDraw(side: Direction,player: Player)=FanGui(player,this)
 }

@@ -28,6 +28,7 @@ class FanElement(node: TransparentNode,descriptor: TransparentNodeDescriptor): T
     var setting=1.0
         private set
     override val cord=ApplianceCord(this,load)
+    override val cordVoltage get()=type.volts
     override val cordPortable get()=!type.industrial
     private val hitAfter=mutableMapOf<UUID,Long>()
     private var publishedSpeed=0.0
@@ -63,10 +64,9 @@ class FanElement(node: TransparentNode,descriptor: TransparentNodeDescriptor): T
         }
         hitAfter.keys.retainAll(touching)
     }
-    override fun disconnectJob() { cord.disconnect();super.disconnectJob() }
     override fun onBreakElement() {
         if(cord.moving) { if(useUuid())stop(getUuid());return }
-        cord.onBroken();super.onBreakElement()
+        super.onBreakElement()
     }
     override fun getElectricalLoad(side: Direction,lrdu: LRDU)=if(!cord.plugged && side.isNotY && lrdu==LRDU.Down)load else null
     override fun getConnectionMask(side: Direction,lrdu: LRDU)=if(getElectricalLoad(side,lrdu)!=null)NodeBase.maskElectricalPower else 0
@@ -83,14 +83,14 @@ class FanElement(node: TransparentNode,descriptor: TransparentNodeDescriptor): T
     }
     override fun networkSerialize(stream: DataOutputStream) {
         super.networkSerialize(stream);stream.writeBoolean(enabled);stream.writeDouble(setting);stream.writeDouble(rotor.speed)
-        stream.writeDouble(load.voltage);stream.writeDouble(motor.power);node!!.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);cord.writeNetwork(stream)
+        stream.writeDouble(load.voltage);stream.writeDouble(motor.power);node!!.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);
     }
     override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt);enabled=!nbt.contains("fanEnabled") || nbt.getBoolean("fanEnabled")
         setting=nbt.getDouble("fanSetting").takeIf { it.isFinite() && it in .25..1.0 } ?: 1.0
-        rotor.read(nbt);cord.read(nbt)
+        rotor.read(nbt);
     }
-    override fun writeToNBT(nbt: CompoundTag) { super.writeToNBT(nbt);nbt.putBoolean("fanEnabled",enabled);nbt.putDouble("fanSetting",setting);rotor.write(nbt);cord.write(nbt) }
+    override fun writeToNBT(nbt: CompoundTag) { super.writeToNBT(nbt);nbt.putBoolean("fanEnabled",enabled);nbt.putDouble("fanSetting",setting);rotor.write(nbt) }
     override fun readItemStackNBT(nbt: CompoundTag?) { nbt?.takeIf { it.contains("carriedAppliance") }?.let { val placedFront=front;readFromNBT(it.getCompound("carriedAppliance"));front=placedFront
         if(it.contains("carriedAt"))rotor.step(((world().gameTime-it.getLong("carriedAt")).coerceAtLeast(0)/20.0),0.0)
     } }

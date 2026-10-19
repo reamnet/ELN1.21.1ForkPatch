@@ -17,9 +17,15 @@ import net.minecraft.world.entity.player.Player
 import java.io.DataOutputStream
 import java.io.IOException
 
-class FestiveElement(node: TransparentNode, descriptor: TransparentNodeDescriptor): TransparentNodeElement(node, descriptor) {
+class FestiveElement(node: TransparentNode, descriptor: TransparentNodeDescriptor): TransparentNodeElement(node, descriptor),mods.eln.transparentnode.cord.CordDevice {
 
     val electricalLoad = NbtElectricalLoad("electricalLoad")
+    override val cord=mods.eln.transparentnode.cord.ApplianceCord(this,electricalLoad)
+    override val cordVoltage get()=240.0
+    override fun connectJob() {
+        if(cord.plugged) { electricalLoadList.add(electricalLoad);electricalComponentList.add(loadResistor) };super.connectJob()
+    }
+    override fun disconnectJob() { super.disconnectJob();electricalLoadList.remove(electricalLoad);electricalComponentList.remove(loadResistor) }
     val loadResistor = Resistor(electricalLoad, null)
     var powerChannel = "xmas" // TODO: Add a GUI in the render panes and allow the user to specify a different channel.
 
@@ -84,9 +90,11 @@ class FestiveElement(node: TransparentNode, descriptor: TransparentNodeDescripto
         }
 
         override fun process(time: Double) {
-            val lampSupplyList = findBestSupply(elem.node!!.coordinate)
+            val lampSupplyList = if(elem.cord.plugged)null else findBestSupply(elem.node!!.coordinate)
             val best = lampSupplyList?.second
-            if (best != null && best.element.getChannelState(best.id)) {
+            if(elem.cord.plugged) {
+                // The physical cord supplies the real resistor; do not also charge wireless power.
+            } else if (best != null && best.element.getChannelState(best.id)) {
                 best.element.addToRp(elem.loadResistor.resistance)
                 elem.electricalLoad.state = best.element.powerLoad.state
             } else {

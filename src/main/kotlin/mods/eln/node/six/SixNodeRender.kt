@@ -32,6 +32,7 @@ class SixNodeRender : BlockEntityRenderer<SixNodeEntity> {
                     GL11.glTranslatef(-0.5f, 0f, 0f)
                     render.draw()
                     GL11.glPopMatrix()
+                    render.cord.draw(entity.level!!,entity.blockPos,fromInt(idx)!!,fromInt(idx)!!.rotateFromXN(Vec3(-.40,0.0,0.0)))
                 }
             }
             GL11.glPopMatrix()
