@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_automatic_transfer_switch": {
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:automatic_transfer_switch"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "eln:wall-mounted_automatic_transfer_switch"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_automatic_transfer_switch"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "eln:wall-mounted_automatic_transfer_switch"
+    ]
+  }
+}

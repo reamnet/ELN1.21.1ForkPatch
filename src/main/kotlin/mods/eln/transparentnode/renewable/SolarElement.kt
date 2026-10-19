@@ -22,11 +22,13 @@ class SolarElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) 
     override fun newContainer(side: Direction,player: Player)=BasicContainer(player,inventory,emptyArray())
     override fun connectJob() { super.connectJob();Eln.simulator.mna.addProcess(unit.controller) }
     override fun disconnectJob() { Eln.simulator.mna.removeProcess(unit.controller);super.disconnectJob() }
-    override fun getElectricalLoad(side: Direction,lrdu: LRDU)=if(lrdu!=LRDU.Down)null else when(side) {
+    private val cabinet get()=transparentNodeDescriptor as RenewableDescriptor
+    override fun onNeighborBlockChange() { super.onNeighborBlockChange();cabinet.checkWallSupport(this) }
+    override fun getElectricalLoad(side: Direction,lrdu: LRDU)=if(!cabinet.acceptsCable(front,side,lrdu))null else when(side) {
         front.left() -> unit.solar
-        front.inverse -> unit.negative
+        (if(cabinet.wallMounted)Direction.YN else front.inverse) -> unit.negative
         front.right() -> unit.output
-        front -> if(unit.hybrid)unit.grid else null
+        (if(cabinet.wallMounted)Direction.YP else front) -> if(unit.hybrid)unit.grid else null
         else -> null
     }
     override fun getConnectionMask(side: Direction,lrdu: LRDU)=if(getElectricalLoad(side,lrdu)!=null)NodeBase.maskElectricalPower else 0
@@ -60,7 +62,7 @@ class SolarElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) 
             target=unit.target;enabled=unit.enabled;priority=unit.priority.ordinal;status=unit.status
             pv=unit.solar.voltage-unit.negative.voltage;pvWatts=unit.pvWatts;grid=unit.grid.voltage;gridWatts=unit.gridWatts
             output=unit.output.voltage;watts=unit.outputWatts;energy=unit.energy
-            connections=node!!.lrduCubeMask.getTranslate(Direction.YN)
+            connections=node!!.lrduCubeMask.getTranslate(cabinet.connectionPlane(front))
         }.write(stream)
     }
     override fun multiMeterString(side: Direction)=tr("Solar: %1$; grid: %2$; output: %3$",Utils.plotPower("",unit.pvWatts),Utils.plotPower("",unit.gridWatts),Utils.plotUIP(unit.output.voltage,unit.outputSource.current))

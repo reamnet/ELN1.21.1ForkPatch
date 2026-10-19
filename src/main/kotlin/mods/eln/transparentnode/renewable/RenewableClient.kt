@@ -49,11 +49,12 @@ class SolarDisplay {
     }
 }
 
-class RenewableDescriptor(name: String,val kind: RenewableKind) : TransparentNodeDescriptor(name,
-    if(kind==RenewableKind.WIND || kind==RenewableKind.WATER)LargeRenewableElement::class.java else SolarElement::class.java,RenewableRender::class.java) {
+class RenewableDescriptor(name: String,val kind: RenewableKind,wallMounted: Boolean=false) : PowerCabinetDescriptor(name,
+    if(kind==RenewableKind.WIND || kind==RenewableKind.WATER)LargeRenewableElement::class.java else SolarElement::class.java,RenewableRender::class.java,wallMounted) {
     val large get()=kind==RenewableKind.WIND || kind==RenewableKind.WATER
-    private val model=Eln.obj.getObj(when(kind) { RenewableKind.MPPT->"solarmppt";RenewableKind.HYBRID->"solarhybrid";RenewableKind.WIND->"utilitywind";RenewableKind.WATER->"utilitywatermill" })
+    private val model=Eln.obj.getObj(when(kind) { RenewableKind.MPPT->if(wallMounted)"wallmppt" else "solarmppt";RenewableKind.HYBRID->if(wallMounted)"wallhybrid" else "solarhybrid";RenewableKind.WIND->"utilitywind";RenewableKind.WATER->"utilitywatermill" })
     init {
+        require(!large || !wallMounted)
         if(large)ghostGroup=GhostGroup().apply {
             if(kind==RenewableKind.WIND) {
                 addRectangle(0,0,1,10,0,0)
@@ -115,10 +116,12 @@ class RenewableDescriptor(name: String,val kind: RenewableKind) : TransparentNod
             }
         }
         if(!large) {
-            list.add(tr("Blue left: solar positive; black rear: solar return; orange right: output"))
-            if(kind==RenewableKind.HYBRID)list.add(tr("Dark blue front: optional grid input"))
+            list.add(if(wallMounted)tr("Wall cables: blue left PV+; black bottom PV-; orange right output")
+                else tr("Blue left: solar positive; black rear: solar return; orange right: output"))
+            if(kind==RenewableKind.HYBRID)list.add(if(wallMounted)tr("Dark blue top: optional grid input") else tr("Dark blue front: optional grid input"))
             list.add(tr("Solar input: 6 to 51200 V; 200 A maximum; output never feeds back into inputs"))
             list.add(tr("Internal 5000 J DC link; use a UPS or batteries for sustained storage"))
+            if(wallMounted)list.add(tr("Place against a vertical wall; connect cables on the same wall face"))
         }
     }
 }
@@ -131,7 +134,7 @@ class RenewableRender(entity: TransparentNodeEntity,descriptor: TransparentNodeD
     private var angle=0f
     private val renewable get()=transparentNodeDescriptor as RenewableDescriptor
     override fun draw() {
-        cable=drawCable(Direction.YN,Eln.instance.stdCableRender3200V,display.connections,cable)
+        cable=drawCable(renewable.connectionPlane(front ?: Direction.ZP),Eln.instance.stdCableRender3200V,display.connections,cable)
         renewable.draw(front ?: Direction.ZP,angle)
     }
     override fun refresh(deltaT: Float) { super.refresh(deltaT);if(renewable.large)angle=(angle+deltaT*if(available>.01)35f else 0f)%360f }

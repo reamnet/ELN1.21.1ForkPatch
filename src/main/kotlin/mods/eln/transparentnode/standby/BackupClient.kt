@@ -45,10 +45,11 @@ class BackupDisplay {
     }
 }
 
-class BackupDescriptor(name: String,val generator: Boolean) : TransparentNodeDescriptor(name,
+class BackupDescriptor(name: String,val generator: Boolean,wallMounted: Boolean=false) : PowerCabinetDescriptor(name,
     if(generator)StandbyGeneratorElement::class.java else AtsElement::class.java,BackupRender::class.java,
-    if(generator)EntityMetaTag.Fluid else EntityMetaTag.Basic) {
-    private val model=Eln.obj.getObj(if(generator)"standbygenerator" else "automatictransferswitch")
+    wallMounted,if(generator)EntityMetaTag.Fluid else EntityMetaTag.Basic) {
+    init { require(!generator || !wallMounted) }
+    private val model=Eln.obj.getObj(if(generator)"standbygenerator" else if(wallMounted)"wallats" else "automatictransferswitch")
     fun draw(front: Direction,display: BackupDisplay?=null)=preserveMatrix {
         front.inverse.glRotateZnRef()
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
@@ -79,12 +80,14 @@ class BackupDescriptor(name: String,val generator: Boolean) : TransparentNodeDes
             list.add(tr("Orange side terminals: power output"))
         } else {
             list.add(tr("Automatic transfer switch; opens one source before closing the other"))
-            list.add(tr("Blue left: mains; yellow rear: generator; orange right: load"))
+            list.add(if(wallMounted)tr("Wall cables: blue left mains; yellow bottom generator; orange right load")
+                else tr("Blue left: mains; yellow rear: generator; orange right: load"))
             list.add(tr("Set both sources to the same rated voltage (12 to 51200 V)"))
             list.add(tr("Detects failure after 1 s; returns after 5 s of stable mains"))
         }
         list.add(tr("Matching wireless channels control engine starting; power still needs cables"))
         list.add(tr("Wireless control works between loaded blocks in the same dimension"))
+        if(wallMounted)list.add(tr("Place against a vertical wall; connect cables on the same wall face"))
     }
 }
 
@@ -99,7 +102,7 @@ class BackupRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDesc
         })
     }
     override fun draw() {
-        cable=drawCable(Direction.YN,Eln.instance.stdCableRender3200V,display.connections,cable)
+        cable=drawCable((transparentNodeDescriptor as BackupDescriptor).connectionPlane(front ?: Direction.ZP),Eln.instance.stdCableRender3200V,display.connections,cable)
         (transparentNodeDescriptor as BackupDescriptor).draw(front ?: Direction.ZP,display)
     }
     override fun cameraDrawOptimisation()=false

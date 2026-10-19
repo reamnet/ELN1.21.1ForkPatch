@@ -120,6 +120,7 @@ Output=输出
 Output_power=Output power
 Output_voltage=输出电压
 P\:_%1$_S\:_%2$=P: %1$ S: %2$
+Place_against_a_vertical_wall;_connect_cables_on_the_same_wall_face=Place against a vertical wall; connect cables on the same wall face
 Portable_battery_slot=便携电池
 Position=触点
 Power=功率
@@ -1066,6 +1067,9 @@ Separate_or_unsolved_electrical_sections\:_check_their_ground_references_before_
 Terminal_B_current\:_%1$_|_Cable/contact_loss_at_B\:_%2$=Terminal B current: %1$ | Cable/contact loss at B: %2$
 The_circuit_has_no_finite_solver_reading_yet.=The circuit has no finite solver reading yet.
 
+# src/main/kotlin/mods/eln/node/transparent/PowerCabinetDescriptor.kt
+Place_this_cabinet_against_a_vertical_wall=Place this cabinet against a vertical wall
+
 # src/main/kotlin/mods/eln/node/transparent/TransparentNodeDescriptor.kt
 
 # src/main/kotlin/mods/eln/railroad/ElectricMinecartChargeReporter.kt
@@ -1811,6 +1815,9 @@ Utility_Pole_w/DC-DC_Converter.name=T1电线杆(变压器)
 Utility_Wind_Turbine_3.2kV.name=Utility Wind Turbine 3.2kV
 Variable_DC-DC_Converter.name=直流-直流 变压器(可调)
 Voltage_Oriented_Battery.name=电池(大电压)
+Wall-mounted_Automatic_Transfer_Switch.name=Wall-mounted Automatic Transfer Switch
+Wall-mounted_Hybrid_Solar_Inverter.name=Wall-mounted Hybrid Solar Inverter
+Wall-mounted_MPPT_Solar_Controller.name=Wall-mounted MPPT Solar Controller
 Water_Turbine.name=发电机(水力,50V)
 Wind_Turbine.name=发电机(风力,59V)
 Wire_Combiner.name=导线合并器
@@ -2488,6 +2495,7 @@ Controller\:_Off=Controller: Off
 Controller\:_On=Controller: On
 DC_link\:_%1$_/_5000_J=DC link: %1$ / 5000 J
 Dark_blue_front\:_optional_grid_input=Dark blue front: optional grid input
+Dark_blue_top\:_optional_grid_input=Dark blue top: optional grid input
 Eight-metre_wheel;_nine-block_clearance;_moving_water_required=Eight-metre wheel; nine-block clearance; moving water required
 Grid\:_%1$_/_%2$=Grid: %1$ / %2$
 Grid_first=Grid first
@@ -2514,6 +2522,7 @@ Solar_only=Solar only
 Solar_supplies_the_load=Solar supplies the load
 Starting_solar_controller=Starting solar controller
 Waiting_for_solar_or_grid_power=Waiting for solar or grid power
+Wall_cables\:_blue_left_PV+;_black_bottom_PV-;_orange_right_output=Wall cables: blue left PV+; black bottom PV-; orange right output
 
 # src/main/kotlin/mods/eln/transparentnode/renewable/SolarElement.kt
 Grid_power=Grid power
@@ -2560,6 +2569,7 @@ Standby;_waiting_for_wireless_request=Standby; waiting for wireless request
 Standby_Gasoline_Generator=Standby Gasoline Generator
 Start_requested;_waiting_for_rated_voltage=Start requested; waiting for rated voltage
 Starting_engine_(3_seconds)=Starting engine (3 seconds)
+Wall_cables\:_blue_left_mains;_yellow_bottom_generator;_orange_right_load=Wall cables: blue left mains; yellow bottom generator; orange right load
 Wireless_control_works_between_loaded_blocks_in_the_same_dimension=Wireless control works between loaded blocks in the same dimension
 Wireless_start\:_ready=Wireless start: ready
 Wireless_start\:_requested=Wireless start: requested

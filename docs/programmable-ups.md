@@ -80,3 +80,17 @@ seconds; overload/protection warnings repeat every second. The alarm stops
 when normal operation resumes or the output is switched off. An active battery
 rack must be installed. The warning uses the existing game sound system and is
 audible within eight blocks.
+
+## Generator charging stability (3.0.20)
+
+The charger now starts gradually and reduces charging demand when its input
+voltage sags. It behaves as a consuming input instead of insisting on constant
+power from a limited generator; the batteries continue supplying the regulated
+output while charging backs off. Charger current, battery ratings, efficiency and
+the 10 kW inverter limit still apply.
+
+The standby generator also distinguishes temporary solver trial voltages from
+actual reverse power. Its real reverse-power and overload protection remain
+active. If a generator already saved the old false reverse-power trip, use its
+**Reset protection** button once after updating. Wire generator output to the
+UPS's **blue input**, with the protected loads on its orange output.

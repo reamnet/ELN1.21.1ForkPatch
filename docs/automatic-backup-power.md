@@ -5,6 +5,20 @@ and supplies a load from either mains or a **Standby Gasoline Generator**
 (Machines tab). Both have crafting recipes and a compact status/configuration GUI.
 Existing block and item identities are unchanged.
 
+## Wall cabinet (3.0.20)
+
+The **Wall-mounted Automatic Transfer Switch** is in Power Electronics. Craft it
+from an Automatic Transfer Switch and one Iron Plate. Right-click a vertical wall
+to mount it; all four wall directions work, with no floor required. Its shallow
+case projects about one third of a block from the wall and has matching collision.
+
+Run cables on that same wall face: **blue left = mains, yellow bottom = generator,
+orange right = load**, as viewed from the front. The GUI, wireless starting, rated
+voltage, contactor sounds and transfer timing work just like the floor version.
+Existing floor ATS units keep their original wiring and appearance. Breaking the
+supporting wall drops the cabinet. Crafting a new housing starts with default
+settings; configure its voltage and wireless channel after placing it.
+
 ## Wiring and wireless starting
 
 Looking at the front of the ATS, connect floor cables to:

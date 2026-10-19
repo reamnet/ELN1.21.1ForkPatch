@@ -82,3 +82,30 @@ these machines do not force-load chunks or generate power while unloaded. On
 reload the environment is resampled automatically, without replacing a cable.
 Both generators limit their power/current locally under overload and block reverse
 power. A larger model and 3.2 kV rating do not imply unlimited power.
+
+## Wall-mounted solar cabinets (3.0.20)
+
+Power Electronics also contains the **Wall-mounted MPPT Solar Controller** and
+**Wall-mounted Hybrid Solar Inverter**. Craft either from its floor-standing
+version and one Iron Plate, then right-click a vertical wall. They work on all four
+wall directions without a floor. The back plate touches the wall; the enclosure
+projects about one third of a block, with a matching shallow collision box.
+
+Cables run on the same wall face, viewed from the front:
+
+| Position | Connection |
+| --- | --- |
+| Blue left | Solar positive |
+| Black bottom | Solar return |
+| Orange right | Regulated output |
+| Dark blue top (hybrid only) | Optional grid supply |
+
+Output voltage, MPPT, grid priorities, power ratings and GUIs are the same as the
+floor units. Mounting direction and settings survive a world reload. Floor units
+keep their existing terminals. Removing the supporting wall drops the cabinet.
+Crafting a new housing starts with default settings; configure it after placement.
+
+For native placement, powered wall wiring, GUI, collision and reload checks, run
+the client with `-Deln.wallCabinetChecks=true`. The isolated test world exercises
+all three cabinets on four walls and writes `wall-cabinet-checks.json` under the
+client run directory.

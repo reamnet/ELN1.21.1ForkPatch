@@ -46,10 +46,12 @@ class AtsElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) : 
     private fun serverWorld()=node?.coordinate?.let { mods.eln.misc.DimensionIds.serverLevel(it.dimension) }
     private fun withdraw() { serverWorld()?.let { StandbyLink.remove(it,this) } }
     init { slowProcessList.add(IProcess { serverWorld()?.let { StandbyLink.update(it,this,unit.channel,it.gameTime,unit.control.request && unit.enabled) } }) }
-    override fun getElectricalLoad(side: Direction,lrdu: LRDU)=if(lrdu!=LRDU.Down)null else when(side) {
+    private val cabinet get()=transparentNodeDescriptor as BackupDescriptor
+    override fun onNeighborBlockChange() { super.onNeighborBlockChange();cabinet.checkWallSupport(this) }
+    override fun getElectricalLoad(side: Direction,lrdu: LRDU)=if(!cabinet.acceptsCable(front,side,lrdu))null else when(side) {
         front.left() -> unit.mains
         front.right() -> unit.output
-        front.inverse -> unit.backup
+        (if(cabinet.wallMounted)Direction.YN else front.inverse) -> unit.backup
         else -> null
     }
     override fun disconnectJob() { withdraw();unit.reset(false);super.disconnectJob() }
@@ -71,7 +73,7 @@ class AtsElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) : 
         BackupDisplay().apply {
             target=unit.nominal;channel=unit.channel;status=unit.status;mode=if(unit.enabled)0 else 2
             mains=unit.mains.voltage;backup=unit.backup.voltage;output=unit.output.voltage;watts=unit.watts;request=unit.control.request
-            connections=node!!.lrduCubeMask.getTranslate(Direction.YN)
+            connections=node!!.lrduCubeMask.getTranslate(cabinet.connectionPlane(front))
         }.write(stream)
     }
     override fun multiMeterString(side: Direction)=tr("Mains: %1$; generator: %2$; output: %3$",Utils.plotVolt("",unit.mains.voltage),Utils.plotVolt("",unit.backup.voltage),Utils.plotVolt("",unit.output.voltage))

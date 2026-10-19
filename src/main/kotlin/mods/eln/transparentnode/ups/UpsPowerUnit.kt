@@ -49,14 +49,15 @@ class UpsPowerUnit(owner: TransparentNodeElement, val bank: UpsBatteryBank) {
     val inverterOutput=SwitchableVoltageSource("upsInverterOutput").apply { connectTo(outputPin,null) }
     val thermal=NbtThermalLoad("upsThermal").apply { heatCapacity=20_000.0;Rp=.025;Rs=.1;setAsSlow() }
     private val cool get()=thermal.temperatureCelsius<90.0
+    private val chargeControl=UpsChargeControl()
+    private fun requestedChargeWatts()=min(16_000.0,(-inverterInput.power).coerceAtLeast(0.0)+bank.availableChargeWatts(stepSeconds))
     val charger=RegulatedPowerProcess(inputPin,null,chargePin,null,chargerInput,chargerOutput,
         { bank.activeCount>0 && cool && (bank.energy<bank.capacity-1e-7 || -inverterInput.power>1e-7) },
         {
             // Feed the inverter's last accepted demand, plus bounded charging headroom.
             // Load changes are absorbed by the battery for one physical step.
-            val demand=(-inverterInput.power).coerceAtLeast(0.0)
-            val charging=bank.availableChargeWatts(stepSeconds)
-            ConverterLimits(12.0,MAX_INPUT_VOLTS,50.0,100.0,500.0,min(16_000.0,demand+charging),EFFICIENCY,1.0/4096,8.0)
+            ConverterLimits(12.0,MAX_INPUT_VOLTS,50.0,100.0,500.0,
+                min(requestedChargeWatts(),chargeControl.outputBudget(chargerInput.voltage)),EFFICIENCY,1.0/4096,8.0)
         }, { 49.0 })
     val inverter=RegulatedPowerProcess(inverterPin,null,outputPin,null,inverterInput,inverterOutput,
         { enabled && cool && bank.activeCount>0 && bank.energy>1e-7 },
@@ -67,7 +68,12 @@ class UpsPowerUnit(owner: TransparentNodeElement, val bank: UpsBatteryBank) {
         }, { outputVoltage })
     /** The clock advances once per accepted physical step, never inside convergence trials. */
     val clock=object : ConservativePowerProcess {
-        override fun beginStep(seconds: Double) { if(seconds.isFinite() && seconds>0)stepSeconds=seconds }
+        override fun beginStep(seconds: Double) {
+            if(!seconds.isFinite() || seconds<=0)return
+            stepSeconds=seconds
+            val input=probePort(inputPin,null,chargerInput)
+            chargeControl.advance(seconds,input.volts,requestedChargeWatts()/EFFICIENCY,chargerInput.enabled && inputWatts>1)
+        }
         override fun rootSystemPreStepProcess() {}
         override fun acceptsCandidate()=true
         override fun failClosed() {}

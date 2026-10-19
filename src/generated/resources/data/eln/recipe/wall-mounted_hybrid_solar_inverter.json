@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "eln:hybrid_solar_inverter"
+    },
+    {
+      "item": "eln:iron_plate"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:wall-mounted_hybrid_solar_inverter"
+  }
+}

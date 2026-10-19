@@ -1636,6 +1636,16 @@ object TransparentNodeRegistration {
             UtilityStreetLightDescriptor(TR_NAME(I18N.Type.NONE,"Utility Pole Cobrahead Street Light"),mods.eln.transparentnode.utilitylight.PoleLampStyle.COBRAHEAD))
         transparentNodeItem.addDescriptor(13+(124 shl 6),
             UtilityStreetLightDescriptor(TR_NAME(I18N.Type.NONE,"Utility Pole Twin LED Street Light"),mods.eln.transparentnode.utilitylight.PoleLampStyle.TWIN_LED))
+        transparentNodeItem.addDescriptor(14+(124 shl 6),
+            mods.eln.transparentnode.standby.BackupDescriptor(TR_NAME(I18N.Type.NONE,"Wall-mounted Automatic Transfer Switch"),false,true).apply {
+                setCreativeTab(Eln.creativeTabPowerElectronics)
+            })
+        transparentNodeItem.addDescriptor(15+(124 shl 6),
+            mods.eln.transparentnode.renewable.RenewableDescriptor(TR_NAME(I18N.Type.NONE,"Wall-mounted MPPT Solar Controller"),
+                mods.eln.transparentnode.renewable.RenewableKind.MPPT,true).apply { setCreativeTab(Eln.creativeTabPowerElectronics) })
+        transparentNodeItem.addDescriptor(16+(124 shl 6),
+            mods.eln.transparentnode.renewable.RenewableDescriptor(TR_NAME(I18N.Type.NONE,"Wall-mounted Hybrid Solar Inverter"),
+                mods.eln.transparentnode.renewable.RenewableKind.HYBRID,true).apply { setCreativeTab(Eln.creativeTabPowerElectronics) })
         listOf(
             TR_NAME(I18N.Type.NONE,"MPPT Solar Controller"),
             TR_NAME(I18N.Type.NONE,"Hybrid Solar Inverter"),

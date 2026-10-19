@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "eln:automatic_transfer_switch"
+    },
+    {
+      "item": "eln:iron_plate"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:wall-mounted_automatic_transfer_switch"
+  }
+}

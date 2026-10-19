@@ -407,6 +407,9 @@ object CraftingRecipes {
         addRecipe(findItemStack("Hybrid Solar Inverter"), "PPP", "MCM", "CRC",
             'P',findItemStack("Iron Plate"),'M',findItemStack("MPPT Solar Controller"),
             'C',findItemStack("Copper Cable"),'R',ItemStack(Items.REDSTONE))
+        addShapelessRecipe(findItemStack("Wall-mounted Automatic Transfer Switch"),findItemStack("Automatic Transfer Switch"),findItemStack("Iron Plate"))
+        addShapelessRecipe(findItemStack("Wall-mounted MPPT Solar Controller"),findItemStack("MPPT Solar Controller"),findItemStack("Iron Plate"))
+        addShapelessRecipe(findItemStack("Wall-mounted Hybrid Solar Inverter"),findItemStack("Hybrid Solar Inverter"),findItemStack("Iron Plate"))
         addRecipe(findItemStack("Utility Wind Turbine 3.2kV"), " P ", "PWP", "ICI",
             'P',findItemStack("Iron Plate"),'W',findItemStack("Wind Turbine"),
             'I',ItemStack(Blocks.IRON_BLOCK),'C',findItemStack("Copper Cable"))
