@@ -1251,6 +1251,9 @@ Tungsten_Ore.name=钨矿石
 Tungsten_Turbine_Blade.name=钨涡轮叶片
 Turbine_Blade_Set.name=涡轮叶片组
 Turbo_Electrical_Drill.name=钻头(10kW,1")
+UPS_AGM_Battery_Cell.name=UPS AGM Battery Cell
+UPS_Industrial_Battery_Module.name=UPS Industrial Battery Module
+UPS_LiFePO4_Battery_Cell.name=UPS LiFePO4 Battery Cell
 White_Brush.name=刷子(白)
 Wire_Scraps.name=导线废料
 Wire_Snips.name=剪线钳
@@ -1696,10 +1699,14 @@ Voltage_controlled_amplifier.name=模拟集成电路(压控放大器)
 Voltage_controlled_sawtooth_oscillator.name=模拟集成电路(压控振荡器,锯齿)
 Voltage_controlled_sine_oscillator.name=模拟集成电路(压控振荡器,正弦)
 Wireless_Button.name=按钮(无线)
+Wireless_Paddle_Button.name=Wireless Paddle Button
+Wireless_Paddle_Switch.name=Wireless Paddle Switch
 Wireless_Signal_Receiver.name=无线信号接收器
 Wireless_Signal_Repeater.name=无线信号中继器
 Wireless_Signal_Transmitter.name=无线信号发射器
 Wireless_Switch.name=开关(无线)
+Wireless_Toggle_Button.name=Wireless Toggle Button
+Wireless_Toggle_Switch.name=Wireless Toggle Switch
 XNOR_Chip.name=数字集成电路(同或)
 XOR_Chip.name=数字集成电路(异或)
 
@@ -1797,7 +1804,9 @@ Tachometer.name=转速计
 Thermal_Heat_Exchanger.name=热交换器
 Transmission_Tower.name=T2输电塔
 Utility_Pole.name=T1电线杆
+Utility_Pole_Cobrahead_Street_Light.name=Utility Pole Cobrahead Street Light
 Utility_Pole_Street_Light.name=Utility Pole Street Light
+Utility_Pole_Twin_LED_Street_Light.name=Utility Pole Twin LED Street Light
 Utility_Pole_w/DC-DC_Converter.name=T1电线杆(变压器)
 Utility_Wind_Turbine_3.2kV.name=Utility Wind Turbine 3.2kV
 Variable_DC-DC_Converter.name=直流-直流 变压器(可调)
@@ -2026,35 +2035,65 @@ Precipitation=降水
 
 # src/main/kotlin/mods/eln/sixnode/lampsocket/DecorativeLampStyle.kt
 Adjustable_Gimbal_Recessed_Light.name=Adjustable Gimbal Recessed Light
+Armored_Oval_Bulkhead_Light.name=Armored Oval Bulkhead Light
 Articulated_Task_Table_Lamp.name=Articulated Task Table Lamp
 Basic_Chandelier.name=Basic Chandelier
 Basic_Lamp_Holder.name=Basic Lamp Holder
+Boulevard_Lantern_Street_Light.name=Boulevard Lantern Street Light
 Candle_Arm_Foyer_Chandelier.name=Candle Arm Foyer Chandelier
 Ceramic_Drum_Table_Lamp.name=Ceramic Drum Table Lamp
+Christmas_Icicle_Lights.name=Christmas Icicle Lights
+Christmas_Star_Wall_Light.name=Christmas Star Wall Light
 Crystal_Tier_Foyer_Chandelier.name=Crystal Tier Foyer Chandelier
 Deep_Baffle_Recessed_Light.name=Deep Baffle Recessed Light
 Double_Candle_Wall_Sconce.name=Double Candle Wall Sconce
 Fabric_Shade_Wall_Sconce.name=Fabric Shade Wall Sconce
+Flexible_Neon_LED_Strip.name=Flexible Neon LED Strip
 Garden_Bollard_Light.name=Garden Bollard Light
 Glass_Globe_Wall_Sconce.name=Glass Globe Wall Sconce
 Gooseneck_Barn_Light.name=Gooseneck Barn Light
+Grand_Crystal_Cascade_Chandelier.name=Grand Crystal Cascade Chandelier
+Grand_Empire_Chandelier.name=Grand Empire Chandelier
+Grand_Halo_Ring_Chandelier.name=Grand Halo Ring Chandelier
 Green_Banker_Table_Lamp.name=Green Banker Table Lamp
+Halloween_Bat_Wall_Light.name=Halloween Bat Wall Light
+Halloween_Ghost_String_Lights.name=Halloween Ghost String Lights
+Halloween_Pumpkin_String_Lights.name=Halloween Pumpkin String Lights
+Heavy_Duty_Stadium_Wall_Floodlight.name=Heavy Duty Stadium Wall Floodlight
 Household_Desk_Lamp.name=Household Desk Lamp
+Indirect_Cove_LED_Strip.name=Indirect Cove LED Strip
 Industrial_Cage_Wall_Sconce.name=Industrial Cage Wall Sconce
+Industrial_Wall_Pack_Light.name=Industrial Wall Pack Light
+Industrial_Yard_Area_Light.name=Industrial Yard Area Light
+Jack_O_Lantern_Table_Lamp.name=Jack O Lantern Table Lamp
 Lantern_Cage_Foyer_Chandelier.name=Lantern Cage Foyer Chandelier
 Mini_Dot_Spotlight.name=Mini Dot Spotlight
+Modern_LED_Street_Light.name=Modern LED Street Light
 Modern_Sputnik_Foyer_Chandelier.name=Modern Sputnik Foyer Chandelier
+Multicolor_Christmas_String_Lights.name=Multicolor Christmas String Lights
+Offshore_Caged_Wellglass_Light.name=Offshore Caged Wellglass Light
+Offshore_Platform_Floodlight.name=Offshore Platform Floodlight
+Offshore_Sealed_Linear_Light.name=Offshore Sealed Linear Light
 Outdoor_Motion_Floodlight.name=Outdoor Motion Floodlight
 Porch_Lantern_Sconce.name=Porch Lantern Sconce
+Recessed_LED_Channel.name=Recessed LED Channel
 Round_Recessed_Ceiling_Light.name=Round Recessed Ceiling Light
+Rugged_Outdoor_Canopy_Light.name=Rugged Outdoor Canopy Light
+Sculptural_Branch_Chandelier.name=Sculptural Branch Chandelier
+Spiral_Rain_Chandelier.name=Spiral Rain Chandelier
+Standing_Drum_Floor_Lamp.name=Standing Drum Floor Lamp
+Surface_Linear_LED_Strip.name=Surface Linear LED Strip
 Suspended_Factory_Fluorescent_Light.name=Suspended Factory Fluorescent Light
 Thin_Fluorescent_Shop_Light.name=Thin Fluorescent Shop Light
 Traditional_Lantern_Post_Light.name=Traditional Lantern Post Light
 Trimless_Recessed_Downlight.name=Trimless Recessed Downlight
 Twin_Parking_Lot_Light.name=Twin Parking Lot Light
+Under_Cabinet_LED_Strip.name=Under Cabinet LED Strip
 Up_Down_Cylinder_Wall_Sconce.name=Up Down Cylinder Wall Sconce
 Wagon_Wheel_Foyer_Chandelier.name=Wagon Wheel Foyer Chandelier
 Warehouse_Wall_Floodlight.name=Warehouse Wall Floodlight
+Warm_White_Christmas_Fairy_Lights.name=Warm White Christmas Fairy Lights
+Window_Candle_Light.name=Window Candle Light
 
 # src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketDescriptor.kt
 Angle\:_%1$°_to_%2$°=角度: %1$° 到 %2$°
@@ -2129,6 +2168,10 @@ Set_min/max_values_in_GUI\nto_map_temperature_to_output.=在GUI中设置最小/�
 Biome_temperature=生物群系温度
 
 # src/main/kotlin/mods/eln/sixnode/thermometersensor/ThermometerSensorGui.kt
+
+# src/main/kotlin/mods/eln/sixnode/wirelesssignal/WallWirelessControl.kt
+Pairs_with_the_existing_Wireless_Signal_Receiver;_connect_its_output_to_a_Lamp_Supply_control=Pairs with the existing Wireless Signal Receiver; connect its output to a Lamp Supply control
+Right-click_to_operate;_use_a_wrench_to_configure_the_wireless_channel=Right-click to operate; use a wrench to configure the wireless channel
 
 # src/main/kotlin/mods/eln/transparentnode/DcDc.kt
 This_DC/DC_has_unrealistic_capacitance_effects_and_can_sink/source_power_that_violates_Newton's_laws=此变压器有不真实的电容效应，可以吸收/输出违反牛顿定律的功率
@@ -2549,13 +2592,13 @@ Output_off=Output off
 Output_power_limited=Output power limited
 Output_protection;_retrying=Output protection; retrying
 Output_voltage\:_1_to_3200_V=Output voltage: 1 to 3200 V
-Portable_Battery_or_Portable_Battery_Pack=Portable Battery or Portable Battery Pack
+Portable_battery_or_larger_UPS_cell=Portable battery or larger UPS cell
 Programmable_UPS=Programmable UPS
 Rack_%1$/2_-_click_to_switch=Rack %1$/2 - click to switch
 Set_V=Set V
 
 # src/main/kotlin/mods/eln/transparentnode/ups/UpsDescriptor.kt
-Accepts_Portable_Battery_and_Portable_Battery_Pack=Accepts Portable Battery and Portable Battery Pack
+Accepts_portable_batteries_and_AGM,_LiFePO4_or_industrial_UPS_cells=Accepts portable batteries and AGM, LiFePO4 or industrial UPS cells
 Batteries_retain_their_charge_when_removed=Batteries retain their charge when removed
 Blue_terminal\:_input;_orange_terminal\:_output=Blue terminal: input; orange terminal: output
 Install_one_or_two_complete_racks_of_24_portable_batteries=Install one or two complete racks of 24 portable batteries
@@ -2566,6 +2609,11 @@ Programmable_output\:_1_to_3200_V;_up_to_10000_W=Programmable output: 1 to 3200 
 Installed_batteries=Installed batteries
 Stored_energy=Stored energy
 UPS_status=UPS status
+
+# src/main/kotlin/mods/eln/transparentnode/ups/UpsLargeCell.kt
+Crafted_empty;_charge_before_use=Crafted empty; charge before use
+Rated_capacity\:_%1$_kWh=Rated capacity: %1$ kWh
+UPS_rack_compatible;_larger_capacity_does_not_raise_the_UPS_output_rating=UPS rack compatible; larger capacity does not raise the UPS output rating
 
 # src/main/kotlin/mods/eln/transparentnode/utilitylight/MainsStepDown.kt
 

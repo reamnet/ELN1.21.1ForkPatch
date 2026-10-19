@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_modern_led_street_light": {
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:modern_led_street_light"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "eln:utility_pole_twin_led_street_light"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_modern_led_street_light"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "eln:utility_pole_twin_led_street_light"
+    ]
+  }
+}

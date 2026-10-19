@@ -41,9 +41,12 @@ class DecorativeLampObjRender(val style: DecorativeLampStyle) : ILampSocketObjRe
                 DecorativeLampStyle.SHOP, DecorativeLampStyle.FACTORY -> GL11.glColor3f(.75f,.77f,.78f)
                 else -> GL11.glColor3f(.26f,.29f,.32f)
             }
+            if(style.luxury)GL11.glColor3f(.77f,.58f,.28f)
+            if(style == DecorativeLampStyle.RIG_CAGE || style == DecorativeLampStyle.RIG_LINEAR || style == DecorativeLampStyle.RIG_FLOOD)GL11.glColor3f(.82f,.64f,.12f)
             model.getPart("Metal")?.drawNoBind()
             GL11.glColor3f(.65f,.68f,.71f); model.getPart("Trim")?.drawNoBind()
             if(style == DecorativeLampStyle.TABLE_BANKER) GL11.glColor3f(.08f,.38f,.20f)
+            else if(style == DecorativeLampStyle.HALLOWEEN_GHOST) GL11.glColor3f(.93f,.94f,.96f)
             else GL11.glColor3f(.88f,.79f,.62f)
             model.getPart("Shade")?.let {
                 GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
@@ -51,6 +54,7 @@ class DecorativeLampObjRender(val style: DecorativeLampStyle) : ILampSocketObjRe
                 it.drawNoBind()
                 GL11.glPopAttrib()
             }
+            GL11.glColor3f(.92f,.35f,.035f);model.getPart("Accent")?.drawNoBind()
             for (i in 0 until style.bulbs) {
                 val installed = i < count
                 if (!installed && style.exposedBulbs) continue
@@ -60,6 +64,17 @@ class DecorativeLampObjRender(val style: DecorativeLampStyle) : ILampSocketObjRe
                         "led", "fluorescent" -> GL11.glColor3f(.90f,.96f,1f)
                         "farming" -> GL11.glColor3f(1f,.78f,.92f)
                         else -> GL11.glColor3f(1f,.90f,.65f)
+                    }
+                    when(style) {
+                        DecorativeLampStyle.CHRISTMAS_FAIRY -> GL11.glColor3f(1f,.76f,.35f)
+                        DecorativeLampStyle.CHRISTMAS_COLOR -> when(i%4) {
+                            0->GL11.glColor3f(1f,.10f,.05f);1->GL11.glColor3f(.12f,1f,.20f);2->GL11.glColor3f(.15f,.35f,1f);else->GL11.glColor3f(1f,.72f,.08f)
+                        }
+                        DecorativeLampStyle.CHRISTMAS_ICICLE,DecorativeLampStyle.HALLOWEEN_GHOST -> GL11.glColor3f(.65f,.80f,1f)
+                        DecorativeLampStyle.CHRISTMAS_STAR -> GL11.glColor3f(1f,.80f,.20f)
+                        DecorativeLampStyle.HALLOWEEN_PUMPKIN,DecorativeLampStyle.HALLOWEEN_JACK -> GL11.glColor3f(1f,.40f,.035f)
+                        DecorativeLampStyle.HALLOWEEN_BAT -> GL11.glColor3f(.68f,.15f,1f)
+                        else -> Unit
                     }
                     model.getPart("Light$i")?.drawNoBind()
                     UtilsClient.enableLight()

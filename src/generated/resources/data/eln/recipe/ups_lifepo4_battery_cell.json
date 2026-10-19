@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "eln:ups_agm_battery_cell"
+    },
+    "C": {
+      "item": "eln:copper_ingot"
+    },
+    "G": {
+      "item": "minecraft:gold_ingot"
+    }
+  },
+  "pattern": [
+    "CCC",
+    "GBG",
+    "CCC"
+  ],
+  "result": {
+    "components": {
+      "minecraft:custom_data": {
+        "energy": 0.0
+      }
+    },
+    "count": 1,
+    "id": "eln:ups_lifepo4_battery_cell"
+  }
+}

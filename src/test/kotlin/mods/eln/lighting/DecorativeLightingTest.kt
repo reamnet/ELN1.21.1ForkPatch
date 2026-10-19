@@ -19,7 +19,7 @@ class DecorativeLightingTest {
     private fun element(d: LampSocketDescriptor) = LampSocketElement(SixNode().apply { coordinate = Coordinate(0,64,0,0) },Direction.YN,d)
 
     @Test fun allFixtureIdentitiesAcceptEveryRegisteredBulbWithoutChangingOldFixtures() {
-        assertEquals(30,fixtures.size)
+        assertEquals(DecorativeLampStyle.entries.size,fixtures.size)
         val savedFixtures = listOf("Twin Parking Lot Light","Warehouse Wall Floodlight","Household Desk Lamp",
             "Round Recessed Ceiling Light","Basic Chandelier")
         savedFixtures.forEachIndexed { index,name ->
@@ -27,8 +27,7 @@ class DecorativeLightingTest {
         }
         assertEquals(LampLists.lampTechnologyList.map { it.lampType }.toSet(),bulbs.map { it.lampData.technology.lampType }.toSet())
         for (fixture in fixtures) {
-            val index = DecorativeLampStyle.entries.indexOf(fixture.fixture)
-            assertEquals(fixture,Eln.sixNodeItem.subItemList[(64 shl 6)+20+index])
+            assertEquals(fixture,Eln.sixNodeItem.subItemList[mods.eln.registration.DecorativeLightRegistration.idFor(fixture.fixture!!)])
             val slot = LampItemSlot(SimpleContainer(2),0,0,0,fixture.bulbCapacity,fixture.acceptedLampTypes)
             assertEquals(fixture.fixture!!.bulbs,slot.maxStackSize)
             for (bulb in bulbs) assertTrue(slot.mayPlace(bulb.newItemStack()),"${fixture.name}: ${bulb.name}")

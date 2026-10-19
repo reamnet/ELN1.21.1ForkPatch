@@ -68,6 +68,7 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
     val installed get() = isStepDownUnit(inventory.getItem(0))
     internal val lamp = Resistor(unit.secondary, null)
     private var darkOutside = false
+    private val fixture get() = transparentNodeDescriptor as UtilityStreetLightDescriptor
     private val lampRequested get() = installed && unit.enabled && unit.lampEnabled && (!unit.lampAutomatic || darkOutside)
     var lightLevel = 0
         private set
@@ -78,7 +79,7 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
         configureLamp()
     }
     private fun configureLamp() {
-        lamp.resistance = if (lampRequested) unit.outputVoltage.toDouble().let { it * it / 60.0 } else 1e19
+        lamp.resistance = if (lampRequested) unit.outputVoltage.toDouble().let { it * it / fixture.lampWatts } else 1e19
     }
     internal fun updateAmbientDarkness(darkness: Int) {
         // Global sky darkness includes dusk and weather, but never this lamp's own light.
@@ -88,14 +89,17 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
     private fun updateLight() {
         val world = node!!.coordinate.world() as? ServerLevel ?: return
         updateAmbientDarkness(if (world.dimensionType().hasSkyLight()) world.skyDarken else 15)
-        val next = if (lampRequested) (15.0 * (lamp.power / 60.0).coerceIn(0.0, 1.0)).toInt() else 0
+        val next = if (lampRequested) (15.0 * (lamp.power / fixture.lampWatts).coerceIn(0.0, 1.0)).toInt() else 0
         if (next != lightLevel) { lightLevel = next; needPublish() }
         if (lightLevel > 0) {
             // Light comes from the head, and must not load a remote chunk merely to refresh it.
-            val offset = StreetLightMount.lightOffset(front, unit.lampHeightStep, unit.lampYaw)
-            val at = node!!.coordinate.newWithOffset(offset.x, offset.y, offset.z)
-            if (world.chunkSource.getChunkNow(at.x shr 4, at.z shr 4) != null)
-                LightBlockEntity.addLight(at, lightLevel, 5)
+            for(head in fixture.heads) {
+                val position=front.rotateFromXN(head.add(0.0,StreetLightMount.offset(unit.lampHeightStep),0.0).yRot(Math.toRadians(unit.lampYaw.toDouble()).toFloat()))
+                val offset=net.minecraft.core.BlockPos.containing(position.x+.5,position.y,position.z+.5)
+                val at = node!!.coordinate.newWithOffset(offset.x, offset.y, offset.z)
+                if (world.chunkSource.getChunkNow(at.x shr 4, at.z shr 4) != null)
+                    LightBlockEntity.addLight(at, lightLevel, 5)
+            }
         }
     }
     override fun connectJob() { super.connectJob(); Eln.simulator.mna.addProcess(unit.controller) }

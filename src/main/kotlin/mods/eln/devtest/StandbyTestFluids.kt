@@ -25,7 +25,7 @@ object StandbyTestFluids {
     private val fluids=mutableMapOf<ResourceLocation,Fluid>()
     private val buckets=mutableMapOf<ResourceLocation,Item>()
     @SubscribeEvent fun register(event: RegisterEvent) {
-        if(!java.lang.Boolean.getBoolean("eln.standbyChecks") && System.getProperty("fml.junit.argsfile")==null)return
+        if(!java.lang.Boolean.getBoolean("eln.standbyChecks") && !java.lang.Boolean.getBoolean("eln.lightingExpansionChecks") && System.getProperty("fml.junit.argsfile")==null)return
         when(event.registryKey) {
             NeoForgeRegistries.Keys.FLUID_TYPES -> event.register(NeoForgeRegistries.Keys.FLUID_TYPES) { h ->
                 type=FluidType(FluidType.Properties.create().density(750).viscosity(1000));h.register(ResourceLocation.parse("eln_test_a:motor_fuel"),type)

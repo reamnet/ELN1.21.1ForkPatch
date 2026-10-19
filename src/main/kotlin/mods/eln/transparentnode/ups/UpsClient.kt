@@ -31,7 +31,7 @@ fun upsStatusText(status: String)=when(status) {
 class UpsContainer(player: Player, inventory: Container, private val pageState: IntArray=intArrayOf(0)) :
     BasicContainer(player,inventory,Array<net.minecraft.world.inventory.Slot>(48) { i ->
         object : SlotWithSkinAndComment(inventory,i,16+(i%8)*18,141+(i%24/8)*18,
-            ISlotSkin.SlotSkin.medium,arrayOf(tr("Portable Battery or Portable Battery Pack"))) {
+            ISlotSkin.SlotSkin.medium,arrayOf(tr("Portable battery or larger UPS cell"))) {
             override fun mayPlace(stack: ItemStack)=upsBattery(stack)!=null
             override fun getMaxStackSize()=1
             override fun isActive()=i/24==pageState[0]

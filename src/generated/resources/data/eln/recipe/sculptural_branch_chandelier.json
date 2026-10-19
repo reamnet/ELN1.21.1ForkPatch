@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": {
+      "item": "minecraft:copper_ingot"
+    },
+    "L": {
+      "item": "eln:modern_sputnik_foyer_chandelier"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    " D ",
+    "DLD",
+    " P "
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:sculptural_branch_chandelier"
+  }
+}

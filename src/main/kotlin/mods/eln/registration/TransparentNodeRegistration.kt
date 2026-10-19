@@ -1632,6 +1632,10 @@ object TransparentNodeRegistration {
             mods.eln.transparentnode.standby.BackupDescriptor(TR_NAME(I18N.Type.NONE,"Standby Gasoline Generator"),true).apply {
                 setCreativeTab(Eln.creativeTabMachines)
             })
+        transparentNodeItem.addDescriptor(12+(124 shl 6),
+            UtilityStreetLightDescriptor(TR_NAME(I18N.Type.NONE,"Utility Pole Cobrahead Street Light"),mods.eln.transparentnode.utilitylight.PoleLampStyle.COBRAHEAD))
+        transparentNodeItem.addDescriptor(13+(124 shl 6),
+            UtilityStreetLightDescriptor(TR_NAME(I18N.Type.NONE,"Utility Pole Twin LED Street Light"),mods.eln.transparentnode.utilitylight.PoleLampStyle.TWIN_LED))
         listOf(
             TR_NAME(I18N.Type.NONE,"MPPT Solar Controller"),
             TR_NAME(I18N.Type.NONE,"Hybrid Solar Inverter"),

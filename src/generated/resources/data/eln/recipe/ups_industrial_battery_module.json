@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "eln:ups_lifepo4_battery_cell"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    "PPP",
+    "BBB",
+    "PPP"
+  ],
+  "result": {
+    "components": {
+      "minecraft:custom_data": {
+        "energy": 0.0
+      }
+    },
+    "count": 1,
+    "id": "eln:ups_industrial_battery_module"
+  }
+}

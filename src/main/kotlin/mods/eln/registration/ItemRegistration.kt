@@ -1386,6 +1386,14 @@ object ItemRegistration {
             Eln.sharedItemStackOne.addElement(subId + (id shl 6), desc)
         }
 
+        listOf(
+            I18N.TR_NAME(I18N.Type.NONE,"UPS AGM Battery Cell"),
+            I18N.TR_NAME(I18N.Type.NONE,"UPS LiFePO4 Battery Cell"),
+            I18N.TR_NAME(I18N.Type.NONE,"UPS Industrial Battery Module")
+        ).forEachIndexed { index,cellName ->
+            Eln.sharedItemStackOne.addElement(2+index+(id shl 6),mods.eln.transparentnode.ups.UpsLargeCell(cellName,index))
+        }
+
         run {
             subId = 16
             name = I18N.TR_NAME(I18N.Type.NONE, "Portable Condensator")

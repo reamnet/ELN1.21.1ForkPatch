@@ -2076,6 +2076,15 @@ object SixNodeRegistration {
     }
 
     private fun registerElectricalGateSource(id: Int) {
+        listOf(
+            I18N.TR_NAME(I18N.Type.NONE,"Wireless Paddle Switch"),
+            I18N.TR_NAME(I18N.Type.NONE,"Wireless Toggle Switch"),
+            I18N.TR_NAME(I18N.Type.NONE,"Wireless Paddle Button"),
+            I18N.TR_NAME(I18N.Type.NONE,"Wireless Toggle Button")
+        ).forEachIndexed { index,name ->
+            Eln.sixNodeItem.addDescriptor(20+index+(id shl 6),mods.eln.sixnode.wirelesssignal.WallWirelessDescriptor(name,index%2==0,index>=2))
+        }
+
         var subId: Int
         var name: String?
 

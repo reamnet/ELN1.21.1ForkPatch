@@ -69,20 +69,84 @@ enum class DecorativeLampStyle(val model: String, val itemName: String, val bulb
     OUTDOOR_BARN("gooseneckbarnlight", I18N.TR_NAME(I18N.Type.NONE, "Gooseneck Barn Light"), 1, .96, 7,
         listOf(Vec3(.63,-.04,0.0)),Vec3(.3,-1.0,0.0)),
     OUTDOOR_POST("traditionallanternpost", I18N.TR_NAME(I18N.Type.NONE, "Traditional Lantern Post Light"), 1, 2.6, 0,
-        listOf(Vec3(2.06,0.0,0.0)),Vec3(1.0,0.0,0.0));
+        listOf(Vec3(2.06,0.0,0.0)),Vec3(1.0,0.0,0.0)),
+    WINDOW_CANDLE("windowcandlelamp", I18N.TR_NAME(I18N.Type.NONE, "Window Candle Light"), 1, .52, 0,
+        listOf(Vec3(.39,0.0,0.0)),Vec3(1.0,0.0,0.0)),
+    FLOOR_DRUM("standingdrumfloorlamp", I18N.TR_NAME(I18N.Type.NONE, "Standing Drum Floor Lamp"), 1, 2.0, 0,
+        listOf(Vec3(1.66,0.0,0.0)),Vec3(1.0,0.0,0.0)),
+    STRIP_CABINET("undercabinetledstrip", I18N.TR_NAME(I18N.Type.NONE, "Under Cabinet LED Strip"), 2, 1.0, 2,
+        listOf(Vec3(.045,0.0,-.23),Vec3(.045,0.0,.23)),Vec3(1.0,0.0,0.0)),
+    STRIP_RECESSED("recessedledchannel", I18N.TR_NAME(I18N.Type.NONE, "Recessed LED Channel"), 2, 1.0, 3,
+        listOf(Vec3(.025,0.0,-.23),Vec3(.025,0.0,.23)),Vec3(1.0,0.0,0.0)),
+    STRIP_COVE("coveledstrip", I18N.TR_NAME(I18N.Type.NONE, "Indirect Cove LED Strip"), 2, 1.0, 3,
+        listOf(Vec3(.08,.14,-.23),Vec3(.08,.14,.23)),Vec3(.4,1.0,0.0)),
+    STRIP_SURFACE("surfacelinearledstrip", I18N.TR_NAME(I18N.Type.NONE, "Surface Linear LED Strip"), 4, 2.0, 4,
+        (0..3).map { Vec3(.075,0.0,-.72+it*.48) },Vec3(1.0,0.0,0.0)),
+    STRIP_NEON("flexneonledstrip", I18N.TR_NAME(I18N.Type.NONE, "Flexible Neon LED Strip"), 3, 1.0, 1,
+        (0..2).map { Vec3(.06,.12*cos(it*PI/2),-.32+it*.32) },Vec3(1.0,0.0,0.0)),
+    LUXURY_RINGS("grandhalochandelier", I18N.TR_NAME(I18N.Type.NONE, "Grand Halo Ring Chandelier"), 16, 4.2, 2,
+        (0..15).map { Vec3(1.8+(it/8)*1.25,(if(it<8)1.9 else 1.2)*cos(it*PI/4),(if(it<8)1.9 else 1.2)*sin(it*PI/4)) },Vec3(1.0,0.0,0.0)),
+    LUXURY_CASCADE("crystalcascadechandelier", I18N.TR_NAME(I18N.Type.NONE, "Grand Crystal Cascade Chandelier"), 20, 5.0, 2,
+        (0..19).map { Vec3(1.6+(it%5)*.65,(1.8-(it%5)*.22)*cos(it*PI/2),(1.8-(it%5)*.22)*sin(it*PI/2)) },Vec3(1.0,0.0,0.0)),
+    LUXURY_BRANCH("sculpturalbranchchandelier", I18N.TR_NAME(I18N.Type.NONE, "Sculptural Branch Chandelier"), 18, 3.8, 2,
+        (0..17).map { Vec3(2.0+(it%3)*.45,(.75+(it%3)*.65)*cos(it*PI/3),(.75+(it%3)*.65)*sin(it*PI/3)) },Vec3(1.0,0.0,0.0)),
+    LUXURY_SPIRAL("spiralrainchandelier", I18N.TR_NAME(I18N.Type.NONE, "Spiral Rain Chandelier"), 20, 5.5, 2,
+        (0..19).map { Vec3(1.6+it*.18,1.7*cos(it*PI/5),1.7*sin(it*PI/5)) },Vec3(1.0,0.0,0.0)),
+    LUXURY_EMPIRE("grandempirechandelier", I18N.TR_NAME(I18N.Type.NONE, "Grand Empire Chandelier"), 16, 4.8, 2,
+        (0..15).map { Vec3(if(it<8)1.8 else 3.0,(if(it<8)1.9 else 1.2)*cos(it*PI/4),(if(it<8)1.9 else 1.2)*sin(it*PI/4)) },Vec3(1.0,0.0,0.0)),
+    HEAVY_FLOOD("stadiumwallfloodlight", I18N.TR_NAME(I18N.Type.NONE, "Heavy Duty Stadium Wall Floodlight"), 4, 1.2, 14,
+        (0..3).map { Vec3(.62,-.15+(it/2)*.3,-.3+(it%2)*.6) },Vec3(.94,-.34,0.0)),
+    HEAVY_BULKHEAD("armoredbulkheadlight", I18N.TR_NAME(I18N.Type.NONE, "Armored Oval Bulkhead Light"), 1, .55, 3,
+        listOf(Vec3(.22,0.0,0.0)),Vec3(1.0,0.0,0.0)),
+    HEAVY_WALLPACK("industrialwallpacklight", I18N.TR_NAME(I18N.Type.NONE, "Industrial Wall Pack Light"), 2, .8, 8,
+        listOf(Vec3(.36,-.14,-.18),Vec3(.36,-.14,.18)),Vec3(.6,-.8,0.0)),
+    HEAVY_CANOPY("ruggedcanopylight", I18N.TR_NAME(I18N.Type.NONE, "Rugged Outdoor Canopy Light"), 4, 1.0, 6,
+        (0..3).map { Vec3(.17,-.2+(it/2)*.4,-.2+(it%2)*.4) },Vec3(1.0,0.0,0.0)),
+    HEAVY_YARD("industrialyardlight", I18N.TR_NAME(I18N.Type.NONE, "Industrial Yard Area Light"), 2, 1.4, 12,
+        listOf(Vec3(.85,.1,-.22),Vec3(.85,.1,.22)),Vec3(.5,-.86,0.0)),
+    RIG_CAGE("offshorecagedwellglass", I18N.TR_NAME(I18N.Type.NONE, "Offshore Caged Wellglass Light"), 1, 1.1, 4,
+        listOf(Vec3(.64,0.0,0.0)),Vec3(1.0,0.0,0.0)),
+    RIG_LINEAR("offshoresealedlinearlight", I18N.TR_NAME(I18N.Type.NONE, "Offshore Sealed Linear Light"), 2, 2.0, 5,
+        listOf(Vec3(.20,0.0,-.45),Vec3(.20,0.0,.45)),Vec3(1.0,0.0,0.0)),
+    RIG_FLOOD("offshoreplatformfloodlight", I18N.TR_NAME(I18N.Type.NONE, "Offshore Platform Floodlight"), 2, 1.2, 16,
+        listOf(Vec3(.63,.0,-.28),Vec3(.63,.0,.28)),Vec3(.94,-.34,0.0)),
+    STREET_LED("modernledstreetlight", I18N.TR_NAME(I18N.Type.NONE, "Modern LED Street Light"), 1, 5.8, 10,
+        listOf(Vec3(5.35,-1.05,0.0)),Vec3(-1.0,0.0,0.0)),
+    STREET_BOULEVARD("boulevardlanternstreetlight", I18N.TR_NAME(I18N.Type.NONE, "Boulevard Lantern Street Light"), 2, 5.4, 4,
+        listOf(Vec3(4.8,-.72,0.0),Vec3(4.8,.72,0.0)),Vec3(-1.0,0.0,0.0)),
+    CHRISTMAS_FAIRY("christmasfairylights", I18N.TR_NAME(I18N.Type.NONE, "Warm White Christmas Fairy Lights"), 6, 2.0, 0,
+        (0..5).map { Vec3(.08,-.07,-.80+it*.32) },Vec3(1.0,0.0,0.0)),
+    CHRISTMAS_COLOR("multicolorchristmaslights", I18N.TR_NAME(I18N.Type.NONE, "Multicolor Christmas String Lights"), 6, 2.0, 0,
+        (0..5).map { Vec3(.08,-.07,-.80+it*.32) },Vec3(1.0,0.0,0.0)),
+    CHRISTMAS_ICICLE("christmasiciclelights", I18N.TR_NAME(I18N.Type.NONE, "Christmas Icicle Lights"), 6, 2.0, 0,
+        (0..5).map { Vec3(.08,-.12-(it%3)*.12,-.80+it*.32) },Vec3(1.0,0.0,0.0)),
+    CHRISTMAS_STAR("christmasstarlight", I18N.TR_NAME(I18N.Type.NONE, "Christmas Star Wall Light"), 1, 1.0, 0,
+        listOf(Vec3(.06,0.0,0.0)),Vec3(1.0,0.0,0.0)),
+    HALLOWEEN_PUMPKIN("halloweenpumpkinstring", I18N.TR_NAME(I18N.Type.NONE, "Halloween Pumpkin String Lights"), 4, 2.0, 0,
+        (0..3).map { Vec3(.10,-.12,-.72+it*.48) },Vec3(1.0,0.0,0.0)),
+    HALLOWEEN_GHOST("halloweenghoststring", I18N.TR_NAME(I18N.Type.NONE, "Halloween Ghost String Lights"), 4, 2.0, 0,
+        (0..3).map { Vec3(.10,-.12,-.72+it*.48) },Vec3(1.0,0.0,0.0)),
+    HALLOWEEN_BAT("halloweenbatlight", I18N.TR_NAME(I18N.Type.NONE, "Halloween Bat Wall Light"), 1, 1.0, 0,
+        listOf(Vec3(.07,0.0,0.0)),Vec3(1.0,0.0,0.0)),
+    HALLOWEEN_JACK("jackolanternlamp", I18N.TR_NAME(I18N.Type.NONE, "Jack O Lantern Table Lamp"), 1, .8, 0,
+        listOf(Vec3(.42,0.0,0.0)),Vec3(1.0,0.0,0.0));
 
-    val tableLamp get() = this == DESK || this == TABLE_DRUM || this == TABLE_BANKER || this == TABLE_TASK
+    val tableLamp get() = this == DESK || this == TABLE_DRUM || this == TABLE_BANKER || this == TABLE_TASK || this == WINDOW_CANDLE || this == HALLOWEEN_JACK
     val wallLamp get() = when(this) {
-        WAREHOUSE,PORCH,MOTION,SCONCE_CYLINDER,SCONCE_FABRIC,SCONCE_GLOBE,SCONCE_CAGE,SCONCE_CANDLE,OUTDOOR_BARN -> true
+        CHRISTMAS_FAIRY,CHRISTMAS_COLOR,CHRISTMAS_ICICLE,CHRISTMAS_STAR,HALLOWEEN_PUMPKIN,HALLOWEEN_GHOST,HALLOWEEN_BAT,HEAVY_FLOOD,HEAVY_BULKHEAD,HEAVY_WALLPACK,HEAVY_YARD,RIG_FLOOD,WAREHOUSE,PORCH,MOTION,SCONCE_CYLINDER,SCONCE_FABRIC,SCONCE_GLOBE,SCONCE_CAGE,SCONCE_CANDLE,OUTDOOR_BARN -> true
         else -> false
     }
     val foyer get() = when(this) {
         CANDLE, CRYSTAL, WAGON, LANTERN, SPUTNIK -> true
         else -> false
     }
-    val ceiling get() = this == RECESSED || this == CHANDELIER || this == SHOP || this == FACTORY || foyer || this == POT_BAFFLE || this == POT_TRIMLESS || this == POT_GIMBAL
-    val uprightItem get() = this == PARKING || tableLamp || this == OUTDOOR_BOLLARD || this == OUTDOOR_POST || ceiling
-    val exposedBulbs get() = foyer || tableLamp || this == SCONCE_CANDLE || this == SCONCE_CAGE || this == SCONCE_GLOBE || this == OUTDOOR_POST || this == DESK || this == CHANDELIER || this == PORCH || this == HOLDER
+    val luxury get() = this in LUXURY_RINGS..LUXURY_EMPIRE
+    val seasonalString get() = this == CHRISTMAS_FAIRY || this == CHRISTMAS_COLOR || this == CHRISTMAS_ICICLE || this == HALLOWEEN_PUMPKIN || this == HALLOWEEN_GHOST
+    val strip get() = this in STRIP_CABINET..STRIP_NEON
+    val street get() = this == STREET_LED || this == STREET_BOULEVARD
+    val ceiling get() = luxury || this == HEAVY_CANOPY || this == RIG_CAGE || this == RIG_LINEAR || this == STRIP_RECESSED || this == RECESSED || this == CHANDELIER || this == SHOP || this == FACTORY || foyer || this == POT_BAFFLE || this == POT_TRIMLESS || this == POT_GIMBAL
+    val uprightItem get() = this == FLOOR_DRUM || street || this == PARKING || tableLamp || this == OUTDOOR_BOLLARD || this == OUTDOOR_POST || ceiling
+    val exposedBulbs get() = luxury || this == FLOOR_DRUM || this == WINDOW_CANDLE || this == HALLOWEEN_JACK || this == STREET_BOULEVARD || foyer || tableLamp || this == SCONCE_CANDLE || this == SCONCE_CAGE || this == SCONCE_GLOBE || this == OUTDOOR_POST || this == DESK || this == CHANDELIER || this == PORCH || this == HOLDER
 
     fun localFacing(v: Vec3, front: LRDU) = front.rotateOnXnLeft(v.xRot((-PI/2).toFloat()))
     fun worldPoint(origin: Vec3, side: Direction, front: LRDU, local: Vec3): Vec3 =

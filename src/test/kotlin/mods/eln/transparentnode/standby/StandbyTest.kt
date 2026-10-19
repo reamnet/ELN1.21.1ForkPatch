@@ -61,6 +61,23 @@ class StandbyTest {
         assertEquals(TransferFeed.MAINS,c.a.unit.control.selected);assertFalse(c.g.unit.running)
         assertEquals(0.0,c.a.unit.backupContact.current);assertTrue(c.load.power>990)
     }
+    @Test fun contactSoundsFollowPhysicalTransfersOnceAndUnloadingIsSilent() {
+        val sounds=mutableListOf<Boolean>()
+        val unit=AtsUnit(ats()) { sounds+=it }
+        unit.mains.state=240.0;unit.backup.state=240.0
+        repeat(30) { unit.tick(.05) };assertEquals(listOf(true),sounds)
+        repeat(100) { unit.tick(.05) };assertEquals(listOf(true),sounds)
+        unit.mains.state=0.0;repeat(50) { unit.tick(.05) }
+        assertEquals(TransferFeed.GENERATOR,unit.control.selected)
+        assertEquals(listOf(true,false,true),sounds)
+        unit.mains.state=240.0;repeat(120) { unit.tick(.05) }
+        assertEquals(TransferFeed.MAINS,unit.control.selected)
+        assertEquals(listOf(true,false,true,false,true),sounds)
+        unit.reset(false);assertEquals(5,sounds.size)
+        repeat(30) { unit.tick(.05) };assertEquals(6,sounds.size)
+        unit.setEnabled(false);assertEquals(false,sounds.last())
+        repeat(30) { unit.tick(.05) };assertEquals(7,sounds.size)
+    }
     @Test fun everyTransferIncludesAnOpenIntervalAndVoltageDipsDoNotChatter() {
         val control=TransferControl();repeat(8) { control.step(.05,240.0,240.0,240.0) }
         assertEquals(TransferFeed.MAINS,control.selected)

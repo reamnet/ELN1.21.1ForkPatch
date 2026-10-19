@@ -25,7 +25,7 @@ import kotlin.test.assertTrue
 class GridCableCompatibilityTest {
     private val expectedDevices = setOf("Grid DC-DC Converter", "Utility Pole",
         "Utility Pole w/DC-DC Converter", "Transmission Tower", "Direct Utility Pole", "Grid Switch",
-        "Utility Pole Street Light")
+        "Utility Pole Street Light", "Utility Pole Cobrahead Street Light", "Utility Pole Twin LED Street Light")
 
     private fun devices(): List<GridDescriptor> = Eln.transparentNodeItem.subItemList.values
         .filterIsInstance<GridDescriptor>().distinct().also {

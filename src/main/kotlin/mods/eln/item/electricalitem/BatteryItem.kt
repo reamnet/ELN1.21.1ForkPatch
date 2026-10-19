@@ -15,7 +15,7 @@ import mods.eln.client.itemrender.IItemRenderer.ItemRenderType
 import mods.eln.client.itemrender.IItemRenderer.ItemRendererHelper
 import mods.eln.misc.isNothing
 
-class BatteryItem(name: String, var energyStorage: Double, var chargePower: Double, var dischargePower: Double, private val priority: Int) : GenericItemUsingDamageDescriptor(name), IItemEnergyBattery {
+open class BatteryItem(name: String, var energyStorage: Double, var chargePower: Double, var dischargePower: Double, private val priority: Int) : GenericItemUsingDamageDescriptor(name), IItemEnergyBattery {
 
     override fun setParent(item: Item?, damage: Int) {
         super.setParent(item, damage)

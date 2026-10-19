@@ -38,8 +38,12 @@ abstract class BackupElement(node: TransparentNode,descriptor: TransparentNodeDe
 }
 
 class AtsElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) : BackupElement(node,descriptor) {
-    val unit=AtsUnit(this)
-    private fun serverWorld()=node?.coordinate?.world() as? ServerLevel
+    val unit=AtsUnit(this) { closed ->
+        if(serverWorld()!=null)play(mods.eln.sound.SoundCommand(
+            if(closed)"eln:circuit_breaker_close" else "eln:circuit_breaker_open")
+            .smallRange().mulVolume(.45f,if(closed)1.1f else 1.2f))
+    }
+    private fun serverWorld()=node?.coordinate?.let { mods.eln.misc.DimensionIds.serverLevel(it.dimension) }
     private fun withdraw() { serverWorld()?.let { StandbyLink.remove(it,this) } }
     init { slowProcessList.add(IProcess { serverWorld()?.let { StandbyLink.update(it,this,unit.channel,it.gameTime,unit.control.request && unit.enabled) } }) }
     override fun getElectricalLoad(side: Direction,lrdu: LRDU)=if(lrdu!=LRDU.Down)null else when(side) {
@@ -48,7 +52,7 @@ class AtsElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) : 
         front.inverse -> unit.backup
         else -> null
     }
-    override fun disconnectJob() { withdraw();unit.reset();super.disconnectJob() }
+    override fun disconnectJob() { withdraw();unit.reset(false);super.disconnectJob() }
     override fun settings(nbt: CompoundTag) { withdraw();unit.read(nbt) }
     override fun writeSettings(nbt: CompoundTag)=unit.write(nbt)
     override fun networkUnserialize(stream: DataInputStream): Byte {

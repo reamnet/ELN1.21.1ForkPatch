@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": {
+      "item": "minecraft:iron_ingot"
+    },
+    "L": {
+      "item": "eln:gooseneck_barn_light"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    " D ",
+    "DLD",
+    " P "
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:industrial_yard_area_light"
+  }
+}

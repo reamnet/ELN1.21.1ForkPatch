@@ -63,7 +63,7 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
         @Override
         public void process(double time) {
             if (timeout > 0) {
-                if (timeout - time < 0) {
+                if (timeout - time <= 0) {
                     if (state) {
                         state = false;
                         needPublish();
@@ -126,11 +126,26 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
     }
 
     @Override
+    public void connectJob() {
+        super.connectJob();
+        WirelessSignalTxElement.channelRemove(this);
+        WirelessSignalTxElement.channelRegister(this);
+    }
+
+    @Override
+    public void disconnectJob() {
+        WirelessSignalTxElement.channelRemove(this);
+        if (descriptor.autoReset) state = false;
+        super.disconnectJob();
+    }
+
+
+    @Override
     public boolean onBlockActivated(@NotNull Player entityPlayer, @NotNull Direction side, float vx, float vy, float vz) {
         if (Utils.isPlayerUsingWrench(entityPlayer))
             return false;
 
-        state = !state;
+        state = descriptor.autoReset || !state;
         if (state && autoResetProcess != null) autoResetProcess.reset();
         needPublish();
         return true;
@@ -155,7 +170,7 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
 
         super.readFromNBT(nbt);
         channel = nbt.getString("channel");
-        state = nbt.getBoolean("state");
+        state = !descriptor.autoReset && nbt.getBoolean("state");
 
         WirelessSignalTxElement.channelRegister(this);
     }

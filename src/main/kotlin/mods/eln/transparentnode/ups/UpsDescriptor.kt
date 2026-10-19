@@ -39,7 +39,7 @@ class UpsDescriptor(name: String) : TransparentNodeDescriptor(name,UpsElement::c
     override fun addInformation(itemStack: ItemStack?,entityPlayer: Player?,list: MutableList<String>,par4: Boolean) {
         list.add(tr("Programmable output: 1 to 3200 V; up to 10000 W"))
         list.add(tr("Install one or two complete racks of 24 portable batteries"))
-        list.add(tr("Accepts Portable Battery and Portable Battery Pack"))
+        list.add(tr("Accepts portable batteries and AGM, LiFePO4 or industrial UPS cells"))
         list.add(tr("Blue terminal: input; orange terminal: output"))
         list.add(tr("Batteries retain their charge when removed"))
     }

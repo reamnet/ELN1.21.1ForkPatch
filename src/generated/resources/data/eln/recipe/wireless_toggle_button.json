@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "L": {
+      "item": "eln:wireless_button"
+    },
+    "M": {
+      "item": "minecraft:iron_nugget"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    " M ",
+    "MLM",
+    " P "
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:wireless_toggle_button"
+  }
+}

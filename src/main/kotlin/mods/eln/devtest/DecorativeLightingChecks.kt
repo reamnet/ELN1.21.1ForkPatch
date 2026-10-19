@@ -45,8 +45,9 @@ object DecorativeLightingChecks {
     private val supplyPos=base.west(4).south(4)
     private const val channel="Fixture gallery"
     private data class Fixture(val style: DecorativeLampStyle,val pos: BlockPos,val side: Direction,val wired: Boolean)
+    private val styles=DecorativeLampStyle.entries.take(30) // This original gallery predates the larger expansion.
     private val fixtures=buildList {
-        for(wired in listOf(false,true)) for((i,style) in DecorativeLampStyle.entries.withIndex()) {
+        for(wired in listOf(false,true)) for((i,style) in styles.withIndex()) {
             if(wired && style.wirelessOnly) continue
             val y=if(style.ceiling || style.wallLamp) 3 else if(style.tableLamp) 1 else when(style) { DecorativeLampStyle.WAREHOUSE,DecorativeLampStyle.RECESSED,DecorativeLampStyle.CHANDELIER,DecorativeLampStyle.DOT,DecorativeLampStyle.PORCH,DecorativeLampStyle.HOLDER -> 3; DecorativeLampStyle.DESK -> 1; else -> 0 }
             val side=if(style.ceiling) Direction.YP else if(style.wallLamp) Direction.XN else when(style) { DecorativeLampStyle.WAREHOUSE,DecorativeLampStyle.PORCH,DecorativeLampStyle.HOLDER -> Direction.XN; DecorativeLampStyle.RECESSED,DecorativeLampStyle.CHANDELIER,DecorativeLampStyle.DOT -> Direction.YP; else -> Direction.YN }
@@ -189,7 +190,7 @@ object DecorativeLightingChecks {
                             }
                         }
                         p.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY)
-                        for((i,style)in DecorativeLampStyle.entries.withIndex())p.inventory.setItem(i,Eln.findItemStack(style.itemName,1))
+                        for((i,style)in styles.withIndex())p.inventory.setItem(i,Eln.findItemStack(style.itemName,1))
                         p.inventory.setChanged();p.containerMenu.broadcastChanges()
                     };waitFor(2,120)
                 }
@@ -253,7 +254,7 @@ object DecorativeLightingChecks {
                 11 -> if(ticks>5) {
                     capture("${fixtures.filterNot { it.wired }[shot].style.model}-${if(off) "off" else "on"}")
                     shot++
-                    if(shot<DecorativeLampStyle.entries.size)step(9) else if(!off) {
+                    if(shot<styles.size)step(9) else if(!off) {
                         off=true;shot=0;server { p ->voltage(p,supplyPos.west(2),Direction.YN,0.0);fixtures.filter { it.wired }.forEach { voltage(p,sourcePos(it),it.side,0.0) } };waitFor(12,100)
                     } else { record("All fixture models render lit and unlit, with dark off-state lenses");step(13) }
                 }

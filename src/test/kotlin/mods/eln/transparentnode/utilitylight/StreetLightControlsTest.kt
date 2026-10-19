@@ -12,7 +12,7 @@ import kotlin.test.*
 
 class StreetLightControlsTest {
     private fun pole() = UtilityStreetLightElement(TransparentNode(),
-        Eln.transparentNodeItem.subItemList.values.filterIsInstance<UtilityStreetLightDescriptor>().single())
+        Eln.transparentNodeItem.subItemList.values.filterIsInstance<UtilityStreetLightDescriptor>().single { it.style==PoleLampStyle.ORIGINAL })
     private fun bool(value: Boolean) = DataInputStream(ByteArrayInputStream(byteArrayOf(if (value) 1 else 0)))
     private fun movement(value: Int) = DataInputStream(ByteArrayInputStream(ByteArrayOutputStream().also {
         DataOutputStream(it).writeInt(value)

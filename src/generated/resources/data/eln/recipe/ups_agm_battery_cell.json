@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "eln:portable_battery"
+    },
+    "L": {
+      "tag": "c:ingots/lead"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    "PPP",
+    "LBL",
+    "PPP"
+  ],
+  "result": {
+    "components": {
+      "minecraft:custom_data": {
+        "energy": 0.0
+      }
+    },
+    "count": 1,
+    "id": "eln:ups_agm_battery_cell"
+  }
+}

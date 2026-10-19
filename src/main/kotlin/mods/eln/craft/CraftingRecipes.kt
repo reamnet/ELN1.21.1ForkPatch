@@ -43,6 +43,7 @@ object CraftingRecipes {
         recipeElectricalCable()
         recipeThermalCable()
         recipeLampSocket()
+        recipeLightingExpansion()
         recipeLampSupply()
         recipePowerSocket()
         recipePassiveComponent()
@@ -279,6 +280,63 @@ object CraftingRecipes {
             Eln.findItemStack("Copper Thermal Cable", 1), "S", "C", 'S', ItemStack(Blocks.COBBLESTONE), 'C',
             findItemStack("Copper Cable")
         )
+    }
+
+    /** Always available, including seasonal fixtures outside the holiday season. */
+    private fun recipeLightingExpansion() {
+        addShapelessRecipe(Eln.findItemStack("String Lights", 2), findItemStack("120V LED Light Bulb"), "materialString")
+        val upgrades = listOf(
+            Triple("Window Candle Light","Basic Lamp Holder",Items.HONEYCOMB),
+            Triple("Standing Drum Floor Lamp","Ceramic Drum Table Lamp",Items.IRON_INGOT),
+            Triple("Under Cabinet LED Strip","Flat Lamp Socket",Items.IRON_NUGGET),
+            Triple("Recessed LED Channel","Flat Lamp Socket",Items.QUARTZ),
+            Triple("Indirect Cove LED Strip","Flat Lamp Socket",Items.WHITE_DYE),
+            Triple("Surface Linear LED Strip","Thin Fluorescent Shop Light",Items.IRON_INGOT),
+            Triple("Flexible Neon LED Strip","Flat Lamp Socket",Items.SLIME_BALL),
+            Triple("Grand Halo Ring Chandelier","Modern Sputnik Foyer Chandelier",Items.GOLD_INGOT),
+            Triple("Grand Crystal Cascade Chandelier","Crystal Tier Foyer Chandelier",Items.DIAMOND),
+            Triple("Sculptural Branch Chandelier","Modern Sputnik Foyer Chandelier",Items.COPPER_INGOT),
+            Triple("Spiral Rain Chandelier","Crystal Tier Foyer Chandelier",Items.CHAIN),
+            Triple("Grand Empire Chandelier","Candle Arm Foyer Chandelier",Items.GOLD_INGOT),
+            Triple("Heavy Duty Stadium Wall Floodlight","Warehouse Wall Floodlight",Items.IRON_BLOCK),
+            Triple("Armored Oval Bulkhead Light","Robust Lamp Socket",Items.IRON_BARS),
+            Triple("Industrial Wall Pack Light","Warehouse Wall Floodlight",Items.IRON_INGOT),
+            Triple("Rugged Outdoor Canopy Light","Robust Lamp Socket",Items.IRON_BLOCK),
+            Triple("Industrial Yard Area Light","Gooseneck Barn Light",Items.IRON_INGOT),
+            Triple("Offshore Caged Wellglass Light","Robust Lamp Socket",Items.YELLOW_DYE),
+            Triple("Offshore Sealed Linear Light","Thin Fluorescent Shop Light",Items.YELLOW_DYE),
+            Triple("Offshore Platform Floodlight","Warehouse Wall Floodlight",Items.YELLOW_DYE),
+            Triple("Modern LED Street Light","Streetlight",Items.IRON_INGOT),
+            Triple("Boulevard Lantern Street Light","Traditional Lantern Post Light",Items.CHAIN),
+            Triple("Warm White Christmas Fairy Lights","String Lights",Items.YELLOW_DYE),
+            Triple("Multicolor Christmas String Lights","String Lights",Items.RED_DYE),
+            Triple("Christmas Icicle Lights","String Lights",Items.LIGHT_BLUE_DYE),
+            Triple("Christmas Star Wall Light","Basic Lamp Holder",Items.GOLD_NUGGET),
+            Triple("Halloween Pumpkin String Lights","String Lights",Items.PUMPKIN),
+            Triple("Halloween Ghost String Lights","String Lights",Items.WHITE_DYE),
+            Triple("Halloween Bat Wall Light","Basic Lamp Holder",Items.BLACK_DYE),
+            Triple("Jack O Lantern Table Lamp","Basic Lamp Holder",Items.CARVED_PUMPKIN)
+        )
+        for ((output, base, material) in upgrades) addRecipe(findItemStack(output)," D ","DLD"," P ",
+            'D',ItemStack(material),'L',findItemStack(base),'P',findItemStack("Iron Plate"))
+        for ((name,base,material) in listOf(
+            Triple("Wireless Paddle Switch","Wireless Switch",Items.QUARTZ),
+            Triple("Wireless Toggle Switch","Wireless Switch",Items.IRON_NUGGET),
+            Triple("Wireless Paddle Button","Wireless Button",Items.QUARTZ),
+            Triple("Wireless Toggle Button","Wireless Button",Items.IRON_NUGGET))) {
+            addRecipe(findItemStack(name)," M ","MLM"," P ",'M',ItemStack(material),'L',findItemStack(base),'P',findItemStack("Iron Plate"))
+        }
+        addRecipe(findItemStack("Utility Pole Cobrahead Street Light")," L "," P ",
+            'L',findItemStack("Modern LED Street Light"),'P',findItemStack("Utility Pole"))
+        addRecipe(findItemStack("Utility Pole Twin LED Street Light"),"L L"," P ",
+            'L',findItemStack("Modern LED Street Light"),'P',findItemStack("Utility Pole"))
+        // These recipes create empty cells; ingredient charge is intentionally not copied.
+        addRecipe(findItemStack("UPS AGM Battery Cell"),"PPP","LBL","PPP",'P',findItemStack("Iron Plate"),
+            'L',"ingotLead",'B',findItemStack("Portable Battery"))
+        addRecipe(findItemStack("UPS LiFePO4 Battery Cell"),"CCC","GBG","CCC",'C',findItemStack("Copper Ingot"),
+            'G',ItemStack(Items.GOLD_INGOT),'B',findItemStack("UPS AGM Battery Cell"))
+        addRecipe(findItemStack("UPS Industrial Battery Module"),"PPP","BBB","PPP",'P',findItemStack("Iron Plate"),
+            'B',findItemStack("UPS LiFePO4 Battery Cell"))
     }
 
     private fun recipeLampSocket() {
@@ -2910,7 +2968,6 @@ object CraftingRecipes {
             Eln.findItemStack("Holiday Candle", 1), " g ", "gbg", " i ", 'g', ItemStack(Blocks.GLASS_PANE), 'b',
             findItemStack("120V LED Light Bulb"), 'i', "ingotIron"
         )
-        addShapelessRecipe(Eln.findItemStack("String Lights", 2), findItemStack("120V LED Light Bulb"), "materialString")
     }
 
 }

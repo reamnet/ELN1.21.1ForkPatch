@@ -94,8 +94,8 @@ class BackupRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDesc
     private var cable: CableRenderType?=null
     init {
         if((descriptor as BackupDescriptor).generator)addLoopedSound(object : LoopedSound("eln:fuelgenerator",coordinate(),SoundInstance.Attenuation.LINEAR) {
-            override fun getVolume()=if(display.status in listOf("RUNNING","COOLDOWN")) .2f else 0f
-            override fun getPitch()=.9f
+            override fun getVolume()=GeneratorEffects.volume(display.status,display.watts)
+            override fun getPitch()=(.84+.10*(display.watts/10_000).coerceIn(0.0,1.0)).toFloat()
         })
     }
     override fun draw() {
@@ -103,6 +103,21 @@ class BackupRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDesc
         (transparentNodeDescriptor as BackupDescriptor).draw(front ?: Direction.ZP,display)
     }
     override fun cameraDrawOptimisation()=false
+    private var smokeClock=0f
+    var emittedSmoke=0
+        private set
+    override fun refresh(deltaT: Float) {
+        super.refresh(deltaT)
+        if(!(transparentNodeDescriptor as BackupDescriptor).generator || !GeneratorEffects.running(display.status)) { smokeClock=0f;return }
+        smokeClock+=deltaT.coerceIn(0f,.25f)
+        if(smokeClock<.15f)return
+        smokeClock%=.15f
+        val world=tileEntity.level ?: return
+        val pipe=GeneratorEffects.exhaust(front ?: Direction.ZP)
+        val pos=tileEntity.blockPos
+        world.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE,pos.x+.5+pipe.x,pos.y+.5+pipe.y,pos.z+.5+pipe.z,0.0,.045,0.0)
+        emittedSmoke++
+    }
     override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream);display.read(stream);cable=null }
     override fun newGuiDraw(side: Direction,player: Player)=BackupGui(player,this)
 }

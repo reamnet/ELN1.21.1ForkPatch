@@ -33,15 +33,28 @@ class StepDownUnitDescriptor(name: String) :
     }
 }
 
-class UtilityStreetLightDescriptor(name: String) : GridDescriptor(name, Eln.obj.getObj("UtilityPole"),
+enum class PoleLampStyle { ORIGINAL, COBRAHEAD, TWIN_LED }
+
+class UtilityStreetLightDescriptor(name: String, val style: PoleLampStyle = PoleLampStyle.ORIGINAL) : GridDescriptor(name, Eln.obj.getObj("UtilityPole"),
     UtilityStreetLightElement::class.java, UtilityStreetLightRender::class.java,
     "textures/wire.png", Eln.instance.veryHighVoltageCableDescriptor, 40) {
-    private val fixture = Eln.obj.getObj("utilitystreetlamp")
+    private val fixture = Eln.obj.getObj(when(style) {
+        PoleLampStyle.ORIGINAL -> "utilitystreetlamp"
+        PoleLampStyle.COBRAHEAD -> "utilitycobrahead"
+        PoleLampStyle.TWIN_LED -> "utilitytwinled"
+    })
+    val lampWatts get() = when(style) { PoleLampStyle.ORIGINAL -> 60.0;PoleLampStyle.COBRAHEAD -> 70.0;PoleLampStyle.TWIN_LED -> 120.0 }
+    val heads get() = when(style) {
+        PoleLampStyle.ORIGINAL -> listOf(net.minecraft.world.phys.Vec3(-1.095,2.30,0.0))
+        PoleLampStyle.COBRAHEAD -> listOf(net.minecraft.world.phys.Vec3(-1.15,2.30,0.0))
+        PoleLampStyle.TWIN_LED -> listOf(net.minecraft.world.phys.Vec3(-1.15,2.30,-.62),net.minecraft.world.phys.Vec3(-1.15,2.30,.62))
+    }
     init {
         creativeTab = Eln.creativeTabLighting
         ghostGroup = GhostGroup().apply {
             for (y in 1..4) addElement(0, y, 0)
-            addElement(-1, 3, 0)
+            if(style==PoleLampStyle.ORIGINAL)addElement(-1, 3, 0)
+            if(style!=PoleLampStyle.ORIGINAL)for(x in -2..-1)for(y in 1..3)for(z in -1..1)addElement(x,y,z)
         }
     }
     fun drawLamp(front: Direction, lit: Boolean, installed: Boolean, heightStep: Int = 0, yaw: Int = 0) = preserveMatrix {
@@ -79,7 +92,7 @@ class UtilityStreetLightDescriptor(name: String) : GridDescriptor(name, Eln.obj.
         }
     }
     override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<String>, par4: Boolean) {
-        list.add(tr("Grid-powered %1$ W street light with %2$-block pole connections", 60, 40))
+        list.add(tr("Grid-powered %1$ W street light with %2$-block pole connections", lampWatts.toInt(), 40))
         list.add(tr("Install a Mains Step-down Unit and select %1$ V or %2$ V", 120, 240))
         list.add(tr("Base terminals also supply the regulated output"))
         list.add(tr("Right-click with a Mains Step-down Unit to install it"))
