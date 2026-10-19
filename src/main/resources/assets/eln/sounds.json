@@ -523,5 +523,21 @@
         "stream": false
       }
     ]
+  },
+  "appliance_box_fan": {
+    "sounds": [
+      {
+        "name": "eln:appliance_box_fan",
+        "stream": false
+      }
+    ]
+  },
+  "appliance_industrial_fan": {
+    "sounds": [
+      {
+        "name": "eln:appliance_industrial_fan",
+        "stream": false
+      }
+    ]
   }
 }

@@ -106,6 +106,7 @@ class KitchenRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDes
     val type=(descriptor as KitchenDescriptor).type
     override val inventory=TransparentNodeElementInventory(if(type==KitchenType.FRIDGE)30 else 3,64,this)
     val display=KitchenDisplay()
+    val cord=mods.eln.transparentnode.cord.CordDisplay()
     val operatingSound=object : LoopedSound("eln:${type.sound}",Coordinate(entity.blockPos.x,entity.blockPos.y,entity.blockPos.z,0)) {
         override fun getVolume()=if(display.enabled && display.active && display.watts>1 && display.status!="EXPLODING").18f else 0f
     }
@@ -115,13 +116,14 @@ class KitchenRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDes
     init { addLoopedSound(operatingSound);warningSound?.let(::addLoopedSound) }
     private var cable: CableRenderType?=null
     override fun draw() {
+        cord.draw(tileEntity.level!!,tileEntity.blockPos,front ?: Direction.ZP)
         cable=drawCable(Direction.YN,Eln.instance.meduimVoltageCableDescriptor.render,display.connections,cable)
         val below=tileEntity.blockPos.below();val world=tileEntity.level!!
         val height=mods.eln.sixnode.lampsocket.LampMounting.surface(world.getBlockState(below).getCollisionShape(world,below).toAabbs(),Direction.YN) ?: 1.0
         (transparentNodeDescriptor as KitchenDescriptor).draw(front ?: Direction.ZP,display.active,(1-height).coerceIn(-.5,1.0))
     }
     override fun cameraDrawOptimisation()=false
-    override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream);display.read(stream);cable=null }
+    override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream);display.read(stream);cord.read(stream);cable=null }
     override fun newGuiDraw(side: Direction,player: Player)=KitchenGui(player,this)
 }
 class KitchenGui(player: Player,private val render: KitchenRender) : GuiContainerEln(KitchenContainer(player,render.inventory,render.type)) {
@@ -140,7 +142,9 @@ class KitchenGui(player: Player,private val render: KitchenRender) : GuiContaine
         drawString(8,54,tr("Work: %1$% / %2$ W",(state.progress*100).toInt(),state.watts.toInt()))
         drawString(16,68,tr("Input"));drawString(132,68,tr("Output"))
         if(render.type==KitchenType.FRIDGE)drawString(8,99,tr("Temperature: %1$ C",String.format(java.util.Locale.ROOT,"%.1f",state.temperature)))
-        else drawString(8,110,font.plainSubstrByWidth(when(render.type) {
+        else {
+            if(render.cord.endpoint!=null)drawString(8,99,font.plainSubstrByWidth(mods.eln.transparentnode.cord.cordState(render.cord.state),160))
+            drawString(8,110,font.plainSubstrByWidth(when(render.type) {
             KitchenType.KETTLE -> tr("Water bottle makes hot water")
             KitchenType.BLENDER -> tr("Fruit + water makes a smoothie")
             KitchenType.RICE -> tr("Wheat or rice + water bottle")
@@ -148,5 +152,6 @@ class KitchenGui(player: Player,private val render: KitchenRender) : GuiContaine
             KitchenType.TOASTER -> tr("Bread makes toasted bread")
             else -> tr("Food recipes; no fuel needed")
         },160))
+        }
     }
 }

@@ -31,6 +31,8 @@ LOOPS = {
     'ceiling_fan': (60, .08, .34, 12),
     'window_ac': (60, .38, .40, 18),
     'minisplit': (90, .12, .32, 15),
+    'box_fan': (120, .18, .42, 20),
+    'industrial_fan': (60, .43, .70, 12),
     'battery_hiss': (120, .025, .75, 13),
 }
 
@@ -84,4 +86,4 @@ for name in list(LOOPS) + ['done', 'toaster_pop']:
     key = 'appliance_'+name
     data[key] = {'sounds': [{'name': 'eln:'+key, 'stream': False}]}
 path.write_text(json.dumps(data, indent=2)+'\n')
-print('Generated 16 original appliance sound samples.')
+print('Generated 18 original appliance sound samples.')

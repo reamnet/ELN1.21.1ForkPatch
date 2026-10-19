@@ -416,6 +416,13 @@ object CraftingRecipes {
         for(name in listOf("Classic Four Blade Ceiling Fan","Modern Three Blade Ceiling Fan"))
             addRecipe(findItemStack(name)," M ","PLP"," P ",
                 'M',findItemStack("Electrical Motor"),'P',if(name=="Classic Four Blade Ceiling Fan")ItemStack(Blocks.OAK_PLANKS) else findItemStack("Iron Plate"),'L',findItemStack("Basic Lamp Holder"))
+        for(name in listOf("Classic Box Fan","Metal Shop Box Fan","Compact Desktop Box Fan"))
+            addRecipe(findItemStack(name),"PPP","PMP","CRC",
+                'P',when(name) { "Metal Shop Box Fan" -> ItemStack(Items.IRON_INGOT);"Compact Desktop Box Fan" -> findItemStack("Rubber");else -> findItemStack("Iron Plate") },
+                'M',findItemStack("Electrical Motor"),'C',findItemStack("Copper Cable"),'R',ItemStack(Items.REDSTONE))
+        addRecipe(findItemStack("Industrial Five Block Fan"),"PMP","MCM","PMP",'P',findItemStack("Iron Plate"),'M',findItemStack("Electrical Motor"),'C',findItemStack("Copper Cable"))
+        addRecipe(findItemStack("Experimental Wall Outlet")," P ","CRC"," P ",'P',findItemStack("Iron Plate"),'C',findItemStack("Copper Cable"),'R',ItemStack(Items.REDSTONE))
+        addShapelessRecipe(findItemStack("Flexible Appliance Cord"),findItemStack("Copper Cable"),findItemStack("Copper Cable"),findItemStack("Rubber"))
         addRecipe(findItemStack("Electric Mini Oven"),"PPP","GCG","PRP",
             'P',findItemStack("Iron Plate"),'G',ItemStack(Blocks.GLASS_PANE),'C',findItemStack("Copper Cable"),'R',ItemStack(Items.REDSTONE))
         addRecipe(findItemStack("Electric Kettle")," P ","BCP"," R ",

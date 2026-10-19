@@ -60,12 +60,12 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, sixNodeDescri
     var fanPower=0.0
     val operatingSound=if(descriptor.fixture?.fan==true)object : LoopedSound("eln:appliance_ceiling_fan",
         Coordinate(tileEntity.blockPos.x,tileEntity.blockPos.y,tileEntity.blockPos.z,0)) {
-        override fun getVolume()=if(fanEnabled && fanPower.isFinite()).16f*fanPower.coerceIn(0.0,1.0).toFloat() else 0f
-        override fun getPitch()=.7f+.3f*(fanPower.takeIf { it.isFinite() } ?: 0.0).coerceIn(0.0,1.0).toFloat()
+        override fun getVolume()=if(visual.speed>.001f).16f*visual.speed else 0f
+        override fun getPitch()=.55f+.45f*visual.speed
     } else null
     init { operatingSound?.let(::addLoopedSound) }
-    var fanAngle=0f
-        private set
+    val visual=mods.eln.transparentnode.fan.FanVisual()
+    val fanAngle get()=visual.angle
     var paintColor = DEFAULT_PAINT_COLOR
     var grounded = true
     var motionMode = 0
@@ -161,7 +161,7 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, sixNodeDescri
 
     override fun refresh(deltaT: Float) {
         super.refresh(deltaT)
-        if(descriptor.fixture?.fan==true)fanAngle=(fanAngle+deltaT.coerceIn(0f,.25f)*540f*fanPower.toFloat())%360f
+        if(descriptor.fixture?.fan==true)visual.step(deltaT,fanPower)
         if (descriptor.renderType is LampSocketSuspendedObjRender) {
             entityTimeout -= deltaT
 

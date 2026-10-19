@@ -9,6 +9,7 @@ import mods.eln.sim.IProcess
 import mods.eln.sim.mna.component.Resistor
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sound.SoundCommand
+import mods.eln.transparentnode.cord.*
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.Container
@@ -18,7 +19,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import kotlin.math.abs
 
-class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) : TransparentNodeElement(node,descriptor) {
+class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) : TransparentNodeElement(node,descriptor),CordDevice {
     val type=(descriptor as KitchenDescriptor).type
     override val inventory=object : TransparentNodeElementInventory(if(type==KitchenType.FRIDGE)30 else 3,64,this) {
         override fun getAccessibleSlotsFromSide(side: Int)=IntArray(containerSize) { it }
@@ -27,6 +28,8 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
     }
     val load=NbtElectricalLoad("applianceInput")
     val resistor=Resistor(load,null)
+    override val cord=ApplianceCord(this,load)
+    override val cordPortable get()=type.volts==120.0 && type!=KitchenType.FRIDGE
     val work=KitchenWork()
     val batteryHeat=MicrowaveBatteryHeat()
     val batteryJob get()=type==KitchenType.MICROWAVE && MicrowaveBatteryHeat.accepts(inventory.getItem(0))
@@ -114,13 +117,21 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
             }
         },0.0)
     }
+    override fun disconnectJob() { cord.disconnect();super.disconnectJob() }
+    override fun readItemStackNBT(nbt: CompoundTag?) {
+        nbt?.takeIf { it.contains("carriedAppliance") }?.let {
+            val placedFront=front;readFromNBT(it.getCompound("carriedAppliance"));front=placedFront
+        }
+    }
     override fun onBreakElement() {
+        if(cord.moving) { if(useUuid())stop(getUuid());return }
+        cord.onBroken()
         if(!detonating) { super.onBreakElement();return }
         // A ruptured microwave is destroyed; spare contents drop once, not the appliance.
         if(useUuid())stop(getUuid())
         node!!.dropInventory(inventory)
     }
-    override fun getElectricalLoad(side: Direction,lrdu: LRDU)=if(side.isNotY && lrdu==LRDU.Down)load else null
+    override fun getElectricalLoad(side: Direction,lrdu: LRDU)=if(!cord.plugged && side.isNotY && lrdu==LRDU.Down)load else null
     override fun getConnectionMask(side: Direction,lrdu: LRDU)=if(getElectricalLoad(side,lrdu)!=null)NodeBase.maskElectricalPower else 0
     override fun getThermalLoad(side: Direction,lrdu: LRDU)=null
     override fun hasGui()=true
@@ -134,17 +145,17 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
         super.networkSerialize(stream)
         stream.writeBoolean(enabled);stream.writeBoolean(active);stream.writeDouble(if(batteryJob)batteryHeat.joules/MicrowaveBatteryHeat.BLAST_JOULES else work.joules/(type.watts*type.seconds))
         stream.writeDouble(load.voltage);stream.writeDouble(resistor.power);stream.writeDouble(temperature);stream.writeUTF(status)
-        node!!.lrduCubeMask.getTranslate(Direction.YN).serialize(stream)
+        node!!.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);cord.writeNetwork(stream)
     }
     override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
         enabled=!nbt.contains("kitchenEnabled") || nbt.getBoolean("kitchenEnabled")
         work.joules=nbt.getDouble("kitchenJoules").takeIf { it.isFinite() }?.coerceIn(0.0,type.watts*type.seconds) ?: 0.0
         temperature=if(nbt.contains("kitchenTemperature"))nbt.getDouble("kitchenTemperature").takeIf { it.isFinite() }?.coerceIn(3.5,20.0) ?: 20.0 else 20.0
-        batteryHeat.read(nbt);cacheReady=false
+        batteryHeat.read(nbt);cord.read(nbt);cacheReady=false
     }
     override fun writeToNBT(nbt: CompoundTag) {
-        super.writeToNBT(nbt);nbt.putBoolean("kitchenEnabled",enabled);nbt.putDouble("kitchenJoules",work.joules);nbt.putDouble("kitchenTemperature",temperature);batteryHeat.write(nbt)
+        super.writeToNBT(nbt);nbt.putBoolean("kitchenEnabled",enabled);nbt.putDouble("kitchenJoules",work.joules);nbt.putDouble("kitchenTemperature",temperature);batteryHeat.write(nbt);cord.write(nbt)
     }
     override fun multiMeterString(side: Direction)=Utils.plotVolt("U:",load.voltage)+Utils.plotPower("P:",resistor.power)
     override fun getWaila()=linkedMapOf(tr("State") to kitchenStatus(status),tr("Voltage") to Utils.plotVolt("",load.voltage),tr("Power") to Utils.plotPower("",resistor.power))

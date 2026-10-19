@@ -74,16 +74,19 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     var projectionRotationAngle = 0.0
     val aim=descriptor.fixture?.newAim() ?: LightAim(0)
     var fanEnabled=true
-    var fanPower=0.0
-        private set
+    val rotor=mods.eln.transparentnode.fan.FanDynamics()
+    val fanPower get()=rotor.speed
+    private var publishedFanSpeed=0.0
     val fanMotor=Resistor(electricalLoad,null).apply { resistance=1e19 }
     val fanNominal get()=(getItemObject(inventory.getItem(0)) as? LampDescriptor)?.lampData?.nominalU ?: 120.0
-    fun updateFan() {
+    fun updateFan(seconds: Double=.05) {
         if(descriptor.fixture?.fan!=true)return
         val ready=fanEnabled && !inventory.getItem(LampSocketContainer.CABLE_SLOT_ID).isEmpty
         val level=if(ready)(kotlin.math.abs(electricalLoad.voltage)/fanNominal).coerceIn(0.0,1.0) else 0.0
-        val next=if(level>=.5)level else 0.0
-        if(kotlin.math.abs(next-fanPower)>.01) { fanPower=next;needPublish() }
+        rotor.step(seconds,if(level>=.5)level else 0.0)
+        if(kotlin.math.abs(fanPower-publishedFanSpeed)>.009 || fanPower==0.0 && publishedFanSpeed!=0.0) {
+            publishedFanSpeed=fanPower;needPublish()
+        }
     }
     var motionMode = 0
     var motionEnergized = false
@@ -208,7 +211,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
         motionMode = nbt.getInt("motionMode").coerceIn(0,3)
         projectionRotationAngle = nbt.getDouble("projectionRotationAngle")
         aim.read(nbt)
-        fanEnabled=!nbt.contains("fanEnabled") || nbt.getBoolean("fanEnabled")
+        fanEnabled=!nbt.contains("fanEnabled") || nbt.getBoolean("fanEnabled");rotor.read(nbt)
         lampSocketProcess.stableLightProbability = nbt.getDouble("stableLightProbability")
     }
 
@@ -222,7 +225,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
         nbt.putInt("motionMode",motionMode)
         nbt.putDouble("projectionRotationAngle", projectionRotationAngle)
         aim.write(nbt)
-        if(descriptor.fixture?.fan==true)nbt.putBoolean("fanEnabled",fanEnabled)
+        if(descriptor.fixture?.fan==true) { nbt.putBoolean("fanEnabled",fanEnabled);rotor.write(nbt) }
         nbt.putDouble("stableLightProbability", lampSocketProcess.stableLightProbability)
     }
 

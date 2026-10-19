@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "eln:copper_cable"
+    },
+    "M": {
+      "item": "eln:electrical_motor"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    "PMP",
+    "MCM",
+    "PMP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:industrial_five_block_fan"
+  }
+}

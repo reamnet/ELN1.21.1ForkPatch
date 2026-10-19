@@ -58,17 +58,17 @@ class FixtureControlsTest {
             if(s.fan)assertNotNull(model.getPart("Rotor"),s.name)
         }
     }
-    @Test fun fansUseRatedMotorPowerWithoutBulbsAndStopWithoutPower() {
+    @Test fun fansUseRatedMotorPowerWithoutBulbsAndCoastWithoutPower() {
         for(s in listOf(DecorativeLampStyle.FAN_CLASSIC,DecorativeLampStyle.FAN_MODERN)) {
             val d=Eln.sixNodeItem.subItemList[DecorativeLightRegistration.idFor(s)] as LampSocketDescriptor
             val e=LampSocketElement(SixNode(),Direction.YP,d)
             e.inventory.setItem(1,Eln.findItemStack("Copper Cable",1));e.computeInventory()
             val root=RootSystem(.05,1);root.addState(e.electricalLoad);root.addComponent(e.fanMotor)
             val source=VoltageSource("fan",e.electricalLoad,null).apply { voltage=120.0 };root.addComponent(source)
-            root.step();e.updateFan()
+            root.step();repeat(100) { e.updateFan() }
             assertEquals(s.fanWatts,e.fanMotor.power,1e-6);assertEquals(1.0,e.fanPower)
             assertTrue(e.inventory.getItem(0).isEmpty)
-            source.voltage=0.0;root.step();e.updateFan();assertEquals(0.0,e.fanPower);assertEquals(0.0,e.fanMotor.power)
+            source.voltage=0.0;root.step();e.updateFan();assertTrue(e.fanPower in .98..1.0);assertEquals(0.0,e.fanMotor.power);repeat(200) { e.updateFan() };assertEquals(0.0,e.fanPower)
             e.fanEnabled=false;e.computeInventory();assertEquals(1e19,e.fanMotor.resistance)
             val copy=LampSocketElement(SixNode(),Direction.YP,d).also { it.readFromNBT(CompoundTag().also(e::writeToNBT)) }
             assertFalse(copy.fanEnabled)

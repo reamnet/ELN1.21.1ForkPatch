@@ -3,6 +3,7 @@
 # Appearing in multiple source files
 %1$,_%2$,_%3$=%1$, %2$, %3$
 %1$_(version_%2$)=%1$ (version %2$)
+%1$_V_/_%2$_W=%1$ V / %2$ W
 %1$_is_not_in_range!=%1$ não está na faixa!
 %1$_percent=%1$ percent
 (Increases_capacity)=(Aumenta a capacitância)
@@ -16,6 +17,7 @@ Bad=Ruim
 Battery_level=Nível da bateria
 Biggest=Maior
 Booster_slot=Espaço de reforço
+Breaker_tripped=Breaker tripped
 Cable_slot=Espaço de cabo
 Can_create\:=Pode criar:
 Capacity=Capacitância
@@ -140,6 +142,7 @@ Range\:_%1$_blocks=Alcance: %1$ blocos
 Rated_supply\:_%1$_V_/_%2$_W=Rated supply: %1$ V / %2$ W
 Ratio=Razão
 Read=Ler
+Ready=Ready
 Redstone_slot=Espaço de Redstone
 Redstone_value=Valor de Redstone
 Regulator_slot=Espaço de regulador
@@ -1174,6 +1177,7 @@ Electrical_age_wrench,\nCan_be_used_to_turn\nsmall_wall_blocks=Chave inglesa Ele
 Falstad_Import_Tool.name=Ferramenta de Importação Falstad
 Fast_Electrical_Drill.name=Furadeira Elétrica Rápida
 Ferrite_Ingot.name=Lingote de Ferrita
+Flexible_Appliance_Cord.name=Flexible Appliance Cord
 Gold_Clutch_Plate.name=Disco de Embreagem de Ouro
 Gold_Dust.name=Pó de Ouro
 Gold_Plate.name=Placa de Ouro
@@ -2406,6 +2410,35 @@ Portable_Electric_Space_Heater.name=Portable Electric Space Heater
 Wall-mounted_Mini-split_Air_Conditioner.name=Wall-mounted Mini-split Air Conditioner
 Window_Air_Conditioner.name=Window Air Conditioner
 
+# src/main/kotlin/mods/eln/transparentnode/cord/ApplianceCord.kt
+Cord_connected=Cord connected
+Cord_out_of_reach_(8_blocks)=Cord out of reach (8 blocks)
+Cord_outlet_missing=Cord outlet missing
+No_cord_connected=No cord connected
+Outlet_already_occupied=Outlet already occupied
+Outlet_breaker_tripped=Outlet breaker tripped
+
+# src/main/kotlin/mods/eln/transparentnode/cord/CordInteraction.kt
+Connect_this_cord_to_a_small_120_V_appliance_or_box_fan=Connect this cord to a small 120 V appliance or box fan
+Cord_connected;_sneak_with_an_empty_hand_to_move_the_appliance=Cord connected; sneak with an empty hand to move the appliance
+Cord_plugged_into_outlet;_select_a_small_appliance=Cord plugged into outlet; select a small appliance
+Could_not_connect\:_check_cord_reach,_outlet_occupancy_and_the_existing_plug=Could not connect: check cord reach, outlet occupancy and the existing plug
+Experimental_flexible_cord\:_8_block_reach=Experimental flexible cord: 8 block reach
+Select_a_wall_outlet_first=Select a wall outlet first
+Sneak-use_a_cord_on_the_appliance_to_unplug_it=Sneak-use a cord on the appliance to unplug it
+Sneak_with_an_empty_hand_to_carry_a_plugged_appliance=Sneak with an empty hand to carry a plugged appliance
+Use_on_a_wall_outlet,_then_on_a_small_appliance=Use on a wall outlet, then on a small appliance
+
+# src/main/kotlin/mods/eln/transparentnode/cord/OutletClient.kt
+%1$_V_/_%2$_A=%1$ V / %2$ A
+20_A;_one_8-block_cord=20 A; one 8-block cord
+Experimental_Wall_Outlet.name=Experimental Wall Outlet
+One_flexible_cord;_120/240_V,_20_A_breaker=One flexible cord; 120/240 V, 20 A breaker
+Release_lost_cord=Release lost cord
+Reset_breaker=Reset breaker
+Wall_outlet=Wall outlet
+Wire_the_wall_outlet_to_your_grid;_it_does_not_change_voltage=Wire the wall outlet to your grid; it does not change voltage
+
 # src/main/kotlin/mods/eln/transparentnode/evaporative/EvaporativeCooler.kt
 %1$_/_4000_mB=%1$ / 4000 mB
 Airflow_blocked_-_passive_cooling=Airflow blocked - passive cooling
@@ -2477,6 +2510,24 @@ Wet_bulb_(estimate)=Wet bulb (estimate)
 Wet_mode_needs_an_unobstructed_path_to_sky_within_8_blocks.=Wet mode needs an unobstructed path to sky within 8 blocks.
 Wet_operation=Wet operation
 
+# src/main/kotlin/mods/eln/transparentnode/fan/FanClient.kt
+Exposed_blades\:_5_hearts_per_second_at_full_speed=Exposed blades: 5 hearts per second at full speed
+Floor_cable_or_flexible_appliance_cord;_no_bulb_needed=Floor cable or flexible appliance cord; no bulb needed
+Keep_clear_of_rotating_blades=Keep clear of rotating blades
+Motor_speed\:_25_to_100%=Motor speed: 25 to 100%
+Motor_starts_gradually;_blades_coast_when_switched_off=Motor starts gradually; blades coast when switched off
+Set_speed_%=Set speed %
+Speed\:_%1$%=Speed: %1$%
+
+# src/main/kotlin/mods/eln/transparentnode/fan/FanElement.kt
+%1$%=%1$%
+
+# src/main/kotlin/mods/eln/transparentnode/fan/FanType.kt
+Classic_Box_Fan.name=Classic Box Fan
+Compact_Desktop_Box_Fan.name=Compact Desktop Box Fan
+Industrial_Five_Block_Fan.name=Industrial Five Block Fan
+Metal_Shop_Box_Fan.name=Metal Shop Box Fan
+
 # src/main/kotlin/mods/eln/transparentnode/festive/FestiveElement.kt
 It_probably_works_if_you_apply_~200v_to_the_xmas_wireless_channel=Provavelmente funciona se você aplicar ~200v ao canal sem fio xmas
 Not_as_warm_as_it_could_be=Não tão quente quanto poderia ser
@@ -2498,7 +2549,6 @@ Horizontal_angle\:_%1$°=Ângulo horizontal: %1$°
 Vertical_angle\:_%1$°=Ângulo vertical: %1$°
 
 # src/main/kotlin/mods/eln/transparentnode/kitchen/KitchenClient.kt
-%1$_V_/_%2$_W=%1$ V / %2$ W
 27_food-storage_slots;_freezes_a_water_bucket_into_ice_and_returns_the_bucket=27 food-storage slots; freezes a water bucket into ice and returns the bucket
 Batteries_hiss_and_explode_when_microwaved=Batteries hiss and explode when microwaved
 Battery_hissing_-_explosion_imminent!=Battery hissing - explosion imminent!
@@ -2518,7 +2568,6 @@ Heats_a_water_bottle_into_drinkable_hot_water=Heats a water bottle into drinkabl
 Needs_a_supporting_surface=Needs a supporting surface
 Needs_water_or_output_space=Needs water or output space
 Processing=Processing
-Ready=Ready
 Returned_container=Returned container
 Steams_wheat_or_tagged_rice_with_a_water_bottle;_returns_the_empty_bottle=Steams wheat or tagged rice with a water bottle; returns the empty bottle
 Turns_bread_into_edible_toasted_bread=Turns bread into edible toasted bread

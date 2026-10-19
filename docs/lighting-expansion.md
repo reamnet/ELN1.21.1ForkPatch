@@ -123,3 +123,7 @@ buttons click again when released automatically; loading a saved switch is silen
 Both ceiling-fan styles have quiet motor and airflow loops as of 3.0.22. Their
 sound follows actual motor power and stops when the motor is disabled, even if
 the light remains on. Removing or unloading a fan releases its sound instance.
+
+As of 3.0.23, ceiling fans spin up and coast down gradually; their motor sound
+follows rotor speed through shutdown. See [fans and appliance cords](fans-and-appliance-cords.md)
+for the new box and industrial fans and the flexible cord prototype.

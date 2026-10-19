@@ -69,7 +69,7 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
                     element.electricalLoad.state=h.element.powerLoad.state
                 } else element.electricalLoad.state=0.0
             }
-            element.updateFan()
+            element.updateFan(time)
         }
 
         if (energized && !lampStack.isNothing() && !cableStack.isNothing()) {

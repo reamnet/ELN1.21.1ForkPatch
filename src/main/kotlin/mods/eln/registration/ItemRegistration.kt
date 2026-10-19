@@ -369,6 +369,7 @@ object ItemRegistration {
     }
 
     private fun registerWireToolItems(id: Int) {
+        Eln.sharedItem.addElement(2+(id shl 6),mods.eln.transparentnode.cord.CordDescriptor(I18N.TR_NAME(I18N.Type.NONE,"Flexible Appliance Cord")))
         run {
             val subId = 0
             val name = I18N.TR_NAME(I18N.Type.NONE, "Wire Scraps")

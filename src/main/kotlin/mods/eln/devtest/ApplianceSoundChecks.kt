@@ -161,7 +161,7 @@ object ApplianceSoundChecks {
                         for((_,pos) in kitchens)kitchen(p,pos).networkUnserialize(packet(80))
                         for((_,pos) in climates)(f(p).machine(pos) as ClimateElement).networkUnserialize(packet(81))
                         for((_,pos) in fans)fan(p,pos).networkUnserialize(packet(9))
-                    };waitFor(3,40)
+                    };waitFor(3,225)
                 }
                 3 -> if(settled()) {
                     check(loops().all { it.volume==0f && !mc.soundManager.isActive(it) });record("Switching appliances and fans off stops their operating loops")

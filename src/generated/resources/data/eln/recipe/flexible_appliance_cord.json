@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "eln:copper_cable"
+    },
+    {
+      "item": "eln:copper_cable"
+    },
+    {
+      "item": "eln:rubber"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:flexible_appliance_cord"
+  }
+}

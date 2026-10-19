@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "eln:copper_cable"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    " P ",
+    "CRC",
+    " P "
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:experimental_wall_outlet"
+  }
+}
