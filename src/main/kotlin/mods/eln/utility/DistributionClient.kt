@@ -1,0 +1,208 @@
+package mods.eln.utility
+
+import mods.eln.Eln
+import mods.eln.client.gl.GL11
+import mods.eln.client.itemrender.IItemRenderer
+import mods.eln.ghost.GhostBlock
+import mods.eln.ghost.GhostGroup
+import mods.eln.gridnode.GridDescriptor
+import mods.eln.gridnode.GridRender
+import mods.eln.gui.*
+import mods.eln.i18n.I18N.tr
+import mods.eln.misc.*
+import mods.eln.node.transparent.*
+import mods.eln.transparentnode.utilitylight.MainsStepDown
+import mods.eln.transparentnode.utilitylight.isStepDownUnit
+import net.minecraft.world.Container
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.inventory.Slot
+import net.minecraft.world.item.ItemStack
+import java.io.DataInputStream
+import java.io.DataOutputStream
+import java.util.Locale
+
+class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kind.title,Eln.obj.getObj("distributionpole"),
+    DistributionPoleElement::class.java,DistributionPoleRender::class.java,"textures/wire.png",Eln.instance.veryHighVoltageCableDescriptor,64) {
+    init {
+        creativeTab=Eln.creativeTabPowerElectronics
+        ghostGroup=GhostGroup().apply { for(y in 1..7)addElement(0,y,0,GhostBlock.tClearance) }
+    }
+    override fun rotationIsFixed()=true
+    fun drawEquipment(front: Direction,display: DistributionDisplay?=null)=preserveMatrix {
+        front.glRotateXnRef();GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
+        try {
+            GL11.glDisable(GL11.GL_TEXTURE_2D)
+            fun part(name: String,r: Float,g: Float,b: Float) { GL11.glColor3f(r,g,b);obj.getPart(name)?.drawNoBind() }
+            part("main",.39f,.27f,.14f)
+            if(!kind.lvOnly) {
+                part(if(kind.phases==1)"SingleArm" else "Crossarm",.36f,.25f,.13f)
+                repeat(kind.phases) { i -> part("Pin${if(kind.phases==1)1 else i}",.57f,.66f,.68f) }
+            }
+            part("SecondaryRack",.29f,.31f,.32f);repeat(3) { part("Secondary$it",.54f,.65f,.67f) }
+            if(kind.transformer && display?.installed!=false) {
+                part("Transformer",.53f,.55f,.54f);part("TransformerPin",.32f,.43f,.44f)
+                part("TransformerFeed${if(kind.phases==1)1 else display?.phase ?: 0}",.12f,.14f,.15f)
+                part("TransformerSecondary",.13f,.15f,.16f)
+            }
+            if(kind.transformer || kind.cutout || kind.regulator)repeat(if(kind.transformer)1 else kind.phases) { i ->
+                val visual=if(kind.phases==1 || kind.transformer)1 else i
+                if(kind.cutout || kind.regulator)part("FuseJumper$visual",.13f,.15f,.16f)
+                part("CutoutBase$visual",.32f,.34f,.35f);part("CutoutInsulator$visual",.68f,.68f,.61f)
+                preserveMatrix {
+                    val z=if(kind.phases==1 || kind.transformer)0.0 else (i-1)*.95
+                    GL11.glTranslated(-.68,5.85,z)
+                    if(display?.fuseClosed?.getOrNull(i)==false)GL11.glRotated(125.0,0.0,0.0,1.0)
+                    GL11.glTranslated(.68,-5.85,-z)
+                    part("FuseDoor$visual",if(display?.fuseBlown?.getOrNull(i)==true).23f else .53f,.36f,.20f)
+                }
+            }
+            if(kind==DistributionKind.FEEDER_THREE)repeat(3) { part("Riser$it",.28f,.31f,.32f);part("RiserJumper$it",.13f,.15f,.16f) }
+            if(kind.regulator)repeat(kind.phases) { val i=if(kind.phases==1)1 else it;part("Regulator$i",.64f,.66f,.63f);part("RegulatorPin$i",.44f,.48f,.38f);part("RegulatorLoadPin$i",.44f,.48f,.38f);part("RegulatorFeed$i",.13f,.15f,.16f) }
+            if(kind.capacitor) { part("CapacitorRack",.35f,.38f,.40f);repeat(3) { part("Capacitor$it",.76f,.77f,.72f);part("CapacitorPin$it",.4f,.45f,.35f);part("CapacitorFeed$it",.13f,.15f,.16f) } }
+            if(kind.recloser) { part("Recloser",.57f,.61f,.58f);part("Control",.60f,.63f,.61f) }
+            if(kind.recloser || kind==DistributionKind.AIR_BREAK_THREE) {
+                repeat(3) { i ->
+                    part("SwitchInsulator$i",.50f,.60f,.59f);part("SwitchFeed$i",.13f,.15f,.16f)
+                    preserveMatrix {
+                        GL11.glTranslated(-.35,6.51,(i-1)*.95)
+                        if(if(kind.recloser)display?.closed==false else display?.enabled==false)GL11.glRotated(-70.0,0.0,0.0,1.0)
+                        GL11.glTranslated(.35,-6.51,-(i-1)*.95);part("Knife$i",.73f,.61f,.38f)
+                    }
+                }
+                part("Handle",.37f,.39f,.38f)
+            }
+            if(kind.light) {
+                part("LampBracket",.48f,.50f,.51f);part("LampHousing",.26f,.29f,.31f)
+                if((display?.light ?: 0)>0) { UtilsClient.disableLight();part("LampLens",1f,.94f,.77f);UtilsClient.enableLight() }
+                else part("LampLens",.14f,.17f,.19f)
+            }
+        } finally { GL11.glPopAttrib() }
+    }
+    override fun renderItem(type: IItemRenderer.ItemRenderType,item: ItemStack,vararg data: Any)=preserveMatrix {
+        GL11.glScaled(.20,.20,.20);GL11.glTranslated(0.0,-2.8,0.0);drawEquipment(Direction.XN)
+    }
+    override fun addInformation(itemStack: ItemStack?,entityPlayer: Player?,list: MutableList<String>,par4: Boolean) {
+        list.add(tr("Select the cable terminal in the menu before linking poles"))
+        list.add(tr("A, B and C are independent electrical circuits"))
+        list.add(tr("Secondary rack carries L1 120 V, L2 120 V and 240 V service circuits"))
+        if(kind.transformer) { list.add(tr("Insert a Mains Step-down Unit; select 10, 25, 50, 75 or 100 kW"));list.add(tr("Transformer phase is selectable; a blown fuse needs a Pole Fuse Link")) }
+        if(kind.cutout || kind.regulator)list.add(tr("Separate line and load terminals; replace blown links with a Pole Fuse Link"))
+        if(kind.recloser)list.add(tr("Any phase fault opens all three; timed retries stop at lockout"))
+        if(kind.regulator)list.add(tr("Automatic regulation within 10 percent of line voltage; passive, power-conserving taps"))
+        if(kind.capacitor)list.add(tr("Three independent charge storage branches smooth DC-equivalent voltage changes"))
+        if(kind==DistributionKind.FEEDER_THREE)list.add(tr("Base: left A, right B, rear C; three separate underground cable inputs"))
+    }
+}
+
+class DistributionDisplay {
+    var terminal=32;var phase=0;var rating=10_000;var voltage=120;var enabled=true;var installed=false
+    var fuseClosed=listOf<Boolean>();var fuseBlown=listOf<Boolean>();var fuseRating=100.0
+    var locked=false;var closed=true;var failures=0;var remaining=0.0;var pickup=100.0;var delay=3.0;var maxFailures=3
+    var target=14_000.0;var automatic=true;var ratios=listOf<Double>();var light=0;var lampOn=true;var dusk=false
+    var input=0.0;var output=0.0;var watts=0.0
+    fun write(s: DataOutputStream) {
+        s.writeInt(terminal);s.writeInt(phase);s.writeInt(rating);s.writeInt(voltage);s.writeBoolean(enabled);s.writeBoolean(installed)
+        s.writeByte(fuseClosed.size);fuseClosed.indices.forEach { s.writeBoolean(fuseClosed[it]);s.writeBoolean(fuseBlown[it]) };s.writeDouble(fuseRating)
+        s.writeBoolean(locked);s.writeBoolean(closed);s.writeInt(failures);s.writeDouble(remaining);s.writeDouble(pickup);s.writeDouble(delay);s.writeInt(maxFailures)
+        s.writeDouble(target);s.writeBoolean(automatic);s.writeByte(ratios.size);ratios.forEach(s::writeDouble);s.writeByte(light);s.writeBoolean(lampOn);s.writeBoolean(dusk)
+        s.writeDouble(input);s.writeDouble(output);s.writeDouble(watts)
+    }
+    fun read(s: DataInputStream) {
+        terminal=s.readInt();phase=s.readInt();rating=s.readInt();voltage=s.readInt();enabled=s.readBoolean();installed=s.readBoolean()
+        val n=s.readUnsignedByte().coerceAtMost(3);val a=ArrayList<Boolean>();val b=ArrayList<Boolean>();repeat(n) { a.add(s.readBoolean());b.add(s.readBoolean()) };fuseClosed=a;fuseBlown=b;fuseRating=s.readDouble()
+        locked=s.readBoolean();closed=s.readBoolean();failures=s.readInt();remaining=s.readDouble();pickup=s.readDouble();delay=s.readDouble();maxFailures=s.readInt()
+        target=s.readDouble();automatic=s.readBoolean();ratios=List(s.readUnsignedByte().coerceAtMost(3)) { s.readDouble() };light=s.readUnsignedByte();lampOn=s.readBoolean();dusk=s.readBoolean()
+        input=s.readDouble();output=s.readDouble();watts=s.readDouble()
+    }
+}
+class DistributionContainer(player: Player,inventory: Container,transformer: Boolean): BasicContainer(player,inventory,
+    if(transformer)arrayOf(object: SlotWithSkinAndComment(inventory,0,9,31,ISlotSkin.SlotSkin.medium,arrayOf(tr("Mains Step-down Unit"))) {
+        override fun mayPlace(stack: ItemStack)=isStepDownUnit(stack)
+        override fun getMaxStackSize()=1
+    }) else emptyArray<Slot>())
+
+class DistributionPoleRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDescriptor): GridRender(entity,descriptor) {
+    override val inventory=TransparentNodeElementInventory(if((descriptor as DistributionPoleDescriptor).kind.transformer)1 else 0,1,this)
+    val display=DistributionDisplay()
+    private val connections=LRDUMask()
+    private var cable: mods.eln.cable.CableRenderType?=null
+    override fun draw() {
+        drawCables();(transparentNodeDescriptor as DistributionPoleDescriptor).drawEquipment(front ?: Direction.XN,display)
+        cable=drawCable(Direction.YN,if((transparentNodeDescriptor as DistributionPoleDescriptor).kind==DistributionKind.FEEDER_THREE)Eln.instance.stdCableRender3200V else Eln.instance.stdCableRender200V,connections,cable)
+    }
+    override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream);display.read(stream);connections.deserialize(stream);cable=null }
+    override fun newGuiDraw(side: Direction,player: Player)=DistributionGui(player,this)
+}
+class DistributionGui(player: Player,private val render: DistributionPoleRender): GuiContainerEln(DistributionContainer(player,render.inventory,(render.transparentNodeDescriptor as DistributionPoleDescriptor).kind.transformer)) {
+    private val kind=(render.transparentNodeDescriptor as DistributionPoleDescriptor).kind
+    private val d get()=render.display
+    private lateinit var terminal: GuiButtonEln
+    private var phase: GuiButtonEln?=null;private var rating: GuiButtonEln?=null;private var voltage: GuiButtonEln?=null;private var operate: GuiButtonEln?=null
+    private var current: GuiTextFieldEln?=null;private var applyCurrent: GuiButtonEln?=null;private var retry: GuiTextFieldEln?=null;private var applyRetry: GuiButtonEln?=null;private var max: GuiButtonEln?=null;private var reset: GuiButtonEln?=null
+    private var target: GuiTextFieldEln?=null;private var applyTarget: GuiButtonEln?=null;private var auto: GuiButtonEln?=null;private var lamp: GuiButtonEln?=null;private var dusk: GuiButtonEln?=null
+    private val fuses=ArrayList<GuiButtonEln>()
+    override fun newHelper()=GuiHelperContainer(this,240,310,8,228)
+    private fun terminals()=buildList { if(!kind.lvOnly) { repeat(kind.phases) { add(32+it) };if(kind.protectedLine)repeat(kind.phases) { add(36+it) } };add(50);addAll(40..42) }
+    override fun initGui() {
+        super.initGui();terminal=newGuiButton(8,58,224,"")
+        if(kind.transformer) {
+            phase=newGuiButton(8,82,106,"");rating=newGuiButton(118,82,114,"");voltage=newGuiButton(8,106,106,"")
+            operate=newGuiButton(118,106,114,"")
+        }
+        if(kind.cutout || kind.transformer || kind.regulator)repeat(if(kind.transformer)1 else kind.phases) { i -> fuses.add(newGuiButton(8+i*75,134,72,"")) }
+        if(kind.cutout || kind.recloser) {
+            current=newGuiTextField(8,88,85).apply { text=(if(kind.recloser)d.pickup else d.fuseRating).toString();setComment(0,tr("Trip current in amperes: 1 to 2000 A")) }
+            applyCurrent=newGuiButton(98,84,134,tr("Set trip current"))
+        }
+        if(kind.recloser) {
+            retry=newGuiTextField(8,112,85).apply { text=d.delay.toString();setComment(0,tr("Retry delay: 1 to 60 seconds")) };applyRetry=newGuiButton(98,108,134,tr("Set retry delay"))
+            max=newGuiButton(8,132,224,"");operate=newGuiButton(8,156,106,"");reset=newGuiButton(118,156,114,tr("Reset lockout"))
+        }
+        if(kind.regulator) {
+            target=newGuiTextField(8,88,100).apply { text=d.target.toString() };applyTarget=newGuiButton(114,84,118,tr("Set voltage"));auto=newGuiButton(8,108,224,"")
+            current=newGuiTextField(8,170,85).apply { text=d.fuseRating.toString();setComment(0,tr("Fuse trip current: 1 to 2000 A")) };applyCurrent=newGuiButton(98,166,134,tr("Set fuse current"))
+        }
+        if(kind==DistributionKind.AIR_BREAK_THREE)operate=newGuiButton(8,84,224,"")
+        if(kind.light) { lamp=newGuiButton(8,162,106,"");dusk=newGuiButton(118,162,114,"") }
+        refresh()
+    }
+    private fun refresh() {
+        terminal.displayString=tr("Cable: %1$",ServiceTerminals.label(d.terminal))
+        phase?.displayString=tr("Phase: %1$",listOf("A","B","C")[d.phase.coerceIn(0,2)])
+        rating?.displayString=tr("Rating: %1$ kW",d.rating/1000);voltage?.displayString=tr("Output: %1$ V",d.voltage)
+        operate?.displayString=when { kind.transformer -> if(d.enabled)tr("Transformer: On") else tr("Transformer: Off");kind.recloser -> if(d.closed)tr("Open all phases") else tr("Close all phases");else -> if(d.enabled)tr("Open switch") else tr("Close switch") }
+        fuses.forEachIndexed { i,b -> b.displayString=tr("%1$: %2$",listOf("A","B","C")[if(kind.transformer)d.phase.coerceIn(0,2) else i],if(d.fuseBlown.getOrNull(i)==true)tr("Blown") else if(d.fuseClosed.getOrNull(i)!=false)tr("Open") else tr("Close"));b.enabled=d.fuseBlown.getOrNull(i)!=true;b.setComment(0,tr("Right-click the pole holding a Pole Fuse Link to replace a blown fuse")) }
+        max?.displayString=tr("Lockout after %1$ failed reclosures",d.maxFailures)
+        auto?.displayString=if(d.automatic)tr("Voltage control: Auto") else tr("Voltage control: Hold tap")
+        lamp?.displayString=if(d.lampOn)tr("Lamp: On") else tr("Lamp: Off");dusk?.displayString=if(d.dusk)tr("Dusk: Auto") else tr("Dusk: Manual")
+    }
+    override fun guiObjectEvent(obj: IGuiObject) {
+        super.guiObjectEvent(obj)
+        when(obj) {
+            terminal -> { val ts=terminals();render.clientSendInt(87,ts[(ts.indexOf(d.terminal)+1)%ts.size]) }
+            phase -> render.clientSendInt(88,(d.phase+1)%kind.phases)
+            rating -> render.clientSendInt(86,MainsStepDown.RATINGS[(MainsStepDown.RATINGS.indexOf(d.rating)+1)%5])
+            voltage -> render.clientSendInt(80,if(d.voltage==120)240 else 120)
+            operate -> if(kind.transformer)render.clientSendBoolean(81,!d.enabled) else render.clientSendId(95)
+            applyCurrent -> current?.text?.toDoubleOrNull()?.let { render.clientSendDouble(91,it) }
+            applyRetry -> retry?.text?.toDoubleOrNull()?.let { render.clientSendDouble(92,it) }
+            max -> render.clientSendInt(93,d.maxFailures%5+1)
+            reset -> render.clientSendId(94)
+            applyTarget -> target?.text?.toDoubleOrNull()?.let { render.clientSendDouble(96,it) }
+            auto -> render.clientSendBoolean(97,!d.automatic)
+            lamp -> render.clientSendBoolean(82,!d.lampOn)
+            dusk -> render.clientSendBoolean(83,!d.dusk)
+            else -> fuses.indexOf(obj).takeIf { it>=0 }?.let { render.clientSendInt(89,it) }
+        }
+    }
+    override fun postDraw(f: Float,x: Int,y: Int) {
+        super.postDraw(f,x,y);refresh()
+        drawString(8,8,font.plainSubstrByWidth(tr(kind.title),224))
+        if(kind.transformer)drawString(32,35,if(d.installed)tr("Step-down unit installed") else tr("Insert step-down unit"))
+        else drawString(8,30,tr("Line: %1$",Utils.plotVolt("",d.input).trim()))
+        if(kind.recloser)drawString(8,184,if(d.locked)tr("Locked out; inspect fault and reset") else if(!d.closed)tr("Retry in %1$ s",String.format(Locale.ROOT,"%.1f",d.remaining)) else tr("All three phases closed"))
+        else if(kind.regulator)drawString(8,190,tr("Tap: %1$ %%",String.format(Locale.ROOT,"%.1f",100*(d.ratios.firstOrNull() ?: 1.0))))
+        else drawString(8,190,tr("Load: %1$",Utils.plotVolt("",d.output).trim()))
+        drawString(8,208,font.plainSubstrByWidth(tr("Secondary: L1 120 V / L2 120 V / 240 V"),224))
+    }
+}

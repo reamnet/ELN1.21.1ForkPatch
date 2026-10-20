@@ -32,20 +32,24 @@ class GridLink : INBTTReady {
     internal var connected = false
     // Drop this if the link is broken.
     lateinit internal var cable: ItemStack
-    lateinit private var `as`: Direction
-    lateinit private var bs: Direction
+    private var aTerminal=0
+    private var bTerminal=0
     private var ae = Optional.empty<GridElement>()
     private var be = Optional.empty<GridElement>()
     private var ab: ElectricalConnection? = null
+    private val extraConnections=ArrayList<ElectricalConnection>()
+    private val extraThermals=ArrayList<WireSpanThermal>()
     private var rs = MnaConst.highImpedance
     internal var spanThermal: WireSpanThermal? = null
 
-    constructor(a: Coordinate, b: Coordinate, `as`: Direction, bs: Direction, cable: ItemStack, rs: Double) {
+    constructor(a: Coordinate,b: Coordinate,`as`: Direction,bs: Direction,cable: ItemStack,rs: Double):this(a,b,`as`.int,bs.int,cable,rs)
+
+    constructor(a: Coordinate, b: Coordinate, fromTerminal: Int, toTerminal: Int, cable: ItemStack, rs: Double) {
         this.rs = rs
         this.a = a
         this.b = b
-        this.`as` = `as`
-        this.bs = bs
+        this.aTerminal = fromTerminal
+        this.bTerminal = toTerminal
         this.cable = cable
     }
 
@@ -75,22 +79,27 @@ class GridLink : INBTTReady {
             return false
         }
 
-        // Add link to simulator.
-        val aLoad = a.getGridElectricalLoad(`as`)
-        val bLoad = b.getGridElectricalLoad(bs)
-        if (aLoad == null || bLoad == null) {
-            throw UserError("Invalid connection side")
+        // Both chunks save the span. Merge their records into one live link after reload.
+        val canonical=(a.gridLinkList+b.gridLinkList).firstOrNull { other -> other!==this && sameTerminals(other) }
+        if(canonical!=null) {
+            a.gridLinkList.add(canonical);b.gridLinkList.add(canonical);canonical.connect();return false
         }
-        assert(ab == null)
-        val utility = Eln.sixNodeItem.getDescriptor(cable) as? UtilityCableDescriptor
-        ab = if (utility != null) WireSpanConnection(aLoad, bLoad, rs) else ElectricalConnection(aLoad, bLoad)
-        Eln.simulator.addElectricalComponent(ab)
-        if (utility == null) ab!!.resistance = rs
-        if (utility != null) {
-            val thermal = spanThermal ?: WireSpanThermal(utility, utility.getRemainingLengthMeters(cable)).also { spanThermal = it }
-            thermal.connect(ab as WireSpanConnection,
-                { (a.getAmbientTemperatureCelsius() + b.getAmbientTemperatureCelsius()) * .5 },
-                { onBreakElement() }) // destroyed conductor: no intact spool refund
+        ae=Optional.of(a);be=Optional.of(b)
+        val loadsA=a.gridLoads(aTerminal);val loadsB=b.gridLoads(bTerminal)
+        if(loadsA.isEmpty() || loadsA.size!=loadsB.size)throw UserError(tr("Invalid grid terminal circuit"))
+        val utility=Eln.sixNodeItem.getDescriptor(cable) as? UtilityCableDescriptor
+        val meters=if(utility!=null)utility.getRemainingLengthMeters(cable)/loadsA.size else cable.count.toDouble()/loadsA.size
+        for(index in loadsA.indices) {
+            val connection=if(utility!=null)WireSpanConnection(loadsA[index],loadsB[index],rs) else ElectricalConnection(loadsA[index],loadsB[index])
+            if(index==0)ab=connection else extraConnections.add(connection)
+            Eln.simulator.addElectricalComponent(connection)
+            if(utility==null)connection.resistance=rs
+            else {
+                val thermal=if(index==0)spanThermal ?: WireSpanThermal(utility,meters).also { spanThermal=it }
+                    else extraThermals.getOrNull(index-1) ?: WireSpanThermal(utility,meters).also { extraThermals.add(it) }
+                thermal.connect(connection as WireSpanConnection,
+                    { (a.getAmbientTemperatureCelsius()+b.getAmbientTemperatureCelsius())*.5 },{ onBreakElement() })
+            }
         }
 
         // Add link to link lists.
@@ -125,6 +134,8 @@ class GridLink : INBTTReady {
         val b = getElementFromCoordinate(this.b)
 
         spanThermal?.disconnect()
+        extraThermals.forEach { it.disconnect() }
+        extraConnections.forEach { Eln.simulator.removeElectricalComponent(it);it.breakConnection() };extraConnections.clear()
         Eln.simulator.removeElectricalComponent(ab)
         ab?.breakConnection()
         ab = null
@@ -134,6 +145,10 @@ class GridLink : INBTTReady {
 
         connected = false
     }
+
+    private fun sameTerminals(other: GridLink)=
+        a==other.a && b==other.b && aTerminal==other.aTerminal && bTerminal==other.bTerminal ||
+        a==other.b && b==other.a && aTerminal==other.bTerminal && bTerminal==other.aTerminal
 
     private fun links(a: GridElement, b: GridElement): Boolean {
         if (this.a == a.coordinate()) {
@@ -148,25 +163,30 @@ class GridLink : INBTTReady {
     override fun readFromNBT(nbt: CompoundTag, str: String) {
         a.readFromNBT(nbt, str + "a")
         b.readFromNBT(nbt, str + "b")
-        `as` = Direction.readFromNBT(nbt, str + "as")!!
-        bs = Direction.readFromNBT(nbt, str + "bs")!!
+        aTerminal=nbt.getInt(str+"as")
+        bTerminal=nbt.getInt(str+"bs")
         rs = nbt.getDouble(str + "rs")
         cable = stackFromNbt(nbt)
         // Migrate the old saved, arbitrary resistance using the actual paid length in the cable stack.
         (Eln.sixNodeItem.getDescriptor(cable) as? UtilityCableDescriptor)?.let {
-            rs = it.resistanceOhms(it.getRemainingLengthMeters(cable))
-            spanThermal = WireSpanThermal(it, it.getRemainingLengthMeters(cable)).also { thermal -> thermal.read(nbt) }
+            val channels=if(aTerminal in 50..51)3 else 1
+            val meters=it.getRemainingLengthMeters(cable)/channels
+            rs = it.resistanceOhms(meters)
+            spanThermal = WireSpanThermal(it, meters).also { thermal -> thermal.read(nbt) }
+            extraThermals.clear()
+            for(i in 1 until channels)extraThermals.add(WireSpanThermal(it,meters).also { t -> t.read(nbt.getCompound("spanThermal$i")) })
         }
     }
 
     override fun writeToNBT(nbt: CompoundTag, str: String) {
         a.writeToNBT(nbt, str + "a")
         b.writeToNBT(nbt, str + "b")
-        `as`.writeToNBT(nbt, str + "as")
-        bs.writeToNBT(nbt, str + "bs")
+        nbt.putInt(str+"as",aTerminal)
+        nbt.putInt(str+"bs",bTerminal)
         nbt.putDouble(str + "rs", rs)
         cable.writeToNBT(nbt)
         spanThermal?.write(nbt)
+        extraThermals.forEachIndexed { i,t -> nbt.put("spanThermal${i+1}",CompoundTag().also(t::write)) }
     }
 
     fun selfDestroy() {
@@ -182,19 +202,14 @@ class GridLink : INBTTReady {
         val thermal = spanThermal
         if (thermal != null && thermal.insulationDamaged) {
             thermal.descriptor.meltedDescriptor?.let {
-                cable = it.newItemStack().also { stack -> it.setRemainingLengthMeters(stack, thermal.meters) }
+                cable = it.newItemStack().also { stack -> it.setRemainingLengthMeters(stack, thermal.meters*(1+extraThermals.size)) }
             }
         }
         return cable
     }
 
-    fun getSide(gridElement: GridElement): Direction {
-        if (gridElement === elementA()) {
-            return `as`
-        } else {
-            return bs
-        }
-    }
+    fun getTerminal(element: GridElement)=if(element===elementA())aTerminal else bTerminal
+    fun getSide(gridElement: GridElement): Direction = Direction.fromInt(getTerminal(gridElement)) ?: Direction.XN
 
     fun getOtherElement(gridElement: GridElement): GridElement {
         if (gridElement === elementA()) {
@@ -227,7 +242,7 @@ class GridLink : INBTTReady {
                 throw UserError(tr("Grid links require an intact power cable; signal and melted cables are not supported"))
             }
             if (a === b || cableLength <= 0) throw UserError(tr("Invalid grid cable span"))
-            if (a.getGridElectricalLoad(fromSide) == null || b.getGridElectricalLoad(toSide) == null) {
+            if (a.gridLoads(fromSide.int).isEmpty() || b.gridLoads(toSide.int).isEmpty()) {
                 throw UserError(tr("Select a grid terminal, not the device body"))
             }
         }
@@ -252,21 +267,27 @@ class GridLink : INBTTReady {
             return stack
         }
 
-        fun addLink(a: GridElement, b: GridElement, `as`: Direction, bs: Direction, cable: ElectricalCableDescriptor, cableLength: Int, cableStack: ItemStack? = null) {
-            validateNewLink(a, b, `as`, bs, cable, cableLength)
-            // Check if these two nodes are already linked.
-            (a.gridLinkList + b.gridLinkList)
-                .filter { it.links(a, b) }
-                .forEach { throw UserError("Already Connected") }
+        fun addLink(a: GridElement,b: GridElement,`as`: Direction,bs: Direction,cable: ElectricalCableDescriptor,cableLength: Int,cableStack: ItemStack?=null) =
+            addLink(a,b,`as`.int,bs.int,cable,cableLength,cableStack)
 
-            val linkStack = linkStack(cable, cableLength, cableStack)
-
-            // Makin' a Link. Where'd Zelda go?
-            val link = GridLink(
-                    a.coordinate(), b.coordinate(), `as`, bs, linkStack,
-                    resistanceForCable(cable, cableLength))
-            if (!link.connect()) throw UserError(tr("Grid endpoint is no longer available"))
+        fun addLink(a: GridElement,b: GridElement,from: Int,to: Int,cable: ElectricalCableDescriptor,cableLength: Int,cableStack: ItemStack?=null) {
+            if(!(a.transparentNodeDescriptor as GridDescriptor).acceptsGridCable(cable) || !(b.transparentNodeDescriptor as GridDescriptor).acceptsGridCable(cable))
+                throw UserError(tr("Grid links require an intact power cable; signal and melted cables are not supported"))
+            val x=a.gridLoads(from);val y=b.gridLoads(to)
+            if(a===b || x.isEmpty() || x.size!=y.size || cableLength<=0)throw UserError(tr("Select matching grid terminal circuits"))
+            val ka=a.gridCircuitKey(from);val kb=b.gridCircuitKey(to)
+            if(ka!=kb && ka!="LEGACY" && kb!="LEGACY")throw UserError(tr("Grid phases or service voltages do not match"))
+            if((a.gridLinkList+b.gridLinkList).any { it.links(a,b) && ((from<6 && to<6) || (it.a==a.coordinate() && it.aTerminal==from && it.bTerminal==to) || (it.a==b.coordinate() && it.bTerminal==from && it.aTerminal==to)) })
+                throw UserError(tr("Already connected to this terminal"))
+            if(x.size>1 && cable !is UtilityCableDescriptor && cableLength>cable.newItemStack().maxStackSize)
+                throw UserError(tr("Use a cable spool for this long service bundle"))
+            val stack=linkStack(cable,cableLength,cableStack)
+            val meters=cableLength.toDouble()/x.size
+            val resistance=if(cable is UtilityCableDescriptor)cable.resistanceOhms(meters) else cable.electricalRs*meters
+            val link=GridLink(a.coordinate(),b.coordinate(),from,to,stack,resistance)
+            if(!link.connect())throw UserError(tr("Grid endpoint is no longer available"))
         }
+
     }
 }
 

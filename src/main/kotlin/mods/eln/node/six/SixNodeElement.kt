@@ -331,6 +331,7 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
     }
 
     open fun disconnectJob() {
+        mods.eln.utility.WirelessPowerChannels.disconnectOwner(this)
         mods.eln.transparentnode.cord.WirelessOutletPower.disconnectSupply(this)
         (this as? CordDevice)?.cord?.disconnect()
         for (load in thermalLoadList) load.clearSimCoordinate()

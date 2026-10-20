@@ -114,11 +114,11 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
 
     val process = IProcess { deltaT ->
         if (!poweredByCable && !cord.plugged) {
-            var closestPowerSupply: LampSupplyElement.PowerSupplyChannelHandle? = null
+            var closestPowerSupply: mods.eln.utility.WirelessPowerHandle? = null
             var closestDistance = 10000f
 
-            LampSupplyElement.channelMap[channel]?.forEach {
-                val distance = it.element.sixNode!!.coordinate.trueDistanceTo(sixNode.coordinate).toFloat()
+            mods.eln.utility.WirelessPowerChannels.channels(channel)?.forEach {
+                val distance = it.element.coordinate.trueDistanceTo(sixNode.coordinate).toFloat()
                 if (distance < closestDistance && distance <= it.element.range) {
                     closestDistance = distance
                     closestPowerSupply = it

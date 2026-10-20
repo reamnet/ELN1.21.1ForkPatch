@@ -25,7 +25,8 @@ import kotlin.test.assertTrue
 class GridCableCompatibilityTest {
     private val expectedDevices = setOf("Grid DC-DC Converter", "Utility Pole",
         "Utility Pole w/DC-DC Converter", "Transmission Tower", "Direct Utility Pole", "Grid Switch",
-        "Utility Pole Street Light", "Utility Pole Cobrahead Street Light", "Utility Pole Twin LED Street Light")
+        "Utility Pole Street Light", "Utility Pole Cobrahead Street Light", "Utility Pole Twin LED Street Light") +
+        mods.eln.utility.DistributionKind.entries.map { it.title } + setOf("120/240V Service Weatherhead","North American Meter Base","Twelve Circuit American Breaker Panel")
 
     private fun devices(): List<GridDescriptor> = Eln.transparentNodeItem.subItemList.values
         .filterIsInstance<GridDescriptor>().distinct().also {
@@ -179,6 +180,7 @@ class GridCableCompatibilityTest {
         val old = GridLink(Coordinate(0, 80, 0, 0), Coordinate(6, 80, 0, 0), Direction.XP,
             Direction.XN, stack, cable.resistanceOhms(6.0))
         val tag = CompoundTag(); old.writeToNBT(tag, "")
+        tag.putByte("as",Direction.XP.int.toByte());tag.putByte("bs",Direction.XN.int.toByte()) // Real legacy encoding.
         val restored = GridLink(tag, "")
         assertTrue(ElectricalCableDescriptor.getDescriptor(restored.cable) === cable)
         assertEquals(6.0, cable.getRemainingLengthMeters(restored.cable), 0.0)

@@ -22,10 +22,13 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
         const val MAX_INPUT_AMPS = 100.0
         const val EFFICIENCY = .95
         fun validVoltage(value: Int) = value == 120 || value == 240
-        fun limits(voltage: Int) = ConverterLimits(voltage.toDouble(), MAX_INPUT_VOLTS, 240.0,
-            MAX_INPUT_AMPS, MAX_OUTPUT_WATTS / voltage, MAX_OUTPUT_WATTS, EFFICIENCY, 1.0 / 1024, 1.0)
+        val RATINGS=intArrayOf(10_000,25_000,50_000,75_000,100_000)
+        fun limits(voltage: Int,watts: Int=10_000) = ConverterLimits(voltage.toDouble(), MAX_INPUT_VOLTS, 240.0,
+            MAX_INPUT_AMPS, watts.toDouble() / voltage, watts.toDouble(), EFFICIENCY, 1.0 / 1024, 1.0)
     }
 
+    var ratedWatts=10_000
+        private set
     var outputVoltage = 120
         private set
     var enabled = true
@@ -51,7 +54,7 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
     }
     val controller = RegulatedPowerProcess(inputPin, null, outputPin, null, input, output,
         { enabled && available() && thermal.temperatureCelsius < 100.0 },
-        { limits(outputVoltage) }, { outputVoltage.toDouble() })
+        { limits(outputVoltage,ratedWatts) }, { outputVoltage.toDouble() })
 
     init {
         listOf(primary, secondary, inputPin, outputPin).forEach {
@@ -66,7 +69,14 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
         })
     }
 
+    /** Uses the existing solve result, never another expensive Thevenin probe. */
+    val outputOverloaded get()=secondary.voltage<outputVoltage*.92 && when(controller.status) {
+        "OUTPUT_POWER","OUTPUT_CURRENT","GAIN_UNAVAILABLE" -> true
+        else -> false
+    }
+
     fun write(tag: CompoundTag) {
+        tag.putInt("mainsRatedWatts",ratedWatts)
         tag.putInt("mainsOutputVoltage", outputVoltage)
         tag.putBoolean("mainsEnabled", enabled)
         tag.putBoolean("mainsLampEnabled", lampEnabled)
@@ -75,6 +85,8 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
         tag.putInt("mainsLampYaw", lampYaw)
     }
     fun read(tag: CompoundTag) {
+        ratedWatts=tag.getInt("mainsRatedWatts").takeIf { it in RATINGS } ?: 10_000
+        thermal.heatCapacity=2000.0*ratedWatts/10_000;thermal.Rp=.08*10_000/ratedWatts;outputWinding.resistance=.01*10_000/ratedWatts
         outputVoltage = tag.getInt("mainsOutputVoltage").takeIf(::validVoltage) ?: 120
         enabled = !tag.contains("mainsEnabled") || tag.getBoolean("mainsEnabled")
         lampEnabled = !tag.contains("mainsLampEnabled") || tag.getBoolean("mainsLampEnabled")
@@ -84,9 +96,10 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
         controller.resetFault()
     }
     fun packet(id: Byte, stream: DataInputStream): Boolean {
-        if (id.toInt() !in 80..85) return false
+        if (id.toInt() !in 80..86) return false
         try {
             when (id.toInt()) {
+                86 -> { val next=stream.readInt();if(next in RATINGS) { ratedWatts=next;thermal.heatCapacity=2000.0*ratedWatts/10_000;thermal.Rp=.08*10_000/ratedWatts;outputWinding.resistance=.01*10_000/ratedWatts } }
                 80 -> { val value = stream.readInt(); if (!validVoltage(value)) return true; outputVoltage = value }
                 81 -> enabled = stream.readBoolean()
                 82 -> lampEnabled = stream.readBoolean()
@@ -109,7 +122,7 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
         return true
     }
     fun publish(stream: DataOutputStream, installed: Boolean, light: Int) {
-        stream.writeInt(outputVoltage); stream.writeBoolean(enabled); stream.writeBoolean(lampEnabled); stream.writeBoolean(lampAutomatic)
+        stream.writeInt(ratedWatts);stream.writeInt(outputVoltage); stream.writeBoolean(enabled); stream.writeBoolean(lampEnabled); stream.writeBoolean(lampAutomatic)
         stream.writeBoolean(installed); stream.writeByte(light)
         stream.writeByte(lampHeightStep)
         stream.writeShort(lampYaw)

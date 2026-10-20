@@ -50,26 +50,29 @@ class PowerSocketElement(sixNode: SixNode?, side: Direction?, descriptor: SixNod
         voltageWatchdog.setNominalVoltage(300.0)
     }
 
+    private var connectedSupply: mods.eln.utility.WirelessPowerHandle?=null
+    private fun disconnectSupply() {
+        if(connectedSupply==null)return
+        mods.eln.Eln.simulator.removeElectricalComponent(loadResistor)
+        loadResistor.breakConnection();loadResistor.highImpedance()
+        connectedSupply=null
+        mods.eln.Eln.simulator.addElectricalComponent(loadResistor)
+        mods.eln.utility.WirelessPowerChannels.untrackBridge(this)
+    }
     internal inner class PowerSocketSlowProcess : IProcess {
         override fun process(time: Double) {
-            val local = sixNode!!.coordinate
-            var handle: PowerSupplyChannelHandle? = null
-            var bestDist = 1e9f
-            val handles: List<PowerSupplyChannelHandle>? = LampSupplyElement.channelMap[channel]
-            if (handles != null) {
-                for (hdl in handles) {
-                    val dist = hdl.element.sixNode!!.coordinate.trueDistanceTo(local).toFloat()
-                    if (dist < bestDist && dist <= hdl.element.range) {
-                        bestDist = dist
-                        handle = hdl
-                    }
-                }
-            }
-            loadResistor.breakConnection()
-            loadResistor.highImpedance()
-            if (handle != null && handle.element.getChannelState(handle.id)) {
-                loadResistor.connectTo(handle.element.powerLoad, outputLoad)
-                loadResistor.resistance = 0.1
+            val local=sixNode!!.coordinate
+            val next=mods.eln.utility.WirelessPowerChannels.channels(channel)?.asSequence()
+                ?.filter { it.element.isInRange(local) && it.element.getChannelState(it.id) }
+                ?.minByOrNull { it.element.coordinate.trueDistanceTo(local) }
+            if(next===connectedSupply)return
+            disconnectSupply()
+            if(next!=null) {
+                mods.eln.Eln.simulator.removeElectricalComponent(loadResistor)
+                loadResistor.connectTo(next.element.powerLoad,outputLoad);loadResistor.resistance=.1
+                mods.eln.Eln.simulator.addElectricalComponent(loadResistor)
+                connectedSupply=next
+                mods.eln.utility.WirelessPowerChannels.trackBridge(this@PowerSocketElement,next.element.owner) { disconnectSupply() }
             }
         }
     }

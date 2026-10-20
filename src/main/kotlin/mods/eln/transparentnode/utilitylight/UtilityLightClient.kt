@@ -27,6 +27,8 @@ class StepDownContainer(player: Player, inventory: Container, pole: Boolean) : B
     }) else emptyArray<Slot>())
 
 class StepDownDisplay {
+    val pole=mods.eln.utility.LegacyPoleDisplay()
+    var rating=10_000
     var voltage = 120
     var enabled = true
     var lampEnabled = true
@@ -41,7 +43,7 @@ class StepDownDisplay {
     var status = "IDLE"
     val connections = LRDUMask()
     fun read(stream: DataInputStream) {
-        voltage = stream.readInt(); enabled = stream.readBoolean(); lampEnabled = stream.readBoolean(); automatic = stream.readBoolean()
+        rating=stream.readInt();voltage = stream.readInt(); enabled = stream.readBoolean(); lampEnabled = stream.readBoolean(); automatic = stream.readBoolean()
         installed = stream.readBoolean(); light = stream.readUnsignedByte()
         heightStep = stream.readByte().toInt().coerceIn(StreetLightMount.MIN_STEP, StreetLightMount.MAX_STEP)
         yaw = stream.readUnsignedShort().takeIf(StreetLightMount::validYaw) ?: 0
@@ -79,15 +81,20 @@ class UtilityStreetLightRender(entity: TransparentNodeEntity, descriptor: Transp
     private var cable: CableRenderType? = null
     override fun draw() {
         super.draw()
+        mods.eln.utility.PoleFuseVisual.draw(front ?: Direction.XN,display.pole.fuseClosed,display.pole.fuseBlown)
+        mods.eln.utility.PoleSecondaryVisual.draw(front ?: Direction.XN)
         (transparentNodeDescriptor as UtilityStreetLightDescriptor).drawLamp(front ?: Direction.XN, display.light > 0, display.installed, display.heightStep, display.yaw)
         cable = drawCable(front!!.down(), Eln.instance.stdCableRender200V, display.connections, cable)
     }
-    override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream); display.read(stream) }
+    override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream); display.read(stream);display.pole.read(stream) }
     override fun newGuiDraw(side: Direction, player: Player) = StepDownGui(player, inventory, this, display, true)
 }
 
 class StepDownGui(player: Player, inventory: Container, private val render: TransparentNodeElementRender,
     private val display: StepDownDisplay, private val pole: Boolean) : GuiContainerEln(StepDownContainer(player, inventory, pole)) {
+    private var terminal: GuiButtonEln?=null
+    private var fuse: GuiButtonEln?=null
+    private lateinit var rating: GuiButtonEln
     private lateinit var voltage: GuiButtonEln
     private lateinit var enabled: GuiButtonEln
     private lateinit var lamp: GuiButtonEln
@@ -96,9 +103,14 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
     private lateinit var heightUp: GuiButtonEln
     private lateinit var angleLeft: GuiButtonEln
     private lateinit var angleRight: GuiButtonEln
-    override fun newHelper() = GuiHelperContainer(this, 176, if (pole) 256 else 208, 8, if (pole) 174 else 126)
+    override fun newHelper() = GuiHelperContainer(this, if(pole)332 else 176, if (pole) 280 else 232, 8, if (pole) 198 else 150)
     override fun initGui() {
         super.initGui()
+        rating=newGuiButton(8,if(pole)156 else 108,160,"")
+        if(pole) {
+            terminal=newGuiButton(180,60,144,"")
+            fuse=newGuiButton(180,84,144,"").apply { setComment(0,tr("Right-click the pole holding a Pole Fuse Link to replace a blown fuse")) }
+        }
         voltage = newGuiButton(8, 60, 102, "")
         enabled = newGuiButton(116, 60, 52, "")
         lamp = newGuiButton(8, 84, 75, "").apply { visible = pole }
@@ -116,6 +128,9 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
         refresh()
     }
     private fun refresh() {
+        terminal?.displayString=tr("Cable: %1$",mods.eln.utility.ServiceTerminals.label(display.pole.terminal))
+        fuse?.apply { displayString=if(display.pole.fuseBlown)tr("Fuse blown") else if(display.pole.fuseClosed)tr("Open fuse") else tr("Close fuse");enabled=!display.pole.fuseBlown }
+        rating.displayString=tr("Transformer: %1$ kW",display.rating/1000)
         voltage.displayString = tr("Output: %1$ V", display.voltage)
         enabled.displayString = if (display.enabled) tr("On") else tr("Off")
         automatic.displayString = if (display.automatic) tr("Dusk: Auto") else tr("Dusk: Manual")
@@ -126,6 +141,9 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
     override fun guiObjectEvent(obj: IGuiObject) {
         super.guiObjectEvent(obj)
         when (obj) {
+            terminal -> { val ts=listOf(32,50,40,41,42);render.clientSendInt(87,ts[(ts.indexOf(display.pole.terminal)+1)%ts.size]) }
+            fuse -> render.clientSendInt(89,0)
+            rating -> render.clientSendInt(86,MainsStepDown.RATINGS[(MainsStepDown.RATINGS.indexOf(display.rating)+1)%MainsStepDown.RATINGS.size])
             voltage -> render.clientSendInt(80, if (display.voltage == 120) 240 else 120)
             enabled -> render.clientSendBoolean(81, !display.enabled)
             lamp -> render.clientSendBoolean(82, !display.lampEnabled)
@@ -139,6 +157,12 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
     override fun postDraw(f: Float, x: Int, y: Int) {
         super.postDraw(f, x, y); refresh()
         drawString(8, 8, if (pole) tr("Utility Pole Street Light") else tr("Mains Step-down Unit"))
+        if(pole) {
+            drawString(180,113,tr("Secondary service rack"))
+            drawString(180,127,tr("L1: 120 V; L2: 120 V"))
+            drawString(180,141,tr("240 V service circuit"))
+            drawString(180,165,tr("Phase A transformer"))
+        }
         if (pole) drawString(32, 35, if (display.installed) tr("Unit installed") else tr("Insert step-down unit"))
         else {
             drawString(8, 30, tr("Input: %1$", Utils.plotVolt("", display.inputVolts).trim()))
@@ -150,6 +174,6 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
             val angle = tr("Angle: %1$°", display.yaw)
             drawString(88 - font.width(angle) / 2, 138, angle)
         }
-        drawString(8, if (pole) 156 else 108, font.plainSubstrByWidth(if (pole && !display.installed) tr("Step-down unit required") else converterStateText(display.status), 160))
+        drawString(8, if (pole) 180 else 132, font.plainSubstrByWidth(if (pole && !display.installed) tr("Step-down unit required") else converterStateText(display.status), 160))
     }
 }

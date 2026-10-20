@@ -103,17 +103,17 @@ class StreetLightWallElement(node: TransparentNode, descriptor: TransparentNodeD
     }
 
     class StreetLightWallElementProcess(val elem: StreetLightWallElement): IProcess {
-        var bestChannelHandle: Pair<Double, LampSupplyElement.PowerSupplyChannelHandle>? = null
+        var bestChannelHandle: Pair<Double, mods.eln.utility.WirelessPowerHandle>? = null
 
-        private fun findBestSupply(here: Coordinate, forceUpdate: Boolean = false): Pair<Double, LampSupplyElement.PowerSupplyChannelHandle>? {
-            val chanMap = LampSupplyElement.channelMap[elem.powerChannel] ?: return null
+        private fun findBestSupply(here: Coordinate, forceUpdate: Boolean = false): Pair<Double, mods.eln.utility.WirelessPowerHandle>? {
+            val chanMap = mods.eln.utility.WirelessPowerChannels.channels(elem.powerChannel) ?: return null
             val bestChanHand = bestChannelHandle
             // Here's our cached value. We just check if it's null and if it's still a thing.
             if (!(bestChanHand == null || forceUpdate || !chanMap.contains(bestChanHand.second) || !bestChanHand.second.element.isInRange(here))) {
                 return bestChanHand // we good!
             }
-            val list = LampSupplyElement.channelMap[elem.powerChannel]?.filterNotNull() ?: return null
-            val map = list.map { Pair(it.element.sixNode!!.coordinate.trueDistanceTo(here), it) }
+            val list = mods.eln.utility.WirelessPowerChannels.channels(elem.powerChannel)?.filterNotNull() ?: return null
+            val map = list.map { Pair(it.element.coordinate.trueDistanceTo(here), it) }
             val sortedBy = map.sortedBy { it.first }
             val chanHand = sortedBy.firstOrNull { it.second.element.isInRange(here) }
             bestChannelHandle = chanHand

@@ -38,7 +38,9 @@ public class ElectricalLoad extends VoltageStateLineReady {
     public double getCurrent() {
         double current = 0;
         for (Component c : getConnectedComponents()) {
-            if (c instanceof Bipole && (!(c instanceof Line)))
+            if (c instanceof mods.eln.utility.PortCurrentComponent port)
+                current += Math.abs(port.portCurrent(this));
+            else if (c instanceof Bipole && (!(c instanceof Line)))
                 current += Math.abs(((Bipole) c).getCurrent());
         }
         return current * 0.5;

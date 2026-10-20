@@ -19,6 +19,7 @@ Battery_level=Batteriestand
 Biggest=Größter
 Booster_slot=Booster-Slot
 Breaker_tripped=Breaker tripped
+Cable\:_%1$=Cable: %1$
 Cable_slot=Kabelslot
 Can_create\:=Kann erzeugen:
 Capacity=Kapazität
@@ -28,6 +29,8 @@ Channel=Kanal
 Charge=Ladung
 Charge_power=Ladeleistung
 Charge_power\:_%1$W=Ladeleistung: %1$W
+Circuit_%1$\:_%2$=Circuit %1$: %2$
+Close_fuse=Close fuse
 Closed=Geschlossen
 Condition\:_%1$=Bedingung: %1$
 Connected=Verbunden
@@ -47,6 +50,8 @@ Default_position=Standardposition
 Dielectric_slot=Dielektrikum-Slot
 Disabled=Deaktiviert
 Discharge_power\:_%1$W=Entladeleistung: %1$W
+Dusk\:_Auto=Dusk: Auto
+Dusk\:_Manual=Dusk: Manual
 Efficiency=Effizienz
 Electrical_cable_slot=Elektrokabel-Slot
 End_of_life=Lebensende
@@ -59,6 +64,7 @@ Falstad_import\:_clipboard_is_not_valid_Falstad_data.=Falstad-Import: Zwischenab
 Ferromagnetic_core_slot=Ferromagnetkern-Slot
 Flexible_Appliance_Cord.name=Flexible Appliance Cord
 Fuel_usage=Brennstoffverbrauch
+Fuse_blown=Fuse blown
 Generated_power=Erzeugte Leistung
 Generates_heat_when_supplied_with_fuel.=Erzeugt Wärme bei Brennstoffzufuhr.
 Generating=Erzeugt
@@ -76,6 +82,7 @@ Input\:_%1$;_output\:_%2$=Input: %1$; output: %2$
 Input_/_Output_windings=Input / Output windings
 Input_voltage=Eingangsspannung
 Inputs=Eingänge
+Insert_step-down_unit=Insert step-down unit
 Internal_control=Interne Steuerung
 Internal_resistance\:_%1$Ω=Innenwiderstand: %1$Ω
 Is_off=Ist aus
@@ -83,10 +90,13 @@ Is_on=Ist an
 It_doesn't_really_behave_well_for_DC=Verhält sich bei Gleichspannung nicht optimal
 It_is_made_this_way_to_improve_the_performance_of_the_simulator_in_large_power_networks=Dies dient der Verbesserung der Simulatorleistung in großen Stromnetzen
 It_should_require_power_to_transmit_realistically=Sollte realistisch Strom zum Senden benötigen
+Lamp\:_Off=Lamp: Off
+Lamp\:_On=Lamp: On
 Lamp_Brightness=Lampenhelligkeit
 Left=Links
 Length_(m)=Länge (m)
 MQTT_server=MQTT-Server
+Mains_Step-down_Unit=Mains Step-down Unit
 Material\:_%1$=Material: %1$
 Max._temperature\:_%1$°C=Max. Temperatur: %1$°C
 Max_rads\:__=Max. rad/s:
@@ -118,13 +128,16 @@ ON=AN
 Off=Aus
 On=An
 Open=Offen
+Open_fuse=Open fuse
 Operational=Operational
 Out\:_%1$_/_%2$=Out: %1$ / %2$
 Output=Ausgang
+Output\:_%1$_V=Output: %1$ V
 Output_power=Output power
 Output_voltage=Ausgangsspannung
 P\:_%1$_S\:_%2$=P: %1$ S: %2$
 Place_against_a_vertical_wall;_connect_cables_on_the_same_wall_face=Place against a vertical wall; connect cables on the same wall face
+Place_this_cabinet_against_a_vertical_wall=Place this cabinet against a vertical wall
 Portable_battery_slot=Tragbarer-Batterie-Slot
 Position=Position
 Power=Leistung
@@ -153,6 +166,7 @@ Reset=Zurücksetzen
 Resistance=Widerstand
 Resistance\:_%1$Ω=Widerstand: %1$Ω
 Right=Rechts
+Right-click_the_pole_holding_a_Pole_Fuse_Link_to_replace_a_blown_fuse=Right-click the pole holding a Pole Fuse Link to replace a blown fuse
 Secondary=Secondary
 Secondary_winding=Secondary winding
 Select_a_grid_terminal,_not_the_device_body=Select a grid terminal, not the device body
@@ -864,10 +878,15 @@ This_cable_spool_has_no_usable_length=This cable spool has no usable length
 You_need_%1$_m_of_cable=Sie benötigen %1$ m Kabel
 
 # src/main/kotlin/mods/eln/gridnode/GridLink.kt
+Already_connected_to_this_terminal=Already connected to this terminal
 Grid_cable_item_does_not_match_the_paid_length=Grid cable item does not match the paid length
 Grid_cable_item_does_not_match_the_selected_cable=Grid cable item does not match the selected cable
 Grid_endpoint_is_no_longer_available=Grid endpoint is no longer available
+Grid_phases_or_service_voltages_do_not_match=Grid phases or service voltages do not match
 Invalid_grid_cable_span=Invalid grid cable span
+Invalid_grid_terminal_circuit=Invalid grid terminal circuit
+Select_matching_grid_terminal_circuits=Select matching grid terminal circuits
+Use_a_cable_spool_for_this_long_service_bundle=Use a cable spool for this long service bundle
 
 # src/main/kotlin/mods/eln/gridnode/GridSwitch.kt
 Closed?=Geschlossen?
@@ -1084,9 +1103,6 @@ Probe_A_selected_at_%1$,_face_%2$,_port_%3$._Sneak-click_B_to_measure_B_minus_A.
 Separate_or_unsolved_electrical_sections\:_check_their_ground_references_before_interpreting_this_difference.=Separate or unsolved electrical sections: check their ground references before interpreting this difference.
 Terminal_B_current\:_%1$_|_Cable/contact_loss_at_B\:_%2$=Terminal B current: %1$ | Cable/contact loss at B: %2$
 The_circuit_has_no_finite_solver_reading_yet.=The circuit has no finite solver reading yet.
-
-# src/main/kotlin/mods/eln/node/transparent/PowerCabinetDescriptor.kt
-Place_this_cabinet_against_a_vertical_wall=Place this cabinet against a vertical wall
 
 # src/main/kotlin/mods/eln/node/transparent/TransparentNodeDescriptor.kt
 
@@ -2063,6 +2079,7 @@ Precipitation=Niederschlag
 Adjustable_Gimbal_Recessed_Light.name=Adjustable Gimbal Recessed Light
 Armored_Oval_Bulkhead_Light.name=Armored Oval Bulkhead Light
 Articulated_Task_Table_Lamp.name=Articulated Task Table Lamp
+Aura_Five_Blade_Ceiling_Fan.name=Aura Five Blade Ceiling Fan
 Basic_Chandelier.name=Basic Chandelier
 Basic_Lamp_Holder.name=Basic Lamp Holder
 Boulevard_Lantern_Street_Light.name=Boulevard Lantern Street Light
@@ -2773,18 +2790,16 @@ UPS_rack_compatible;_larger_capacity_does_not_raise_the_UPS_output_rating=UPS ra
 # src/main/kotlin/mods/eln/transparentnode/utilitylight/MainsStepDown.kt
 
 # src/main/kotlin/mods/eln/transparentnode/utilitylight/UtilityLightClient.kt
+240_V_service_circuit=240 V service circuit
 Angle\:_%1$°=Angle: %1$°
 Down=Down
-Dusk\:_Auto=Dusk: Auto
-Dusk\:_Manual=Dusk: Manual
 Height\:_%1$_m=Height: %1$ m
-Insert_step-down_unit=Insert step-down unit
-Lamp\:_Off=Lamp: Off
-Lamp\:_On=Lamp: On
-Mains_Step-down_Unit=Mains Step-down Unit
+L1\:_120_V;_L2\:_120_V=L1: 120 V; L2: 120 V
 Output\:_%1$=Output: %1$
-Output\:_%1$_V=Output: %1$ V
+Phase_A_transformer=Phase A transformer
+Secondary_service_rack=Secondary service rack
 Step-down_unit_required=Step-down unit required
+Transformer\:_%1$_kW=Transformer: %1$ kW
 Turn_left_by_%1$°;_hold_Shift_for_%2$°_steps=Turn left by %1$°; hold Shift for %2$° steps
 Turn_right_by_%1$°;_hold_Shift_for_%2$°_steps=Turn right by %1$°; hold Shift for %2$° steps
 Unit_installed=Unit installed
@@ -2831,6 +2846,145 @@ Start_engine=Start engine
 Stop_engine=Stop engine
 Two_matching_bulbs=Two matching bulbs
 Wireless=Wireless
+
+# src/main/kotlin/mods/eln/utility/BreakerPanel.kt
+%1$_installed;_%2$_tripped=%1$ installed; %2$ tripped
+Circuits=Circuits
+Selected_circuit=Selected circuit
+
+# src/main/kotlin/mods/eln/utility/BreakerPanelClient.kt
+%1$\:_%2$_A=%1$: %2$ A
+Cable\:_circuit_%1$=Cable: circuit %1$
+Cable\:_service_bundle=Cable: service bundle
+Circuit_%1$\:_%2$_V=Circuit %1$: %2$ V
+Circuit_%1$\:_insert_an_Electrical_Breaker=Circuit %1$: insert an Electrical Breaker
+Every_circuit_has_a_wireless_power_channel_and_optional_wireless_switch_control=Every circuit has a wireless power channel and optional wireless switch control
+Left_bank\:_L1=Left bank: L1
+Left_bank\:_L1_120_V;_right_bank\:_L2_120_V;_each_circuit_can_select_240_V=Left bank: L1 120 V; right bank: L2 120 V; each circuit can select 240 V
+Link_an_incoming_service_bundle_or_feed_the_three_service_buses_separately=Link an incoming service bundle or feed the three service buses separately
+Optional_wireless_switch_channel;_blank_means_always_enabled=Optional wireless switch channel; blank means always enabled
+Power_channel_for_this_breaker;_enter_the_same_name_on_lamps_and_outlets=Power channel for this breaker; enter the same name on lamps and outlets
+Power_link=Power link
+Right_bank\:_L2=Right bank: L2
+Switch\:_All_on=Switch: All on
+Switch\:_Any_on=Switch: Any on
+Switch\:_Toggle=Switch: Toggle
+Switch_link=Switch link
+Twelve_Circuit_American_Breaker_Panel=Twelve Circuit American Breaker Panel
+Twelve_Circuit_American_Breaker_Panel.name=Twelve Circuit American Breaker Panel
+Twelve_slots_accept_existing_Electrical_Breaker_items=Twelve slots accept existing Electrical Breaker items
+Wall_cables\:_left_L1,_right_L2,_top_240_V,_bottom_selected_branch=Wall cables: left L1, right L2, top 240 V, bottom selected branch
+Wireless_range\:_%1$=Wireless range: %1$
+
+# src/main/kotlin/mods/eln/utility/DistributionClient.kt
+%1$\:_%2$=%1$: %2$
+A,_B_and_C_are_independent_electrical_circuits=A, B and C are independent electrical circuits
+All_three_phases_closed=All three phases closed
+Any_phase_fault_opens_all_three;_timed_retries_stop_at_lockout=Any phase fault opens all three; timed retries stop at lockout
+Automatic_regulation_within_10_percent_of_line_voltage;_passive,_power-conserving_taps=Automatic regulation within 10 percent of line voltage; passive, power-conserving taps
+Base\:_left_A,_right_B,_rear_C;_three_separate_underground_cable_inputs=Base: left A, right B, rear C; three separate underground cable inputs
+Blown=Blown
+Close=Close
+Close_all_phases=Close all phases
+Close_switch=Close switch
+Fuse_trip_current\:_1_to_2000_A=Fuse trip current: 1 to 2000 A
+Insert_a_Mains_Step-down_Unit;_select_10,_25,_50,_75_or_100_kW=Insert a Mains Step-down Unit; select 10, 25, 50, 75 or 100 kW
+Line\:_%1$=Line: %1$
+Load\:_%1$=Load: %1$
+Locked_out;_inspect_fault_and_reset=Locked out; inspect fault and reset
+Lockout_after_%1$_failed_reclosures=Lockout after %1$ failed reclosures
+Open_all_phases=Open all phases
+Open_switch=Open switch
+Phase\:_%1$=Phase: %1$
+Rating\:_%1$_kW=Rating: %1$ kW
+Reset_lockout=Reset lockout
+Retry_delay\:_1_to_60_seconds=Retry delay: 1 to 60 seconds
+Retry_in_%1$_s=Retry in %1$ s
+Secondary\:_L1_120_V_/_L2_120_V_/_240_V=Secondary: L1 120 V / L2 120 V / 240 V
+Secondary_rack_carries_L1_120_V,_L2_120_V_and_240_V_service_circuits=Secondary rack carries L1 120 V, L2 120 V and 240 V service circuits
+Select_the_cable_terminal_in_the_menu_before_linking_poles=Select the cable terminal in the menu before linking poles
+Separate_line_and_load_terminals;_replace_blown_links_with_a_Pole_Fuse_Link=Separate line and load terminals; replace blown links with a Pole Fuse Link
+Set_fuse_current=Set fuse current
+Set_retry_delay=Set retry delay
+Set_trip_current=Set trip current
+Step-down_unit_installed=Step-down unit installed
+Tap\:_%1$_%%=Tap: %1$ %%
+Three_independent_charge_storage_branches_smooth_DC-equivalent_voltage_changes=Three independent charge storage branches smooth DC-equivalent voltage changes
+Transformer\:_Off=Transformer: Off
+Transformer\:_On=Transformer: On
+Transformer_phase_is_selectable;_a_blown_fuse_needs_a_Pole_Fuse_Link=Transformer phase is selectable; a blown fuse needs a Pole Fuse Link
+Trip_current_in_amperes\:_1_to_2000_A=Trip current in amperes: 1 to 2000 A
+Voltage_control\:_Auto=Voltage control: Auto
+Voltage_control\:_Hold_tap=Voltage control: Hold tap
+
+# src/main/kotlin/mods/eln/utility/DistributionPole.kt
+120/240V_Secondary_Street_Light_Pole.name=120/240V Secondary Street Light Pole
+120/240V_Secondary_Utility_Pole.name=120/240V Secondary Utility Pole
+Cable_terminal=Cable terminal
+Protection=Protection
+Recloser_locked_out=Recloser locked out
+Single_Phase_Automatic_Voltage_Regulator_Pole.name=Single Phase Automatic Voltage Regulator Pole
+Single_Phase_Fused_Cutout_Pole.name=Single Phase Fused Cutout Pole
+Single_Phase_Transformer_Pole.name=Single Phase Transformer Pole
+Single_Phase_Transformer_Street_Light_Pole.name=Single Phase Transformer Street Light Pole
+Single_Phase_Utility_Pole.name=Single Phase Utility Pole
+Terminal_%1$\:_%2$=Terminal %1$: %2$
+Three_Phase_Automatic_Voltage_Regulator_Pole.name=Three Phase Automatic Voltage Regulator Pole
+Three_Phase_Fused_Cutout_Pole.name=Three Phase Fused Cutout Pole
+Three_Phase_Gang_Operated_Air_Break_Switch_Pole.name=Three Phase Gang Operated Air Break Switch Pole
+Three_Phase_Pole_Mounted_Capacitor_Bank.name=Three Phase Pole Mounted Capacitor Bank
+Three_Phase_Recloser_Pole.name=Three Phase Recloser Pole
+Three_Phase_Transformer_Pole.name=Three Phase Transformer Pole
+Three_Phase_Transformer_Street_Light_Pole.name=Three Phase Transformer Street Light Pole
+Three_Phase_Underground_Feeder_Pole.name=Three Phase Underground Feeder Pole
+Three_Phase_Utility_Pole.name=Three Phase Utility Pole
+Transformer_phase=Transformer phase
+
+# src/main/kotlin/mods/eln/utility/HouseService.kt
+%1$_kWh=%1$ kWh
+Analog_or_smart_service_meter=Analog or smart service meter
+Exported_energy=Exported energy
+Imported_energy=Imported energy
+Service=Service
+Service\:_%1$_/_%2$_/_%3$=Service: %1$ / %2$ / %3$
+
+# src/main/kotlin/mods/eln/utility/HouseServiceClient.kt
+120/240V_Service_Weatherhead=120/240V Service Weatherhead
+120/240V_Service_Weatherhead.name=120/240V Service Weatherhead
+Analog_meter_installed=Analog meter installed
+Cable\:_incoming_service_bundle=Cable: incoming service bundle
+Cable\:_outgoing_service_bundle=Cable: outgoing service bundle
+Cable\:_service_drop_bundle=Cable: service drop bundle
+Export\:_%1$_kWh=Export: %1$ kWh
+Import\:_%1$_kWh=Import: %1$ kWh
+Insert_a_meter_to_connect_service=Insert a meter to connect service
+Insert_an_Analog_Glass_Service_Meter_or_Smart_Digital_Service_Meter=Insert an Analog Glass Service Meter or Smart Digital Service Meter
+Line_and_load_bundles_are_isolated_until_a_meter_is_installed=Line and load bundles are isolated until a meter is installed
+North_American_Meter_Base=North American Meter Base
+North_American_Meter_Base.name=North American Meter Base
+Power\:_%1$=Power: %1$
+Smart_disconnect\:_Closed=Smart disconnect: Closed
+Smart_disconnect\:_Open=Smart disconnect: Open
+Smart_meter_has_a_manual_disconnect_and_a_future_remote-control_hook=Smart meter has a manual disconnect and a future remote-control hook
+Smart_meter_installed=Smart meter installed
+Terminate_a_pole_service_drop_here_and_continue_with_wall_cables_or_a_service_bundle=Terminate a pole service drop here and continue with wall cables or a service bundle
+Three-wire_service_bundle\:_L1_120_V,_L2_120_V_and_240_V_circuit_equivalents=Three-wire service bundle: L1 120 V, L2 120 V and 240 V circuit equivalents
+Top/bottom_cable\:_%1$=Top/bottom cable: %1$
+Top_and_bottom_cable_terminals_use_the_circuit_selected_in_the_menu=Top and bottom cable terminals use the circuit selected in the menu
+
+# src/main/kotlin/mods/eln/utility/LegacyPoleGui.kt
+Legacy_converter_retains_its_4\:1_ratio=Legacy converter retains its 4:1 ratio
+Replace_a_blown_fuse_by_right-clicking_with_a_Pole_Fuse_Link=Replace a blown fuse by right-clicking with a Pole Fuse Link
+Secondary_rack_passes_120/240_V_service=Secondary rack passes 120/240 V service
+Transformer_fuse_rating\:_%1$_kW=Transformer fuse rating: %1$ kW
+Utility_Pole_Connections=Utility Pole Connections
+
+# src/main/kotlin/mods/eln/utility/UtilityItems.kt
+Analog_Glass_Service_Meter.name=Analog Glass Service Meter
+Fits_the_North_American_Meter_Base;_records_imported_and_exported_energy=Fits the North American Meter Base; records imported and exported energy
+Pole_Fuse_Link.name=Pole Fuse Link
+Right-click_a_fused_pole_to_replace_its_first_blown_link=Right-click a fused pole to replace its first blown link
+Smart_Digital_Service_Meter.name=Smart Digital Service Meter
 
 # src/main/kotlin/mods/eln/wiki/CircuitLessons.kt
 1._Hold_a_Multimeter_or_AllMeter._Normal_right-click_keeps_the_existing_machine_readings._Sneak-click_a_connector_to_select_reference_A,_then_sneak-click_a_second_connector_B.=1. Hold a Multimeter or AllMeter. Normal right-click keeps the existing machine readings. Sneak-click a connector to select reference A, then sneak-click a second connector B.

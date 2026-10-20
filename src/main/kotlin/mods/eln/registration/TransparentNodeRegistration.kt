@@ -1513,6 +1513,10 @@ object TransparentNodeRegistration {
     }
 
     private fun registerGridDevices(id: Int) {
+        transparentNodeItem.addDescriptor(50+(124 shl 6),mods.eln.utility.HouseServiceDescriptor(false))
+        transparentNodeItem.addDescriptor(51+(124 shl 6),mods.eln.utility.HouseServiceDescriptor(true))
+        transparentNodeItem.addDescriptor(52+(124 shl 6),mods.eln.utility.BreakerPanelDescriptor())
+        mods.eln.utility.DistributionKind.entries.forEachIndexed { i,kind -> transparentNodeItem.addDescriptor(34+i+(124 shl 6),mods.eln.utility.DistributionPoleDescriptor(kind)) }
         var subId: Int
         run {
             subId = 3
@@ -1537,7 +1541,7 @@ object TransparentNodeRegistration {
             val descriptor = ElectricalPoleDescriptor(
                 TR_NAME(I18N.Type.NONE, "Utility Pole"),
                 Eln.obj.getObj(
-                    "UtilityPole"
+                    "UtilityPoleTall"
                 ),
                 "textures/wire.png",
                 instance.veryHighVoltageCableDescriptor,
@@ -1550,6 +1554,7 @@ object TransparentNodeRegistration {
             g.addElement(0, 1, 0)
             g.addElement(0, 2, 0)
             g.addElement(0, 3, 0)
+            for(y in 4..7)g.addElement(0,y,0)
             descriptor.ghostGroup = g
             transparentNodeItem.addDescriptor(subId + (id shl 6), descriptor)
         }
@@ -1557,7 +1562,7 @@ object TransparentNodeRegistration {
             subId = 5
             val descriptor = ElectricalPoleDescriptor(
                 TR_NAME(I18N.Type.NONE, "Utility Pole w/DC-DC Converter"),
-                Eln.obj.getObj("UtilityPole"),
+                Eln.obj.getObj("UtilityPoleTall"),
                 "textures/wire.png",
                 instance.veryHighVoltageCableDescriptor,
                 Kind.TRANSFORMER_TO_GROUND,
@@ -1568,6 +1573,7 @@ object TransparentNodeRegistration {
             g.addElement(0, 1, 0)
             g.addElement(0, 2, 0)
             g.addElement(0, 3, 0)
+            for(y in 4..7)g.addElement(0,y,0)
             descriptor.ghostGroup = g
             transparentNodeItem.addDescriptor(subId + (id shl 6), descriptor)
         }
@@ -1576,7 +1582,7 @@ object TransparentNodeRegistration {
             val descriptor = ElectricalPoleDescriptor(
                 TR_NAME(I18N.Type.NONE, "Transmission Tower"),
                 Eln.obj.getObj(
-                    "TransmissionTower"
+                    "TransmissionTowerTall"
                 ),
                 "textures/wire.png",
                 instance.veryHighVoltageCableDescriptor,
@@ -1586,7 +1592,7 @@ object TransparentNodeRegistration {
             ).powerDistribution()
             val g = GhostGroup()
             g.addRectangle(-1, 1, 0, 0, -1, 1)
-            g.addRectangle(0, 0, 1, 8, 0, 0)
+            g.addRectangle(0, 0, 1, 12, 0, 0)
             g.removeElement(0, 0, 0)
             descriptor.ghostGroup = g
             transparentNodeItem.addDescriptor(subId + (id shl 6), descriptor)
@@ -1596,7 +1602,7 @@ object TransparentNodeRegistration {
             val descriptor = ElectricalPoleDescriptor(
                 TR_NAME(I18N.Type.NONE, "Direct Utility Pole"),
                 Eln.obj.getObj(
-                    "UtilityPole"
+                    "UtilityPoleTall"
                 ),
                 "textures/wire.png",
                 instance.veryHighVoltageCableDescriptor,
@@ -1608,6 +1614,7 @@ object TransparentNodeRegistration {
             g.addElement(0, 1, 0)
             g.addElement(0, 2, 0)
             g.addElement(0, 3, 0)
+            for(y in 4..7)g.addElement(0,y,0)
             descriptor.ghostGroup = g
             transparentNodeItem.addDescriptor(subId + (id shl 6), descriptor)
         }

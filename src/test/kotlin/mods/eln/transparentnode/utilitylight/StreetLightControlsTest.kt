@@ -84,10 +84,10 @@ class StreetLightControlsTest {
         val copy = pole().unit
         copy.read(saved)
         assertEquals(StreetLightMount.MIN_STEP, copy.lampHeightStep)
-        assertEquals(1, StreetLightMount.lightY(copy.lampHeightStep))
+        assertEquals(4, StreetLightMount.lightY(copy.lampHeightStep))
         copy.read(CompoundTag())
         assertEquals(0, copy.lampHeightStep)
-        assertEquals(2, StreetLightMount.lightY(copy.lampHeightStep))
+        assertEquals(5, StreetLightMount.lightY(copy.lampHeightStep))
         copy.read(CompoundTag().apply { putInt("mainsLampHeightStep", Int.MAX_VALUE) })
         assertEquals(0, copy.lampHeightStep)
     }

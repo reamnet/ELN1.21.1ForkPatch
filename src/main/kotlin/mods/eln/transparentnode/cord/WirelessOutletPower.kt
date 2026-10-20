@@ -11,11 +11,11 @@ import java.util.IdentityHashMap
  * Both outlet modes feed the same breaker. Stable links never rebuild solver topology. */
 class WirelessOutletPower(private val outlet: OutletElement) {
     val conductor=Resistor(null,null).apply { resistance=.08 }
-    var supply: LampSupplyElement?=null
+    var supply: mods.eln.utility.WirelessPowerSupply?=null
         private set
     fun refresh() {
         val here=outlet.coordinate()
-        val next=if(outlet.wireless)LampSupplyElement.channelMap[outlet.channel]?.asSequence()
+        val next=if(outlet.wireless)mods.eln.utility.WirelessPowerChannels.channels(outlet.channel)?.asSequence()
             ?.filter { it.element.isInRange(here) && it.element.getChannelState(it.id) }
             ?.minByOrNull { it.element.coordinate!!.trueDistanceTo(here) }?.element else null
         if(next===supply)return
@@ -35,6 +35,6 @@ class WirelessOutletPower(private val outlet: OutletElement) {
     companion object {
         private val links=Collections.newSetFromMap(IdentityHashMap<WirelessOutletPower,Boolean>())
         /** Remove bridges before their source loads leave the solver, including chunk unload. */
-        fun disconnectSupply(element: SixNodeElement) { links.filter { it.supply===element }.forEach { it.disconnect();it.outlet.needPublish() } }
+        fun disconnectSupply(element: Any) { links.filter { it.supply?.owner===element }.forEach { it.disconnect();it.outlet.needPublish() } }
     }
 }

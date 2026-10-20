@@ -26,7 +26,7 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
 
     private var processElapsedTime = 0.0
 
-    var cachedBestChannelHandle: Pair<Double, LampSupplyElement.PowerSupplyChannelHandle>? = null
+    var cachedBestChannelHandle: Pair<Double, mods.eln.utility.WirelessPowerHandle>? = null
     var stableLightProbability = 0.0
     var fastLightValue = 0
 
@@ -155,7 +155,7 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
     }
 
     private fun findBestLampSupply(coordinate: Coordinate, forceUpdate: Boolean = false) {
-        val channelMap = LampSupplyElement.channelMap[element.lampSupplyChannel]
+        val channelMap = mods.eln.utility.WirelessPowerChannels.channels(element.lampSupplyChannel)
 
         if (channelMap != null) {
             if (channelMap.contains(cachedBestChannelHandle?.second) &&
@@ -163,7 +163,7 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
             else {
                 channelMap.filterNotNull()
                 cachedBestChannelHandle = channelMap
-                    .map { Pair(it.element.sixNode!!.coordinate.trueDistanceTo(coordinate), it) }
+                    .map { Pair(it.element.coordinate.trueDistanceTo(coordinate), it) }
                     .filter { it.second.element.isInRange(coordinate) }
                     .minByOrNull { it.first }
             }

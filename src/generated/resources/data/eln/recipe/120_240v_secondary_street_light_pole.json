@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "eln:direct_utility_pole"
+    },
+    {
+      "item": "eln:basic_lamp_holder"
+    },
+    {
+      "item": "minecraft:glowstone_dust"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:120_240v_secondary_street_light_pole"
+  }
+}

@@ -99,6 +99,8 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
     }
 
     open fun disconnectJob() {
+        mods.eln.utility.WirelessPowerChannels.disconnectOwner(this)
+        mods.eln.transparentnode.cord.WirelessOutletPower.disconnectSupply(this)
         (this as? CordDevice)?.cord?.disconnect()
         for (load in thermalLoadList) load.clearSimCoordinate()
         Eln.simulator.removeAllSlowProcess(slowProcessList)

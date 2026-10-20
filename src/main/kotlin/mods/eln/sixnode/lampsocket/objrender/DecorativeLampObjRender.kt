@@ -57,7 +57,7 @@ class DecorativeLampObjRender(val style: DecorativeLampStyle) : ILampSocketObjRe
             GL11.glColor3f(.65f,.68f,.71f); model.getPart("Trim")?.drawNoBind()
             if(style.fan)preserveMatrix {
                 GL11.glRotatef(fanAngle,1f,0f,0f)
-                if(style==DecorativeLampStyle.FAN_CLASSIC)GL11.glColor3f(.34f,.20f,.10f) else GL11.glColor3f(.12f,.14f,.16f)
+                if(style==DecorativeLampStyle.FAN_AURA)GL11.glColor3f(.46f,.48f,.49f) else if(style==DecorativeLampStyle.FAN_CLASSIC)GL11.glColor3f(.34f,.20f,.10f) else GL11.glColor3f(.12f,.14f,.16f)
                 model.getPart("Rotor")?.drawNoBind()
             }
             for(head in 0 until style.aimHeadCount)swivel(aim,head) {

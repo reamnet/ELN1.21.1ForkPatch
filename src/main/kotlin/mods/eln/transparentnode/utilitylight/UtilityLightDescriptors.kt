@@ -27,7 +27,7 @@ class StepDownUnitDescriptor(name: String) :
     }
     override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<String>, par4: Boolean) {
         list.add(tr("Selectable output: %1$ V or %2$ V", 120, 240))
-        list.add(tr("Maximum input: %1$ V; maximum output: %2$ W", MainsStepDown.MAX_INPUT_VOLTS.toInt(), MainsStepDown.MAX_OUTPUT_WATTS.toInt()))
+        list.add(tr("Maximum input: %1$ V; maximum output: %2$ W", MainsStepDown.MAX_INPUT_VOLTS.toInt(), 100_000))
         list.add(tr("Step-down only; grid voltage must reach the selected output"))
         list.add(tr("Place on its own or install in a Utility Pole Street Light"))
     }
@@ -35,7 +35,7 @@ class StepDownUnitDescriptor(name: String) :
 
 enum class PoleLampStyle { ORIGINAL, COBRAHEAD, TWIN_LED }
 
-class UtilityStreetLightDescriptor(name: String, val style: PoleLampStyle = PoleLampStyle.ORIGINAL) : GridDescriptor(name, Eln.obj.getObj("UtilityPole"),
+class UtilityStreetLightDescriptor(name: String, val style: PoleLampStyle = PoleLampStyle.ORIGINAL) : GridDescriptor(name, Eln.obj.getObj("UtilityPoleTall"),
     UtilityStreetLightElement::class.java, UtilityStreetLightRender::class.java,
     "textures/wire.png", Eln.instance.veryHighVoltageCableDescriptor, 40) {
     private val fixture = Eln.obj.getObj(when(style) {
@@ -43,22 +43,24 @@ class UtilityStreetLightDescriptor(name: String, val style: PoleLampStyle = Pole
         PoleLampStyle.COBRAHEAD -> "utilitycobrahead"
         PoleLampStyle.TWIN_LED -> "utilitytwinled"
     })
+    override fun rotationIsFixed()=true
     val lampWatts get() = when(style) { PoleLampStyle.ORIGINAL -> 60.0;PoleLampStyle.COBRAHEAD -> 70.0;PoleLampStyle.TWIN_LED -> 120.0 }
     val heads get() = when(style) {
-        PoleLampStyle.ORIGINAL -> listOf(net.minecraft.world.phys.Vec3(-1.095,2.30,0.0))
-        PoleLampStyle.COBRAHEAD -> listOf(net.minecraft.world.phys.Vec3(-1.15,2.30,0.0))
-        PoleLampStyle.TWIN_LED -> listOf(net.minecraft.world.phys.Vec3(-1.15,2.30,-.62),net.minecraft.world.phys.Vec3(-1.15,2.30,.62))
+        PoleLampStyle.ORIGINAL -> listOf(net.minecraft.world.phys.Vec3(-1.095,5.30,0.0))
+        PoleLampStyle.COBRAHEAD -> listOf(net.minecraft.world.phys.Vec3(-1.15,5.30,0.0))
+        PoleLampStyle.TWIN_LED -> listOf(net.minecraft.world.phys.Vec3(-1.15,5.30,-.62),net.minecraft.world.phys.Vec3(-1.15,5.30,.62))
     }
     init {
         creativeTab = Eln.creativeTabLighting
         ghostGroup = GhostGroup().apply {
-            for (y in 1..4) addElement(0, y, 0)
-            if(style==PoleLampStyle.ORIGINAL)addElement(-1, 3, 0)
-            if(style!=PoleLampStyle.ORIGINAL)for(x in -2..-1)for(y in 1..3)for(z in -1..1)addElement(x,y,z)
+            for (y in 1..7) addElement(0, y, 0)
+            if(style==PoleLampStyle.ORIGINAL)addElement(-1, 6, 0)
+            if(style!=PoleLampStyle.ORIGINAL)for(x in -2..-1)for(y in 4..6)for(z in -1..1)addElement(x,y,z)
         }
     }
     fun drawLamp(front: Direction, lit: Boolean, installed: Boolean, heightStep: Int = 0, yaw: Int = 0) = preserveMatrix {
         front.glRotateXnRef()
+        GL11.glTranslated(0.0,3.0,0.0)
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
             GL11.glDisable(GL11.GL_TEXTURE_2D)

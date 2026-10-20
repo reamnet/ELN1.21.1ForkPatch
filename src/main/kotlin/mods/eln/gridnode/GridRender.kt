@@ -21,7 +21,7 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
     private val descriptor: GridDescriptor
     private val cableTexture: ResourceLocation
     private val catenaries = ArrayList<Catenary>()
-    private var idealRenderingAngle: Float = 0.toFloat()
+    protected var idealRenderingAngle: Float = 0.toFloat()
 
     init {
         this.descriptor = descriptor as GridDescriptor
@@ -59,24 +59,9 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
             idealRenderingAngle = stream.readFloat()
             val linkCount = stream.readInt()
             for (i in 0..linkCount - 1) {
-                // Links always come in pairs.
-                val splus = readVec(stream)
-                val tplus = readVec(stream)
-                val sgnd = readVec(stream)
-                val tgnd = readVec(stream)
-                var dplus = splus.subtract(tplus).normalize()
-                var dgnd = sgnd.subtract(tgnd).normalize()
-                val straightV = dplus.dot(dgnd)
-                dplus = splus.subtract(tgnd).normalize()
-                dgnd = sgnd.subtract(tplus).normalize()
-                val crossV = dplus.dot(dgnd)
-                if (crossV < straightV) {
-                    catenaries.add(Catenary(splus, tplus))
-                    catenaries.add(Catenary(sgnd, tgnd))
-                } else {
-                    catenaries.add(Catenary(splus, tgnd))
-                    catenaries.add(Catenary(sgnd, tplus))
-                }
+                val wires=stream.readUnsignedByte()
+                require(wires in 1..3)
+                repeat(wires) { catenaries.add(Catenary(readVec(stream),readVec(stream))) }
             }
         } catch (e: IOException) {
             e.printStackTrace()

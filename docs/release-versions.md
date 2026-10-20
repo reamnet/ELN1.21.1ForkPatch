@@ -28,6 +28,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.22` | — | Working countertop mini oven; energy-driven microwave battery hiss and explosion; operating sounds for all kitchen appliances, heaters, ceiling fans and both AC units |
 | `v3.0.23` | — | Fan spin-up/coast-down; five-block industrial fan with blade damage; three box fans; flexible cord and wired wall-outlet prototype with portable appliance pickup |
 | `v3.0.24` | — | Cords for all lamps and appliances; visible NEMA 5-20/6-20 plugs; 240 V outlets; wireless Lamp Supply outlet mode; five-block industrial ceiling fan with 5 damage/s blade contact |
+| `v3.0.25` | — | Independent utility phases and 120/240 V service drops; 10–100 kW pole transformers and fuses; reclosers, feeder/secondary poles, regulators and capacitor banks; analog/smart meters, twelve-circuit wireless breaker panel; taller poles and an Aura-style seven-light fan |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`
@@ -40,7 +41,7 @@ release assets remain available with their original filenames.
 `modVersion` in `gradle.properties` is the version source for the jar filename,
 NeoForge metadata and the in-game version. Increment it when preparing the next
 update and create the matching `vX.Y.Z` source tag. For unpublished experiments,
-use an explicit override such as `-PmodVersion=3.0.24-local.1`.
+use an explicit override such as `-PmodVersion=3.0.25-local.1`.
 
 Build with `./gradlew build` to retain previous versioned jars in `build/libs/`.
 `./gradlew clean` removes that directory, and recompiling the same version

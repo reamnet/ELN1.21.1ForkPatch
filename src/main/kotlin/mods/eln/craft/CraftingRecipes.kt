@@ -23,6 +23,7 @@ object CraftingRecipes {
     /** Declares everything once (load-complete, or the data generator - whichever asks first). */
     @JvmStatic
     fun itemCrafting() {
+        mods.eln.utility.UtilityRecipes.register({ o,p -> addRecipe(o,*p) },{ o,p -> addShapelessRecipe(o,*p) })
         if (declared) return
         declared = true
 

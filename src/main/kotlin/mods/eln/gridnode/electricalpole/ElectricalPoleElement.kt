@@ -1,6 +1,13 @@
 package mods.eln.gridnode.electricalpole
 
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor
+import mods.eln.utility.*
+import mods.eln.i18n.I18N.tr
+import mods.eln.sim.IProcess
+import mods.eln.transparentnode.standby.TransferContact
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.entity.player.Player
+import java.io.DataInputStream
 import mods.eln.Eln
 import mods.eln.gridnode.GridDescriptor
 import mods.eln.gridnode.GridElement
@@ -39,8 +46,17 @@ data class Transformer(
 class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDescriptor)
     : GridElement(node, descriptor, (descriptor as GridDescriptor).connectRange) {
     private val desc = descriptor as ElectricalPoleDescriptor
+    override val inventory=mods.eln.node.transparent.TransparentNodeElementInventory(0,1,this)
 
     var electricalLoad = NbtElectricalLoad("electricalLoad")
+    val fuse=CutoutFuse()
+    val ports=LegacyPolePorts(this,electricalLoad)
+    var ratedWatts=10_000
+        private set
+    val fusedPrimary=NbtElectricalLoad("fusedPrimary").apply { serialResistance=.00001 }
+    val fuseContact=TransferContact(electricalLoad,fusedPrimary)
+    private var heightReady=false
+    private var heightRetry=0.0
     var thermalLoad = NbtThermalLoad("thermalLoad")
     internal var heater = ElectricalLoadHeatThermalLoad(electricalLoad, thermalLoad)
     internal var thermalWatchdog = ambientAwareThermalWatchdog(ThermalLoadWatchDog(thermalLoad))
@@ -79,11 +95,13 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
                 .setNominalVoltage(desc.voltageLimit)
                 .setDestroys(exp)
 
+        slowProcessList.add(IProcess { dt -> if(!heightReady) { heightRetry-=dt;if(heightRetry<=0) { heightReady=PoleHeightUpgrade.update(this);heightRetry=1.0 } } })
         if (desc.includeTransformer) {
+            electricalLoadList.add(fusedPrimary);electricalComponentList.add(fuseContact);fuseContact.closed=fuse.closed
             val secondaryLoad = NbtElectricalLoad("secondaryLoad")
-            val primaryVoltageSource = SwitchableVoltageSource("primaryVoltageSource").apply { connectTo(electricalLoad, null) }
+            val primaryVoltageSource = SwitchableVoltageSource("primaryVoltageSource").apply { connectTo(fusedPrimary, null) }
             val secondaryVoltageSource = SwitchableVoltageSource("secondaryVoltageSource").apply { connectTo(secondaryLoad, null) }
-            val interSystemProcess = SafeTransformerProcess(electricalLoad, secondaryLoad, primaryVoltageSource, secondaryVoltageSource) { true }
+            val interSystemProcess = SafeTransformerProcess(fusedPrimary, secondaryLoad, primaryVoltageSource, secondaryVoltageSource) { fuse.closed }
             val voltageSecondaryWatchdog = VoltageStateWatchDog(secondaryLoad)
 
             trafo = Transformer(
@@ -101,6 +119,12 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
             electricalComponentList.add(secondaryVoltageSource)
             slowProcessList.add(voltageSecondaryWatchdog.setDestroys(exp))
 
+            electricalProcessList.add(IProcess { dt ->
+                if(fuse.pickup(dt,fuseContact.current))play(mods.eln.sound.SoundCommand("eln:utility_arc_close").smallRange().mulVolume(.20))
+                if(fuse.step(dt,fuseContact.current,ratedWatts/(kotlin.math.abs(electricalLoad.voltage).coerceAtLeast(120.0)*.95))) {
+                    fuseContact.closed=false;play(mods.eln.sound.SoundCommand("eln:utility_fuse_blow").smallRange().mulVolume(.8));needPublish()
+                }
+            })
             // Publish load from time to time.
             slowProcessList.add(NodePeriodicPublishProcess(node, 1.0, 0.5))
         } else {
@@ -193,6 +217,41 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
         }
     }
 
+    override fun selectedGridTerminal(side: Direction)=ports.selected
+    override fun gridLoads(terminal: Int)=ports.loads(terminal)
+    override fun gridCircuitKey(terminal: Int)=ports.key(terminal)
+    override fun renderWireCount(terminal: Int)=if(terminal==50)3 else if(terminal<6)2 else 1
+    override fun gridCablePoint(terminal: Int,wire: Int)=if(terminal<40)super.gridCablePoint(terminal,wire) else ports.point(terminal,wire)
+    override fun hasGui()=true
+    override fun newContainer(side: Direction,player: Player)=mods.eln.misc.BasicContainer(player,inventory,emptyArray())
+    override fun onBlockActivated(player: Player,side: Direction,vx: Float,vy: Float,vz: Float): Boolean {
+        if(UtilityItems.isFuse(player.mainHandItem) && desc.includeTransformer && fuse.blown) {
+            fuse.replace();fuseContact.closed=true
+            if(!player.abilities.instabuild)player.mainHandItem.shrink(1)
+            player.inventory.setChanged();needPublish();return true
+        }
+        return super.onBlockActivated(player,side,vx,vy,vz)
+    }
+    override fun writeToNBT(nbt: CompoundTag) { super.writeToNBT(nbt);ports.write(nbt);fuse.write(nbt,"legacyFuse");nbt.putInt("legacyRatedWatts",ratedWatts) }
+    override fun readFromNBT(nbt: CompoundTag) { super.readFromNBT(nbt);ports.read(nbt);fuse.read(nbt,"legacyFuse");fuseContact.closed=fuse.closed;ratedWatts=nbt.getInt("legacyRatedWatts").takeIf { it in mods.eln.transparentnode.utilitylight.MainsStepDown.RATINGS } ?: 10_000 }
+    override fun getItemStackNBT()=CompoundTag().also { ports.write(it);fuse.write(it,"legacyFuse");it.putInt("legacyRatedWatts",ratedWatts) }
+    override fun readItemStackNBT(nbt: CompoundTag?) { if(nbt!=null) { ports.read(nbt);fuse.read(nbt,"legacyFuse");fuseContact.closed=fuse.closed;ratedWatts=nbt.getInt("legacyRatedWatts").takeIf { it in mods.eln.transparentnode.utilitylight.MainsStepDown.RATINGS } ?: 10_000 } }
+    override fun networkUnserialize(stream: DataInputStream): Byte {
+        val id=super.networkUnserialize(stream)
+        when(id.toInt()) {
+            87->ports.select(stream.readInt())
+            86->stream.readInt().takeIf { it in mods.eln.transparentnode.utilitylight.MainsStepDown.RATINGS }?.let { ratedWatts=it }
+            89->{
+                stream.readInt();val loaded=kotlin.math.abs(fuseContact.current)>.02
+                if(desc.includeTransformer && fuse.operate()) {
+                    if(loaded && !fuse.closed)play(mods.eln.sound.SoundCommand("eln:utility_arc_open").smallRange().mulVolume(.55))
+                    fuseContact.closed=fuse.closed
+                }
+            }
+        }
+        needPublish();return id
+    }
+
     override fun getGridElectricalLoad(side: Direction): ElectricalLoad {
         return electricalLoad
     }
@@ -228,5 +287,6 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
         } catch (e: IOException) {
             e.printStackTrace()
         }
+        LegacyPoleDisplay().apply { terminal=ports.selected;fuseClosed=fuse.closed;fuseBlown=fuse.blown;rating=ratedWatts }.write(stream)
     }
 }

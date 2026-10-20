@@ -1,5 +1,8 @@
 package mods.eln.gridnode.electricalpole
 
+import mods.eln.utility.*
+import mods.eln.misc.Direction
+import net.minecraft.world.entity.player.Player
 import mods.eln.Eln
 import mods.eln.cable.CableRenderType
 import mods.eln.gridnode.GridRender
@@ -18,6 +21,8 @@ import java.io.IOException
 
 class ElectricalPoleRender(entity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor) : GridRender(entity, descriptor) {
 
+    override val inventory=mods.eln.node.transparent.TransparentNodeElementInventory(0,1,this)
+    val display=LegacyPoleDisplay()
     internal var cableRenderType: CableRenderType? = null
     internal var eConn = LRDUMask()
 
@@ -41,6 +46,11 @@ class ElectricalPoleRender(entity: TransparentNodeEntity, descriptor: Transparen
 
     override fun draw() {
         super.draw()
+        preserveMatrix {
+            GL11.glRotatef(idealRenderingAngle,0f,1f,0f)
+            PoleSecondaryVisual.draw(Direction.XN)
+            if(descriptor.includeTransformer)PoleFuseVisual.draw(Direction.XN,display.fuseClosed,display.fuseBlown)
+        }
         cableRenderType = drawCable(front!!.down(), Eln.instance.stdCableRender3200V, eConn, cableRenderType)
     }
 
@@ -53,8 +63,11 @@ class ElectricalPoleRender(entity: TransparentNodeEntity, descriptor: Transparen
         } catch (e: IOException) {
             e.printStackTrace()
         }
+        display.read(stream)
 
     }
+
+    override fun newGuiDraw(side: Direction,player: Player)=LegacyPoleGui(player,this,descriptor.includeTransformer)
 
     override fun refresh(deltaT: Float) {
         super.refresh(deltaT)

@@ -67,7 +67,7 @@ class WorkLightElement(node: TransparentNode,descriptor: TransparentNodeDescript
     private var lifeTime=0.0
     private var warmup=0.0
     private var supplyRefresh=0.0
-    private var supply: LampSupplyElement.PowerSupplyChannelHandle?=null
+    private var supply: mods.eln.utility.WirelessPowerHandle?=null
     init {
         electricalComponentList.add(wiredLamp)
         slowProcessList.add(IProcess(::updateLight))
@@ -106,9 +106,9 @@ class WorkLightElement(node: TransparentNode,descriptor: TransparentNodeDescript
             supplyRefresh-=time
             if(supplyRefresh<=0) {
                 supplyRefresh=1.0
-                supply=LampSupplyElement.channelMap[channel]?.filterNotNull()
+                supply=mods.eln.utility.WirelessPowerChannels.channels(channel)?.filterNotNull()
                     ?.filter { it.element.isInRange(coordinate()) }
-                    ?.minByOrNull { it.element.sixNode!!.coordinate.trueDistanceTo(coordinate()) }
+                    ?.minByOrNull { it.element.coordinate.trueDistanceTo(coordinate()) }
             }
             val h=supply
             volts=if(h!=null && h.element.getChannelState(h.id) && h.element.isInRange(coordinate())) {

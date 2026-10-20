@@ -15,8 +15,10 @@ Enable **Dusk: Auto** to switch the lamp with daylight while keeping the base
 output available. See [streetlight controls and visuals](streetlight-qol.md).
 
 Base-level wire connections can supply other devices from the same regulated
-output. The lamp and those devices share the unit's **10 kW** rating, with an
-output-current limit of **83.3 A at 120 V** or **41.7 A at 240 V**.
+output. The lamp and those devices share the selected **10, 25, 50, 75 or 100 kW**
+rating (10 kW by default). Output current is limited to the selected watts divided
+by the output voltage. A primary fuse disconnects the transformer on sustained
+overload; replace a blown link by right-clicking with a **Pole Fuse Link**.
 Removing the unit disconnects the grid supply and turns the
 lamp off. The installed unit is returned when the pole is broken.
 
@@ -36,8 +38,8 @@ a suitably rated wire; a Direct Utility Pole can bring an overhead line down to
 these terminals. Open the menu to choose 120 V or 240 V.
 
 This is a step-down device, with a maximum input rating of **51.2 kV**, 95%
-electronics efficiency, a **10 kW** output limit and a **100 A** input-current limit.
-Output current is limited to 10 kW divided by the selected output voltage.
+electronics efficiency, a selectable **10–100 kW** output limit and a **100 A** input-current limit.
+Output current is limited to the selected watts divided by the output voltage.
 The input must remain above the selected output under load. Winding resistance
 causes a small voltage drop at the terminals. It will not boost an undervoltage
 line or backfeed the grid; it opens its active branches when disabled or outside
@@ -50,6 +52,10 @@ apply automatically to existing units and pole upgrades after updating the mod.
 Output selection and enabled state are saved and can be copied with the
 configuration tool. A standalone unit also retains them when broken and replaced.
 Poles save their own settings and installed unit across world restarts.
+
+See [utility distribution and house service](utility-distribution-and-service.md)
+for the secondary rack, phase-selectable transformers, service drops and protection poles.
+All existing poles and towers are three blocks taller in 3.0.25.
 
 ## Existing-device fixes
 

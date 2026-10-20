@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_analog_glass_service_meter": {
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:analog_glass_service_meter"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "eln:smart_digital_service_meter"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_analog_glass_service_meter"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "eln:smart_digital_service_meter"
+    ]
+  }
+}

@@ -134,6 +134,7 @@ object ItemRegistration {
         registerBasicItems(126)
         registerElectricMinecartItems(127)
         registerWireToolItems(123)
+        mods.eln.utility.UtilityItems.register()
         registerWireMachineItems(118)
 
         mods.eln.transparentnode.kitchen.KitchenFoods.register()

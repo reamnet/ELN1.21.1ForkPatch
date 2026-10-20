@@ -54,9 +54,10 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
         return false
     }
 
-    private fun onTryGridConnect(entityPlayer: Player, stack: ItemStack, cable: ElectricalCableDescriptor, side: Direction): Boolean {
+    fun onTryGridConnect(entityPlayer: Player, stack: ItemStack, cable: ElectricalCableDescriptor, side: Direction): Boolean {
         // First node, or second node?
         val uuid = entityPlayer.uuid
+        val terminal=selectedGridTerminal(side)
         val p = pending[uuid]
         var other: GridElement? = null
         if (p != null) {
@@ -80,16 +81,16 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
             return true
         }
         // Reject a transformer/switch body face before recording an unusable starting point.
-        if (getGridElectricalLoad(side) == null) {
+        if (gridLoads(terminal).isEmpty()) {
             Utils.sendMessage(entityPlayer, tr("Select a grid terminal, not the device body"))
             return true
         }
         if (other == null) {
             Utils.sendMessage(entityPlayer, tr("Setting starting point"))
-            pending.put(uuid, Pair.of(this.coordinate(), side))
+            pending.put(uuid, Pair.of(this.coordinate(), terminal))
         } else {
             val distance = other.coordinate().trueDistanceTo(this.coordinate())
-            val cableLength = Math.ceil(distance).toInt()
+            val cableLength = Math.ceil(distance).toInt()*gridLoads(terminal).size.coerceAtLeast(1)
             val range = Math.min(connectRange, other.connectRange)
             val stackSize = entityPlayer.totalItemsCarried(stack)
             val consumeLength = shouldConsumeUtilityCableLength(entityPlayer)
@@ -114,7 +115,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
                     } else {
                         null
                     }
-                    GridLink.addLink(this, other, side, p!!.right, cable, cableLength, linkStack)
+                    GridLink.addLink(this, other, terminal, p!!.right, cable, cableLength, linkStack)
                     Utils.sendMessage(entityPlayer, tr("Added connection"))
                     if (cable is UtilityCableDescriptor && consumeLength) {
                         cable.setRemainingLengthMeters(stack, cable.getRemainingLengthMeters(stack) - cableLength)
@@ -151,10 +152,8 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
     }
 
     override fun disconnectJob() {
+        for (link in gridLinkList) link.disconnect()
         super.disconnectJob()
-        for (link in gridLinkList) {
-            link.disconnect()
-        }
     }
 
     override fun onBreakElement() {
@@ -198,6 +197,13 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
     }
 
     abstract fun getGridElectricalLoad(side: Direction): ElectricalLoad?
+
+    /** Terminals below 6 retain their legacy Direction encoding in existing saves. */
+    open fun selectedGridTerminal(side: Direction)=side.int
+    open fun gridLoads(terminal: Int): List<ElectricalLoad> = Direction.fromInt(terminal)?.let(::getGridElectricalLoad)?.let(::listOf) ?: emptyList()
+    open fun gridCircuitKey(terminal: Int)="LEGACY"
+    open fun renderWireCount(terminal: Int)=2
+    open fun gridCablePoint(terminal: Int,wire: Int): Vec3 = getRenderCablePoint(Direction.fromInt(terminal) ?: Direction.XN,wire)
 
     // TODO: This should check if the wire isn't passing through blocks.
     private fun validLOS(@Suppress("UNUSED_PARAMETER") other: GridElement): Boolean {
@@ -273,13 +279,15 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
             stream.writeInt(ourLinks.size)
             for (link in ourLinks) {
                 val target = link.getOtherElement(this)
-                val ourSide = link.getSide(this)
-                val theirSide = link.getSide(target)
+                val ourSide = link.getTerminal(this)
+                val theirSide = link.getTerminal(target)
                 // It's always the "a" side doing this.
                 val offset = link.b.subtract(link.a)
-                for (i in 0..1) {
-                    val start = getRenderCablePoint(ourSide, i).yRot(Math.toRadians(idealRenderingAngle.toDouble()).toFloat())
-                    var end = target.getRenderCablePoint(theirSide, i).yRot(Math.toRadians(target.idealRenderingAngle.toDouble()).toFloat())
+                val wires=minOf(renderWireCount(ourSide),target.renderWireCount(theirSide))
+                stream.writeByte(wires)
+                for (i in 0 until wires) {
+                    val start = gridCablePoint(ourSide, i).yRot(Math.toRadians(idealRenderingAngle.toDouble()).toFloat())
+                    var end = target.gridCablePoint(theirSide, i).yRot(Math.toRadians(target.idealRenderingAngle.toDouble()).toFloat())
                     end = end.add(offset.x.toDouble(), offset.y.toDouble(), offset.z.toDouble())
                     writeVec(stream, start)
                     writeVec(stream, end)
@@ -324,6 +332,6 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
         /**
          * The last place any given player tried to link two instance nodes.
          */
-        private val pending = HashMap<UUID, Pair<Coordinate, Direction>>()
+        private val pending = HashMap<UUID, Pair<Coordinate, Int>>()
     }
 }

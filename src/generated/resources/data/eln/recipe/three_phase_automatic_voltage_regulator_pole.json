@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "eln:three_phase_utility_pole"
+    },
+    {
+      "item": "eln:dc-dc_converter"
+    },
+    {
+      "item": "minecraft:redstone"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:three_phase_automatic_voltage_regulator_pole"
+  }
+}

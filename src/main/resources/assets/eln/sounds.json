@@ -539,5 +539,37 @@
         "stream": false
       }
     ]
+  },
+  "utility_fuse_blow": {
+    "sounds": [
+      {
+        "name": "eln:utility_fuse_blow",
+        "stream": false
+      }
+    ]
+  },
+  "utility_recloser_bump": {
+    "sounds": [
+      {
+        "name": "eln:utility_recloser_bump",
+        "stream": false
+      }
+    ]
+  },
+  "utility_arc_close": {
+    "sounds": [
+      {
+        "name": "eln:utility_arc_close",
+        "stream": false
+      }
+    ]
+  },
+  "utility_arc_open": {
+    "sounds": [
+      {
+        "name": "eln:utility_arc_open",
+        "stream": false
+      }
+    ]
   }
 }
