@@ -64,13 +64,14 @@ class PoleLoadConnectionTest {
         if (!idealSupply) root.addProcess(ShaftGeneratorProcess(sourcePin, null, source as SwitchableVoltageSource,
             { supplyVolts }, { 1e8 }, 20000.0, 20.0, 100.0, .95))
         var feeder: State = sourcePin
-        val descriptor = Eln.transparentNodeItem.subItemList.values.filterIsInstance<StepDownUnitDescriptor>().single()
+        val descriptor = Eln.transparentNodeItem.subItemList.values.filterIsInstance<UtilityStreetLightDescriptor>().first()
         val lights = List(count) {
-            val light = StepDownUnitElement(TransparentNode(), descriptor)
+            val light = UtilityStreetLightElement(TransparentNode(), descriptor)
+            light.inventory.setItem(0, Eln.findItemStack("Mains Step-down Unit", 1)); light.inventoryChange(light.inventory); light.fuseContact.closed=light.fuse.closed
             light.electricalLoadList.forEach(root::addState)
             light.electricalComponentList.forEach(root::addComponent)
-            wire(feeder, light.unit.primary, .002)
-            feeder = light.unit.primary
+            wire(feeder, light.highBus, .002)
+            feeder = light.highBus
             root.addComponent(Resistor(light.unit.secondary, null).apply { resistance = 240.0 })
             root.addProcess(light.unit.controller)
             light
@@ -104,7 +105,7 @@ class PoleLoadConnectionTest {
             assertEquals(0, tapTrips, "$label count=$count poleTransformer=$poleTransformer")
             assertTrue(sourcePin.voltage > supplyVolts * .7,
                 "$label count=$count poleTransformer=$poleTransformer HV=${sourcePin.voltage} output=${output.voltage}")
-            lights.forEach { assertEquals(it.unit.outputVoltage.toDouble(), it.unit.secondary.voltage, .1,
+            lights.forEach { assertTrue(it.unit.primary.voltage > supplyVolts*.6, "Pole input disconnected"); assertEquals(it.unit.primary.voltage * it.unit.outputVoltage / MainsStepDown.NOMINAL_POLE_VOLTS, it.unit.secondary.voltage, .1,
                 "$label count=$count poleTransformer=$poleTransformer ${it.unit.controller.status}") }
         }
         repeat(40) { step -> root.step(); checkPowered("tap initialization step=$step") }

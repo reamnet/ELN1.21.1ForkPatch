@@ -26,6 +26,12 @@ interface ConservativePowerProcess : IRootSystemPreStepProcess {
     fun connectedSystems(): Set<SubSystem>
 }
 
+/** Shared controls for regulated converters and fixed-ratio transformers. */
+interface ResettablePowerProcess : ConservativePowerProcess {
+    val status: String
+    fun resetFault()
+}
+
 /** A failed algebraic solve opens the converter for a second, then retries normal validation.
  * This is a numerical recovery timer, separate from persistent insulation/winding damage.
  */

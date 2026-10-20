@@ -19,28 +19,39 @@ def aura():
  m.cyl('Metal',0,(.275,0,0),.10,.065,.10,40)
  m.cyl('Rotor',0,(.375,0,0),.055,.105,n=48)
  m.cyl('Metal',0,(.43,0,0),.045,.102,.096,48)
- # Pear-shaped swept blades: slim curved neck, broad round outer paddle.
- controls=[(.078,-.020),(.15,-.020),(.20,-.10),(.31,-.115),(.405,-.115),(.454,-.060),(.455,.010),(.455,.085),(.405,.127),(.335,.116),(.24,.10),(.17,.027),(.085,.025)]
- # Closed Catmull-Rom outline, sampled densely enough to retain the round paddle silhouette.
- outline=[]
- for j in range(len(controls)):
-  p0,p1,p2,p3=[controls[k%len(controls)] for k in [j-1,j,j+1,j+2]]
+ # Radial sections: narrow inward-curved waist, then an oval, bulbous paddle.
+ # +X points down from the ceiling. Negative tangential sweep is leftward
+ # when looking up at the first blade; every copy has the same handed pitch.
+ controls=[(.080,.000,.020),(.140,-.005,.020),(.205,-.030,.026),
+           (.260,-.056,.052),(.325,-.067,.104),(.390,-.052,.130),
+           (.445,-.024,.109),(.480,-.003,.059),(.492,.005,.001)]
+ sections=[]
+ for j in range(len(controls)-1):
+  p0,p1,p2,p3=[controls[min(max(k,0),len(controls)-1)] for k in [j-1,j,j+1,j+2]]
   for k in range(5):
    t=k/5;t2=t*t;t3=t2*t
-   outline.append(tuple(.5*(2*p1[d]+(-p0[d]+p2[d])*t+(2*p0[d]-5*p1[d]+4*p2[d]-p3[d])*t2+(-p0[d]+3*p1[d]-3*p2[d]+p3[d])*t3) for d in range(2)))
+   sections.append(tuple(.5*(2*p1[d]+(-p0[d]+p2[d])*t+(2*p0[d]-5*p1[d]+4*p2[d]-p3[d])*t2+(-p0[d]+3*p1[d]-3*p2[d]+p3[d])*t3) for d in range(3)))
+ sections.append(controls[-1])
  for j in range(5):
   a=j*tau/5
-  def point(p,top):
-   r,w=p;return(.398+top+.025*(w/.13),r*cos(a)-w*sin(a),r*sin(a)+w*cos(a))
-  # Surface triangles from an interior point avoid fan triangulation across the narrow neck.
-  # Separate longitudinal curved strips make the blade solid and subtly cupped.
-  # Polygon is star-shaped around the neck/paddle junction.
-  center=(.245,.005)
-  for k,p in enumerate(outline):
-   q=outline[(k+1)%len(outline)]
-   m.poly('Rotor',[point(center,0),point(q,0),point(p,0)])
-   m.poly('Rotor',[point(center,.013),point(p,.013),point(q,.013)])
-   m.poly('Rotor',[point(p,0),point(q,0),point(q,.013),point(p,.013)])
+  def point(section,u,bottom):
+   r,sweep,width=section;w=sweep+u*width
+   # Downward droop and a 20-degree leftward pitch, plus a shallow curved face.
+   x=.398+.035*((r-.08)/.412)**1.3-.364*u*width+.009*(1-u*u)+bottom
+   return(x,r*cos(a)-w*sin(a),r*sin(a)+w*cos(a))
+  across=[-1,-.75,-.5,-.25,0,.25,.5,.75,1]
+  for k in range(len(sections)-1):
+   p,q=sections[k:k+2]
+   for u,v in zip(across,across[1:]):
+    m.poly('Rotor',[point(p,u,0),point(p,v,0),point(q,v,0),point(q,u,0)])
+    m.poly('Rotor',[point(p,u,.010),point(q,u,.010),point(q,v,.010),point(p,v,.010)])
+   for u in [-1,1]:
+    face=[point(p,u,0),point(q,u,0),point(q,u,.010),point(p,u,.010)]
+    m.poly('Rotor',face if u<0 else list(reversed(face)))
+  for p in [sections[0],sections[-1]]:
+   for u,v in zip(across,across[1:]):
+    face=[point(p,u,0),point(p,u,.010),point(p,v,.010),point(p,v,0)]
+    m.poly('Rotor',face if p==sections[0] else list(reversed(face)))
  for i in range(7):
   a=i*tau/7;y=.067*cos(a);z=.067*sin(a)
   m.cyl('Trim',0,(.474,y,z),.003,.012,n=16)

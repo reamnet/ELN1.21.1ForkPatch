@@ -74,7 +74,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         private set
     var regulatorAutomatic=true
         private set
-    val unit=if(kind.transformer)MainsStepDown(this) { installed && fuses[0].closed } else null
+    val unit=if(kind.transformer)MainsStepDown(this, poleTransformer = true) { installed && fuses[0].closed } else null
     val secondary=unit?.let { ServiceSecondary(this,it.secondary) { it.outputVoltage.toDouble() } }
     val services: List<NbtElectricalLoad> = secondary?.loads ?: List(3) { NbtElectricalLoad("secondaryBus$it").apply { serialResistance=.00001 } }
     private val regulatorInputs=if(kind.regulator)List(kind.phases) { NbtElectricalLoad("regulatorInput$it").apply { serialResistance=.00001 } } else emptyList()
@@ -133,7 +133,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         if(kind.transformer) {
             val limited=unit!!.outputOverloaded
             val amps=contacts.getOrNull(transformerPhase)?.current ?: 0.0
-            val rating=unit.ratedWatts/(abs(lines[transformerPhase].voltage).coerceAtLeast(unit.outputVoltage.toDouble())*MainsStepDown.EFFICIENCY)
+            val rating=unit.ratedWatts/MainsStepDown.NOMINAL_POLE_VOLTS
             if(fuses[0].step(dt,amps,rating,limited)) { sound("utility_fuse_blow",.8);applyContacts();needPublish() }
         }
         fuses.forEachIndexed { i,fuse ->

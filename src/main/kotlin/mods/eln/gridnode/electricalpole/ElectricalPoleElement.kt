@@ -5,6 +5,7 @@ import mods.eln.utility.*
 import mods.eln.i18n.I18N.tr
 import mods.eln.sim.IProcess
 import mods.eln.transparentnode.standby.TransferContact
+import mods.eln.transparentnode.utilitylight.MainsStepDown
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.player.Player
 import java.io.DataInputStream
@@ -45,6 +46,7 @@ data class Transformer(
 
 class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDescriptor)
     : GridElement(node, descriptor, (descriptor as GridDescriptor).connectRange) {
+    companion object { val OUTPUT_VOLTAGES=intArrayOf(120,240,3200) }
     private val desc = descriptor as ElectricalPoleDescriptor
     override val inventory=mods.eln.node.transparent.TransparentNodeElementInventory(0,1,this)
 
@@ -53,6 +55,14 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
     val ports=LegacyPolePorts(this,electricalLoad)
     var ratedWatts=10_000
         private set
+    var outputVoltage=3200
+        private set
+    private fun updateRatio() {
+        trafo?.interSystemProcess?.apply {
+            ratio=outputVoltage/MainsStepDown.NOMINAL_POLE_VOLTS
+            (this as? SafeTransformerProcess)?.resetFault()
+        }
+    }
     val fusedPrimary=NbtElectricalLoad("fusedPrimary").apply { serialResistance=.00001 }
     val fuseContact=TransferContact(electricalLoad,fusedPrimary)
     private var heightReady=false
@@ -101,7 +111,7 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
             val secondaryLoad = NbtElectricalLoad("secondaryLoad")
             val primaryVoltageSource = SwitchableVoltageSource("primaryVoltageSource").apply { connectTo(fusedPrimary, null) }
             val secondaryVoltageSource = SwitchableVoltageSource("secondaryVoltageSource").apply { connectTo(secondaryLoad, null) }
-            val interSystemProcess = SafeTransformerProcess(fusedPrimary, secondaryLoad, primaryVoltageSource, secondaryVoltageSource) { fuse.closed }
+            val interSystemProcess = SafeTransformerProcess(fusedPrimary, secondaryLoad, primaryVoltageSource, secondaryVoltageSource) { fuse.closed }.apply { ratio=outputVoltage/MainsStepDown.NOMINAL_POLE_VOLTS }
             val voltageSecondaryWatchdog = VoltageStateWatchDog(secondaryLoad)
 
             trafo = Transformer(
@@ -121,7 +131,7 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
 
             electricalProcessList.add(IProcess { dt ->
                 if(fuse.pickup(dt,fuseContact.current))play(mods.eln.sound.SoundCommand("eln:utility_arc_close").smallRange().mulVolume(.20))
-                if(fuse.step(dt,fuseContact.current,ratedWatts/(kotlin.math.abs(electricalLoad.voltage).coerceAtLeast(120.0)*.95))) {
+                if(fuse.step(dt,fuseContact.current,ratedWatts/MainsStepDown.NOMINAL_POLE_VOLTS)) {
                     fuseContact.closed=false;play(mods.eln.sound.SoundCommand("eln:utility_fuse_blow").smallRange().mulVolume(.8));needPublish()
                 }
             })
@@ -232,15 +242,26 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
         }
         return super.onBlockActivated(player,side,vx,vy,vz)
     }
-    override fun writeToNBT(nbt: CompoundTag) { super.writeToNBT(nbt);ports.write(nbt);fuse.write(nbt,"legacyFuse");nbt.putInt("legacyRatedWatts",ratedWatts) }
-    override fun readFromNBT(nbt: CompoundTag) { super.readFromNBT(nbt);ports.read(nbt);fuse.read(nbt,"legacyFuse");fuseContact.closed=fuse.closed;ratedWatts=nbt.getInt("legacyRatedWatts").takeIf { it in mods.eln.transparentnode.utilitylight.MainsStepDown.RATINGS } ?: 10_000 }
-    override fun getItemStackNBT()=CompoundTag().also { ports.write(it);fuse.write(it,"legacyFuse");it.putInt("legacyRatedWatts",ratedWatts) }
-    override fun readItemStackNBT(nbt: CompoundTag?) { if(nbt!=null) { ports.read(nbt);fuse.read(nbt,"legacyFuse");fuseContact.closed=fuse.closed;ratedWatts=nbt.getInt("legacyRatedWatts").takeIf { it in mods.eln.transparentnode.utilitylight.MainsStepDown.RATINGS } ?: 10_000 } }
+    private fun writeSettings(nbt: CompoundTag) {
+        ports.write(nbt);fuse.write(nbt,"legacyFuse")
+        nbt.putInt("legacyRatedWatts",ratedWatts);nbt.putInt("legacyOutputVoltage",outputVoltage)
+    }
+    private fun readSettings(nbt: CompoundTag) {
+        ports.read(nbt);fuse.read(nbt,"legacyFuse");fuseContact.closed=fuse.closed
+        ratedWatts=nbt.getInt("legacyRatedWatts").takeIf { it in MainsStepDown.RATINGS } ?: 10_000
+        outputVoltage=nbt.getInt("legacyOutputVoltage").takeIf { it in OUTPUT_VOLTAGES } ?: 3200
+        updateRatio()
+    }
+    override fun writeToNBT(nbt: CompoundTag) { super.writeToNBT(nbt);writeSettings(nbt) }
+    override fun readFromNBT(nbt: CompoundTag) { super.readFromNBT(nbt);readSettings(nbt) }
+    override fun getItemStackNBT()=CompoundTag().also(::writeSettings)
+    override fun readItemStackNBT(nbt: CompoundTag?) { if(nbt!=null)readSettings(nbt) }
     override fun networkUnserialize(stream: DataInputStream): Byte {
         val id=super.networkUnserialize(stream)
         when(id.toInt()) {
+            80->stream.readInt().takeIf { it in OUTPUT_VOLTAGES }?.let { outputVoltage=it;updateRatio() }
             87->ports.select(stream.readInt())
-            86->stream.readInt().takeIf { it in mods.eln.transparentnode.utilitylight.MainsStepDown.RATINGS }?.let { ratedWatts=it }
+            86->stream.readInt().takeIf { it in MainsStepDown.RATINGS }?.let { ratedWatts=it }
             89->{
                 stream.readInt();val loaded=kotlin.math.abs(fuseContact.current)>.02
                 if(desc.includeTransformer && fuse.operate()) {
@@ -270,7 +291,7 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
         trafo?.apply {
             voltageSecondaryWatchdog.setNominalVoltage(Eln.instance.veryHighVoltageCableDescriptor.electricalNominalVoltage)
             secondaryMaxCurrent = desc.cableDescriptor.electricalMaximalCurrent.toFloat()
-            interSystemProcess.setRatio(0.25)
+            interSystemProcess.setRatio(outputVoltage/MainsStepDown.NOMINAL_POLE_VOLTS)
         }
         super.initialize()
     }
@@ -287,6 +308,6 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
         } catch (e: IOException) {
             e.printStackTrace()
         }
-        LegacyPoleDisplay().apply { terminal=ports.selected;fuseClosed=fuse.closed;fuseBlown=fuse.blown;rating=ratedWatts }.write(stream)
+        LegacyPoleDisplay().apply { terminal=ports.selected;fuseClosed=fuse.closed;fuseBlown=fuse.blown;rating=ratedWatts;voltage=outputVoltage }.write(stream)
     }
 }

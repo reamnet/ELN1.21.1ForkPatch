@@ -67,7 +67,7 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
     }
     val fuse=CutoutFuse()
     val highBus=mods.eln.sim.nbt.NbtElectricalLoad("streetGridBus").apply { serialResistance=.00001 }
-    val unit: MainsStepDown = MainsStepDown(this) { installed && !cord.plugged && fuse.closed }
+    val unit: MainsStepDown = MainsStepDown(this, poleTransformer = true) { installed && !cord.plugged && fuse.closed }
     val serviceSecondary=ServiceSecondary(this,unit.secondary) { unit.outputVoltage.toDouble() }
     val ports=LegacyPolePorts(this,highBus,serviceSecondary.loads)
     val fuseContact=mods.eln.transparentnode.standby.TransferContact(highBus,unit.primary)
@@ -90,7 +90,7 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
             serviceSecondary.update()
             if(fuse.pickup(dt,fuseContact.current))play(mods.eln.sound.SoundCommand("eln:utility_arc_close").smallRange().mulVolume(.20))
             val limited=unit.outputOverloaded
-            if(fuse.step(dt,fuseContact.current,unit.ratedWatts/(kotlin.math.abs(highBus.voltage).coerceAtLeast(unit.outputVoltage.toDouble())*MainsStepDown.EFFICIENCY),limited)) {
+            if(fuse.step(dt,fuseContact.current,unit.ratedWatts/MainsStepDown.NOMINAL_POLE_VOLTS,limited)) {
                 play(mods.eln.sound.SoundCommand("eln:utility_fuse_blow").smallRange().mulVolume(.8));fuseContact.closed=false;needPublish()
             }
         })
@@ -169,7 +169,7 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
     override fun readConfigTool(compound: CompoundTag, invoker: Player) { if (compound.contains("mainsOutputVoltage")) { unit.read(compound); configureLamp(); needPublish() } }
     override fun writeConfigTool(compound: CompoundTag, invoker: Player) { unit.write(compound) }
     override fun networkSerialize(stream: DataOutputStream) { super.networkSerialize(stream); unit.publish(stream, installed, lightLevel)
-        LegacyPoleDisplay().apply { terminal=ports.selected;fuseClosed=fuse.closed;fuseBlown=fuse.blown;rating=unit.ratedWatts }.write(stream)
+        LegacyPoleDisplay().apply { terminal=ports.selected;fuseClosed=fuse.closed;fuseBlown=fuse.blown;rating=unit.ratedWatts;voltage=unit.outputVoltage }.write(stream)
     }
     override fun networkUnserialize(stream: DataInputStream): Byte {
         val id = super.networkUnserialize(stream)

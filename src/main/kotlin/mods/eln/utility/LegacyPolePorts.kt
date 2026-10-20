@@ -73,9 +73,9 @@ object PoleFuseVisual {
     }
 }
 class LegacyPoleDisplay {
-    var terminal=32;var fuseClosed=true;var fuseBlown=false;var rating=10_000
-    fun write(s: DataOutputStream) { s.writeInt(terminal);s.writeBoolean(fuseClosed);s.writeBoolean(fuseBlown);s.writeInt(rating) }
-    fun read(s: DataInputStream) { terminal=s.readInt();fuseClosed=s.readBoolean();fuseBlown=s.readBoolean();rating=s.readInt() }
+    var terminal=32;var fuseClosed=true;var fuseBlown=false;var rating=10_000;var voltage=3200
+    fun write(s: DataOutputStream) { s.writeInt(terminal);s.writeBoolean(fuseClosed);s.writeBoolean(fuseBlown);s.writeInt(rating);s.writeInt(voltage) }
+    fun read(s: DataInputStream) { terminal=s.readInt();fuseClosed=s.readBoolean();fuseBlown=s.readBoolean();rating=s.readInt();voltage=s.readInt() }
 }
 object PoleSecondaryVisual {
     private val model by lazy { Eln.obj.getObj("distributionpole") }

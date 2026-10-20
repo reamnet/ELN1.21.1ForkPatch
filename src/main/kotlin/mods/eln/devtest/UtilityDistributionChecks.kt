@@ -138,7 +138,7 @@ object UtilityDistributionChecks {
                         trafo.inventory.setItem(0,Eln.findItemStack("Mains Step-down Unit",1));trafo.inventory.setChanged()
                         settings(trafo,80) { writeInt(240) };settings(trafo,86) { writeInt(25_000) };settings(trafo,88) { writeInt(2) }
                         val sec=place(p,DistributionKind.SECONDARY_LIGHT.title,secondary) as DistributionPoleElement
-                        for((dir,volts) in listOf(Direction.XN to 14_000.0,Direction.XP to 13_000.0,Direction.ZN to 12_000.0)) {
+                        for((dir,volts) in listOf(Direction.XN to 14_000.0,Direction.XP to 13_000.0,Direction.ZN to 15_200.0)) {
                             val a=feeder.relative(dir.toFacing());val b=a.relative(dir.toFacing());w.setBlockAndUpdate(a.below(),Blocks.STONE.defaultBlockState());w.setBlockAndUpdate(b.below(),Blocks.STONE.defaultBlockState());f(p).wire(a);f(p).source(b,volts)
                         }
                         repeat(3) { i -> link(p,feed,rec,32+i,32+i);link(p,rec,trafo,36+i,32+i) }
@@ -175,14 +175,32 @@ object UtilityDistributionChecks {
                     capture("service-and-poles")
                     server { p ->
                         verifyPower(p)
-                        val feed=pole(p,feeder);feed.lines.forEachIndexed { i,b -> f(p).near(b.voltage,14_000.0-i*1000,2.0) }
+                        val feed=pole(p,feeder);feed.lines.forEachIndexed { i,b -> f(p).near(b.voltage,listOf(14_000.0,13_000.0,15_200.0)[i],2.0) }
                         val reg=pole(p,regulator);f(p).near(reg.outs[0].voltage,13_000.0,2.0)
-                        val cap=pole(p,capacitor);check(cap.electricalComponentList.filterIsInstance<mods.eln.sim.mna.component.Capacitor>().all { it.voltage>11_900 })
+                        val cap=pole(p,capacitor);check(cap.electricalComponentList.filterIsInstance<mods.eln.sim.mna.component.Capacitor>().all { it.voltage>12_900 })
                         check(meter(p).energy.importedKwh>0);check(lamp(p,fan).installedBulbs==7)
-                        pass("Independent 14/13/12 kV legs feed a phase-C 25 kW transformer, secondary streetlight, weatherhead, smart meter, twelve-breaker panel, wireless lamps, seven-light Aura fan and a 240 V cord outlet")
+                        pass("Independent 14/13/15.2 kV legs feed a phase-C 25 kW transformer, secondary streetlight, weatherhead, smart meter, twelve-breaker panel, wireless lamps, seven-light Aura fan and a 240 V cord outlet")
                         pass("Three-phase regulators reach target with passive taps; capacitor branches charge from their own legs")
-                        p.teleportTo(p.serverLevel(),fan.x+.5,fan.y-2.0,fan.z+1.2,180f,-55f)
-                    };next(25,40)
+                        f(p).voltage(feeder.north(2),14_440.0)
+                    };next(32,50)
+                }
+                32->if(settled()) {
+                    server { p ->
+                        panel(p).buses.forEachIndexed { i,b -> f(p).near(b.voltage,if(i==2)228.0 else 114.0,1.0) }
+                        check(pole(p,transformer).unit!!.controller.status=="TRANSFERRING")
+                        f(p).voltage(feeder.north(2),15_960.0)
+                    };next(33,50)
+                }
+                33->if(settled()) {
+                    server { p ->
+                        panel(p).buses.forEachIndexed { i,b -> f(p).near(b.voltage,if(i==2)252.0 else 126.0,1.0) }
+                        check(pole(p,transformer).unit!!.controller.status=="TRANSFERRING")
+                        f(p).voltage(feeder.north(2),15_200.0)
+                        pass("A 5 percent primary sag and rise produces 114/228 V and 126/252 V at the loaded house panel; no fixed-voltage regulation or convergence trip")
+                    };next(34,60)
+                }
+                34->if(settled()) {
+                    server { p -> verifyPower(p);p.teleportTo(p.serverLevel(),fan.x+.5,fan.y-2.0,fan.z+1.2,180f,-55f) };next(25,40)
                 }
                 25->if(settled()) { capture("aura-five-blade-seven-light-fan");server { p ->gui(p,transformer) };next(3) }
                 3->if(settled() && mc.screen is DistributionGui && ticks>25) { capture("transformer-gui");button("rating");next(4) }

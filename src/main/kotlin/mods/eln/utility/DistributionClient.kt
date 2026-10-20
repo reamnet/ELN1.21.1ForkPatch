@@ -85,7 +85,7 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
         list.add(tr("Select the cable terminal in the menu before linking poles"))
         list.add(tr("A, B and C are independent electrical circuits"))
         list.add(tr("Secondary rack carries L1 120 V, L2 120 V and 240 V service circuits"))
-        if(kind.transformer) { list.add(tr("Insert a Mains Step-down Unit; select 10, 25, 50, 75 or 100 kW"));list.add(tr("Transformer phase is selectable; a blown fuse needs a Pole Fuse Link")) }
+        if(kind.transformer) { list.add(tr("Fixed ratio: 15.2 kV nominal primary; output follows grid voltage"));list.add(tr("Insert a Mains Step-down Unit; select 10, 25, 50, 75 or 100 kW"));list.add(tr("Transformer phase is selectable; a blown fuse needs a Pole Fuse Link")) }
         if(kind.cutout || kind.regulator)list.add(tr("Separate line and load terminals; replace blown links with a Pole Fuse Link"))
         if(kind.recloser)list.add(tr("Any phase fault opens all three; timed retries stop at lockout"))
         if(kind.regulator)list.add(tr("Automatic regulation within 10 percent of line voltage; passive, power-conserving taps"))
@@ -146,7 +146,7 @@ class DistributionGui(player: Player,private val render: DistributionPoleRender)
     override fun initGui() {
         super.initGui();terminal=newGuiButton(8,58,224,"")
         if(kind.transformer) {
-            phase=newGuiButton(8,82,106,"");rating=newGuiButton(118,82,114,"");voltage=newGuiButton(8,106,106,"")
+            phase=newGuiButton(8,82,106,"");rating=newGuiButton(118,82,114,"");voltage=newGuiButton(8,106,106,"").apply { setComment(0,tr("Nominal output at 15.2 kV; follows grid voltage proportionally")) }
             operate=newGuiButton(118,106,114,"")
         }
         if(kind.cutout || kind.transformer || kind.regulator)repeat(if(kind.transformer)1 else kind.phases) { i -> fuses.add(newGuiButton(8+i*75,134,72,"")) }
@@ -169,7 +169,7 @@ class DistributionGui(player: Player,private val render: DistributionPoleRender)
     private fun refresh() {
         terminal.displayString=tr("Cable: %1$",ServiceTerminals.label(d.terminal))
         phase?.displayString=tr("Phase: %1$",listOf("A","B","C")[d.phase.coerceIn(0,2)])
-        rating?.displayString=tr("Rating: %1$ kW",d.rating/1000);voltage?.displayString=tr("Output: %1$ V",d.voltage)
+        rating?.displayString=tr("Rating: %1$ kW",d.rating/1000);voltage?.displayString=tr("Nominal: %1$ V",d.voltage)
         operate?.displayString=when { kind.transformer -> if(d.enabled)tr("Transformer: On") else tr("Transformer: Off");kind.recloser -> if(d.closed)tr("Open all phases") else tr("Close all phases");else -> if(d.enabled)tr("Open switch") else tr("Close switch") }
         fuses.forEachIndexed { i,b -> b.displayString=tr("%1$: %2$",listOf("A","B","C")[if(kind.transformer)d.phase.coerceIn(0,2) else i],if(d.fuseBlown.getOrNull(i)==true)tr("Blown") else if(d.fuseClosed.getOrNull(i)!=false)tr("Open") else tr("Close"));b.enabled=d.fuseBlown.getOrNull(i)!=true;b.setComment(0,tr("Right-click the pole holding a Pole Fuse Link to replace a blown fuse")) }
         max?.displayString=tr("Lockout after %1$ failed reclosures",d.maxFailures)
@@ -203,6 +203,6 @@ class DistributionGui(player: Player,private val render: DistributionPoleRender)
         if(kind.recloser)drawString(8,184,if(d.locked)tr("Locked out; inspect fault and reset") else if(!d.closed)tr("Retry in %1$ s",String.format(Locale.ROOT,"%.1f",d.remaining)) else tr("All three phases closed"))
         else if(kind.regulator)drawString(8,190,tr("Tap: %1$ %%",String.format(Locale.ROOT,"%.1f",100*(d.ratios.firstOrNull() ?: 1.0))))
         else drawString(8,190,tr("Load: %1$",Utils.plotVolt("",d.output).trim()))
-        drawString(8,208,font.plainSubstrByWidth(tr("Secondary: L1 120 V / L2 120 V / 240 V"),224))
+        drawString(8,208,font.plainSubstrByWidth(if(kind.transformer)tr("Nominal primary: 15.2 kV; fixed ratio") else tr("Secondary: L1 120 V / L2 120 V / 240 V"),224))
     }
 }

@@ -1,6 +1,6 @@
-# Utility distribution and house service (3.0.25)
+# Utility distribution and house service (3.0.26)
 
-All existing poles and transmission towers are three blocks taller. Existing block/item IDs, overhead spans, transformer ratios and streetlight settings remain compatible. Saved poles reserve extra clearance when the surrounding chunks load; the upgrade never replaces player-built blocks.
+All existing poles and transmission towers are three blocks taller. Existing block/item IDs, overhead spans and streetlight settings remain compatible. Pole transformers now use a fixed 15.2 kV nominal primary, so their secondary voltages follow the grid. Saved poles reserve extra clearance when the surrounding chunks load; the upgrade never replaces player-built blocks.
 
 ## Overhead circuits and service drops
 
@@ -8,14 +8,14 @@ The new **Single Phase Utility Pole** has one overhead conductor. **Three Phase 
 
 Every pole, including the existing variants and towers, has an independent secondary rack. Select **120/240 V service drop** to link all three service channels at once. Use a cable spool for long bundles; ordinary stackable cable items are limited to one stack of paid conductor length. The bundle uses three metres of cable per block of span and renders three sagging conductors. Each has its own resistance and thermal state. Individual L1 120 V, L2 120 V and 240 V terminals are also available. Unpowered racks pass the secondary through; they do not generate voltage.
 
-The simulator uses DC-equivalent circuits. A/B/C are independent power networks, not AC phase angles. The service bundle represents two independent 120 V load circuits and one 240 V load circuit, with the return reference implicit. It does not simulate a physical neutral conductor, split-phase waveforms or neutral imbalance. All three outputs draw from the same real transformer, so their combined power cannot exceed its rating.
+The simulator uses DC-equivalent circuits. A/B/C are independent power networks, not AC phase angles. The service bundle represents two independent 120 V load circuits and one 240 V load circuit, with the return reference implicit. It does not simulate a physical neutral conductor, split-phase waveforms or neutral imbalance. All three outputs draw from the same real transformer. The selected kW rating sets its primary fuse and winding thermal capacity; an overload can exceed the rating briefly before protection opens.
 
 ## A working pole-to-house connection
 
 1. Feed a **Three Phase Underground Feeder Pole** with three separate floor cables: left A, right B, rear C. The front follows placement direction.
 2. Link its A/B/C overhead terminals to the matching terminals on other three-phase poles. Protection poles have separate **Line** and **Load** terminals; the outgoing circuit must connect to Load.
 3. Install a **Mains Step-down Unit** in a transformer pole by right-clicking with it, or using its inventory slot. Choose A, B or C on a three-phase transformer pole. The transformer uses only that phase.
-4. Choose **10, 25, 50, 75 or 100 kW**. This is the total transformer output budget, shared by the lamp, normal base output and all service channels. Choose 120 or 240 V for the normal base output; the service rack always provides both 120 V circuits and the 240 V circuit. The standalone Mains Step-down Unit has the same selectable ratings. Input current, available source power, feeder resistance and thermal limits still apply.
+4. Choose **10, 25, 50, 75 or 100 kW**. This is the transformer rating shared by the lamp, normal base output and service channels. Choose 120 or 240 V as the **nominal** normal base output at **15.2 kV** primary. The service rack has nominal 120 V, 120 V and 240 V circuits at that same primary voltage. Actual output follows the primary proportionally, with additional physical winding/cable drops. At 14.44 kV (−5%), nominal 120/240 V becomes approximately 114/228 V; at 15.96 kV (+5%), it becomes 126/252 V. The separate standalone Mains Step-down Unit retains active regulated output and the same selectable ratings.
 5. Connect the secondary service bundle along secondary racks or **120/240V Secondary Utility Poles**, then to a wall-mounted **120/240V Service Weatherhead** on the house. The **Secondary Street Light Pole** runs its lamp directly from L1; it needs no transformer or primary fuse.
 6. Connect the weatherhead to the **incoming service bundle** on a **North American Meter Base**. Insert an **Analog Glass Service Meter** or **Smart Digital Service Meter**.
 7. Connect the meter's **outgoing service bundle** to a **Twelve Circuit American Breaker Panel**.
@@ -26,7 +26,7 @@ The weatherhead also terminates individual circuits into ordinary wall cables: l
 ## Protection and switching
 
 - **Fused Cutout Poles**, single- and three-phase, contain cutouts without a transformer. Select the trip current in amperes. Each phase's fuse protects its own load terminal.
-- Transformer poles, including the existing converter and streetlight poles, have a primary fuse. A sustained output overload also operates the fuse when the converter is already limiting current. The old 4:1 converter pole keeps its original voltage ratio; its selectable kW value sets its fuse protection.
+- Transformer poles, including the existing converter and streetlight poles, have a primary fuse. Primary fuse pickup is the selected watts divided by 15,200 V, independent of the instantaneous grid voltage. It responds to real reflected load current, rather than a converter current-limit flag. The older Utility Pole w/DC-DC Converter also uses 15.2 kV nominal primary; choose nominal 120, 240 or 3,200 V output in its menu. Old saves default to 3,200 V nominal on this older pole and keep their existing 120/240 V settings on streetlight/new transformer poles. There is no automatic primary calibration on load or restart. Existing grids below 15.2 kV will therefore have proportionally lower outputs after upgrading.
 - A blown fuse drops its door open and plays a pop. Inspect/remove the overload, then right-click holding a **Pole Fuse Link**. A blown link cannot be reset by toggling the GUI or picking up/replacing its pole. Manual operation under load makes an arc; closing or re-fusing plays a quieter arc only if current actually starts flowing.
 - **Three Phase Recloser Pole** opens every phase when any phase exceeds pickup current. Configure 1–2000 A pickup, 1–60 seconds retry delay and 1–5 failed reclosures. The first trip starts the retry sequence; each failed automatic reclosure counts toward lockout. Ten seconds of stable operation clears the failed-retry counter. Manual Open prevents automatic closing. Locked-out and manually open states survive world restart. Inspect the fault and use **Reset lockout** to close again.
 - **Three Phase Gang Operated Air Break Switch Pole** opens/closes all three load terminals together. It does not automatically detect overloads.
@@ -47,14 +47,14 @@ Wireless lamp demand is charged to its own real branch. Wireless cord outlets co
 
 ## Aura-style ceiling fan
 
-The **Aura Five Blade Ceiling Fan** follows the supplied fan photos: satin gray finish, five swept blades with narrow roots and broad rounded ends, a roughly 36-inch span and seven recessed downward lights. Install up to seven bulbs of any supported lamp technology, using a matching voltage. Its fan and lights have independent controls, gradual startup/coast-down and the existing fan sound. It supports wireless lamp/panel channels, direct cables and the flexible cord system. It can mount on the same ceiling/slab surfaces as the other ceiling fixtures.
+The **Aura Five Blade Ceiling Fan** follows the supplied fan photos: satin gray finish, five swept blades with slim roots and inward-curving waists, bulbous rounded ends, and matching downward and leftward pitch, a roughly 36-inch span and seven recessed downward lights. Install up to seven bulbs of any supported lamp technology, using a matching voltage. Its fan and lights have independent controls, gradual startup/coast-down and the existing fan sound. It supports wireless lamp/panel channels, direct cables and the flexible cord system. It can mount on the same ceiling/slab surfaces as the other ceiling fixtures.
 
 ![Aura-style five-blade fan with seven recessed lights in Minecraft](assets/aura-five-blade-fan.png)
 
 ## Building and validation
 
-Build the matching source tag using the [Ubuntu 24.04 instructions](building-on-ubuntu-24.04.md). The release page intentionally has no compiled jar; attach the locally compiled `ElectricalAge-3.0.25.jar`.
+Build the matching source tag using the [Ubuntu 24.04 instructions](building-on-ubuntu-24.04.md). The release page intentionally has no compiled jar; attach the locally compiled `ElectricalAge-3.0.26.jar`.
 
-Release validation: **725 unit tests passed with zero failures or skips**, and **14 native Minecraft checks passed**, including a cold-world restart and client receipt of all four new operating sounds. The native report for this validation used world `utility-distribution-1792482685255`.
+Release validation: **731 unit tests passed with zero failures, errors or skips**, and **15 native Minecraft checks passed**, including proportional voltage changes through the loaded house service and a cold-world restart. Native validation used world `utility-distribution-1792521355334`.
 
 The opt-in native campaign is `-Deln.utilityDistributionChecks=true` with `runClient`. It places the registered production equipment, feeds three independent voltage legs through actual cables and overhead links, exercises panel and meter GUI inventory/buttons, observes protection sounds and saves/reopens its world. Its JSON report is `run/client/utility-distribution-checks.json`; a successful report must have no failure and the expected current world name/checks. This campaign is disabled in normal play.

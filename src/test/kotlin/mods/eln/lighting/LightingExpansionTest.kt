@@ -78,18 +78,21 @@ class LightingExpansionTest {
         assertEquals(0.0,e.bank.energy,1e-6)
         assertEquals(10_000.0,UpsPowerUnit.MAX_WATTS)
     }
-    @Test fun bothPoleStylesRegulateAt120And240WithoutChangingTheirLampRating() {
+    @Test fun allPoleStylesTrackGridVoltageWithoutChangingTheirNominalLampRating() {
         for(d in Eln.transparentNodeItem.subItemList.values.filterIsInstance<UtilityStreetLightDescriptor>()) for(v in listOf(120,240)) {
             val e=UtilityStreetLightElement(TransparentNode(),d)
             e.inventory.setItem(0,Eln.findItemStack("Mains Step-down Unit",1));e.inventoryChange(e.inventory)
             e.unit.read(CompoundTag().apply { putInt("mainsOutputVoltage",v) });e.updateAmbientDarkness(15)
             val root=RootSystem(.05,1)
             e.electricalLoadList.forEach(root::addState);e.electricalComponentList.forEach(root::addComponent)
-            root.addComponent(VoltageSource("grid",e.unit.primary,null).apply { voltage=14_000.0 });root.addProcess(e.unit.controller)
-            repeat(15) { root.step() }
-            assertEquals(v.toDouble(),e.unit.secondary.voltage,.1)
-            assertEquals(d.lampWatts,e.lamp.power,.1)
-            assertTrue(-e.unit.input.power>=e.lamp.power)
+            val source=VoltageSource("grid",e.unit.primary,null);root.addComponent(source);root.addProcess(e.unit.controller)
+            for(fraction in listOf(1.0,.95,1.05)) {
+                source.voltage=MainsStepDown.NOMINAL_POLE_VOLTS*fraction
+                repeat(15) { root.step() }
+                assertEquals(v*fraction,e.unit.secondary.voltage,.1)
+                assertEquals(d.lampWatts*fraction*fraction,e.lamp.power,.1)
+                assertTrue(source.power>=e.lamp.power)
+            }
             val ghosts=d.getGhostGroupFront(Direction.XN)!!.elementList
             assertEquals(ghosts.size,ghosts.map { Triple(it.x,it.y,it.z) }.toSet().size)
         }

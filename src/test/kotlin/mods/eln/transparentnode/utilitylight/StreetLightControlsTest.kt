@@ -24,7 +24,7 @@ class StreetLightControlsTest {
         e.inventoryChange(e.inventory)
         val root = RootSystem(.05, 1)
         e.electricalLoadList.forEach(root::addState); e.electricalComponentList.forEach(root::addComponent)
-        root.addComponent(VoltageSource("grid", e.unit.primary, null).apply { voltage = 14000.0 })
+        root.addComponent(VoltageSource("grid", e.unit.primary, null).apply { voltage = MainsStepDown.NOMINAL_POLE_VOLTS })
         val baseLoad = Resistor(e.unit.secondary, null).apply { resistance = 240.0 }
         root.addComponent(baseLoad); root.addProcess(e.unit.controller)
         e.unit.packet(83, bool(true))

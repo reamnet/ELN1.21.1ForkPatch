@@ -17,8 +17,8 @@ class RegulatedPowerProcess(
     private val enabled: () -> Boolean,
     private val limits: () -> ConverterLimits,
     private val target: (Double) -> Double
-) : ConservativePowerProcess {
-    var status = "IDLE"
+) : ResettablePowerProcess {
+    override var status = "IDLE"
         private set
     private val retry = ConverterRetry()
     private var commandedInput = Double.NaN
@@ -26,7 +26,7 @@ class RegulatedPowerProcess(
     private var activeLimits: ConverterLimits? = null
     private var previousTarget = Double.NaN
 
-    fun resetFault() { retry.reset(); previousTarget = Double.NaN }
+    override fun resetFault() { retry.reset(); previousTarget = Double.NaN }
     override fun beginStep(seconds: Double) { retry.advance(seconds) }
 
     private fun open(reason: String) {

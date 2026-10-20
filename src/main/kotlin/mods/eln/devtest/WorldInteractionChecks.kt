@@ -90,6 +90,15 @@ object WorldInteractionChecks {
             check((values["outputW"] as Double) > 10.0) { "Converter has no loaded output: $values" }
         }
     }
+    private fun checkPoleRatio(light: UtilityStreetLightElement) {
+        check(light.unit.primary.voltage>1000.0) { "Pole input is not energized" }
+        val expected=light.unit.primary.voltage*light.unit.outputVoltage/MainsStepDown.NOMINAL_POLE_VOLTS
+        check(abs(light.unit.secondary.voltage-expected)<1.0 && light.unit.controller.status!="NON_CONVERGENT") {
+            "Pole did not follow its fixed ratio: ${light.unit.waila()}"
+        }
+        val expectedLight=(15*light.lamp.power/60).toInt().coerceIn(0,15)
+        check(abs(light.lightLevel-expectedLight)<=1)
+    }
     private fun sampleLongLine(f: NativeCampaignFixtures) {
         val old = f.node(olderPole) as? mods.eln.node.transparent.TransparentNode
         check(old != null) {
@@ -104,9 +113,9 @@ object WorldInteractionChecks {
             val light = f.machine(longPole(i)) as UtilityStreetLightElement
             val expected = if (i % 2 == 0) 120 else 240
             check(light.installed && light.unit.outputVoltage == expected)
-            check(abs(light.unit.secondary.voltage - expected) < 1.0 && light.lightLevel >= 14 &&
-                light.unit.controller.status != "NON_CONVERGENT") { "Long-line pole $i lost power: ${light.unit.waila()}" }
-            check(light.unit.output.power > if (i == longPoleCount - 1) 8900.0 else 59.0) {
+            checkPoleRatio(light)
+            val fraction=light.unit.primary.voltage/MainsStepDown.NOMINAL_POLE_VOLTS
+            check(light.unit.output.power > (if(i==longPoleCount-1)8900.0 else 59.0)*fraction*fraction*.98) {
                 "Long-line pole $i has no loaded output: ${light.unit.waila()}"
             }
         }
@@ -229,10 +238,10 @@ object WorldInteractionChecks {
                         val f = fixture(player); sampleConverters(f)
                         sampleLongLine(f)
                         taps.sample(f)
-                        check(lamp(f).unit.secondary.voltage in 119.0..121.0 && lamp(f).lightLevel >= 14)
-                        check(lamp(f).unit.output.power > 110.0) { "Pole does not supply its external load: ${lamp(f).unit.waila()}" }
+                        checkPoleRatio(lamp(f))
+                        check(lamp(f).unit.output.power > 90.0) { "Pole does not supply its external load: ${lamp(f).unit.waila()}" }
                         val head = Coordinate(-1,2,0,0).apply { applyTransformation(lamp(f).front,Coordinate(pole.x,pole.y,pole.z,player.serverLevel())) }
-                        check(player.serverLevel().getBlockState(head.pos).getLightEmission(player.serverLevel(),head.pos) >= 14)
+                        check(player.serverLevel().getBlockState(head.pos).getLightEmission(player.serverLevel(),head.pos) >= 11)
                         player.serverLevel().dayTime = 18000L
                         look(player,pole,5.0,2.0,7.0)
                     }; step(4,true)
@@ -282,7 +291,7 @@ object WorldInteractionChecks {
                     server { player ->
                         val f=fixture(player)
                         check(unit(f).unit.secondary.voltage in 239.0..241.0)
-                        check(lamp(f).unit.outputVoltage == 240 && lamp(f).unit.secondary.voltage in 239.0..241.0) { "Pole voltage selection did not settle: ${lamp(f).unit.waila()}" }
+                        check(lamp(f).unit.outputVoltage == 240);checkPoleRatio(lamp(f))
                         lamp(f).inventory.setItem(0,ItemStack.EMPTY); lamp(f).inventory.setChanged()
                         serverReadyAt = player.server.tickCount + 40
                     }; step(16,true)
@@ -306,17 +315,17 @@ object WorldInteractionChecks {
                         sampleLongLine(f)
                         taps.sample(f, false)
                         check(unit(f).unit.secondary.voltage in 239.0..241.0)
-                        check(lamp(f).unit.secondary.voltage in 239.0..241.0)
+                        checkPoleRatio(lamp(f))
                         look(player,pole,5.0,2.0,7.0)
                     }; step(11,true)
                 }
                 11 -> if (complete() && ticks > 100) {
-                    server { player -> sampleConverters(fixture(player)); check(lamp(fixture(player)).lightLevel >= 14) }
+                    server { player -> sampleConverters(fixture(player)); checkPoleRatio(lamp(fixture(player))) }
                     step(12,true)
                 }
                 12 -> if (complete()) {
                     record("travelling 4000 blocks, unloading and returning preserves converter power without GUI edits")
-                    record("module removal opens both branches; reinsertion and a 14 kV to 3.2 kV grid change restore the selected output")
+                    record("module removal opens both branches; reinsertion and a 14 kV to 3.2 kV grid change preserve the fixed transformer ratio")
                     step(13); mc.level!!.disconnect(); mc.disconnect(TitleScreen())
                 }
                 13 -> if (ticks > 40 && mc.singleplayerServer == null) {
@@ -333,7 +342,7 @@ object WorldInteractionChecks {
                         taps.sample(f, false)
                         check(unit(f).unit.outputVoltage == 240 && unit(f).unit.secondary.voltage in 239.0..241.0)
                         val light=lamp(f)
-                        check(light.installed && light.unit.outputVoltage == 240 && light.lightLevel >= 14)
+                        check(light.installed && light.unit.outputVoltage == 240);checkPoleRatio(light)
                         check(light.gridLinkList.size == 2)
                         check((f.node(cover) as SixNode).sixNodeCacheBlock === Blocks.STONE)
                     }; step(15,true)

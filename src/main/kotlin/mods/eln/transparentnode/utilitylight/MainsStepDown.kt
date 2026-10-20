@@ -9,14 +9,17 @@ import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.nbt.NbtThermalLoad
 import mods.eln.sim.power.ConverterLimits
 import mods.eln.sim.power.RegulatedPowerProcess
+import mods.eln.sim.power.ResettablePowerProcess
+import mods.eln.sim.power.SafeTransformerProcess
 import net.minecraft.nbt.CompoundTag
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 
-/** Shared hardware for the placeable unit and the identical unit installed in a pole. */
-class MainsStepDown(private val owner: TransparentNodeElement, available: () -> Boolean = { true }) {
+/** Shared hardware: standalone active converter, or fixed-ratio 15.2 kV pole transformer. */
+class MainsStepDown(private val owner: TransparentNodeElement, val poleTransformer: Boolean = false, available: () -> Boolean = { true }) {
     companion object {
+        const val NOMINAL_POLE_VOLTS = 15_200.0
         const val MAX_INPUT_VOLTS = 51_200.0
         const val MAX_OUTPUT_WATTS = 10_000.0
         const val MAX_INPUT_AMPS = 100.0
@@ -52,7 +55,14 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
     val thermal = NbtThermalLoad("mainsThermal").apply {
         heatCapacity = 2000.0; Rp = .08; Rs = .1; setAsSlow()
     }
-    val controller = RegulatedPowerProcess(inputPin, null, outputPin, null, input, output,
+    val controller: ResettablePowerProcess = if (poleTransformer)
+        SafeTransformerProcess(inputPin, outputPin, input, output) {
+            enabled && available() && thermal.temperatureCelsius < 100.0
+        }.apply {
+            ratio = outputVoltage / NOMINAL_POLE_VOLTS
+            maximumPrimaryVoltage = MAX_INPUT_VOLTS
+        }
+    else RegulatedPowerProcess(inputPin, null, outputPin, null, input, output,
         { enabled && available() && thermal.temperatureCelsius < 100.0 },
         { limits(outputVoltage,ratedWatts) }, { outputVoltage.toDouble() })
 
@@ -61,18 +71,24 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
             it.serialResistance = .00001
             owner.electricalLoadList.add(it)
         }
-        owner.electricalComponentList.addAll(listOf(input, output, inputWinding, outputWinding))
+        owner.electricalComponentList.addAll(listOf(output, inputWinding, outputWinding))
+        owner.electricalComponentList.add(input)
         owner.thermalLoadList.add(thermal)
         owner.electricalProcessList.add(IProcess {
-            // Account for electronics and both physical winding losses after the accepted solve.
+            // The fixed-ratio pole has physical copper losses; the standalone converter also has electronics losses.
             thermal.movePowerTo((-input.power - output.power).coerceAtLeast(0.0) + inputWinding.power + outputWinding.power)
         })
     }
 
     /** Uses the existing solve result, never another expensive Thevenin probe. */
-    val outputOverloaded get()=secondary.voltage<outputVoltage*.92 && when(controller.status) {
+    val outputOverloaded get()=!poleTransformer && secondary.voltage<outputVoltage*.92 && when(controller.status) {
         "OUTPUT_POWER","OUTPUT_CURRENT","GAIN_UNAVAILABLE" -> true
         else -> false
+    }
+
+    private fun updateController() {
+        (controller as? SafeTransformerProcess)?.ratio = outputVoltage / NOMINAL_POLE_VOLTS
+        controller.resetFault()
     }
 
     fun write(tag: CompoundTag) {
@@ -93,7 +109,7 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
         lampAutomatic = tag.getBoolean("mainsLampAutomatic")
         lampHeightStep = tag.getInt("mainsLampHeightStep").takeIf(StreetLightMount::validStep) ?: 0
         lampYaw = tag.getInt("mainsLampYaw").takeIf(StreetLightMount::validYaw) ?: 0
-        controller.resetFault()
+        updateController()
     }
     fun packet(id: Byte, stream: DataInputStream): Boolean {
         if (id.toInt() !in 80..86) return false
@@ -117,7 +133,7 @@ class MainsStepDown(private val owner: TransparentNodeElement, available: () -> 
                     return true
                 }
             }
-            controller.resetFault()
+            updateController()
         } catch (_: IOException) { /* Reject truncated settings without mutating them. */ }
         return true
     }

@@ -13,19 +13,19 @@ class SafeTransformerProcess(
     private val input: SwitchableVoltageSource,
     private val output: SwitchableVoltageSource,
     private val populated: () -> Boolean
-) : TransformerInterSystemProcess(primary, secondary, input, output), ConservativePowerProcess {
+) : TransformerInterSystemProcess(primary, secondary, input, output), ResettablePowerProcess {
     var maximumPrimaryVoltage = 120_000.0
     var maximumSecondaryVoltage = 120_000.0
     var enabled = true
     var voltageTarget: Double? = null
-    var status = "IDLE"
+    override var status = "IDLE"
         private set
     private val retry = ConverterRetry()
     private var commandedInput = Double.NaN
     private var commandedOutput = Double.NaN
     private var powerRoundoff = 0.0
 
-    fun resetFault() { retry.reset() }
+    override fun resetFault() { retry.reset() }
     override fun beginStep(seconds: Double) { retry.advance(seconds) }
 
     override fun rootSystemPreStepProcess() {

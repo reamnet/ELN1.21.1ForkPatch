@@ -111,7 +111,7 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
             terminal=newGuiButton(180,60,144,"")
             fuse=newGuiButton(180,84,144,"").apply { setComment(0,tr("Right-click the pole holding a Pole Fuse Link to replace a blown fuse")) }
         }
-        voltage = newGuiButton(8, 60, 102, "")
+        voltage = newGuiButton(8, 60, 102, "").apply { if(pole)setComment(0,tr("Nominal output at 15.2 kV; follows grid voltage proportionally")) }
         enabled = newGuiButton(116, 60, 52, "")
         lamp = newGuiButton(8, 84, 75, "").apply { visible = pole }
         automatic = newGuiButton(87, 84, 81, "").apply { visible = pole }
@@ -131,7 +131,7 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
         terminal?.displayString=tr("Cable: %1$",mods.eln.utility.ServiceTerminals.label(display.pole.terminal))
         fuse?.apply { displayString=if(display.pole.fuseBlown)tr("Fuse blown") else if(display.pole.fuseClosed)tr("Open fuse") else tr("Close fuse");enabled=!display.pole.fuseBlown }
         rating.displayString=tr("Transformer: %1$ kW",display.rating/1000)
-        voltage.displayString = tr("Output: %1$ V", display.voltage)
+        voltage.displayString = if(pole)tr("Nominal: %1$ V",display.voltage) else tr("Output: %1$ V",display.voltage)
         enabled.displayString = if (display.enabled) tr("On") else tr("Off")
         automatic.displayString = if (display.automatic) tr("Dusk: Auto") else tr("Dusk: Manual")
         lamp.displayString = if (display.lampEnabled) tr("Lamp: On") else tr("Lamp: Off")
@@ -161,7 +161,9 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
             drawString(180,113,tr("Secondary service rack"))
             drawString(180,127,tr("L1: 120 V; L2: 120 V"))
             drawString(180,141,tr("240 V service circuit"))
-            drawString(180,165,tr("Phase A transformer"))
+            drawString(180,155,tr("15.2 kV fixed ratio"))
+            drawString(180,169,tr("Input: %1$",Utils.plotVolt("",display.inputVolts).trim()))
+            drawString(180,183,tr("Output: %1$",Utils.plotVolt("",display.outputVolts).trim()))
         }
         if (pole) drawString(32, 35, if (display.installed) tr("Unit installed") else tr("Insert step-down unit"))
         else {

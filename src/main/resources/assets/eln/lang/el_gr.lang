@@ -2,6 +2,7 @@
 
 # Appearing in multiple source files
 %1$,_%2$,_%3$=%1$, %2$, %3$
+%1$\:_%2$=%1$: %2$
 %1$_(version_%2$)=%1$ (version %2$)
 %1$_V_/_%2$_W=%1$ V / %2$ W
 %1$_is_not_in_range!=Το %1$ είναι εκτός εύρους!
@@ -62,6 +63,7 @@ Evaporative_cooling=Evaporative cooling
 External_control=Εξωτερικός έλεγχος
 Falstad_import\:_clipboard_is_not_valid_Falstad_data.=Εισαγωγή Falstad: το πρόχειρο δεν περιέχει έγκυρα δεδομένα Falstad.
 Ferromagnetic_core_slot=Θέση σιδηρομαγνητικού πυρήνα
+Fixed_ratio\:_15.2_kV_nominal_primary;_output_follows_grid_voltage=Fixed ratio: 15.2 kV nominal primary; output follows grid voltage
 Flexible_Appliance_Cord.name=Flexible Appliance Cord
 Fuel_usage=Κατανάλωση καυσίμου
 Fuse_blown=Fuse blown
@@ -112,9 +114,12 @@ New=Νέο
 No=Όχι
 No_valid_fluids_for_this_turbine!=Δεν υπάρχουν έγκυρα ρευστά για αυτήν την τουρμπίνα!
 Nominal\:=Ονομαστική:
+Nominal\:_%1$_V=Nominal: %1$ V
 Nominal_Ratings\:=Ονομαστικές τιμές:
 Nominal_mains_class\:_%1$V=Ονομαστική κλάση δικτύου: %1$V
+Nominal_output_at_15.2_kV;_follows_grid_voltage_proportionally=Nominal output at 15.2 kV; follows grid voltage proportionally
 Nominal_power\:_%1$W=Ονομαστική ισχύς: %1$W
+Nominal_primary\:_15.2_kV;_fixed_ratio=Nominal primary: 15.2 kV; fixed ratio
 Nominal_usage\:=Ονομαστική χρήση:
 Nominal_usage_->=Ονομαστική χρήση ->
 Nominal_voltage\:_%1$V=Ονομαστική τάση: %1$V
@@ -132,7 +137,6 @@ Open_fuse=Open fuse
 Operational=Operational
 Out\:_%1$_/_%2$=Out: %1$ / %2$
 Output=Έξοδος
-Output\:_%1$_V=Output: %1$ V
 Output_power=Output power
 Output_voltage=Τάση εξόδου
 P\:_%1$_S\:_%2$=P: %1$ S: %2$
@@ -2790,13 +2794,14 @@ UPS_rack_compatible;_larger_capacity_does_not_raise_the_UPS_output_rating=UPS ra
 # src/main/kotlin/mods/eln/transparentnode/utilitylight/MainsStepDown.kt
 
 # src/main/kotlin/mods/eln/transparentnode/utilitylight/UtilityLightClient.kt
+15.2_kV_fixed_ratio=15.2 kV fixed ratio
 240_V_service_circuit=240 V service circuit
 Angle\:_%1$°=Angle: %1$°
 Down=Down
 Height\:_%1$_m=Height: %1$ m
 L1\:_120_V;_L2\:_120_V=L1: 120 V; L2: 120 V
 Output\:_%1$=Output: %1$
-Phase_A_transformer=Phase A transformer
+Output\:_%1$_V=Output: %1$ V
 Secondary_service_rack=Secondary service rack
 Step-down_unit_required=Step-down unit required
 Transformer\:_%1$_kW=Transformer: %1$ kW
@@ -2808,7 +2813,6 @@ Utility_Pole_Street_Light=Utility Pole Street Light
 
 # src/main/kotlin/mods/eln/transparentnode/utilitylight/UtilityLightDescriptors.kt
 Adjust_the_lamp_height_with_Up_and_Down_in_the_menu=Adjust the lamp height with Up and Down in the menu
-Base_terminals_also_supply_the_regulated_output=Base terminals also supply the regulated output
 Grid-powered_%1$_W_street_light_with_%2$-block_pole_connections=Grid-powered %1$ W street light with %2$-block pole connections
 Install_a_Mains_Step-down_Unit_and_select_%1$_V_or_%2$_V=Install a Mains Step-down Unit and select %1$ V or %2$ V
 Maximum_input\:_%1$_V;_maximum_output\:_%2$_W=Maximum input: %1$ V; maximum output: %2$ W
@@ -2877,7 +2881,6 @@ Wall_cables\:_left_L1,_right_L2,_top_240_V,_bottom_selected_branch=Wall cables: 
 Wireless_range\:_%1$=Wireless range: %1$
 
 # src/main/kotlin/mods/eln/utility/DistributionClient.kt
-%1$\:_%2$=%1$: %2$
 A,_B_and_C_are_independent_electrical_circuits=A, B and C are independent electrical circuits
 All_three_phases_closed=All three phases closed
 Any_phase_fault_opens_all_three;_timed_retries_stop_at_lockout=Any phase fault opens all three; timed retries stop at lockout
@@ -2973,7 +2976,7 @@ Top/bottom_cable\:_%1$=Top/bottom cable: %1$
 Top_and_bottom_cable_terminals_use_the_circuit_selected_in_the_menu=Top and bottom cable terminals use the circuit selected in the menu
 
 # src/main/kotlin/mods/eln/utility/LegacyPoleGui.kt
-Legacy_converter_retains_its_4\:1_ratio=Legacy converter retains its 4:1 ratio
+Nominal_output\:_%1$_V=Nominal output: %1$ V
 Replace_a_blown_fuse_by_right-clicking_with_a_Pole_Fuse_Link=Replace a blown fuse by right-clicking with a Pole Fuse Link
 Secondary_rack_passes_120/240_V_service=Secondary rack passes 120/240 V service
 Transformer_fuse_rating\:_%1$_kW=Transformer fuse rating: %1$ kW
