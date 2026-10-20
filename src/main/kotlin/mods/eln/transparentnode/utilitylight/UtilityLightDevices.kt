@@ -139,11 +139,12 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
     override fun getConnectionMask(side: Direction, lrdu: LRDU) =
         if (getElectricalLoad(side, lrdu) != null) NodeBase.maskElectricalPower else 0
     override fun getThermalLoad(side: Direction, lrdu: LRDU) = if (getElectricalLoad(side, lrdu) != null) unit.thermal else null
-    override fun inventoryChange(inventory: Container?) { configureLamp(); needPublish() }
+    override fun inventoryChange(inventory: Container?) { unit.installRating(mods.eln.utility.PoleHardware.transformerWatts(this.inventory.getItem(0)) ?: 10_000);configureLamp(); needPublish() }
     override fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
         val held = player.mainHandItem
-        if(UtilityItems.isFuse(held) && fuse.blown) {
-            fuse.replace();fuseContact.closed=true;if(!player.abilities.instabuild)held.shrink(1)
+        if(mods.eln.utility.PoleHardware.extract(player,listOf(fuse))) { fuseContact.closed=fuse.closed;needPublish();return true }
+        if(UtilityItems.isFuse(held) && fuse.insertCartridge(held)) {
+            fuseContact.closed=true;if(!player.abilities.instabuild)held.shrink(1)
             player.inventory.setChanged();needPublish();return true
         }
         if (!isStepDownUnit(held)) return super.onBlockActivated(player, side, vx, vy, vz)
@@ -163,11 +164,11 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
         put(tr("Lamp"), if (lightLevel > 0) tr("On") else tr("Off"))
     }
     override fun multiMeterString(side: Direction) = tr("Grid: %1$; output: %2$", Utils.plotVolt("", highBus.voltage), Utils.plotVolt("", unit.secondary.voltage))
-    override fun readFromNBT(nbt: CompoundTag) { super.readFromNBT(nbt); unit.read(nbt);ports.read(nbt);fuse.read(nbt,"poleFuse");fuseContact.closed=fuse.closed;serviceSecondary.update();configureLamp() }
+    override fun readFromNBT(nbt: CompoundTag) { super.readFromNBT(nbt); unit.read(nbt);mods.eln.utility.PoleHardware.migrate(this,unit.ratedWatts);unit.installRating(mods.eln.utility.PoleHardware.transformerWatts(inventory.getItem(0)) ?: 10_000);ports.read(nbt);fuse.read(nbt,"poleFuse");fuseContact.closed=fuse.closed;serviceSecondary.update();configureLamp() }
     override fun writeToNBT(nbt: CompoundTag) { super.writeToNBT(nbt); unit.write(nbt);ports.write(nbt);fuse.write(nbt,"poleFuse") }
     override fun getItemStackNBT()=CompoundTag().also { unit.write(it);ports.write(it);fuse.write(it,"poleFuse") }
-    override fun readItemStackNBT(nbt: CompoundTag?) { if(nbt!=null) { unit.read(nbt);ports.read(nbt);fuse.read(nbt,"poleFuse");fuseContact.closed=fuse.closed;serviceSecondary.update();configureLamp() } }
-    override fun readConfigTool(compound: CompoundTag, invoker: Player) { if (compound.contains("mainsOutputVoltage")) { unit.read(compound); configureLamp(); needPublish() } }
+    override fun readItemStackNBT(nbt: CompoundTag?) { if(nbt!=null) { unit.read(nbt);mods.eln.utility.PoleHardware.migrate(this,unit.ratedWatts);unit.installRating(mods.eln.utility.PoleHardware.transformerWatts(inventory.getItem(0)) ?: 10_000);ports.read(nbt);fuse.read(nbt,"poleFuse");fuseContact.closed=fuse.closed;serviceSecondary.update();configureLamp() } }
+    override fun readConfigTool(compound: CompoundTag, invoker: Player) { if (compound.contains("mainsOutputVoltage")) { unit.read(compound);unit.installRating(mods.eln.utility.PoleHardware.transformerWatts(inventory.getItem(0)) ?: 10_000); configureLamp(); needPublish() } }
     override fun writeConfigTool(compound: CompoundTag, invoker: Player) { unit.write(compound) }
     override fun networkSerialize(stream: DataOutputStream) { super.networkSerialize(stream); unit.publish(stream, installed, lightLevel)
         LegacyPoleDisplay().apply { terminal=ports.selected;fuseClosed=fuse.closed;fuseBlown=fuse.blown;rating=unit.ratedWatts;voltage=unit.outputVoltage }.write(stream)
@@ -188,5 +189,4 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
     }
 }
 
-fun isStepDownUnit(stack: ItemStack?) = stack != null && !stack.isEmpty &&
-    GenericItemBlockUsingDamageDescriptor.getDescriptor(stack) is StepDownUnitDescriptor
+fun isStepDownUnit(stack: ItemStack?) = mods.eln.utility.PoleHardware.transformerWatts(stack)!=null

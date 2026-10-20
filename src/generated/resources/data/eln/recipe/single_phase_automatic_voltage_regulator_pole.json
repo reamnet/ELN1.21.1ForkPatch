@@ -10,6 +10,9 @@
     },
     {
       "item": "minecraft:iron_nugget"
+    },
+    {
+      "item": "eln:pole_fuse_link"
     }
   ],
   "result": {

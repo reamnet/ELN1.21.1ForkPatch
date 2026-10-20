@@ -17,11 +17,12 @@ import java.io.DataInputStream
 import java.util.Locale
 import kotlin.math.pow
 
-class HouseServiceDescriptor(val meter: Boolean): ServiceWallDescriptor(
-    if(meter)I18N.TR_NAME(I18N.Type.NONE,"North American Meter Base") else I18N.TR_NAME(I18N.Type.NONE,"120/240V Service Weatherhead"),
-    if(meter)"northamericanmeterbase" else "serviceweatherhead",HouseServiceElement::class.java,HouseServiceRender::class.java) {
-    init { creativeTab=Eln.creativeTabPowerElectronics;if(!meter)ghostGroup=GhostGroup().apply { addElement(0,1,0,GhostBlock.tClearance) } }
+class HouseServiceDescriptor(val meter: Boolean,val disconnect: Boolean=false): ServiceWallDescriptor(
+    if(disconnect)I18N.TR_NAME(I18N.Type.NONE,"Red Handle Service Disconnect") else if(meter)I18N.TR_NAME(I18N.Type.NONE,"North American Meter Base") else I18N.TR_NAME(I18N.Type.NONE,"120/240V Service Weatherhead"),
+    if(disconnect)"redhandleservicedisconnect" else if(meter)"northamericanmeterbase" else "serviceweatherhead",HouseServiceElement::class.java,HouseServiceRender::class.java) {
+    init { creativeTab=Eln.creativeTabPowerElectronics;if(!meter && !disconnect)ghostGroup=GhostGroup().apply { addElement(0,1,0,GhostBlock.tClearance) } }
     fun drawService(front: Direction,meterType: Int=0,energy: Double=0.0,disconnect: Boolean=false,powered: Boolean=false,disk: Double=0.0)=preserveMatrix {
+        if(this.disconnect) { ServiceDisconnectVisual.draw(front,disconnect,obj);return@preserveMatrix }
         front.inverse.glRotateZnRef();GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
             GL11.glDisable(GL11.GL_TEXTURE_2D)
@@ -70,6 +71,7 @@ class HouseServiceDescriptor(val meter: Boolean): ServiceWallDescriptor(
     }
     override fun renderItem(type: IItemRenderer.ItemRenderType,item: ItemStack,vararg data: Any)=drawService(Direction.ZP,if(meter)1 else 0)
     override fun addInformation(itemStack: ItemStack?,entityPlayer: Player?,list: MutableList<String>,par4: Boolean) {
+        if(disconnect) { list.add(tr("Place between the meter and panel; top is input, bottom is output"));list.add(tr("Red handle manually opens all service circuits; use placed wall cables"));return }
         list.add(tr("Three-wire service bundle: L1 120 V, L2 120 V and 240 V circuit equivalents"))
         if(meter) { list.add(tr("Insert an Analog Glass Service Meter or Smart Digital Service Meter"));list.add(tr("Placed wall cables: top service input, bottom service output; insert a meter to connect"));list.add(tr("Smart meter has a manual disconnect and a future remote-control hook")) }
         else list.add(tr("Terminate a pole service drop here and continue down the wall with placed cables"))
@@ -78,6 +80,7 @@ class HouseServiceDescriptor(val meter: Boolean): ServiceWallDescriptor(
 }
 class HouseServiceRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDescriptor): GridRender(entity,descriptor) {
     val meter=(descriptor as HouseServiceDescriptor).meter
+    val serviceDisconnect=(descriptor as HouseServiceDescriptor).disconnect
     override val inventory=TransparentNodeElementInventory(if(meter)1 else 0,1,this)
     var terminal=50;var circuit=2;var type=0;var disconnected=false;var imported=0.0;var exported=0.0;var volts=listOf(0.0,0.0,0.0);var watts=0.0
     var disk=0.0
@@ -97,7 +100,7 @@ class HouseServiceGui(player: Player,private val r: HouseServiceRender): GuiCont
     override fun newHelper()=GuiHelperContainer(this,240,264,8,182)
     override fun initGui() {
         super.initGui();terminal=newGuiButton(8,58,224,"");circuit=newGuiButton(8,82,224,"")
-        if(r.meter)disconnect=newGuiButton(8,106,224,"")
+        if(r.meter || r.serviceDisconnect)disconnect=newGuiButton(8,106,224,"")
     }
     override fun guiObjectEvent(obj: IGuiObject) {
         super.guiObjectEvent(obj)
@@ -109,12 +112,12 @@ class HouseServiceGui(player: Player,private val r: HouseServiceRender): GuiCont
     }
     override fun postDraw(f: Float,x: Int,y: Int) {
         super.postDraw(f,x,y)
-        drawString(8,8,if(r.meter)tr("North American Meter Base") else tr("120/240V Service Weatherhead"))
+        drawString(8,8,if(r.serviceDisconnect)tr("Red Handle Service Disconnect") else if(r.meter)tr("North American Meter Base") else tr("120/240V Service Weatherhead"))
         if(r.meter)drawString(32,35,when(r.type) { 1->tr("Analog meter installed");2->tr("Smart meter installed");else->tr("Insert a meter to connect service") })
-        terminal.enabled=!r.meter
-        terminal.displayString=if(r.meter)tr("Placed wall cables only") else when(r.terminal) { 50->if(r.meter)tr("Cable: incoming service bundle") else tr("Cable: service drop bundle");51->tr("Cable: outgoing service bundle");else->tr("Cable: %1$",ServiceTerminals.label(r.terminal)) }
+        terminal.enabled=!r.meter && !r.serviceDisconnect
+        terminal.displayString=if(r.meter || r.serviceDisconnect)tr("Placed wall cables only") else when(r.terminal) { 50->if(r.meter)tr("Cable: incoming service bundle") else tr("Cable: service drop bundle");51->tr("Cable: outgoing service bundle");else->tr("Cable: %1$",ServiceTerminals.label(r.terminal)) }
         circuit.displayString=tr("Top/bottom cable: %1$",ServiceTerminals.label(40+r.circuit))
-        disconnect?.apply { enabled=r.type==2;displayString=if(r.disconnected)tr("Smart disconnect: Open") else tr("Smart disconnect: Closed") }
+        disconnect?.apply { enabled=r.serviceDisconnect || r.type==2;displayString=if(r.serviceDisconnect) { if(r.disconnected)tr("Service: OFF") else tr("Service: ON") } else if(r.disconnected)tr("Smart disconnect: Open") else tr("Smart disconnect: Closed") }
         if(r.meter) {
             drawString(8,136,tr("Import: %1$ kWh",String.format(Locale.ROOT,"%.3f",r.imported)))
             drawString(8,148,tr("Export: %1$ kWh",String.format(Locale.ROOT,"%.3f",r.exported)))

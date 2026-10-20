@@ -45,7 +45,9 @@ enum class DistributionKind(val title: String,val phases: Int=3,val transformer:
     REGULATOR_THREE(I18N.TR_NAME(I18N.Type.NONE,"Three Phase Automatic Voltage Regulator Pole"),regulator=true),
     AIR_BREAK_THREE(I18N.TR_NAME(I18N.Type.NONE,"Three Phase Gang Operated Air Break Switch Pole")),
     STREET_SINGLE(I18N.TR_NAME(I18N.Type.NONE,"Single Phase Transformer Street Light Pole"),1,true,true),
-    STREET_THREE(I18N.TR_NAME(I18N.Type.NONE,"Three Phase Transformer Street Light Pole"),3,true,true);
+    STREET_THREE(I18N.TR_NAME(I18N.Type.NONE,"Three Phase Transformer Street Light Pole"),3,true,true),
+    SECONDARY_FED_SINGLE(I18N.TR_NAME(I18N.Type.NONE,"Single Phase Secondary Fed Street Light Pole"),1,light=true),
+    SECONDARY_FED_THREE(I18N.TR_NAME(I18N.Type.NONE,"Three Phase Secondary Fed Street Light Pole"),3,light=true);
     val protectedLine get()=cutout || recloser || this==AIR_BREAK_THREE || regulator
     val capacitor get()=this==CAPACITOR_THREE
 }
@@ -180,20 +182,22 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     }
     fun replaceFuse(player: Player,index: Int): Boolean {
         val fuse=fuses.getOrNull(index) ?: return false
-        if(!fuse.blown)return false
-        val slot=(0 until player.inventory.containerSize).firstOrNull { UtilityItems.isFuse(player.inventory.getItem(it)) } ?: return false
-        if(!player.abilities.instabuild)player.inventory.getItem(slot).shrink(1)
-        fuse.replace();applyContacts();player.inventory.setChanged();needPublish();return true
+        if(fuse.hasCartridge && !fuse.blown)return false
+        val cartridge=player.mainHandItem
+        if(!UtilityItems.isFuse(cartridge) || !fuse.insertCartridge(cartridge))return false
+        if(!player.abilities.instabuild)cartridge.shrink(1)
+        applyContacts();player.inventory.setChanged();needPublish();return true
     }
     override fun onBlockActivated(player: Player,side: Direction,vx: Float,vy: Float,vz: Float): Boolean {
-        if(UtilityItems.isFuse(player.mainHandItem))return fuses.indices.firstOrNull { fuses[it].blown }?.let { replaceFuse(player,it) } ?: true
+        if(PoleHardware.extract(player,fuses)) { applyContacts();needPublish();return true }
+        if(UtilityItems.isFuse(player.mainHandItem))return fuses.indices.firstOrNull { fuses[it].blown || !fuses[it].hasCartridge }?.let { replaceFuse(player,it) } ?: true
         if(kind.transformer && isStepDownUnit(player.mainHandItem) && !installed) {
             inventory.setItem(0,player.mainHandItem.copyWithCount(1));if(!player.abilities.instabuild)player.mainHandItem.shrink(1)
             inventoryChange(inventory);player.inventory.setChanged();return true
         }
         return super.onBlockActivated(player,side,vx,vy,vz)
     }
-    override fun inventoryChange(inventory: Container?) { applyContacts();needPublish() }
+    override fun inventoryChange(inventory: Container?) { unit?.installRating(PoleHardware.transformerWatts(this.inventory.getItem(0)) ?: 10_000);applyContacts();needPublish() }
     override fun connectJob() { super.connectJob();unit?.let { Eln.simulator.mna.addProcess(it.controller) };applyContacts() }
     override fun disconnectJob() { unit?.let { Eln.simulator.mna.removeProcess(it.controller) };super.disconnectJob() }
     override fun selectedGridTerminal(side: Direction)=selectedTerminal
@@ -255,7 +259,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         nbt.putBoolean("utilityLamp",lampEnabled);nbt.putBoolean("utilityDusk",lampAutomatic)
     }
     private fun readSettings(nbt: CompoundTag) {
-        unit?.read(nbt);selectedTerminal=nbt.getInt("utilityTerminal").takeIf { it in terminals } ?: terminals.first()
+        unit?.read(nbt);if(unit!=null) { PoleHardware.migrate(this,unit.ratedWatts);unit.installRating(PoleHardware.transformerWatts(inventory.getItem(0)) ?: 10_000) };selectedTerminal=nbt.getInt("utilityTerminal").takeIf { it in terminals } ?: terminals.first()
         transformerPhase=nbt.getInt("utilityPhase").coerceIn(0,kind.phases-1);fuseAmps=nbt.getDouble("utilityFuseAmps").takeIf { it.isFinite() && it in 1.0..2000.0 } ?: 100.0
         gangClosed=!nbt.contains("utilityGangClosed") || nbt.getBoolean("utilityGangClosed");fuses.forEachIndexed { i,f -> f.read(nbt,"utilityFuse$i") };recloser.read(nbt)
         regulatorTarget=nbt.getDouble("regulatorTarget").takeIf { it.isFinite() && it in 120.0..51_200.0 } ?: 12_470.0;regulatorAutomatic=!nbt.contains("regulatorAuto") || nbt.getBoolean("regulatorAuto")
@@ -271,7 +275,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         DistributionDisplay().apply {
             terminal=selectedTerminal;phase=transformerPhase;rating=unit?.ratedWatts ?: 10_000;voltage=unit?.outputVoltage ?: 120
             enabled=unit?.enabled ?: gangClosed;installed=this@DistributionPoleElement.installed
-            fuseClosed=fuses.map { it.closed };fuseBlown=fuses.map { it.blown };fuseRating=fuseAmps
+            fuseClosed=fuses.map { it.closed };fuseBlown=fuses.map { it.blown };fuseRating=fuses.firstOrNull()?.rating(fuseAmps) ?: fuseAmps
             locked=recloser.locked;closed=recloser.closed;failures=recloser.failures;remaining=recloser.remaining;pickup=recloser.pickupAmps;delay=recloser.retrySeconds;maxFailures=recloser.maxFailures
             target=regulatorTarget;automatic=regulatorAutomatic;ratios=regulatorTaps.map { it.ratio };light=lightLevel;lampOn=unit?.lampEnabled ?: lampEnabled;dusk=unit?.lampAutomatic ?: lampAutomatic
             input=if(kind.lvOnly)services[0].voltage else lines[transformerPhase].voltage;output=unit?.secondary?.voltage ?: outs[0].voltage;watts=unit?.output?.power ?: 0.0
@@ -287,7 +291,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
             87 -> stream.readInt().takeIf { it in terminals }?.let { selectedTerminal=it }
             88 -> stream.readInt().takeIf { it in lines.indices }?.let { transformerPhase=it }
             89 -> operateFuse(stream.readInt())
-            91 -> stream.readDouble().takeIf { it.isFinite() && it in 1.0..2000.0 }?.let { if(kind.recloser)recloser.pickupAmps=it else fuseAmps=it }
+            91 -> stream.readDouble().takeIf { it.isFinite() && it in 1.0..2000.0 }?.let { if(kind.recloser)recloser.pickupAmps=it }
             92 -> stream.readDouble().takeIf { it.isFinite() && it in 1.0..60.0 }?.let { recloser.retrySeconds=it }
             93 -> stream.readInt().takeIf { it in 1..5 }?.let { recloser.maxFailures=it }
             94 -> { recloser.reset();sound("utility_recloser_bump",.7) }

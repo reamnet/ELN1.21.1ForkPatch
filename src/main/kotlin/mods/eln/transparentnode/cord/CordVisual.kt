@@ -67,6 +67,7 @@ class CordDisplay {
         private set
     var rating=CordRating.V120
         private set
+    var socket=0;var horizontal=false;var strip=false
     var state="UNPLUGGED"
         private set
     private var cached: List<Vec3> = emptyList()
@@ -74,28 +75,32 @@ class CordDisplay {
     fun read(input: DataInputStream) {
         val next=if(input.readBoolean())BlockPos(input.readInt(),input.readInt(),input.readInt()) to Direction.fromInt(input.readUnsignedByte())!! else null
         if(next!=endpoint) { cached=emptyList();nextUpdate=0L }
-        if(next!=null)rating=CordRating.entries[input.readUnsignedByte()]
+        if(next!=null) { rating=CordRating.entries[input.readUnsignedByte()];socket=input.readUnsignedByte();horizontal=input.readBoolean();strip=input.readBoolean() }
         endpoint=next;state=input.readUTF()
     }
     fun draw(world: Level,pos: BlockPos,front: Direction,entry: Vec3?=null) {
         val (target,facing)=endpoint ?: return
         val origin=Vec3.atCenterOf(pos)
-        val start=Vec3.atCenterOf(target).add(mods.eln.transparentnode.worklight.WorkLightOptics.world(facing,Vec3(0.0,-.1,-.224)))
+        val outlet=(world.getBlockEntity(target) as? mods.eln.node.transparent.TransparentNodeEntity)?.elementRender as? OutletRender
+        val turned=outlet?.horizontal ?: horizontal
+        val start=Vec3.atCenterOf(target).add(mods.eln.transparentnode.worklight.WorkLightOptics.world(facing,OutletGeometry.tipLocal(socket,turned,strip)))
         val end=origin.add(entry ?: mods.eln.transparentnode.worklight.WorkLightOptics.world(front,Vec3(0.0,-.43,-.25)))
         if(start.distanceTo(end)>ApplianceCord.MAX_REACH+1)return
         if(cached.isEmpty() || world.gameTime>=nextUpdate) {
             nextUpdate=world.gameTime+20;cached=CordPath.samples(start,end) { x,z,y -> CordPath.floor(world,x,z,y,pos) }
         }
-        if(((world.getBlockEntity(target) as? mods.eln.node.transparent.TransparentNodeEntity)?.elementRender as? OutletRender)?.occupied!=true)NemaPlug.draw(facing,rating,target.subtract(pos))
+        if(((world.getBlockEntity(target) as? mods.eln.node.transparent.TransparentNodeEntity)?.elementRender as? OutletRender)?.occupied!=true)NemaPlug.draw(facing,rating,target.subtract(pos),socket,turned,strip)
         CordPath.draw(cached,origin)
     }
 }
 
 /** Moulded body, finger rings, badge, strain relief and the mating metal blades. */
 object NemaPlug {
-    fun draw(front: Direction,rating: CordRating,offset: BlockPos=BlockPos.ZERO)=preserveMatrix {
+    fun draw(front: Direction,rating: CordRating,offset: BlockPos=BlockPos.ZERO,socket: Int=0,horizontal: Boolean=false,strip: Boolean=false)=preserveMatrix {
         GL11.glTranslated(offset.x.toDouble(),offset.y.toDouble(),offset.z.toDouble())
         front.inverse.glRotateZnRef()
+        if(horizontal)GL11.glRotatef(90f,0f,0f,1f)
+        val shift=OutletGeometry.offset(socket,strip);GL11.glTranslated(shift.x,shift.y,shift.z)
         drawLocal(rating)
     }
     fun drawLocal(rating: CordRating)=preserveMatrix {

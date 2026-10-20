@@ -21,7 +21,7 @@ import net.minecraft.client.gui.screens.Screen
 
 class StepDownContainer(player: Player, inventory: Container, pole: Boolean) : BasicContainer(player, inventory,
     if (pole) arrayOf(object : SlotWithSkinAndComment(inventory, 0, 9, 31, ISlotSkin.SlotSkin.medium,
-        arrayOf(tr("Mains Step-down Unit"))) {
+        arrayOf(tr("Pole Transformer or Mains Step-down Unit"))) {
         override fun mayPlace(stack: ItemStack) = isStepDownUnit(stack)
         override fun getMaxStackSize() = 1
     }) else emptyArray<Slot>())
@@ -130,6 +130,7 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
     private fun refresh() {
         terminal?.displayString=tr("Cable: %1$",mods.eln.utility.ServiceTerminals.label(display.pole.terminal))
         fuse?.apply { displayString=if(display.pole.fuseBlown)tr("Fuse blown") else if(display.pole.fuseClosed)tr("Open fuse") else tr("Close fuse");enabled=!display.pole.fuseBlown }
+        rating.enabled=!pole
         rating.displayString=tr("Transformer: %1$ kW",display.rating/1000)
         voltage.displayString = if(pole)tr("Nominal: %1$ V",display.voltage) else tr("Output: %1$ V",display.voltage)
         enabled.displayString = if (display.enabled) tr("On") else tr("Off")

@@ -19,8 +19,9 @@ object UtilityItems {
     const val ANALOG_ID=5+(123 shl 6)
     const val SMART_ID=6+(123 shl 6)
     fun part(stack: ItemStack?): Int?=if(stack==null || stack.isEmpty)null else (GenericItemUsingDamageDescriptor.getDescriptor(stack) as? UtilityPartDescriptor)?.part
-    fun isFuse(stack: ItemStack?)=part(stack)==0
+    fun isFuse(stack: ItemStack?)=part(stack)==0 || PoleHardware.fuse(stack)?.let { !it.spent }==true
     fun register() {
+        PoleHardware.register()
         listOf(I18N.TR_NAME(I18N.Type.NONE,"Pole Fuse Link"),I18N.TR_NAME(I18N.Type.NONE,"Analog Glass Service Meter"),I18N.TR_NAME(I18N.Type.NONE,"Smart Digital Service Meter")).forEachIndexed { i,name -> Eln.sharedItem.addElement(FUSE_ID+i,UtilityPartDescriptor(name,i)) }
     }
 }

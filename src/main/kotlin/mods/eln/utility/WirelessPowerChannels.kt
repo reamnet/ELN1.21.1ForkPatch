@@ -14,6 +14,8 @@ interface WirelessPowerSupply {
     val range: Int
     fun getChannelState(id: Int): Boolean
     fun addToRp(resistance: Double)
+    fun setDemand(consumer: Any,resistance: Double)=addToRp(resistance)
+    fun removeDemand(consumer: Any) {}
     fun isInRange(target: Coordinate)=target.dimension==coordinate.dimension && coordinate.trueDistanceTo(target)<=range
 }
 class WirelessPowerHandle(val element: WirelessPowerSupply,val id: Int)
@@ -52,9 +54,27 @@ object WirelessPowerChannels {
     fun untrackBridge(owner: Any) { bridges.remove(owner) }
     /** Called before either endpoint's electrical loads leave the simulator. */
     @JvmStatic fun disconnectOwner(owner: Any) {
+        WirelessLoadDemand.disconnectOwner(owner)
         if(owner is LampSupplyElement)legacy.entries.removeIf { it.key.element===owner }
         val remove=bridges.filter { it.key===owner || it.value.source===owner }.keys.toList()
         remove.forEach { bridges.remove(it)?.disconnect?.invoke() }
         extra.values.forEach { it.removeIf { h -> h.element.owner===owner } };extra.entries.removeIf { it.value.isEmpty() }
+    }
+}
+
+/** A panel demand is a measurement of one fixture, not an additive packet.
+ * Reconnects/repeated reports must replace that fixture's last measurement. */
+object WirelessLoadDemand {
+    private val sources=IdentityHashMap<Any,WirelessPowerHandle>()
+    fun report(consumer: Any,handle: WirelessPowerHandle?,resistance: Double) {
+        val next=handle?.takeIf { resistance.isFinite() && resistance>0 }
+        val old=sources[consumer]
+        if(old!==next) { old?.element?.removeDemand(consumer);sources.remove(consumer) }
+        if(next!=null) { sources[consumer]=next;next.element.setDemand(consumer,resistance) }
+    }
+    fun disconnectOwner(owner: Any) {
+        sources.entries.filter { it.key===owner || it.value.element.owner===owner }.map { it.key }.forEach {
+            sources.remove(it)?.element?.removeDemand(it)
+        }
     }
 }

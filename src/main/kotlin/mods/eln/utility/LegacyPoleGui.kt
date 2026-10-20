@@ -7,13 +7,13 @@ import mods.eln.misc.BasicContainer
 import mods.eln.transparentnode.utilitylight.MainsStepDown
 import net.minecraft.world.entity.player.Player
 
-class LegacyPoleGui(player: Player,private val r: ElectricalPoleRender,private val transformer: Boolean): GuiContainerEln(BasicContainer(player,r.inventory,emptyArray())) {
+class LegacyPoleGui(player: Player,private val r: ElectricalPoleRender,private val transformer: Boolean): GuiContainerEln(mods.eln.transparentnode.utilitylight.StepDownContainer(player,r.inventory,transformer)) {
     private lateinit var terminal: GuiButtonEln
     private var voltage: GuiButtonEln?=null
     private var rating: GuiButtonEln?=null;private var fuse: GuiButtonEln?=null
     override fun newHelper()=GuiHelperContainer(this,240,238,8,156)
     override fun initGui() {
-        super.initGui();terminal=newGuiButton(8,34,224,"")
+        super.initGui();terminal=newGuiButton(if(transformer)36 else 8,34,if(transformer)196 else 224,"")
         if(transformer) { voltage=newGuiButton(8,106,224,"").apply { setComment(0,tr("Nominal output at 12.47 kV; follows grid voltage proportionally")) };rating=newGuiButton(8,58,224,"");fuse=newGuiButton(8,82,224,"").apply { setComment(0,tr("Replace a blown fuse by right-clicking with a Pole Fuse Link")) } }
     }
     override fun guiObjectEvent(obj: IGuiObject) {
@@ -29,6 +29,7 @@ class LegacyPoleGui(player: Player,private val r: ElectricalPoleRender,private v
         super.postDraw(f,x,y)
         drawString(8,8,tr("Utility Pole Connections"))
         terminal.displayString=tr("Cable: %1$",ServiceTerminals.label(r.display.terminal))
+        rating?.enabled=false
         rating?.displayString=tr("Transformer fuse rating: %1$ kW",r.display.rating/1000)
         fuse?.apply { enabled=!r.display.fuseBlown;displayString=if(r.display.fuseBlown)tr("Fuse blown") else if(r.display.fuseClosed)tr("Open fuse") else tr("Close fuse") }
         voltage?.displayString=tr("Nominal output: %1$ V",r.display.voltage)

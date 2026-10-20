@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "eln:utility_pole"
+    },
+    {
+      "item": "eln:basic_lamp_holder"
+    },
+    {
+      "item": "minecraft:iron_nugget"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:single_phase_secondary_fed_street_light_pole"
+  }
+}

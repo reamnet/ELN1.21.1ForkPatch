@@ -91,6 +91,12 @@ class MainsStepDown(private val owner: TransparentNodeElement, val poleTransform
         controller.resetFault()
     }
 
+    fun installRating(watts: Int) {
+        require(watts in RATINGS)
+        if(ratedWatts==watts)return
+        ratedWatts=watts;thermal.heatCapacity=2000.0*watts/10_000;thermal.Rp=.08*10_000/watts;outputWinding.resistance=.01*10_000/watts
+        updateController()
+    }
     fun write(tag: CompoundTag) {
         tag.putInt("mainsRatedWatts",ratedWatts)
         tag.putInt("mainsOutputVoltage", outputVoltage)
@@ -115,7 +121,7 @@ class MainsStepDown(private val owner: TransparentNodeElement, val poleTransform
         if (id.toInt() !in 80..86) return false
         try {
             when (id.toInt()) {
-                86 -> { val next=stream.readInt();if(next in RATINGS) { ratedWatts=next;thermal.heatCapacity=2000.0*ratedWatts/10_000;thermal.Rp=.08*10_000/ratedWatts;outputWinding.resistance=.01*10_000/ratedWatts } }
+                86 -> { val next=stream.readInt();if(!poleTransformer && next in RATINGS) { ratedWatts=next;thermal.heatCapacity=2000.0*ratedWatts/10_000;thermal.Rp=.08*10_000/ratedWatts;outputWinding.resistance=.01*10_000/ratedWatts } }
                 80 -> { val value = stream.readInt(); if (!validVoltage(value)) return true; outputVoltage = value }
                 81 -> enabled = stream.readBoolean()
                 82 -> lampEnabled = stream.readBoolean()

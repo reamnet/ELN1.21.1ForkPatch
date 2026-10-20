@@ -48,7 +48,9 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
     : GridElement(node, descriptor, (descriptor as GridDescriptor).connectRange) {
     companion object { val OUTPUT_VOLTAGES=intArrayOf(120,240,3200) }
     private val desc = descriptor as ElectricalPoleDescriptor
-    override val inventory=mods.eln.node.transparent.TransparentNodeElementInventory(0,1,this)
+    override val inventory=object: mods.eln.node.transparent.TransparentNodeElementInventory(if(desc.includeTransformer)1 else 0,1,this@ElectricalPoleElement) {
+        override fun canPlaceItemThroughFace(slot: Int,stack: net.minecraft.world.item.ItemStack?,side: Int)=desc.includeTransformer && mods.eln.utility.PoleHardware.transformerWatts(stack)!=null
+    }
 
     var electricalLoad = NbtElectricalLoad("electricalLoad")
     val fuse=CutoutFuse()
@@ -234,22 +236,30 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
     override fun renderWireCount(terminal: Int)=if(terminal==50)3 else if(terminal<6)2 else 1
     override fun gridCablePoint(terminal: Int,wire: Int)=if(terminal<40)super.gridCablePoint(terminal,wire) else ports.point(terminal,wire)
     override fun hasGui()=true
-    override fun newContainer(side: Direction,player: Player)=mods.eln.misc.BasicContainer(player,inventory,emptyArray())
+    override fun newContainer(side: Direction,player: Player)=mods.eln.transparentnode.utilitylight.StepDownContainer(player,inventory,desc.includeTransformer)
     override fun onBlockActivated(player: Player,side: Direction,vx: Float,vy: Float,vz: Float): Boolean {
-        if(UtilityItems.isFuse(player.mainHandItem) && desc.includeTransformer && fuse.blown) {
-            fuse.replace();fuseContact.closed=true
+        if(desc.includeTransformer && mods.eln.utility.PoleHardware.extract(player,listOf(fuse))) { fuseContact.closed=fuse.closed;needPublish();return true }
+        if(desc.includeTransformer && mods.eln.utility.PoleHardware.transformerWatts(player.mainHandItem)!=null && inventory.getItem(0).isEmpty) {
+            inventory.setItem(0,player.mainHandItem.copyWithCount(1));if(!player.abilities.instabuild)player.mainHandItem.shrink(1);inventoryChange(inventory);return true
+        }
+        if(UtilityItems.isFuse(player.mainHandItem) && desc.includeTransformer && fuse.insertCartridge(player.mainHandItem)) {
+            fuseContact.closed=true
             if(!player.abilities.instabuild)player.mainHandItem.shrink(1)
             player.inventory.setChanged();needPublish();return true
         }
         return super.onBlockActivated(player,side,vx,vy,vz)
     }
+    override fun inventoryChange(inventory: net.minecraft.world.Container?) { ratedWatts=mods.eln.utility.PoleHardware.transformerWatts(this.inventory.getItem(0)) ?: 10_000;needPublish() }
     private fun writeSettings(nbt: CompoundTag) {
         ports.write(nbt);fuse.write(nbt,"legacyFuse")
-        nbt.putInt("legacyRatedWatts",ratedWatts);nbt.putInt("legacyOutputVoltage",outputVoltage)
+        nbt.putBoolean("legacyHardwareV1",true);nbt.putInt("legacyRatedWatts",ratedWatts);nbt.putInt("legacyOutputVoltage",outputVoltage)
     }
     private fun readSettings(nbt: CompoundTag) {
         ports.read(nbt);fuse.read(nbt,"legacyFuse");fuseContact.closed=fuse.closed
-        ratedWatts=nbt.getInt("legacyRatedWatts").takeIf { it in MainsStepDown.RATINGS } ?: 10_000
+        val oldWatts=nbt.getInt("legacyRatedWatts").takeIf { it in MainsStepDown.RATINGS } ?: 10_000
+        if(desc.includeTransformer && !nbt.getBoolean("legacyHardwareV1") && oldWatts>10_000 && inventory.getItem(0).isEmpty)
+            inventory.setItem(0,Eln.findItemStack(mods.eln.utility.PoleHardware.transformerNames[MainsStepDown.RATINGS.indexOf(oldWatts)],1))
+        ratedWatts=if(desc.includeTransformer)mods.eln.utility.PoleHardware.transformerWatts(inventory.getItem(0)) ?: 10_000 else 10_000
         outputVoltage=nbt.getInt("legacyOutputVoltage").takeIf { it in OUTPUT_VOLTAGES } ?: 3200
         updateRatio()
     }
@@ -262,7 +272,7 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
         when(id.toInt()) {
             80->stream.readInt().takeIf { it in OUTPUT_VOLTAGES }?.let { outputVoltage=it;updateRatio() }
             87->ports.select(stream.readInt())
-            86->stream.readInt().takeIf { it in MainsStepDown.RATINGS }?.let { ratedWatts=it }
+            86->{ stream.readInt() } // The installed transformer item determines capacity.
             89->{
                 stream.readInt();val loaded=kotlin.math.abs(fuseContact.current)>.02
                 if(desc.includeTransformer && fuse.operate()) {

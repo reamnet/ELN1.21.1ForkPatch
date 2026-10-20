@@ -10,6 +10,15 @@
     },
     {
       "item": "minecraft:redstone"
+    },
+    {
+      "item": "eln:pole_fuse_link"
+    },
+    {
+      "item": "eln:pole_fuse_link"
+    },
+    {
+      "item": "eln:pole_fuse_link"
     }
   ],
   "result": {

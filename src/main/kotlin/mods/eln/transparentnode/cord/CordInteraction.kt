@@ -71,12 +71,14 @@ object CordInteraction {
         }
         event.isCanceled=true;event.cancellationResult=InteractionResult.SUCCESS
         if(device!=null && device.cord.plugged && player.isShiftKeyDown) { device.cord.unplug(p);return }
-        if(machine is OutletElement) {
+        val selected=held.tagCompound?.getCompound("cordSelection")?.let(CordAnchor::read)
+        if(machine is OutletElement && !(machine.capacity==6 && selected!=null && selected.id!=machine.id)) {
             if(machine.rating!=descriptor!!.rating) { Utils.sendMessage(player,tr("This cord requires a %1$ outlet",descriptor.rating.socket));return }
-            held.tagCompound=CompoundTag().apply { put("cordSelection",machine.anchor().write()) }
+            val socket=machine.freeSocket()
+            if(socket==null) { Utils.sendMessage(player,tr("Every socket on this outlet is occupied"));return }
+            held.tagCompound=CompoundTag().apply { put("cordSelection",machine.anchor(socket).write()) }
             Utils.sendMessage(player,tr("Cord plugged into outlet; select a lamp or appliance"));return
         }
-        val selected=held.tagCompound?.getCompound("cordSelection")?.let(CordAnchor::read)
         if(device==null) { Utils.sendMessage(player,tr("Connect this cord to a lamp or appliance"));return }
         if(selected!=null && selected.rating!=descriptor!!.rating) { Utils.sendMessage(player,tr("Select a matching outlet first"));return }
         if(selected==null) { Utils.sendMessage(player,tr("Select a wall outlet first"));return }

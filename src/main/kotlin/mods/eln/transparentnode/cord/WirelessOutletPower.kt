@@ -8,14 +8,14 @@ import java.util.Collections
 import java.util.IdentityHashMap
 
 /** A passive link to the selected supply, rather than a second ideal source or a copied voltage.
- * Both outlet modes feed the same breaker. Stable links never rebuild solver topology. */
+ * Both outlet modes feed the same passive receptacle contacts. Stable links never rebuild solver topology. */
 class WirelessOutletPower(private val outlet: OutletElement) {
     val conductor=Resistor(null,null).apply { resistance=.08 }
     var supply: mods.eln.utility.WirelessPowerSupply?=null
         private set
     fun refresh() {
         val here=outlet.coordinate()
-        val next=if(outlet.wireless)mods.eln.utility.WirelessPowerChannels.channels(outlet.channel)?.asSequence()
+        val next=if(outlet.wireless && !outlet.cord.plugged)mods.eln.utility.WirelessPowerChannels.channels(outlet.channel)?.asSequence()
             ?.filter { it.element.isInRange(here) && it.element.getChannelState(it.id) }
             ?.minByOrNull { it.element.coordinate!!.trueDistanceTo(here) }?.element else null
         if(next===supply)return

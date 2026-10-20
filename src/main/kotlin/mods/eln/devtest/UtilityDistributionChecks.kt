@@ -44,8 +44,13 @@ object UtilityDistributionChecks {
     private val worldName="utility-distribution-${System.currentTimeMillis()}"
     private val base=BlockPos(256,80,256)
     private val feeder=base;private val recloser=base.east(16);private val transformer=base.east(32);private val secondary=base.east(48)
-    private val head=base.east(56).above(4);private val meter=head.below(2);private val panel=meter.below(2)
+    private val head=base.east(56).above(6);private val meter=head.below(2);private val disconnectPos=meter.below(2);private val panel=disconnectPos.below(2)
+    private val chandelier=panel.south(18).above(6)
+    private var peakChandelierAmps=0.0
     private val lamp=panel.south(5);private val fan=panel.south(10).above(4);private val outlet=panel.east(4);private val table=outlet.south(3)
+    private val householdOutlet=panel.east(8);private val stripPos=householdOutlet.south(2)
+    private val extra240=outlet.south(5)
+    private val stripLamps=ArrayList<BlockPos>()
     private val regulator=base.north(16);private val capacitor=base.north(32)
     private val coverTest=base.south(18)
     private val gallery=linkedMapOf<DistributionKind,BlockPos>()
@@ -114,6 +119,12 @@ object UtilityDistributionChecks {
         if(error!=null)Eln.logger.error("UTILITY_NATIVE FAIL phase $phase",error) else Eln.logger.info("UTILITY_NATIVE COMPLETE {} checks",passed.size)
         mc.execute { mc.stop();kotlin.concurrent.thread { Thread.sleep(1500);kotlin.system.exitProcess(if(error==null)0 else 1) } }
     }
+    @SubscribeEvent fun measure(event: net.neoforged.neoforge.event.tick.ServerTickEvent.Post) {
+        if(!java.lang.Boolean.getBoolean("eln.utilityDistributionChecks") || phase<2 || done)return
+        val node=mods.eln.node.NodeManager.instance?.getNodeFromCoordonate(Coordinate(panel.x,panel.y,panel.z,0)) as? TransparentNode
+        val e=node?.element as? BreakerPanelElement ?: return
+        peakChandelierAmps=maxOf(peakChandelierAmps,abs(e.circuits[3].contacts[2].current))
+    }
     @SubscribeEvent fun sound(event: net.neoforged.neoforge.client.event.sound.PlaySoundEvent) {
         if(java.lang.Boolean.getBoolean("eln.utilityDistributionChecks"))event.sound?.location?.toString()?.takeIf { it.startsWith("eln:utility_") }?.let { sounds[it]=(sounds[it] ?: 0)+1 }
     }
@@ -141,8 +152,8 @@ object UtilityDistributionChecks {
                         val feed=place(p,DistributionKind.FEEDER_THREE.title,feeder) as DistributionPoleElement
                         val rec=place(p,DistributionKind.RECLOSER_THREE.title,recloser) as DistributionPoleElement
                         val trafo=place(p,DistributionKind.STREET_THREE.title,transformer) as DistributionPoleElement
-                        trafo.inventory.setItem(0,Eln.findItemStack("Mains Step-down Unit",1));trafo.inventory.setChanged()
-                        settings(trafo,80) { writeInt(240) };settings(trafo,86) { writeInt(25_000) };settings(trafo,88) { writeInt(2) }
+                        trafo.inventory.setItem(0,Eln.findItemStack("25 kW Pole Transformer",1));trafo.inventory.setChanged()
+                        settings(trafo,80) { writeInt(240) };settings(trafo,86) { writeInt(100_000) };check(trafo.unit!!.ratedWatts==25_000);settings(trafo,88) { writeInt(2) }
                         val sec=place(p,DistributionKind.SECONDARY_LIGHT.title,secondary) as DistributionPoleElement
                         for((dir,volts) in listOf(Direction.XN to 14_000.0,Direction.XP to 13_000.0,Direction.ZN to 12_470.0)) {
                             val a=feeder.relative(dir.toFacing());val b=a.relative(dir.toFacing());w.setBlockAndUpdate(a.below(),Blocks.STONE.defaultBlockState());w.setBlockAndUpdate(b.below(),Blocks.STONE.defaultBlockState());f(p).wire(a);f(p).source(b,volts)
@@ -159,13 +170,14 @@ object UtilityDistributionChecks {
                         link(p,trafo,sec,50,50)
                         val h=wall(p,"120/240V Service Weatherhead",head) as HouseServiceElement
                         val m=wall(p,"North American Meter Base",meter) as HouseServiceElement
+                        val serviceSwitch=wall(p,"Red Handle Service Disconnect",disconnectPos) as HouseServiceElement
                         val pan=wall(p,"Twelve Circuit American Breaker Panel",panel) as BreakerPanelElement
                         m.inventory.setItem(0,Eln.findItemStack("Smart Digital Service Meter",1));m.inventory.setChanged()
                         // Aim at the secondary rack, rather than changing the selected GUI terminal.
                         check(sec.onBlockActivated(p,Direction.ZP,.5f,5.5f,.5f))
                         check(h.onBlockActivated(p,Direction.ZP,.5f,.5f,.5f))
                         check(sec.gridLinkList.any { it.getTerminal(sec)==50 })
-                        for(at in listOf(head.below(),meter.below())) {
+                        for(at in listOf(head.below(),meter.below(),disconnectPos.below())) {
                             w.setBlockAndUpdate(at.north(),Blocks.STONE.defaultBlockState())
                             check(Eln.sixNodeItem.placeBlockAt(f(p).spool(),p,w,at,net.minecraft.core.Direction.SOUTH,.5f,.5f,.5f))
                         }
@@ -174,6 +186,10 @@ object UtilityDistributionChecks {
                         check(m.gridLinkList.isEmpty() && pan.gridLinkList.isEmpty())
                         val br=Eln.sixNodeItem.subItemList.values.filterIsInstance<mods.eln.sixnode.electricalbreaker.ElectricalBreakerDescriptor>().first { it.currentLimit==20.0 }
                         repeat(12) { pan.inventory.setItem(it,br.newItemStack()) };pan.inventory.setChanged()
+                        pan.inventory.setItem(3,Eln.findItemStack("30A Electrical Breaker",1));pan.inventory.setChanged()
+                        pan.setPowerChannel(3,"Chandelier 5400");pan.circuits[3].use240=true;pan.circuits[3].configure()
+                        val ch=fixture(p,DecorativeLampStyle.LUXURY_CASCADE,chandelier)
+                        ch.inventory.setItem(0,Eln.findItemStack("240V Halogen Light Bulb",20));ch.inventory.setChanged();ch.lampSupplyChannel="Chandelier 5400"
                         pan.setPowerChannel(0,"Utility lamp");pan.setPowerChannel(1,"Utility fan");pan.setPowerChannel(2,"Utility 240");pan.circuits[2].use240=true;pan.circuits[2].configure()
                         fixture(p,DecorativeLampStyle.TABLE_DRUM,lamp).lampSupplyChannel="Utility lamp"
                         fixture(p,DecorativeLampStyle.FAN_AURA,fan).lampSupplyChannel="Utility fan"
@@ -189,6 +205,9 @@ object UtilityDistributionChecks {
                             val e=place(p,kind.title,pos) as DistributionPoleElement
                             if(kind.transformer) { e.inventory.setItem(0,Eln.findItemStack("Mains Step-down Unit",1));e.inventory.setChanged() }
                         }
+                        for(kind in listOf(DistributionKind.SECONDARY_FED_SINGLE,DistributionKind.SECONDARY_FED_THREE)) {
+                            val e=pole(p,gallery.getValue(kind));link(p,feed,e,if(kind.phases==1)32 else 52,if(kind.phases==1)32 else 52)
+                        }
                         p.teleportTo(w,306.0,88.0,275.0,145f,20f)
                     };next(2,240)
                 }
@@ -198,6 +217,16 @@ object UtilityDistributionChecks {
                     capture("service-and-poles")
                     server { p ->
                         verifyPower(p)
+                        val ch=panel(p).circuits[3]
+                        f(p).near(ch.contacts[2].current,22.5,.3);check(!ch.breaker.tripped)
+                        pass("Twenty 270 W halogen bulbs draw 5400 W / 22.5 A on their actual 240 V panel branch without tripping its 30 A breaker")
+                        val passive=gallery.filterKeys { it==DistributionKind.SECONDARY_FED_SINGLE || it==DistributionKind.SECONDARY_FED_THREE }
+                        for((kind,pos) in passive) {
+                            val e=pole(p,pos);check(e.unit==null);check(e.lightLevel==0)
+                        }
+                        val relay=pole(p,gallery.getValue(DistributionKind.SECONDARY))
+                        link(p,pole(p,transformer),relay,50,50)
+                        for((_,pos) in passive)link(p,relay,pole(p,pos),50,50)
                         val feed=pole(p,feeder);feed.lines.forEachIndexed { i,b -> f(p).near(b.voltage,listOf(14_000.0,13_000.0,12_470.0)[i],2.0) }
                         val reg=pole(p,regulator);f(p).near(reg.outs[0].voltage,13_000.0,2.0)
                         val cap=pole(p,capacitor);cap.electricalComponentList.filterIsInstance<mods.eln.sim.mna.component.Capacitor>().forEachIndexed { i,c -> check(c.voltage>listOf(13_900.0,12_900.0,12_370.0)[i]) }
@@ -211,6 +240,8 @@ object UtilityDistributionChecks {
                 32->if(settled()) {
                     server { p ->
                         panel(p).buses.forEachIndexed { i,b -> f(p).near(b.voltage,if(i==2)228.0 else 114.0,1.0) }
+                        for(kind in listOf(DistributionKind.SECONDARY_FED_SINGLE,DistributionKind.SECONDARY_FED_THREE))check(pole(p,gallery.getValue(kind)).lightLevel>0)
+                        pass("Single- and three-phase pass-through streetlight poles stay dark on HV alone and light only after their secondary racks receive upstream LV")
                         check(pole(p,transformer).unit!!.controller.status=="TRANSFERRING")
                         f(p).voltage(feeder.north(2),13_093.5)
                     };next(33,50)
@@ -224,12 +255,47 @@ object UtilityDistributionChecks {
                     };next(34,60)
                 }
                 34->if(settled()) {
-                    server { p -> verifyPower(p);p.teleportTo(p.serverLevel(),fan.x+.5,fan.y-2.0,fan.z+1.2,180f,-55f) };next(25,40)
+                    server { p ->
+                        verifyPower(p)
+                        val o=f(p).machine(outlet) as OutletElement
+                        val second=fixture(p,DecorativeLampStyle.DESK,extra240)
+                        second.inventory.setItem(0,Eln.findItemStack("240V LED Light Bulb",1));second.inventory.setChanged()
+                        check(second.cord.attach(o.anchor(),false));check(second.cord.anchor!!.socket==1)
+                        val third=fixture(p,DecorativeLampStyle.DESK,outlet.east(3));third.inventory.setItem(0,Eln.findItemStack("240V LED Light Bulb",1));third.inventory.setChanged()
+                        check(!third.cord.attach(o.anchor(),false));check(!third.cord.plugged)
+                        settings(o,84)
+                        val input=wall(p,"120 V Wall Outlet",householdOutlet) as OutletElement
+                        input.wireless=true;input.channel="Utility fan";input.reconnect()
+                        val strip=wall(p,"Six Socket Power Strip",stripPos) as OutletElement
+                        check(strip.cord.attach(input.anchor(),false))
+                        repeat(6) { i ->
+                            val at=stripPos.offset((i%3)*2,0,2+(i/3)*2);stripLamps.add(at)
+                            val d=fixture(p,DecorativeLampStyle.DESK,at)
+                            check(d.cord.attach(strip.anchor(),false));check(d.cord.anchor!!.socket==i)
+                        }
+                        val seventh=fixture(p,DecorativeLampStyle.DESK,stripPos.east(6))
+                        check(!seventh.cord.attach(strip.anchor(),false))
+                        p.teleportTo(p.serverLevel(),householdOutlet.x+1.5,householdOutlet.y+1.0,householdOutlet.z+5.0,180f,15f)
+                    };next(36,60)
+                }
+                36->if(settled()) {
+                    capture("duplex-outlets-and-power-strip")
+                    server { p ->
+                        val o=f(p).machine(outlet) as OutletElement
+                        check(o.horizontal && o.freeSocket()==null);check(lamp(p,extra240).electricalLoad.voltage>238)
+                        check(lamp(p,table).cord.anchor!!.socket==0 && lamp(p,extra240).cord.anchor!!.socket==1)
+                        val strip=f(p).machine(stripPos) as OutletElement
+                        check(strip.freeSocket()==null && strip.cord.connected);check(stripLamps.all { lamp(p,it).electricalLoad.voltage>117 })
+                        pass("A duplex outlet powers bottom and top plugs independently, rejects a third device and retains both cords when rotated horizontally")
+                        pass("A cord-fed six-socket power strip powers six real table lamps and rejects a seventh connection")
+                        p.teleportTo(p.serverLevel(),fan.x+.5,fan.y-2.0,fan.z+1.2,180f,-55f)
+                    };next(25,40)
                 }
                 25->if(settled()) { capture("aura-five-blade-seven-light-fan");server { p ->gui(p,transformer) };next(3) }
-                3->if(settled() && mc.screen is DistributionGui && ticks>25) { capture("transformer-gui");button("rating");next(4) }
+                3->if(settled() && mc.screen is DistributionGui && ticks>25) { capture("transformer-gui");check(!(mc.screen as DistributionGui).javaClass.getDeclaredField("rating").apply { isAccessible=true }.let { it.get(mc.screen) as GuiButtonEln }.enabled)
+                    server { p ->val e=pole(p,transformer);e.inventory.setItem(0,Eln.findItemStack("50 kW Pole Transformer",1));e.inventory.setChanged() };next(4) }
                 4->if(settled()) {
-                    server { p ->check(pole(p,transformer).unit!!.ratedWatts==50_000);pass("The native transformer GUI changes its shared service rating from 25 to 50 kW")
+                    server { p ->check(pole(p,transformer).unit!!.ratedWatts==50_000);pass("Replacing the physical transformer item changes capacity from 25 to 50 kW; GUI rating packets cannot grant a free upgrade")
                         branchFault=Resistor(panel(p).circuits[0].load,null).apply { resistance=.6 }.also { Eln.simulator.addElectricalComponent(it) }
                     };next(35,20)
                 }
@@ -261,7 +327,24 @@ object UtilityDistributionChecks {
                 10->if(settled()) { val g=mc.screen as HouseServiceGui;mc.gameMode!!.handleInventoryMouseClick(g.menu.containerId,0,0,ClickType.PICKUP,mc.player!!);next(11,60) }
                 11->if(settled()) { button("disconnect");next(12,40) }
                 12->if(settled()) { server { p ->check(meter(p).disconnected);check(panel(p).buses.all { abs(it.voltage)<1 });pass("The smart meter disconnect isolates every service output") };next(13) }
-                13->if(settled()) { button("disconnect");next(14,80) }
+                13->if(settled()) { button("disconnect");next(42,80) }
+                42->if(settled()) {
+                    mc.setScreen(null)
+                    server { p ->
+                        verifyPower(p);p.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY)
+                        check((f(p).machine(disconnectPos) as HouseServiceElement).onBlockActivated(p,Direction.ZP,.8f,.7f,.3f))
+                        p.teleportTo(p.serverLevel(),disconnectPos.x+.5,disconnectPos.y-1.1,disconnectPos.z+2.4,180f,0f)
+                    };next(43,40)
+                }
+                43->if(settled()) {
+                    capture("red-handle-disconnect-open")
+                    server { p ->
+                        val sw=f(p).machine(disconnectPos) as HouseServiceElement
+                        check(sw.disconnected);check(panel(p).buses.all { abs(it.voltage)<1 });check(meter(p).load[2].voltage>238)
+                        pass("The red-handle service disconnect under the meter opens the real house feeder while the meter remains energised")
+                        check(sw.onBlockActivated(p,Direction.ZP,.8f,.7f,.3f))
+                    };next(14,80)
+                }
                 14->if(settled()) {
                     server { p ->
                         verifyPower(p);meter(p).inventory.setItem(0,Eln.findItemStack("Analog Glass Service Meter",1));meter(p).inventory.setChanged()
@@ -276,7 +359,12 @@ object UtilityDistributionChecks {
                     server { p ->
                         val rec=pole(p,recloser);check(rec.recloser.locked);check(rec.outs.all { abs(it.voltage)<1 });check(panel(p).buses.all { abs(it.voltage)<1 })
                         check((sounds["eln:utility_recloser_bump"] ?: 0)>=3);pass("A B-leg fault opens all three legs, bumps on retries and locks out after two failed reclosures")
-                        val cut=pole(p,gallery.getValue(DistributionKind.CUTOUT_SINGLE));settings(cut,91) { writeDouble(10.0) }
+                        val cut=pole(p,gallery.getValue(DistributionKind.CUTOUT_SINGLE))
+                        p.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY);p.isShiftKeyDown=true
+                        try { check(cut.onBlockActivated(p,Direction.ZP,.5f,.5f,.5f)) } finally { p.isShiftKeyDown=false }
+                        check(!cut.fuses[0].hasCartridge)
+                        p.setItemInHand(InteractionHand.MAIN_HAND,Eln.findItemStack("10 A Pole Fuse",1))
+                        check(cut.onBlockActivated(p,Direction.ZP,.5f,.5f,.5f));check(cut.fuses[0].rating(100.0)==10.0)
                         val pos=gallery.getValue(DistributionKind.CUTOUT_SINGLE);f(p).wire(pos.west());f(p).source(pos.west(2),240.0)
                         // Cutout base exposes the secondary rack, so feed its HV line from the riser's real cable node.
                         val source=(f(p).six(pos.west(2)) as mods.eln.sixnode.electricalsource.ElectricalSourceElement).getElectricalLoad(LRDU.Down,0)!!
@@ -302,11 +390,14 @@ object UtilityDistributionChecks {
                         val rec=pole(p,recloser);check(rec.recloser.locked && !rec.recloser.closed);check(pole(p,gallery.getValue(DistributionKind.CUTOUT_SINGLE)).fuses[0].blown)
                         check(pole(p,transformer).transformerPhase==2);check(pole(p,transformer).unit!!.ratedWatts==50_000)
                         check(meter(p).energy.importedKwh>=energyBefore);check(lamp(p,fan).installedBulbs==7)
-                        check(pole(p,transformer).gridLinkList.size==2) { "Duplicate transformer spans: ${pole(p,transformer).gridLinkList.size}" }
+                        check(pole(p,transformer).gridLinkList.size==3) { "Duplicate transformer spans: ${pole(p,transformer).gridLinkList.size}" }
                         check(meter(p).gridLinkList.isEmpty());check(panel(p).gridLinkList.isEmpty())
+                        check((f(p).machine(outlet) as OutletElement).freeSocket()==null)
+                        val strip=f(p).machine(stripPos) as OutletElement;check(strip.freeSocket()==null && strip.cord.plugged)
+                        check(stripLamps.all { lamp(p,it).cord.plugged })
                         pass("A full world restart preserves phase/rating, meter energy, seven bulbs, fuse state and recloser lockout, with exactly one copy of every saved span")
                         settings(rec,94)
-                        val cut=pole(p,gallery.getValue(DistributionKind.CUTOUT_SINGLE));p.setItemInHand(InteractionHand.MAIN_HAND,Eln.findItemStack("Pole Fuse Link",1))
+                        val cut=pole(p,gallery.getValue(DistributionKind.CUTOUT_SINGLE));p.setItemInHand(InteractionHand.MAIN_HAND,Eln.findItemStack("10 A Pole Fuse",1))
                         check(cut.onBlockActivated(p,Direction.ZP,.5f,.5f,.5f));check(!cut.fuses[0].blown && cut.fuses[0].closed)
                     };next(21,100)
                 }
@@ -346,7 +437,11 @@ object UtilityDistributionChecks {
                         listOfNotNull(arcFeed,arcLoad).forEach { Eln.simulator.removeElectricalComponent(it);it.breakConnection() };arcFeed=null;arcLoad=null
                     };next(31)
                 }
-                31->if(settled())finish(null)
+                31->if(settled()) {
+                    check(peakChandelierAmps in 22.0..26.0) { "Chandelier current spike: $peakChandelierAmps A" }
+                    pass("The 5400 W chandelier remains below 26 A through grid sag/rise, switching, meter operations and a cold restart")
+                    finish(null)
+                }
             }
         } catch(t: Throwable) { finish(t) }
     }

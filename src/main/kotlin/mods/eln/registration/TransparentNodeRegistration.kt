@@ -1516,7 +1516,8 @@ object TransparentNodeRegistration {
         transparentNodeItem.addDescriptor(50+(124 shl 6),mods.eln.utility.HouseServiceDescriptor(false))
         transparentNodeItem.addDescriptor(51+(124 shl 6),mods.eln.utility.HouseServiceDescriptor(true))
         transparentNodeItem.addDescriptor(52+(124 shl 6),mods.eln.utility.BreakerPanelDescriptor())
-        mods.eln.utility.DistributionKind.entries.forEachIndexed { i,kind -> transparentNodeItem.addDescriptor(34+i+(124 shl 6),mods.eln.utility.DistributionPoleDescriptor(kind)) }
+        transparentNodeItem.addDescriptor(56+(124 shl 6),mods.eln.utility.HouseServiceDescriptor(false,disconnect=true))
+        mods.eln.utility.DistributionKind.entries.forEachIndexed { i,kind -> transparentNodeItem.addDescriptor((if(i<16)34+i else 53+i-16)+(124 shl 6),mods.eln.utility.DistributionPoleDescriptor(kind)) }
         var subId: Int
         run {
             subId = 3
@@ -1670,8 +1671,10 @@ object TransparentNodeRegistration {
         mods.eln.transparentnode.fan.FanType.entries.forEachIndexed { i,type ->
             transparentNodeItem.addDescriptor(28+i+(124 shl 6),mods.eln.transparentnode.fan.FanDescriptor(type).apply { setCreativeTab(Eln.creativeTabMachines) })
         }
+        transparentNodeItem.addDescriptor(55+(124 shl 6),mods.eln.transparentnode.cord.OutletDescriptor(strip=true).apply { setCreativeTab(Eln.creativeTabPowerElectronics) })
         transparentNodeItem.addDescriptor(33+(124 shl 6),mods.eln.transparentnode.cord.OutletDescriptor(mods.eln.transparentnode.cord.CordRating.V240).apply { setCreativeTab(Eln.creativeTabPowerElectronics) })
         transparentNodeItem.addDescriptor(32+(124 shl 6),mods.eln.transparentnode.cord.OutletDescriptor().apply { setCreativeTab(Eln.creativeTabPowerElectronics) })
+        mods.eln.registration.ElnRegistry.registerCustomItemStack("120 V Wall Outlet") { Eln.findItemStack("Experimental Wall Outlet",1) }
         mods.eln.transparentnode.kitchen.KitchenType.entries.forEach { type ->
             transparentNodeItem.addDescriptor(type.subId+(124 shl 6),
                 mods.eln.transparentnode.kitchen.KitchenDescriptor(type).apply { setCreativeTab(Eln.creativeTabMachines) })

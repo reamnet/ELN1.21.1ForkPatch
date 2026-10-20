@@ -94,11 +94,12 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
         list.add(tr("A, B and C are independent electrical circuits"))
         list.add(tr("Hold Shift to use the individual terminal selected in the menu"))
         list.add(tr("Secondary rack carries L1 120 V, L2 120 V and 240 V service circuits"))
-        if(kind.transformer) { list.add(tr("Fixed ratio: 12.47 kV nominal primary; output follows grid voltage"));list.add(tr("Insert a Mains Step-down Unit; select 10, 25, 50, 75 or 100 kW"));list.add(tr("Transformer phase is selectable; a blown fuse needs a Pole Fuse Link")) }
+        if(kind.transformer) { list.add(tr("Fixed ratio: 12.47 kV nominal primary; output follows grid voltage"));list.add(tr("Insert a physical 10, 25, 50, 75 or 100 kW Pole Transformer"));list.add(tr("Transformer phase is selectable; a blown fuse needs a Pole Fuse Link")) }
         if(kind.cutout || kind.regulator)list.add(tr("Separate line and load terminals; replace blown links with a Pole Fuse Link"))
         if(kind.recloser)list.add(tr("Any phase fault opens all three; timed retries stop at lockout"))
         if(kind.regulator)list.add(tr("Automatic regulation within 10 percent of line voltage; passive, power-conserving taps"))
         if(kind.capacitor)list.add(tr("Three independent charge storage branches smooth DC-equivalent voltage changes"))
+        if(kind.light && !kind.transformer)list.add(tr("Street light draws from the LV rack only; feed it from an upstream transformer"))
         if(kind==DistributionKind.FEEDER_THREE)list.add(tr("Base: left A, right B, rear C; three separate underground cable inputs"))
     }
 }
@@ -125,7 +126,7 @@ class DistributionDisplay {
     }
 }
 class DistributionContainer(player: Player,inventory: Container,transformer: Boolean): BasicContainer(player,inventory,
-    if(transformer)arrayOf(object: SlotWithSkinAndComment(inventory,0,9,31,ISlotSkin.SlotSkin.medium,arrayOf(tr("Mains Step-down Unit"))) {
+    if(transformer)arrayOf(object: SlotWithSkinAndComment(inventory,0,9,31,ISlotSkin.SlotSkin.medium,arrayOf(tr("Pole Transformer or Mains Step-down Unit"))) {
         override fun mayPlace(stack: ItemStack)=isStepDownUnit(stack)
         override fun getMaxStackSize()=1
     }) else emptyArray<Slot>())
@@ -172,12 +173,14 @@ class DistributionGui(player: Player,private val render: DistributionPoleRender)
             current=newGuiTextField(8,170,85).apply { text=d.fuseRating.toString();setComment(0,tr("Fuse trip current: 1 to 2000 A")) };applyCurrent=newGuiButton(98,166,134,tr("Set fuse current"))
         }
         if(kind==DistributionKind.AIR_BREAK_THREE)operate=newGuiButton(8,84,224,"")
+        if(!kind.recloser) { applyCurrent?.enabled=false;current?.enabled=false }
         if(kind.light) { lamp=newGuiButton(8,162,106,"");dusk=newGuiButton(118,162,114,"") }
         refresh()
     }
     private fun refresh() {
         terminal.displayString=tr("Cable: %1$",ServiceTerminals.label(d.terminal))
         phase?.displayString=tr("Phase: %1$",listOf("A","B","C")[d.phase.coerceIn(0,2)])
+        rating?.enabled=false
         rating?.displayString=tr("Rating: %1$ kW",d.rating/1000);voltage?.displayString=tr("Nominal: %1$ V",d.voltage)
         operate?.displayString=when { kind.transformer -> if(d.enabled)tr("Transformer: On") else tr("Transformer: Off");kind.recloser -> if(d.closed)tr("Open all phases") else tr("Close all phases");else -> if(d.enabled)tr("Open switch") else tr("Close switch") }
         fuses.forEachIndexed { i,b -> b.displayString=tr("%1$: %2$",listOf("A","B","C")[if(kind.transformer)d.phase.coerceIn(0,2) else i],if(d.fuseBlown.getOrNull(i)==true)tr("Blown") else if(d.fuseClosed.getOrNull(i)!=false)tr("Open") else tr("Close"));b.enabled=d.fuseBlown.getOrNull(i)!=true;b.setComment(0,tr("Right-click the pole holding a Pole Fuse Link to replace a blown fuse")) }

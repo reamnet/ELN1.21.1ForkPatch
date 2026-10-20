@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "eln:experimental_wall_outlet"
+    },
+    {
+      "item": "eln:experimental_wall_outlet"
+    },
+    {
+      "item": "eln:experimental_wall_outlet"
+    },
+    {
+      "item": "eln:iron_plate"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:six_socket_power_strip"
+  }
+}

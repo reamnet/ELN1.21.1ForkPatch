@@ -21,7 +21,7 @@ import java.io.IOException
 
 class ElectricalPoleRender(entity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor) : GridRender(entity, descriptor) {
 
-    override val inventory=mods.eln.node.transparent.TransparentNodeElementInventory(0,1,this)
+    override val inventory=mods.eln.node.transparent.TransparentNodeElementInventory(if((descriptor as ElectricalPoleDescriptor).includeTransformer)1 else 0,1,this)
     val display=LegacyPoleDisplay()
     internal var cableRenderType: CableRenderType? = null
     internal var eConn = LRDUMask()

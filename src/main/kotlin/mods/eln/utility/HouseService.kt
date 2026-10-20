@@ -72,7 +72,9 @@ class ServiceEnergy {
 
 class HouseServiceElement(node: TransparentNode,descriptor: TransparentNodeDescriptor): GridElement(node,descriptor,64) {
     val meter=(descriptor as HouseServiceDescriptor).meter
-    override val allowsNewGridLinks get()=!meter
+    val serviceDisconnect=(descriptor as HouseServiceDescriptor).disconnect
+    private val switched get()=meter || serviceDisconnect
+    override val allowsNewGridLinks get()=!switched
     override fun aimedGridTerminal(side: Direction,localHit: Vec3)=ServiceTerminals.BUNDLE
     private val desc get()=transparentNodeDescriptor as HouseServiceDescriptor
     override val inventory=object: TransparentNodeElementInventory(if(meter)1 else 0,1,this@HouseServiceElement) {
@@ -81,9 +83,9 @@ class HouseServiceElement(node: TransparentNode,descriptor: TransparentNodeDescr
         override fun canTakeItemThroughFace(slot: Int,stack: ItemStack?,side: Int)=meter && slot==0
     }
     val line=List(3) { NbtElectricalLoad("serviceLine$it").apply { serialResistance=.00001 } }
-    private val wiredService=if(meter)WiredServiceSplit(this,line) else null
-    val load=if(meter)List(3) { NbtElectricalLoad("serviceLoad$it").apply { serialResistance=.00001 } } else line
-    private val contacts=if(meter)List(3) { TransferContact(line[it],load[it]) } else emptyList()
+    private val wiredService=if(meter || serviceDisconnect)WiredServiceSplit(this,line) else null
+    val load=if(switched)List(3) { NbtElectricalLoad("serviceLoad$it").apply { serialResistance=.00001 } } else line
+    private val contacts=if(switched)List(3) { TransferContact(line[it],load[it]) } else emptyList()
     val energy=ServiceEnergy()
     var selectedTerminal=50
         private set
@@ -94,7 +96,7 @@ class HouseServiceElement(node: TransparentNode,descriptor: TransparentNodeDescr
     val meterType get()=if(meter)UtilityItems.part(inventory.getItem(0))?.takeIf { it in 1..2 } ?: 0 else 0
     val terminals get()=if(meter)listOf(50,51,40,41,42) else listOf(50,40,41,42)
     init {
-        electricalLoadList.addAll(line);if(meter)electricalLoadList.addAll(load);electricalComponentList.addAll(contacts)
+        electricalLoadList.addAll(line);if(switched)electricalLoadList.addAll(load);electricalComponentList.addAll(contacts)
         electricalProcessList.add(IProcess { dt ->
             wiredService?.update()
             if(meter)energy.step(dt,contacts.indices.sumOf { i -> line[i].voltage*contacts[i].current })
@@ -102,16 +104,17 @@ class HouseServiceElement(node: TransparentNode,descriptor: TransparentNodeDescr
         slowProcessList.add(IProcess { desc.checkSupport(this) })
         slowProcessList.add(NodePeriodicPublishProcess(node,1.0,.5))
     }
-    private fun configure() { contacts.forEach { it.closed=meterType!=0 && !(meterType==2 && disconnected) } }
+    private fun configure() { contacts.forEach { it.closed=if(serviceDisconnect)!disconnected else meterType!=0 && !(meterType==2 && disconnected) } }
     /** Stable hook for a future remote metering integration; analog meters have no disconnect. */
     fun setRemoteDisconnect(open: Boolean): Boolean {
-        if(meterType!=2)return false
+        if(!serviceDisconnect && meterType!=2)return false
         if(disconnected!=open) { disconnected=open;configure();play(mods.eln.sound.SoundCommand("eln:circuit_breaker_close").smallRange().mulVolume(.25));needPublish() }
         return true
     }
     override fun initialize() { configure();super.initialize() }
-    override fun inventoryChange(inventory: Container?) { if(meterType!=2)disconnected=false;configure();needPublish() }
+    override fun inventoryChange(inventory: Container?) { if(meter && meterType!=2)disconnected=false;configure();needPublish() }
     override fun onBlockActivated(player: Player,side: Direction,vx: Float,vy: Float,vz: Float): Boolean {
+        if(serviceDisconnect && player.mainHandItem.isEmpty && !player.isShiftKeyDown) { setRemoteDisconnect(!disconnected);return true }
         if(meter && meterType==0 && UtilityItems.part(player.mainHandItem) in 1..2) {
             inventory.setItem(0,player.mainHandItem.copyWithCount(1));if(!player.abilities.instabuild)player.mainHandItem.shrink(1)
             player.inventory.setChanged();inventoryChange(inventory);return true

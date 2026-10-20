@@ -37,6 +37,10 @@ class TransparentNodeItem(b: Supplier<Block>) : GenericItemBlockUsingDamage<Tran
 
     class Placer(family: TransparentNodeItem, descriptor: TransparentNodeDescriptor, id: Int, block: Block, properties: Properties) :
         DescriptorBlockItem<TransparentNodeDescriptor?>(family, descriptor, id, block, properties) {
+        override fun getDescriptionId(): String {
+            val renamed=(descriptor as? mods.eln.transparentnode.cord.OutletDescriptor)?.displayName ?: return super.getDescriptionId()
+            return renamed.replace(Regex("\\s+"),"_")+".name"
+        }
         override fun useOn(context: UseOnContext): InteractionResult {
             val player = context.player ?: return InteractionResult.PASS
             val place = BlockPlaceContext(context)

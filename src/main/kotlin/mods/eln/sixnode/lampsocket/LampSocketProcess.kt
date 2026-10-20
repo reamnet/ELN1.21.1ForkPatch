@@ -57,6 +57,19 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
         val lampStack = element.inventory.getItem(LampSocketContainer.LAMP_SLOT_ID)
         val cableStack = element.inventory.getItem(LampSocketContainer.CABLE_SLOT_ID)
 
+        // Report the complete fixture once, keyed by its owner. Additive per-frame
+        // reports could count a reconnected fixture several times on a breaker circuit.
+        if(element.wirelessPower) {
+            findBestLampSupply(element.sixNode!!.coordinate)
+            val h=cachedBestChannelHandle?.second
+            var conductance=0.0
+            if(element.hasPowerLead && h?.element?.getChannelState(h.id)==true) {
+                if(energized && !lampStack.isEmpty)conductance+=element.installedBulbs/(Utils.getItemObject(lampStack) as LampDescriptor).lampData.resistance
+                if(element.descriptor.fixture?.fan==true && element.fanEnabled)conductance+=1/element.fanMotor.resistance
+            }
+            mods.eln.utility.WirelessLoadDemand.report(element,if(conductance>0)h else null,if(conductance>0)1/conductance else Double.POSITIVE_INFINITY)
+        } else mods.eln.utility.WirelessLoadDemand.report(element,null,Double.POSITIVE_INFINITY)
+
         var activeLampSupplyConnection = false
         var newLightValue = BoilerplateLampData.MIN_LIGHT_VALUE
         if(element.descriptor.fixture?.fan==true) {
@@ -65,7 +78,6 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
                 val h=cachedBestChannelHandle?.second
                 activeLampSupplyConnection=h!=null
                 if(h!=null && h.element.getChannelState(h.id) && element.hasPowerLead) {
-                    h.element.addToRp(element.fanMotor.resistance)
                     element.electricalLoad.state=h.element.powerLoad.state
                 } else element.electricalLoad.state=0.0
             }
@@ -81,7 +93,6 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
                 val bestLampSupply = cachedBestChannelHandle?.second
 
                 if (bestLampSupply != null && bestLampSupply.element.getChannelState(bestLampSupply.id)) {
-                    bestLampSupply.element.addToRp(lampDescriptor.lampData.resistance / element.installedBulbs.coerceAtLeast(1))
                     element.electricalLoad.state = bestLampSupply.element.powerLoad.state
                 } else {
                     element.electricalLoad.state = 0.0

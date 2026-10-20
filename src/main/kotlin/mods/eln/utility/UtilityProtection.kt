@@ -2,8 +2,23 @@ package mods.eln.utility
 
 import net.minecraft.nbt.CompoundTag
 import kotlin.math.abs
+import mods.eln.Eln
+import mods.eln.misc.stackFromNbt
+import mods.eln.misc.writeToNBT
+import net.minecraft.world.item.ItemStack
 
 class CutoutFuse {
+    private var cartridge: ItemStack?=null // Null is the included legacy link, materialised lazily.
+    val hasCartridge get()=cartridge?.isEmpty!=true
+    fun rating(fallback: Double)=PoleHardware.fuse(cartridge)?.amps?.takeIf { it>0 } ?: fallback
+    fun insertCartridge(stack: ItemStack): Boolean {
+        if(!UtilityItems.isFuse(stack) || (hasCartridge && !blown))return false
+        cartridge=stack.copyWithCount(1);blown=false;closed=true;heat=0.0;pickupWindow=.5;return true
+    }
+    fun removeCartridge(): ItemStack {
+        val result=if(!hasCartridge)ItemStack.EMPTY else if(blown)Eln.findItemStack(PoleHardware.spentName,1) else cartridge ?: Eln.findItemStack("Pole Fuse Link",1)
+        cartridge=ItemStack.EMPTY;closed=false;return result
+    }
     var blown=false
         private set
     var closed=true
@@ -19,15 +34,15 @@ class CutoutFuse {
     fun step(seconds: Double,amps: Double,rating: Double,outputLimited: Boolean=false): Boolean {
         if(!seconds.isFinite() || seconds<=0 || !closed || blown)return false
         if(abs(amps)>.02)lastLoaded=true
-        val ratio=abs(amps)/rating.coerceAtLeast(.1)
+        val ratio=abs(amps)/this.rating(rating).coerceAtLeast(.1)
         heat=if(outputLimited || ratio>1.05)heat+seconds*if(outputLimited)1.0 else (ratio*ratio-1).coerceAtLeast(1.0) else (heat-seconds).coerceAtLeast(0.0)
         if(heat<.25)return false
         blown=true;closed=false;heat=0.0;pickupWindow=0.0;return true
     }
-    fun operate(): Boolean { if(blown)return false;closed=!closed;pickupWindow=if(closed).5 else 0.0;return true }
-    fun replace() { blown=false;closed=true;heat=0.0;pickupWindow=.5 }
-    fun write(tag: CompoundTag,prefix: String) { tag.putBoolean(prefix+"Blown",blown);tag.putBoolean(prefix+"Closed",closed);tag.putDouble(prefix+"Heat",heat);tag.putBoolean(prefix+"Loaded",lastLoaded) }
-    fun read(tag: CompoundTag,prefix: String) { blown=tag.getBoolean(prefix+"Blown");closed=!blown && (!tag.contains(prefix+"Closed") || tag.getBoolean(prefix+"Closed"));heat=tag.getDouble(prefix+"Heat").takeIf { it.isFinite() }?.coerceIn(0.0,.25) ?: 0.0;lastLoaded=tag.getBoolean(prefix+"Loaded") }
+    fun operate(): Boolean { if(blown || !hasCartridge)return false;closed=!closed;pickupWindow=if(closed).5 else 0.0;return true }
+    fun replace() { if(!hasCartridge)cartridge=null;blown=false;closed=true;heat=0.0;pickupWindow=.5 }
+    fun write(tag: CompoundTag,prefix: String) { cartridge?.let { tag.put(prefix+"Cartridge",CompoundTag().also(it::writeToNBT)) };tag.putBoolean(prefix+"Blown",blown);tag.putBoolean(prefix+"Closed",closed);tag.putDouble(prefix+"Heat",heat);tag.putBoolean(prefix+"Loaded",lastLoaded) }
+    fun read(tag: CompoundTag,prefix: String) { cartridge=if(tag.contains(prefix+"Cartridge"))stackFromNbt(tag.getCompound(prefix+"Cartridge")) else null;blown=tag.getBoolean(prefix+"Blown");closed=hasCartridge && !blown && (!tag.contains(prefix+"Closed") || tag.getBoolean(prefix+"Closed"));heat=tag.getDouble(prefix+"Heat").takeIf { it.isFinite() }?.coerceIn(0.0,.25) ?: 0.0;lastLoaded=tag.getBoolean(prefix+"Loaded") }
 }
 
 /** Gang trips; retry timers advance once per physical tick, never during solver retries. */

@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_pole_fuse_link": {
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:pole_fuse_link"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "eln:20_a_pole_fuse"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_pole_fuse_link"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "eln:20_a_pole_fuse"
+    ]
+  }
+}

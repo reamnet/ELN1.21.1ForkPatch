@@ -27,14 +27,14 @@ interface CordDevice {
     fun cordChanged() {}
 }
 
-data class CordAnchor(val dimension: Int,val pos: BlockPos,val id: UUID,val front: Direction,val rating: CordRating = CordRating.V120) {
-    fun tip()=Vec3.atCenterOf(pos).add(mods.eln.transparentnode.worklight.WorkLightOptics.world(front,Vec3(0.0,-.1,-.224)))
-    fun write(): CompoundTag=CompoundTag().apply { putInt("dimension",dimension);putLong("position",pos.asLong());putUUID("outletId",this@CordAnchor.id);putInt("facing",front.int);putString("rating",rating.name) }
+data class CordAnchor(val dimension: Int,val pos: BlockPos,val id: UUID,val front: Direction,val rating: CordRating = CordRating.V120,val socket: Int=0,val horizontal: Boolean=false,val strip: Boolean=false) {
+    fun tip()=Vec3.atCenterOf(pos).add(mods.eln.transparentnode.worklight.WorkLightOptics.world(front,OutletGeometry.tipLocal(socket,horizontal,strip)))
+    fun write(): CompoundTag=CompoundTag().apply { putInt("dimension",dimension);putLong("position",pos.asLong());putUUID("outletId",this@CordAnchor.id);putInt("facing",front.int);putString("rating",rating.name);putInt("socket",socket);putBoolean("horizontal",horizontal);putBoolean("strip",strip) }
     companion object {
         fun read(tag: CompoundTag): CordAnchor? {
             if(!tag.hasUUID("outletId"))return null
             val front=Direction.fromInt(tag.getInt("facing"))?.takeIf { it.isNotY } ?: return null
-            return CordAnchor(tag.getInt("dimension"),BlockPos.of(tag.getLong("position")),tag.getUUID("outletId"),front,CordRating.read(tag.getString("rating")))
+            return CordAnchor(tag.getInt("dimension"),BlockPos.of(tag.getLong("position")),tag.getUUID("outletId"),front,CordRating.read(tag.getString("rating")),tag.getInt("socket").coerceIn(0,5),tag.getBoolean("horizontal"),tag.getBoolean("strip"))
         }
     }
 }
@@ -66,30 +66,27 @@ class ApplianceCord(val owner: INodeElement,val input: NbtElectricalLoad) {
     fun attach(a: CordAnchor,consumed: Boolean): Boolean {
         if(!device.acceptsCord(a.rating) || plugged || !inReach(a))return false
         val target=find(a) ?: return false
-        if(!target.canClaim(this))return false
-        target.reserved=token
+        if(owner is OutletElement && owner.wouldLoop(target))return false
+        if(!target.reserve(this,a.socket))return false
         anchor=a;paid=consumed;device.cordChanged();owner.reconnect();timer=0.0;poll();owner.needPublish();return true
     }
-    private fun find(a: CordAnchor): OutletElement? {
-        val node=NodeManager.instance?.getNodeFromCoordonate(Coordinate(a.pos.x,a.pos.y,a.pos.z,a.dimension)) as? TransparentNode
-        return (node?.element as? OutletElement)?.takeIf { it.id==a.id && it.rating==a.rating && node.isDestructing==false }
-    }
+    private fun find(a: CordAnchor)=findOutlet(a)
     fun poll() {
         val a=anchor
         val target=if(a!=null && inReach(a))find(a) else null
+        if(a!=null && target!=null && (a.horizontal!=target.horizontal)) { anchor=target.anchor(a.socket);owner.needPublish() }
         val next=when {
             a==null -> "UNPLUGGED"
             !inReach(a) -> "TOO_FAR"
             target==null -> "MISSING"
-            !target.canClaim(this) -> "OCCUPIED"
+            !target.canClaim(this,a!!.socket) -> "OCCUPIED"
             !device.acceptsCord(a.rating) -> "VOLTAGE"
-            target.tripped -> "TRIPPED"
             else -> "CONNECTED"
         }
         if(target!==outlet || next !in listOf("CONNECTED","TRIPPED")) {
             disconnect()
-            if(target!=null && target.canClaim(this) && a!=null && inReach(a) && device.acceptsCord(a.rating)) {
-                target.reserved=token;target.occupant=this;outlet=target
+            if(target!=null && a!=null && target.canClaim(this,a.socket) && inReach(a) && device.acceptsCord(a.rating)) {
+                target.claim(this,a.socket);outlet=target
                 conductor.connectTo(target.output,input)
                 conductor.resistance=.08+.015*Vec3.atCenterOf(coordinate().pos).distanceTo(Vec3.atCenterOf(a.pos))
                 conductor.setOwner("ApplianceCord@${coordinate()}")
@@ -100,18 +97,18 @@ class ApplianceCord(val owner: INodeElement,val input: NbtElectricalLoad) {
     }
     fun disconnect() {
         if(connected) { Eln.simulator.removeElectricalComponent(conductor);conductor.connectTo(null,null) }
-        if(outlet?.occupant===this)outlet!!.occupant=null
+        outlet?.release(this)
         outlet=null;connected=false
     }
     fun unplug(player: ServerPlayer) {
         val refund=paid;val item=anchor?.rating?.cordName ?: CordRating.V120.cordName
-        anchor?.let(::find)?.takeIf { it.reserved==token }?.reserved=null
+        anchor?.let(::find)?.release(this,true)
         disconnect();anchor=null;paid=false;state="UNPLUGGED";device.cordChanged();owner.reconnect();owner.needPublish()
         if(refund)player.inventory.placeItemBackInInventory(Eln.findItemStack(item,1))
     }
     fun onBroken() {
         val refund=paid;val item=anchor?.rating?.cordName ?: CordRating.V120.cordName
-        anchor?.let(::find)?.takeIf { it.reserved==token }?.reserved=null
+        anchor?.let(::find)?.release(this,true)
         disconnect();anchor=null;paid=false
         if(refund)when(owner) { is TransparentNodeElement -> owner.node?.dropItem(Eln.findItemStack(item,1));is SixNodeElement -> owner.sixNode?.dropItem(Eln.findItemStack(item,1)) }
     }
@@ -145,10 +142,16 @@ class ApplianceCord(val owner: INodeElement,val input: NbtElectricalLoad) {
     fun write(tag: CompoundTag) { anchor?.let { tag.put("applianceCord",it.write().apply { putBoolean("paid",paid);putUUID("cordId",token) }) } }
     fun writeNetwork(out: DataOutputStream) {
         val a=anchor;out.writeBoolean(a!=null)
-        if(a!=null) { out.writeInt(a.pos.x);out.writeInt(a.pos.y);out.writeInt(a.pos.z);out.writeByte(a.front.int);out.writeByte(a.rating.ordinal) }
+        if(a!=null) { out.writeInt(a.pos.x);out.writeInt(a.pos.y);out.writeInt(a.pos.z);out.writeByte(a.front.int);out.writeByte(a.rating.ordinal);out.writeByte(a.socket);out.writeBoolean(a.horizontal);out.writeBoolean(a.strip) }
         out.writeUTF(state)
     }
-    companion object { const val MAX_REACH=8.0 }
+    companion object {
+        const val MAX_REACH=8.0
+        fun findOutlet(a: CordAnchor): OutletElement? {
+            val node=NodeManager.instance?.getNodeFromCoordonate(Coordinate(a.pos.x,a.pos.y,a.pos.z,a.dimension)) as? TransparentNode
+            return (node?.element as? OutletElement)?.takeIf { it.id==a.id && it.rating==a.rating && !node.isDestructing }
+        }
+    }
 }
 
 fun cordState(state: String)=when(state) {

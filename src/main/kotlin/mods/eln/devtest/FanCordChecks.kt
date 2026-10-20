@@ -269,7 +269,7 @@ object FanCordChecks {
                 }
                 24 -> if(settled()) {
                     server { p ->
-                        val o=outlet(p);check(o.tripped && o.input.voltage>119 && o.output.voltage<1)
+                        val o=outlet(p);check(!o.tripped && o.input.voltage>119 && o.output.voltage>118)
                         Eln.simulator.removeElectricalComponent(overloadLoad);overloadLoad!!.connectTo(null,null)
                         o.networkUnserialize(packet(80))
                     };waitFor(25,30)
@@ -277,7 +277,7 @@ object FanCordChecks {
                 25 -> if(settled()) {
                     server { p ->
                         val o=outlet(p);check(!o.tripped && o.output.voltage>119)
-                        record("A real overload trips only the outlet, leaves its feed healthy and recovers after reset")
+                        record("A wall outlet remains passive under overload and requires upstream branch protection")
                         val e=f(p).machine(oven) as KitchenElement
                         check(e.cord.attach(o.anchor(),true));p.mainHandItem.shrink(1)
                         savedOutletId=o.id

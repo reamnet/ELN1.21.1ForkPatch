@@ -1,5 +1,7 @@
 # Utility distribution and house service (3.0.27)
 
+For 3.0.28, see [household distribution upgrades](household-distribution-upgrades.md): physical transformer ratings and fuse cartridges replace the older GUI capacity settings below; the guide also covers duplex outlets, the power strip and the red-handle service disconnect.
+
 All existing poles and transmission towers are three blocks taller. Existing block/item IDs, overhead spans and streetlight settings remain compatible. Pole transformers now use a fixed 12.47 kV nominal primary, so their secondary voltages follow the grid. Saved poles reserve extra clearance when the surrounding chunks load; the upgrade never replaces player-built blocks.
 
 ## Overhead circuits and service drops

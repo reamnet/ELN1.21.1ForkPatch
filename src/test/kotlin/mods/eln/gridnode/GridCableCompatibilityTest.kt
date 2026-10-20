@@ -26,7 +26,7 @@ class GridCableCompatibilityTest {
     private val expectedDevices = setOf("Grid DC-DC Converter", "Utility Pole",
         "Utility Pole w/DC-DC Converter", "Transmission Tower", "Direct Utility Pole", "Grid Switch",
         "Utility Pole Street Light", "Utility Pole Cobrahead Street Light", "Utility Pole Twin LED Street Light") +
-        mods.eln.utility.DistributionKind.entries.map { it.title } + setOf("120/240V Service Weatherhead","North American Meter Base","Twelve Circuit American Breaker Panel")
+        mods.eln.utility.DistributionKind.entries.map { it.title } + setOf("120/240V Service Weatherhead","North American Meter Base","Twelve Circuit American Breaker Panel","Red Handle Service Disconnect")
 
     private fun devices(): List<GridDescriptor> = Eln.transparentNodeItem.subItemList.values
         .filterIsInstance<GridDescriptor>().distinct().also {

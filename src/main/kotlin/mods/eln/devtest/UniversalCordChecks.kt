@@ -214,9 +214,9 @@ object UniversalCordChecks {
                 }
                 6 -> if(settled()) {
                     server { p ->
-                        val o=outlet(p,outlets.first());check(o.tripped && o.output.voltage<1 && supply(p,supplyPos).powerLoad.voltage>119)
+                        val o=outlet(p,outlets.first());check(!o.tripped && o.output.voltage>118 && supply(p,supplyPos).powerLoad.voltage>119)
                         Eln.simulator.removeElectricalComponent(overload);overload!!.connectTo(null,null);o.networkUnserialize(packet(80))
-                        pass("A wireless-fed 20 A overload trips its own outlet without collapsing the source grid")
+                        pass("A wireless-fed outlet remains passive during overload; upstream branch protection is required")
                         val s=supply(p,supplyPos);s.disconnectJob();check(outlets.filter { outlet(p,it).rating==CordRating.V120 }.all { outlet(p,it).wirelessPower.supply==null });s.connectJob()
                         pass("Source unload disconnects every wireless bridge before removing supply states")
                     };next(7,50)

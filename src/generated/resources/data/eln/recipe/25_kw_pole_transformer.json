@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "eln:copper_cable"
+    },
+    "I": {
+      "item": "eln:iron_plate"
+    },
+    "T": {
+      "item": "eln:10_kw_pole_transformer"
+    }
+  },
+  "pattern": [
+    "ICI",
+    "CTC",
+    "ICI"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:25_kw_pole_transformer"
+  }
+}

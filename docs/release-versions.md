@@ -31,6 +31,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.25` | — | Independent utility phases and 120/240 V service drops; 10–100 kW pole transformers and fuses; reclosers, feeder/secondary poles, regulators and capacitor banks; analog/smart meters, twelve-circuit wireless breaker panel; taller poles and an Aura-style seven-light fan |
 | `v3.0.26` | — | Fixed 15.2 kV nominal pole transformer ratios; proportional secondary sag/rise with physical fuse protection; narrower inward-curved Aura blades with bulbous tips and downward/leftward pitch |
 | `v3.0.27` | — | 12.47 kV pole nominal; aim-based HV/LV links and automatic independent three-phase spans; weatherhead-only overhead house entry with placed meter/panel feeders; slow-blow panel breakers; world-lit wire covers |
+| `v3.0.28` | — | Per-fixture wireless load accounting; physical transformer tiers and fuse cartridges; duplex passive outlets, horizontal mounting and six-socket power strip; secondary-fed HV/LV streetlight poles; red-handle service disconnect |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`
@@ -43,7 +44,7 @@ release assets remain available with their original filenames.
 `modVersion` in `gradle.properties` is the version source for the jar filename,
 NeoForge metadata and the in-game version. Increment it when preparing the next
 update and create the matching `vX.Y.Z` source tag. For unpublished experiments,
-use an explicit override such as `-PmodVersion=3.0.27-local.1`.
+use an explicit override such as `-PmodVersion=3.0.28-local.1`.
 
 Build with `./gradlew build` to retain previous versioned jars in `build/libs/`.
 `./gradlew clean` removes that directory, and recompiling the same version

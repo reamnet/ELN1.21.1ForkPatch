@@ -67,6 +67,7 @@ class BreakerPanelElement(node: TransparentNode,descriptor: TransparentNodeDescr
         var aggregator=0
         var use240=false
         var accumulator=0.0
+        val fixtureDemand=java.util.IdentityHashMap<Any,Double>()
         var wirelessOn=true
         var previousRating=0.0
         val aggregators=arrayOf<IWirelessSignalAggregator>(BiggerAggregator(),SmallerAggregator(),ToogleAggregator())
@@ -78,8 +79,14 @@ class BreakerPanelElement(node: TransparentNode,descriptor: TransparentNodeDescr
             override val powerLoad get()=load
             override val range get()=transmissionRange
             override fun getChannelState(id: Int)=contacts[bus].closed
+            override fun setDemand(consumer: Any,resistance: Double) { if(resistance.isFinite() && resistance>0)fixtureDemand[consumer]=1/resistance }
+            override fun removeDemand(consumer: Any) { fixtureDemand.remove(consumer) }
             override fun addToRp(resistance: Double) { if(resistance.isFinite() && resistance>0)accumulator+=1/resistance }
         },id)
+        fun refreshDemand() {
+            val conductance=accumulator+fixtureDemand.values.sum()
+            demand.resistance=if(conductance>0)1/conductance else 1e19;accumulator=0.0
+        }
         fun configure() { contacts.forEachIndexed { i,c -> c.closed=i==bus && rating>0 && breaker.enabled && !breaker.tripped && wirelessOn } }
         fun write(tag: CompoundTag) {
             val p="panel$id";breaker.write(tag,p);tag.putString(p+"Power",powerChannel);tag.putString(p+"Control",controlChannel);tag.putInt(p+"Aggregator",aggregator);tag.putBoolean(p+"240",use240)
@@ -115,7 +122,7 @@ class BreakerPanelElement(node: TransparentNode,descriptor: TransparentNodeDescr
         wirelessClock-=dt
         if(wirelessClock<=0) { wirelessClock=1.0;txSet.clear();txStrength.clear();WirelessUtils.getTx(WirelessUtils.buildSpot(coordinate(),null,0),txSet,txStrength) }
         circuits.forEach { c ->
-            c.demand.resistance=if(c.accumulator>0)1/c.accumulator else 1e19;c.accumulator=0.0
+            c.refreshDemand()
             c.wirelessOn=when { c.controlChannel.isBlank() || c.controlChannel.equals("true",true)->true;c.controlChannel.equals("false",true)->false;else->txSet[c.controlChannel]?.let { c.aggregators[c.aggregator].aggregate(it)>=.5 } ?: false }
             if(c.breaker.step(dt,c.contacts[c.bus].current,c.rating)) { play(mods.eln.sound.SoundCommand("eln:circuit_breaker_close").smallRange().mulVolume(.22));needPublish() }
             c.configure()
