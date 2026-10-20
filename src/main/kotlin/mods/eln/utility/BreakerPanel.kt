@@ -28,6 +28,7 @@ import kotlin.math.abs
 
 /** Persisted trip latch. Removing the fault alone never silently recloses a tripped branch. */
 class PanelBreaker {
+    companion object { private const val TRIP_HEAT=198.0 } // (10² - 1) × 2 seconds
     var enabled=true
         private set
     var tripped=false
@@ -36,23 +37,26 @@ class PanelBreaker {
     fun operate() { if(tripped) { tripped=false;heat=0.0;enabled=true } else enabled=!enabled }
     fun removed() { tripped=false;heat=0.0 }
     fun step(seconds: Double,amps: Double,rating: Double): Boolean {
-        if(!enabled || tripped || !seconds.isFinite() || seconds<=0 || rating<=0)return false
+        if(!seconds.isFinite() || seconds<=0 || !rating.isFinite() || rating<=0 || !amps.isFinite())return false
+        if(!enabled || tripped) { heat=(heat-seconds*6.6).coerceAtLeast(0.0);return false }
         val ratio=abs(amps)/rating
-        heat=if(ratio>1.05)heat+seconds*(ratio*ratio-1) else (heat-seconds).coerceAtLeast(0.0)
-        if(heat<.2)return false
+        heat=if(ratio>1.05)heat+seconds*(ratio*ratio-1) else (heat-seconds*6.6).coerceAtLeast(0.0)
+        if(heat<TRIP_HEAT)return false
         tripped=true;heat=0.0;return true
     }
     fun write(tag: CompoundTag,prefix: String) { tag.putBoolean(prefix+"Enabled",enabled);tag.putBoolean(prefix+"Tripped",tripped);tag.putDouble(prefix+"Heat",heat) }
-    fun read(tag: CompoundTag,prefix: String) { enabled=!tag.contains(prefix+"Enabled") || tag.getBoolean(prefix+"Enabled");tripped=tag.getBoolean(prefix+"Tripped");heat=tag.getDouble(prefix+"Heat").takeIf { it.isFinite() && it>=0 }?.coerceAtMost(.2) ?: 0.0 }
+    fun read(tag: CompoundTag,prefix: String) { enabled=!tag.contains(prefix+"Enabled") || tag.getBoolean(prefix+"Enabled");tripped=tag.getBoolean(prefix+"Tripped");heat=tag.getDouble(prefix+"Heat").takeIf { it.isFinite() && it>=0 }?.coerceAtMost(TRIP_HEAT) ?: 0.0 }
 }
 
 class BreakerPanelElement(node: TransparentNode,descriptor: TransparentNodeDescriptor): GridElement(node,descriptor,64) {
+    override val allowsNewGridLinks=false
     override val inventory=object: TransparentNodeElementInventory(12,1,this@BreakerPanelElement) {
         override fun getAccessibleSlotsFromSide(side: Int)=IntArray(12) { it }
         override fun canPlaceItemThroughFace(slot: Int,stack: ItemStack?,side: Int)=slot in 0..11 && breakerRating(stack)>0
         override fun canTakeItemThroughFace(slot: Int,stack: ItemStack?,side: Int)=true
     }
     val buses=List(3) { NbtElectricalLoad("panelBus$it").apply { serialResistance=.00001 } }
+    private val wiredService=WiredServiceSplit(this,buses)
     inner class Circuit(val id: Int) {
         val load=NbtElectricalLoad("panelCircuit$id").apply { serialResistance=.00001 }
         val contacts=buses.map { TransferContact(it,load) }
@@ -101,6 +105,7 @@ class BreakerPanelElement(node: TransparentNode,descriptor: TransparentNodeDescr
     private var registered=false
     init {
         electricalLoadList.addAll(buses)
+        electricalProcessList.add(IProcess { wiredService.update() })
         circuits.forEach { c -> electricalLoadList.add(c.load);electricalComponentList.addAll(c.contacts);electricalComponentList.add(c.demand) }
         slowProcessList.add(IProcess(::step))
         slowProcessList.add(NodePeriodicPublishProcess(node,1.0,.5))

@@ -227,6 +227,7 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
         }
     }
 
+    override fun aimedGridTerminal(side: Direction,localHit: net.minecraft.world.phys.Vec3)=if(localHit.y<5.65)50 else 32
     override fun selectedGridTerminal(side: Direction)=ports.selected
     override fun gridLoads(terminal: Int)=ports.loads(terminal)
     override fun gridCircuitKey(terminal: Int)=ports.key(terminal)

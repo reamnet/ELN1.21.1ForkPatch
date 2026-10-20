@@ -16,10 +16,10 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 
-/** Shared hardware: standalone active converter, or fixed-ratio 15.2 kV pole transformer. */
+/** Shared hardware: standalone active converter, or fixed-ratio 12.47 kV pole transformer. */
 class MainsStepDown(private val owner: TransparentNodeElement, val poleTransformer: Boolean = false, available: () -> Boolean = { true }) {
     companion object {
-        const val NOMINAL_POLE_VOLTS = 15_200.0
+        const val NOMINAL_POLE_VOLTS = 12_470.0
         const val MAX_INPUT_VOLTS = 51_200.0
         const val MAX_OUTPUT_WATTS = 10_000.0
         const val MAX_INPUT_AMPS = 100.0

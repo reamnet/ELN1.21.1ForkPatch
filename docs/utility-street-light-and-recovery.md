@@ -8,7 +8,7 @@ the same intact power cables as other poles, with a 40-block connection range.
 
 Right-click the pole while holding a **Mains Step-down Unit**, or open its menu
 and insert one in the single upgrade slot.
-Select **120 V** or **240 V** as the nominal output at a **15.2 kV** overhead supply. Since 3.0.26, pole transformers use a fixed ratio: a 5% primary sag or rise produces a 5% secondary sag or rise, plus winding/cable losses. The separate standalone unit retains active voltage regulation. The built-in
+Select **120 V** or **240 V** as the nominal output at a **12.47 kV** overhead supply. Since 3.0.26 (updated to 12.47 kV nominal in 3.0.27), pole transformers use a fixed ratio: a 5% primary sag or rise produces a 5% secondary sag or rise, plus winding/cable losses. The separate standalone unit retains active voltage regulation. The built-in
 60 W lamp adapts to either selection. The lamp button switches just the light;
 the converter's On/Off button controls the whole low-voltage supply.
 Enable **Dusk: Auto** to switch the lamp with daylight while keeping the base
@@ -16,7 +16,7 @@ output available. See [streetlight controls and visuals](streetlight-qol.md).
 
 Base-level wire connections can supply other devices from the same transformer
 output. The lamp and those devices share the selected **10, 25, 50, 75 or 100 kW**
-rating (10 kW by default). Primary fuse current is the rating divided by 15,200 V;
+rating (10 kW by default). Primary fuse current is the rating divided by 12,470 V;
 physical winding resistance produces additional load sag. A primary fuse disconnects the transformer on sustained
 overload; replace a blown link by right-clicking with a **Pole Fuse Link**.
 Removing the unit disconnects the grid supply and turns the

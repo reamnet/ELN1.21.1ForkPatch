@@ -111,7 +111,7 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
             terminal=newGuiButton(180,60,144,"")
             fuse=newGuiButton(180,84,144,"").apply { setComment(0,tr("Right-click the pole holding a Pole Fuse Link to replace a blown fuse")) }
         }
-        voltage = newGuiButton(8, 60, 102, "").apply { if(pole)setComment(0,tr("Nominal output at 15.2 kV; follows grid voltage proportionally")) }
+        voltage = newGuiButton(8, 60, 102, "").apply { if(pole)setComment(0,tr("Nominal output at 12.47 kV; follows grid voltage proportionally")) }
         enabled = newGuiButton(116, 60, 52, "")
         lamp = newGuiButton(8, 84, 75, "").apply { visible = pole }
         automatic = newGuiButton(87, 84, 81, "").apply { visible = pole }
@@ -161,7 +161,7 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
             drawString(180,113,tr("Secondary service rack"))
             drawString(180,127,tr("L1: 120 V; L2: 120 V"))
             drawString(180,141,tr("240 V service circuit"))
-            drawString(180,155,tr("15.2 kV fixed ratio"))
+            drawString(180,155,tr("12.47 kV fixed ratio"))
             drawString(180,169,tr("Input: %1$",Utils.plotVolt("",display.inputVolts).trim()))
             drawString(180,183,tr("Output: %1$",Utils.plotVolt("",display.outputVolts).trim()))
         }

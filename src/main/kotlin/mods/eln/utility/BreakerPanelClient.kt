@@ -42,7 +42,8 @@ class BreakerPanelDescriptor: ServiceWallDescriptor(I18N.TR_NAME(I18N.Type.NONE,
         list.add(tr("Twelve slots accept existing Electrical Breaker items"))
         list.add(tr("Left bank: L1 120 V; right bank: L2 120 V; each circuit can select 240 V"))
         list.add(tr("Every circuit has a wireless power channel and optional wireless switch control"))
-        list.add(tr("Link an incoming service bundle or feed the three service buses separately"))
+        list.add(tr("Terminate overhead service at a weatherhead; feed this panel with placed wall cables"))
+        list.add(tr("Top 240 V wall feeder supplies both 120 V banks; breakers tolerate brief motor inrush"))
         list.add(tr("Wall cables: left L1, right L2, top 240 V, bottom selected branch"))
     }
 }
@@ -94,7 +95,9 @@ class BreakerPanelGui(player: Player,private val r: BreakerPanelRender): GuiCont
         voltage.displayString=tr("Circuit %1$: %2$ V",i+1,if(c.use240)240 else 120)
         aggregator.displayString=when(c.aggregator) { 0->tr("Switch: Any on");1->tr("Switch: All on");else->tr("Switch: Toggle") }
         range.displayString=tr("Wireless range: %1$",r.range)
-        terminal.displayString=if(r.terminal==50)tr("Cable: service bundle") else if(r.terminal in 64..75)tr("Cable: circuit %1$",r.terminal-63) else tr("Cable: %1$",ServiceTerminals.label(r.terminal))
+        terminal.enabled=false
+        terminal.displayString=tr("Placed wall cables only")
+
     }
     override fun guiObjectEvent(obj: IGuiObject) {
         super.guiObjectEvent(obj)

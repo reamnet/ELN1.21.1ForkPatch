@@ -51,7 +51,7 @@ class PoleTransformerRatioTest {
                 root.addComponent(Resistor(pole.unit.secondary,null).apply { resistance=target.toDouble()*target/2000 })
                 repeat(12) { root.step() }
                 assertTrue(pole.unit.secondary.voltage<before)
-                assertTrue(pole.lines[0].voltage>15_199)
+                assertTrue(pole.lines[0].voltage>12_469)
                 assertFalse(pole.unit.outputOverloaded,"Ordinary voltage sag is not a converter current-limit fault")
             }
         }
@@ -66,7 +66,7 @@ class PoleTransformerRatioTest {
             val source=VoltageSource("street feed",pole.highBus,null);root.addComponent(source);root.addProcess(pole.unit.controller)
             root.addComponent(Resistor(pole.unit.secondary,null).apply { resistance=240.0 })
             for (fraction in listOf(1.0,.95,1.05,0.0,1.0)) {
-                source.voltage=15_200*fraction;repeat(12) { root.step() }
+                source.voltage=12_470*fraction;repeat(12) { root.step() }
                 assertEquals(120*fraction,pole.unit.secondary.voltage,.1,descriptor.name)
                 assertNotEquals("NON_CONVERGENT",pole.unit.controller.status)
             }
@@ -86,7 +86,7 @@ class PoleTransformerRatioTest {
             root.addProcess(copy.trafo!!.interSystemProcess)
             root.addComponent(Resistor(copy.trafo.secondaryLoad,null).apply { resistance=target.toDouble()*target/100 })
             for (fraction in listOf(1.0,.95,1.05,0.0,1.0)) {
-                source.voltage=15_200*fraction;repeat(12) { root.step() }
+                source.voltage=12_470*fraction;repeat(12) { root.step() }
                 assertEquals(target*fraction,copy.trafo.secondaryLoad.voltage,.1)
             }
         }
@@ -103,9 +103,9 @@ class PoleTransformerRatioTest {
         pole.electricalLoadList.forEach(root::addState);pole.electricalComponentList.forEach(root::addComponent)
         root.addProcess(pole.unit!!.controller)
         val source=VoltageSource("secondary supply",pole.unit.secondary,null).apply { voltage=240.0 };root.addComponent(source)
-        val load=Resistor(pole.lines[0],null).apply { resistance=15_200.0*15_200/1000 };root.addComponent(load)
+        val load=Resistor(pole.lines[0],null).apply { resistance=12_470.0*12_470/1000 };root.addComponent(load)
         repeat(20) { root.step() }
-        assertEquals(15_200.0,pole.lines[0].voltage,5.0)
+        assertEquals(12_470.0,pole.lines[0].voltage,5.0)
         assertTrue(load.power>999);assertTrue(source.power>=load.power)
         assertTrue(pole.unit.output.power<0,"Reverse power must flow through the winding")
         assertNotEquals("NON_CONVERGENT",pole.unit.controller.status)
@@ -113,7 +113,7 @@ class PoleTransformerRatioTest {
     @Test fun twoPoleSecondariesShareALoadThroughTheirRealFeedersAndOneCanBeOpened() {
         val root=RootSystem(.01,50);val poles=List(2) { transformer() }
         val grid=mods.eln.sim.nbt.NbtElectricalLoad("grid");root.addState(grid)
-        val source=VoltageSource("shared grid",grid,null).apply { voltage=15_200.0 };root.addComponent(source)
+        val source=VoltageSource("shared grid",grid,null).apply { voltage=12_470.0 };root.addComponent(source)
         poles.forEachIndexed { i,pole ->
             pole.electricalLoadList.forEach(root::addState);pole.electricalComponentList.forEach(root::addComponent)
             root.addProcess(pole.unit!!.controller)
@@ -122,7 +122,7 @@ class PoleTransformerRatioTest {
         root.addComponent(Resistor(poles[0].unit!!.secondary,poles[1].unit!!.secondary).apply { resistance=.02 })
         val load=Resistor(poles[0].unit!!.secondary,null).apply { resistance=240.0*240/5000 };root.addComponent(load)
         for(fraction in listOf(1.0,.95,1.05,1.0)) {
-            source.voltage=15_200*fraction
+            source.voltage=12_470*fraction
             repeat(20) { root.step() }
             poles.forEach { assertNotEquals("NON_CONVERGENT",it.unit!!.controller.status);assertEquals(240*fraction,it.unit.secondary.voltage,1.0) }
             assertTrue(source.power>=load.power)
@@ -138,14 +138,14 @@ class PoleTransformerRatioTest {
         val pole=transformer();val root=RootSystem(.01,50)
         pole.electricalLoadList.forEach(root::addState);pole.electricalComponentList.forEach(root::addComponent)
         root.addProcess(pole.unit!!.controller)
-        val source=VoltageSource("varying primary",pole.lines[0],null).apply { voltage=15_200.0 };root.addComponent(source)
+        val source=VoltageSource("varying primary",pole.lines[0],null).apply { voltage=12_470.0 };root.addComponent(source)
         root.addComponent(Resistor(pole.unit.secondary,null).apply { resistance=240.0*240/1000 })
         repeat(10) { root.step() }
         val before=root.systems.sumOf { it.fullFactorizations }
         repeat(50) { i ->
-            source.voltage=15_200*(1+.05*kotlin.math.sin(i.toDouble()))
+            source.voltage=12_470*(1+.05*kotlin.math.sin(i.toDouble()))
             root.step()
-            assertEquals(source.voltage*240/15_200,pole.unit.secondary.voltage,.1)
+            assertEquals(source.voltage*240/12_470,pole.unit.secondary.voltage,.1)
             assertNotEquals("NON_CONVERGENT",pole.unit.controller.status)
         }
         assertEquals(before,root.systems.sumOf { it.fullFactorizations },"A voltage fluctuation must not rebuild the transformer matrices")

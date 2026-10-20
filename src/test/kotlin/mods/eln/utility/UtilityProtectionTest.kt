@@ -33,10 +33,10 @@ class UtilityProtectionTest {
         val cold=RecloserControl();cold.read(CompoundTag().also(copy::write));cold.step(1000.0,listOf(0.0));assertFalse(cold.closed)
     }
     @Test fun panelTripLatchPersistsAndResetDoesNotIgnoreAnUnclearedFault() {
-        val c=PanelBreaker();assertTrue(c.step(.1,60.0,20.0));assertTrue(c.tripped)
+        val c=PanelBreaker();assertTrue(c.step(25.0,60.0,20.0));assertTrue(c.tripped)
         val cold=PanelBreaker();cold.read(CompoundTag().also { c.write(it,"c") },"c");assertTrue(cold.tripped)
         cold.step(100.0,0.0,20.0);assertTrue(cold.tripped);cold.operate();assertFalse(cold.tripped)
-        assertTrue(cold.step(.1,60.0,20.0));assertTrue(cold.tripped)
+        assertTrue(cold.step(25.0,60.0,20.0));assertTrue(cold.tripped)
     }
     @Test fun energyRegistersIntegrateImportAndExportWithoutCancellingThem() {
         val e=ServiceEnergy();e.step(3600.0,1000.0);e.step(1800.0,-1000.0);e.step(Double.NaN,1000.0)

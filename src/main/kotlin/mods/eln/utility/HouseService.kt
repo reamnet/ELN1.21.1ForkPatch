@@ -72,6 +72,8 @@ class ServiceEnergy {
 
 class HouseServiceElement(node: TransparentNode,descriptor: TransparentNodeDescriptor): GridElement(node,descriptor,64) {
     val meter=(descriptor as HouseServiceDescriptor).meter
+    override val allowsNewGridLinks get()=!meter
+    override fun aimedGridTerminal(side: Direction,localHit: Vec3)=ServiceTerminals.BUNDLE
     private val desc get()=transparentNodeDescriptor as HouseServiceDescriptor
     override val inventory=object: TransparentNodeElementInventory(if(meter)1 else 0,1,this@HouseServiceElement) {
         override fun canPlaceItemThroughFace(slot: Int,stack: ItemStack?,side: Int)=meter && slot==0 && UtilityItems.part(stack) in 1..2
@@ -79,6 +81,7 @@ class HouseServiceElement(node: TransparentNode,descriptor: TransparentNodeDescr
         override fun canTakeItemThroughFace(slot: Int,stack: ItemStack?,side: Int)=meter && slot==0
     }
     val line=List(3) { NbtElectricalLoad("serviceLine$it").apply { serialResistance=.00001 } }
+    private val wiredService=if(meter)WiredServiceSplit(this,line) else null
     val load=if(meter)List(3) { NbtElectricalLoad("serviceLoad$it").apply { serialResistance=.00001 } } else line
     private val contacts=if(meter)List(3) { TransferContact(line[it],load[it]) } else emptyList()
     val energy=ServiceEnergy()
@@ -93,6 +96,7 @@ class HouseServiceElement(node: TransparentNode,descriptor: TransparentNodeDescr
     init {
         electricalLoadList.addAll(line);if(meter)electricalLoadList.addAll(load);electricalComponentList.addAll(contacts)
         electricalProcessList.add(IProcess { dt ->
+            wiredService?.update()
             if(meter)energy.step(dt,contacts.indices.sumOf { i -> line[i].voltage*contacts[i].current })
         })
         slowProcessList.add(IProcess { desc.checkSupport(this) })

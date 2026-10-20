@@ -96,7 +96,7 @@ class UtilityStreetLightDescriptor(name: String, val style: PoleLampStyle = Pole
     override fun addInformation(itemStack: ItemStack?, entityPlayer: Player?, list: MutableList<String>, par4: Boolean) {
         list.add(tr("Grid-powered %1$ W street light with %2$-block pole connections", lampWatts.toInt(), 40))
         list.add(tr("Install a Mains Step-down Unit and select %1$ V or %2$ V", 120, 240))
-        list.add(tr("Fixed ratio: 15.2 kV nominal primary; output follows grid voltage"))
+        list.add(tr("Fixed ratio: 12.47 kV nominal primary; output follows grid voltage"))
         list.add(tr("Right-click with a Mains Step-down Unit to install it"))
         list.add(tr("Optional dusk control switches the lamp automatically"))
         list.add(tr("Adjust the lamp height with Up and Down in the menu"))

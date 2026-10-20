@@ -25,7 +25,15 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
     DistributionPoleElement::class.java,DistributionPoleRender::class.java,"textures/wire.png",Eln.instance.veryHighVoltageCableDescriptor,64) {
     init {
         creativeTab=Eln.creativeTabPowerElectronics
-        ghostGroup=GhostGroup().apply { for(y in 1..7)addElement(0,y,0,GhostBlock.tClearance) }
+        ghostGroup=GhostGroup().apply {
+            for(y in 1..7)addElement(0,y,0,GhostBlock.tClearance)
+            // The outer insulators/cutouts need clickable clearance cells as well as the shaft.
+            if(!kind.lvOnly && kind.phases==3)for(z in listOf(-1,1))addElement(0,7,z,GhostBlock.tClearance)
+            if(kind.cutout || kind.regulator) {
+                val x=if(kind.cutout)-1 else 1
+                for(z in if(kind.phases==3)listOf(-1,0,1) else listOf(0))addElement(x,6,z,GhostBlock.tClearance)
+            }
+        }
     }
     override fun rotationIsFixed()=true
     fun drawEquipment(front: Direction,display: DistributionDisplay?=null)=preserveMatrix {
@@ -82,10 +90,11 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
         GL11.glScaled(.20,.20,.20);GL11.glTranslated(0.0,-2.8,0.0);drawEquipment(Direction.XN)
     }
     override fun addInformation(itemStack: ItemStack?,entityPlayer: Player?,list: MutableList<String>,par4: Boolean) {
-        list.add(tr("Select the cable terminal in the menu before linking poles"))
+        list.add(tr("Aim at HV tie points or the LV rack; three-phase poles link all three phases"))
         list.add(tr("A, B and C are independent electrical circuits"))
+        list.add(tr("Hold Shift to use the individual terminal selected in the menu"))
         list.add(tr("Secondary rack carries L1 120 V, L2 120 V and 240 V service circuits"))
-        if(kind.transformer) { list.add(tr("Fixed ratio: 15.2 kV nominal primary; output follows grid voltage"));list.add(tr("Insert a Mains Step-down Unit; select 10, 25, 50, 75 or 100 kW"));list.add(tr("Transformer phase is selectable; a blown fuse needs a Pole Fuse Link")) }
+        if(kind.transformer) { list.add(tr("Fixed ratio: 12.47 kV nominal primary; output follows grid voltage"));list.add(tr("Insert a Mains Step-down Unit; select 10, 25, 50, 75 or 100 kW"));list.add(tr("Transformer phase is selectable; a blown fuse needs a Pole Fuse Link")) }
         if(kind.cutout || kind.regulator)list.add(tr("Separate line and load terminals; replace blown links with a Pole Fuse Link"))
         if(kind.recloser)list.add(tr("Any phase fault opens all three; timed retries stop at lockout"))
         if(kind.regulator)list.add(tr("Automatic regulation within 10 percent of line voltage; passive, power-conserving taps"))
@@ -98,7 +107,7 @@ class DistributionDisplay {
     var terminal=32;var phase=0;var rating=10_000;var voltage=120;var enabled=true;var installed=false
     var fuseClosed=listOf<Boolean>();var fuseBlown=listOf<Boolean>();var fuseRating=100.0
     var locked=false;var closed=true;var failures=0;var remaining=0.0;var pickup=100.0;var delay=3.0;var maxFailures=3
-    var target=14_000.0;var automatic=true;var ratios=listOf<Double>();var light=0;var lampOn=true;var dusk=false
+    var target=12_470.0;var automatic=true;var ratios=listOf<Double>();var light=0;var lampOn=true;var dusk=false
     var input=0.0;var output=0.0;var watts=0.0
     fun write(s: DataOutputStream) {
         s.writeInt(terminal);s.writeInt(phase);s.writeInt(rating);s.writeInt(voltage);s.writeBoolean(enabled);s.writeBoolean(installed)
@@ -146,7 +155,7 @@ class DistributionGui(player: Player,private val render: DistributionPoleRender)
     override fun initGui() {
         super.initGui();terminal=newGuiButton(8,58,224,"")
         if(kind.transformer) {
-            phase=newGuiButton(8,82,106,"");rating=newGuiButton(118,82,114,"");voltage=newGuiButton(8,106,106,"").apply { setComment(0,tr("Nominal output at 15.2 kV; follows grid voltage proportionally")) }
+            phase=newGuiButton(8,82,106,"");rating=newGuiButton(118,82,114,"");voltage=newGuiButton(8,106,106,"").apply { setComment(0,tr("Nominal output at 12.47 kV; follows grid voltage proportionally")) }
             operate=newGuiButton(118,106,114,"")
         }
         if(kind.cutout || kind.transformer || kind.regulator)repeat(if(kind.transformer)1 else kind.phases) { i -> fuses.add(newGuiButton(8+i*75,134,72,"")) }
@@ -203,6 +212,6 @@ class DistributionGui(player: Player,private val render: DistributionPoleRender)
         if(kind.recloser)drawString(8,184,if(d.locked)tr("Locked out; inspect fault and reset") else if(!d.closed)tr("Retry in %1$ s",String.format(Locale.ROOT,"%.1f",d.remaining)) else tr("All three phases closed"))
         else if(kind.regulator)drawString(8,190,tr("Tap: %1$ %%",String.format(Locale.ROOT,"%.1f",100*(d.ratios.firstOrNull() ?: 1.0))))
         else drawString(8,190,tr("Load: %1$",Utils.plotVolt("",d.output).trim()))
-        drawString(8,208,font.plainSubstrByWidth(if(kind.transformer)tr("Nominal primary: 15.2 kV; fixed ratio") else tr("Secondary: L1 120 V / L2 120 V / 240 V"),224))
+        drawString(8,208,font.plainSubstrByWidth(if(kind.transformer)tr("Nominal primary: 12.47 kV; fixed ratio") else tr("Secondary: L1 120 V / L2 120 V / 240 V"),224))
     }
 }

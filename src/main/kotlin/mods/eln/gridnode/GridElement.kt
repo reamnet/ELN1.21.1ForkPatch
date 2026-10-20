@@ -15,7 +15,7 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.phys.Vec3
-import org.apache.commons.lang3.tuple.Pair
+import mods.eln.utility.ServiceTerminals
 
 import java.io.DataOutputStream
 import java.io.IOException
@@ -48,20 +48,26 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
         val stack = player.mainHandItem
         val itemDesc = GenericItemBlockUsingDamageDescriptor.getDescriptor(stack)
         if (itemDesc is ElectricalCableDescriptor) {
-            return onTryGridConnect(player, stack, itemDesc, side)
+            return onTryGridConnect(player, stack, itemDesc, side, Vec3(vx-.5,vy-.5,vz-.5))
         }
         // TODO: Scissors. Break the connection without breaking the pole.
         return false
     }
 
-    fun onTryGridConnect(entityPlayer: Player, stack: ItemStack, cable: ElectricalCableDescriptor, side: Direction): Boolean {
+    fun onTryGridConnect(entityPlayer: Player, stack: ItemStack, cable: ElectricalCableDescriptor, side: Direction, hit: Vec3?=null): Boolean {
         // First node, or second node?
         val uuid = entityPlayer.uuid
-        val terminal=selectedGridTerminal(side)
+        if(!allowsNewGridLinks) {
+            Utils.sendMessage(entityPlayer,tr("Terminate overhead wires at a Service Weatherhead; use placed wall cables for meters and panels"))
+            pending.remove(uuid)
+            return true
+        }
+        val automatic=hit!=null && !entityPlayer.isShiftKeyDown
+        var terminal=if(automatic) aimedGridTerminal(side,hit.yRot(Math.toRadians(-idealRenderingAngle.toDouble()).toFloat())) else selectedGridTerminal(side)
         val p = pending[uuid]
         var other: GridElement? = null
         if (p != null) {
-            other = GridLink.getElementFromCoordinate(p.left)
+            other = GridLink.getElementFromCoordinate(p.coordinate)
         }
         // Check both ends using the cable actually held on the second click as well.
         if (!desc.acceptsGridCable(cable) || (other != null && !other.desc.acceptsGridCable(cable))) {
@@ -87,8 +93,14 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
         }
         if (other == null) {
             Utils.sendMessage(entityPlayer, tr("Setting starting point"))
-            pending.put(uuid, Pair.of(this.coordinate(), terminal))
+            pending[uuid]=PendingConnection(coordinate(),terminal,automatic)
         } else {
+            var otherTerminal=p!!.terminal
+            // A single-phase pole takes phase A by default. Shift preserves an explicit phase choice.
+            if(automatic && terminal in ServiceTerminals.HV_LINE_BUNDLE..ServiceTerminals.HV_LOAD_BUNDLE && other.gridLoads(otherTerminal).size==1)
+                terminal=if(terminal==ServiceTerminals.HV_LINE_BUNDLE)32 else 36
+            if(p.automatic && otherTerminal in ServiceTerminals.HV_LINE_BUNDLE..ServiceTerminals.HV_LOAD_BUNDLE && gridLoads(terminal).size==1)
+                otherTerminal=if(otherTerminal==ServiceTerminals.HV_LINE_BUNDLE)32 else 36
             val distance = other.coordinate().trueDistanceTo(this.coordinate())
             val cableLength = Math.ceil(distance).toInt()*gridLoads(terminal).size.coerceAtLeast(1)
             val range = Math.min(connectRange, other.connectRange)
@@ -115,7 +127,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
                     } else {
                         null
                     }
-                    GridLink.addLink(this, other, terminal, p!!.right, cable, cableLength, linkStack)
+                    GridLink.addLink(this, other, terminal, otherTerminal, cable, cableLength, linkStack)
                     Utils.sendMessage(entityPlayer, tr("Added connection"))
                     if (cable is UtilityCableDescriptor && consumeLength) {
                         cable.setRemainingLengthMeters(stack, cable.getRemainingLengthMeters(stack) - cableLength)
@@ -200,6 +212,9 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
 
     /** Terminals below 6 retain their legacy Direction encoding in existing saves. */
     open fun selectedGridTerminal(side: Direction)=side.int
+    /** Existing saved spans still load; new overhead service stops at the weatherhead. */
+    open val allowsNewGridLinks=true
+    open fun aimedGridTerminal(side: Direction,localHit: Vec3)=selectedGridTerminal(side)
     open fun gridLoads(terminal: Int): List<ElectricalLoad> = Direction.fromInt(terminal)?.let(::getGridElectricalLoad)?.let(::listOf) ?: emptyList()
     open fun gridCircuitKey(terminal: Int)="LEGACY"
     open fun renderWireCount(terminal: Int)=2
@@ -332,6 +347,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
         /**
          * The last place any given player tried to link two instance nodes.
          */
-        private val pending = HashMap<UUID, Pair<Coordinate, Int>>()
+        private data class PendingConnection(val coordinate: Coordinate,val terminal: Int,val automatic: Boolean)
+        private val pending = HashMap<UUID, PendingConnection>()
     }
 }

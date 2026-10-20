@@ -44,9 +44,10 @@ object UtilityDistributionChecks {
     private val worldName="utility-distribution-${System.currentTimeMillis()}"
     private val base=BlockPos(256,80,256)
     private val feeder=base;private val recloser=base.east(16);private val transformer=base.east(32);private val secondary=base.east(48)
-    private val head=base.east(56).above(2);private val meter=base.east(59);private val panel=base.east(62)
+    private val head=base.east(56).above(4);private val meter=head.below(2);private val panel=meter.below(2)
     private val lamp=panel.south(5);private val fan=panel.south(10).above(4);private val outlet=panel.east(4);private val table=outlet.south(3)
     private val regulator=base.north(16);private val capacitor=base.north(32)
+    private val coverTest=base.south(18)
     private val gallery=linkedMapOf<DistributionKind,BlockPos>()
     private var phase=0;private var ticks=0;private var total=0;private var ready=0;private var done=false
     private var work: CompletableFuture<Void>?=null
@@ -132,25 +133,45 @@ object UtilityDistributionChecks {
                         val w=p.serverLevel();w.dayTime=18000;w.gameRules.getRule(GameRules.RULE_DAYLIGHT).set(false,w.server)
                         for(x in -3..7)for(z in -4..5)w.setChunkForced((base.x shr 4)+x,(base.z shr 4)+z,true)
                         for(x in -4..74)for(z in -4..14)w.setBlockAndUpdate(base.offset(x,-1,z),Blocks.STONE.defaultBlockState())
+                        for(at in listOf(coverTest,coverTest.east(3)))w.setBlockAndUpdate(at.below(),Blocks.STONE.defaultBlockState())
+                        f(p).wire(coverTest)
+                        (f(p).node(coverTest) as SixNode).apply { sixNodeCacheBlock=Blocks.STONE;needPublish=true }
+                        w.chunkSource.lightEngine.checkBlock(coverTest)
+                        w.setBlockAndUpdate(coverTest.east(3),Blocks.STONE.defaultBlockState())
                         val feed=place(p,DistributionKind.FEEDER_THREE.title,feeder) as DistributionPoleElement
                         val rec=place(p,DistributionKind.RECLOSER_THREE.title,recloser) as DistributionPoleElement
                         val trafo=place(p,DistributionKind.STREET_THREE.title,transformer) as DistributionPoleElement
                         trafo.inventory.setItem(0,Eln.findItemStack("Mains Step-down Unit",1));trafo.inventory.setChanged()
                         settings(trafo,80) { writeInt(240) };settings(trafo,86) { writeInt(25_000) };settings(trafo,88) { writeInt(2) }
                         val sec=place(p,DistributionKind.SECONDARY_LIGHT.title,secondary) as DistributionPoleElement
-                        for((dir,volts) in listOf(Direction.XN to 14_000.0,Direction.XP to 13_000.0,Direction.ZN to 15_200.0)) {
+                        for((dir,volts) in listOf(Direction.XN to 14_000.0,Direction.XP to 13_000.0,Direction.ZN to 12_470.0)) {
                             val a=feeder.relative(dir.toFacing());val b=a.relative(dir.toFacing());w.setBlockAndUpdate(a.below(),Blocks.STONE.defaultBlockState());w.setBlockAndUpdate(b.below(),Blocks.STONE.defaultBlockState());f(p).wire(a);f(p).source(b,volts)
                         }
-                        repeat(3) { i -> link(p,feed,rec,32+i,32+i);link(p,rec,trafo,36+i,32+i) }
+                        // Owner-relative ghost hits select all three HV phases without a GUI.
+                        p.setItemInHand(InteractionHand.MAIN_HAND,f(p).spool(300.0))
+                        val outer=feed.front.rotateFromXN(net.minecraft.world.phys.Vec3(0.0,7.0,-1.0))
+                        val feedGhost=Eln.ghostManager.getGhost(feed.coordinate().newWithOffset(kotlin.math.round(outer.x).toInt(),7,kotlin.math.round(outer.z).toInt()))!!
+                        val recGhost=Eln.ghostManager.getGhost(rec.coordinate().newWithOffset(0,7,0))!!
+                        check(feedGhost.onBlockActivated(p,Direction.ZP,.5f,.15f,.5f))
+                        check(recGhost.onBlockActivated(p,Direction.ZP,.5f,.15f,.5f))
+                        check(feed.gridLinkList.single().getTerminal(feed)==ServiceTerminals.HV_LINE_BUNDLE)
+                        link(p,rec,trafo,ServiceTerminals.HV_LOAD_BUNDLE,ServiceTerminals.HV_LINE_BUNDLE)
                         link(p,trafo,sec,50,50)
                         val h=wall(p,"120/240V Service Weatherhead",head) as HouseServiceElement
                         val m=wall(p,"North American Meter Base",meter) as HouseServiceElement
                         val pan=wall(p,"Twelve Circuit American Breaker Panel",panel) as BreakerPanelElement
                         m.inventory.setItem(0,Eln.findItemStack("Smart Digital Service Meter",1));m.inventory.setChanged()
-                        link(p,sec,h,50,50);link(p,h,m,50,50)
-                        // Exercise the held-wire, selected-terminal path for the customer's bundle.
-                        settings(m,87) { writeInt(51) };settings(pan,87) { writeInt(50) };p.setItemInHand(InteractionHand.MAIN_HAND,f(p).spool(300.0))
+                        // Aim at the secondary rack, rather than changing the selected GUI terminal.
+                        check(sec.onBlockActivated(p,Direction.ZP,.5f,5.5f,.5f))
+                        check(h.onBlockActivated(p,Direction.ZP,.5f,.5f,.5f))
+                        check(sec.gridLinkList.any { it.getTerminal(sec)==50 })
+                        for(at in listOf(head.below(),meter.below())) {
+                            w.setBlockAndUpdate(at.north(),Blocks.STONE.defaultBlockState())
+                            check(Eln.sixNodeItem.placeBlockAt(f(p).spool(),p,w,at,net.minecraft.core.Direction.SOUTH,.5f,.5f,.5f))
+                        }
+                        // Cabinets must reject a held overhead spool without creating spans.
                         check(m.onBlockActivated(p,Direction.ZP,.5f,.5f,.5f));check(pan.onBlockActivated(p,Direction.ZP,.5f,.5f,.5f))
+                        check(m.gridLinkList.isEmpty() && pan.gridLinkList.isEmpty())
                         val br=Eln.sixNodeItem.subItemList.values.filterIsInstance<mods.eln.sixnode.electricalbreaker.ElectricalBreakerDescriptor>().first { it.currentLimit==20.0 }
                         repeat(12) { pan.inventory.setItem(it,br.newItemStack()) };pan.inventory.setChanged()
                         pan.setPowerChannel(0,"Utility lamp");pan.setPowerChannel(1,"Utility fan");pan.setPowerChannel(2,"Utility 240");pan.circuits[2].use240=true;pan.circuits[2].configure()
@@ -172,30 +193,33 @@ object UtilityDistributionChecks {
                     };next(2,240)
                 }
                 2->if(settled()) {
+                    CoverRenderingChecks.verify(mc.level!!,coverTest,coverTest.east(3))
+                    pass("Wire camouflage matches actual stone vertex colors, world light, textures and directional shading")
                     capture("service-and-poles")
                     server { p ->
                         verifyPower(p)
-                        val feed=pole(p,feeder);feed.lines.forEachIndexed { i,b -> f(p).near(b.voltage,listOf(14_000.0,13_000.0,15_200.0)[i],2.0) }
+                        val feed=pole(p,feeder);feed.lines.forEachIndexed { i,b -> f(p).near(b.voltage,listOf(14_000.0,13_000.0,12_470.0)[i],2.0) }
                         val reg=pole(p,regulator);f(p).near(reg.outs[0].voltage,13_000.0,2.0)
-                        val cap=pole(p,capacitor);check(cap.electricalComponentList.filterIsInstance<mods.eln.sim.mna.component.Capacitor>().all { it.voltage>12_900 })
+                        val cap=pole(p,capacitor);cap.electricalComponentList.filterIsInstance<mods.eln.sim.mna.component.Capacitor>().forEachIndexed { i,c -> check(c.voltage>listOf(13_900.0,12_900.0,12_370.0)[i]) }
                         check(meter(p).energy.importedKwh>0);check(lamp(p,fan).installedBulbs==7)
-                        pass("Independent 14/13/15.2 kV legs feed a phase-C 25 kW transformer, secondary streetlight, weatherhead, smart meter, twelve-breaker panel, wireless lamps, seven-light Aura fan and a 240 V cord outlet")
+                        pass("Independent 14/13/12.47 kV legs feed a phase-C 25 kW transformer, secondary streetlight, weatherhead, placed wall feeder, smart meter, twelve-breaker panel, wireless lamps, seven-light Aura fan and a 240 V cord outlet")
+                        pass("Aim-based ghost hits connect all three HV phases atomically and select the LV rack; cabinets reject overhead spans")
                         pass("Three-phase regulators reach target with passive taps; capacitor branches charge from their own legs")
-                        f(p).voltage(feeder.north(2),14_440.0)
+                        f(p).voltage(feeder.north(2),11_846.5)
                     };next(32,50)
                 }
                 32->if(settled()) {
                     server { p ->
                         panel(p).buses.forEachIndexed { i,b -> f(p).near(b.voltage,if(i==2)228.0 else 114.0,1.0) }
                         check(pole(p,transformer).unit!!.controller.status=="TRANSFERRING")
-                        f(p).voltage(feeder.north(2),15_960.0)
+                        f(p).voltage(feeder.north(2),13_093.5)
                     };next(33,50)
                 }
                 33->if(settled()) {
                     server { p ->
                         panel(p).buses.forEachIndexed { i,b -> f(p).near(b.voltage,if(i==2)252.0 else 126.0,1.0) }
                         check(pole(p,transformer).unit!!.controller.status=="TRANSFERRING")
-                        f(p).voltage(feeder.north(2),15_200.0)
+                        f(p).voltage(feeder.north(2),12_470.0)
                         pass("A 5 percent primary sag and rise produces 114/228 V and 126/252 V at the loaded house panel; no fixed-voltage regulation or convergence trip")
                     };next(34,60)
                 }
@@ -206,8 +230,11 @@ object UtilityDistributionChecks {
                 3->if(settled() && mc.screen is DistributionGui && ticks>25) { capture("transformer-gui");button("rating");next(4) }
                 4->if(settled()) {
                     server { p ->check(pole(p,transformer).unit!!.ratedWatts==50_000);pass("The native transformer GUI changes its shared service rating from 25 to 50 kW")
-                        branchFault=Resistor(panel(p).circuits[0].load,null).apply { resistance=2.0 }.also { Eln.simulator.addElectricalComponent(it) }
-                    };next(5,40)
+                        branchFault=Resistor(panel(p).circuits[0].load,null).apply { resistance=.6 }.also { Eln.simulator.addElectricalComponent(it) }
+                    };next(35,20)
+                }
+                35->if(settled()) {
+                    server { p ->check(!panel(p).circuits[0].breaker.tripped);pass("A real 10x panel inrush remains connected for its first second") };next(5,40)
                 }
                 5->if(settled()) {
                     server { p ->
@@ -275,8 +302,8 @@ object UtilityDistributionChecks {
                         val rec=pole(p,recloser);check(rec.recloser.locked && !rec.recloser.closed);check(pole(p,gallery.getValue(DistributionKind.CUTOUT_SINGLE)).fuses[0].blown)
                         check(pole(p,transformer).transformerPhase==2);check(pole(p,transformer).unit!!.ratedWatts==50_000)
                         check(meter(p).energy.importedKwh>=energyBefore);check(lamp(p,fan).installedBulbs==7)
-                        check(pole(p,transformer).gridLinkList.size==4) { "Duplicate transformer spans: ${pole(p,transformer).gridLinkList.size}" }
-                        check(meter(p).gridLinkList.size==2);check(panel(p).gridLinkList.size==1)
+                        check(pole(p,transformer).gridLinkList.size==2) { "Duplicate transformer spans: ${pole(p,transformer).gridLinkList.size}" }
+                        check(meter(p).gridLinkList.isEmpty());check(panel(p).gridLinkList.isEmpty())
                         pass("A full world restart preserves phase/rating, meter energy, seven bulbs, fuse state and recloser lockout, with exactly one copy of every saved span")
                         settings(rec,94)
                         val cut=pole(p,gallery.getValue(DistributionKind.CUTOUT_SINGLE));p.setItemInHand(InteractionHand.MAIN_HAND,Eln.findItemStack("Pole Fuse Link",1))

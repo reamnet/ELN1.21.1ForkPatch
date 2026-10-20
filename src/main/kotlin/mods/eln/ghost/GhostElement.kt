@@ -7,6 +7,7 @@ import mods.eln.misc.INBTTReady
 import net.minecraft.world.entity.player.Player
 import net.minecraft.nbt.CompoundTag
 import mods.eln.misc.writeToNBT
+import mods.eln.gridnode.GridElement
 
 class GhostElement : INBTTReady {
     @JvmField
@@ -29,6 +30,13 @@ class GhostElement : INBTTReady {
 
     fun onBlockActivated(entityPlayer: Player?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
         val observer = Eln.ghostManager.getObserver(observatorCoordonate)
+        // Only grid devices consume owner-relative hit coordinates. Other ghost interactions
+        // retain their historical block-local coordinates.
+        if(observer is GridElement && elementCoordinate!=null && observatorCoordonate!=null) {
+            val cell=elementCoordinate!!;val owner=observatorCoordonate!!
+            return observer.ghostBlockActivated(uUID,entityPlayer!!,side!!,
+                vx+cell.x-owner.x,vy+cell.y-owner.y,vz+cell.z-owner.z)
+        }
         return observer?.ghostBlockActivated(uUID, entityPlayer!!, side!!, vx, vy, vz) ?: false
     }
 

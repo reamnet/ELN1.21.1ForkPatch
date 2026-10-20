@@ -79,7 +79,7 @@ class UtilityCircuitTest {
         root.addComponent(Resistor(panel.circuits[1].load,null).apply { resistance=24.0 })
         repeat(3) { root.step() }
         val c=panel.circuits[0]
-        assertTrue(c.breaker.step(.1,c.contacts[c.bus].current,c.rating));c.configure();root.step()
+        assertTrue(c.breaker.step(25.0,c.contacts[c.bus].current,c.rating));c.configure();root.step()
         assertEquals(0.0,c.load.voltage,1e-6);assertFalse(c.handle.element.getChannelState(0))
         assertEquals(120.0,panel.circuits[1].load.voltage,.05)
         assertFalse(panel.circuits[1].breaker.tripped)

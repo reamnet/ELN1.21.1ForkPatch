@@ -125,6 +125,9 @@ class GridCableCompatibilityTest {
                 val aSides = Direction.values().filter { a.getGridElectricalLoad(it) != null }
                 val bSides = Direction.values().filter { b.getGridElectricalLoad(it) != null }
                 assertTrue(aSides.isNotEmpty() && bSides.isNotEmpty())
+                if(!a.allowsNewGridLinks || !b.allowsNewGridLinks) {
+                    rejects { GridLink.validateNewLink(a,b,aSides.first(),bSides.first(),hv(),6) };continue
+                }
                 for (aSide in aSides) for (bSide in bSides) {
                     for (cable in connectionCables) {
                         GridLink.validateNewLink(a, b, aSide, bSide, cable, 6)

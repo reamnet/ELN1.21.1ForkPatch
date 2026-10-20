@@ -71,8 +71,8 @@ class HouseServiceDescriptor(val meter: Boolean): ServiceWallDescriptor(
     override fun renderItem(type: IItemRenderer.ItemRenderType,item: ItemStack,vararg data: Any)=drawService(Direction.ZP,if(meter)1 else 0)
     override fun addInformation(itemStack: ItemStack?,entityPlayer: Player?,list: MutableList<String>,par4: Boolean) {
         list.add(tr("Three-wire service bundle: L1 120 V, L2 120 V and 240 V circuit equivalents"))
-        if(meter) { list.add(tr("Insert an Analog Glass Service Meter or Smart Digital Service Meter"));list.add(tr("Line and load bundles are isolated until a meter is installed"));list.add(tr("Smart meter has a manual disconnect and a future remote-control hook")) }
-        else list.add(tr("Terminate a pole service drop here and continue with wall cables or a service bundle"))
+        if(meter) { list.add(tr("Insert an Analog Glass Service Meter or Smart Digital Service Meter"));list.add(tr("Placed wall cables: top service input, bottom service output; insert a meter to connect"));list.add(tr("Smart meter has a manual disconnect and a future remote-control hook")) }
+        else list.add(tr("Terminate a pole service drop here and continue down the wall with placed cables"))
         list.add(tr("Top and bottom cable terminals use the circuit selected in the menu"))
     }
 }
@@ -111,7 +111,8 @@ class HouseServiceGui(player: Player,private val r: HouseServiceRender): GuiCont
         super.postDraw(f,x,y)
         drawString(8,8,if(r.meter)tr("North American Meter Base") else tr("120/240V Service Weatherhead"))
         if(r.meter)drawString(32,35,when(r.type) { 1->tr("Analog meter installed");2->tr("Smart meter installed");else->tr("Insert a meter to connect service") })
-        terminal.displayString=when(r.terminal) { 50->if(r.meter)tr("Cable: incoming service bundle") else tr("Cable: service drop bundle");51->tr("Cable: outgoing service bundle");else->tr("Cable: %1$",ServiceTerminals.label(r.terminal)) }
+        terminal.enabled=!r.meter
+        terminal.displayString=if(r.meter)tr("Placed wall cables only") else when(r.terminal) { 50->if(r.meter)tr("Cable: incoming service bundle") else tr("Cable: service drop bundle");51->tr("Cable: outgoing service bundle");else->tr("Cable: %1$",ServiceTerminals.label(r.terminal)) }
         circuit.displayString=tr("Top/bottom cable: %1$",ServiceTerminals.label(40+r.circuit))
         disconnect?.apply { enabled=r.type==2;displayString=if(r.disconnected)tr("Smart disconnect: Open") else tr("Smart disconnect: Closed") }
         if(r.meter) {

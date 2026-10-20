@@ -70,7 +70,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         private set
     var gangClosed=true
         private set
-    var regulatorTarget=14_000.0
+    var regulatorTarget=12_470.0
         private set
     var regulatorAutomatic=true
         private set
@@ -98,6 +98,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     var lightLevel=0
         private set
     private var regulatorClock=0.0
+    private var clearancesReady=false
     private val lightRequested get()=kind.light && lampEnabled && (unit?.lampEnabled!=false) &&
         (!(lampAutomatic || unit?.lampAutomatic==true) || (node?.coordinate?.world() as? ServerLevel)?.skyDarken?.let { it>=4 }!=false)
     val terminals get()=buildList {
@@ -118,6 +119,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         if(kind.light)electricalComponentList.add(lamp)
         electricalProcessList.add(IProcess(::step))
         slowProcessList.add(NodePeriodicPublishProcess(node,1.0,.5))
+        slowProcessList.add(IProcess { if(!clearancesReady)clearancesReady=PoleHeightUpgrade.update(this) })
         applyContacts()
     }
     private fun applyContacts() {
@@ -195,6 +197,21 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     override fun connectJob() { super.connectJob();unit?.let { Eln.simulator.mna.addProcess(it.controller) };applyContacts() }
     override fun disconnectJob() { unit?.let { Eln.simulator.mna.removeProcess(it.controller) };super.disconnectJob() }
     override fun selectedGridTerminal(side: Direction)=selectedTerminal
+    override fun aimedGridTerminal(side: Direction,localHit: Vec3): Int {
+        val choices=buildList {
+            add(50)
+            if(!kind.lvOnly) {
+                repeat(kind.phases) { add(32+it) }
+                if(kind.protectedLine)repeat(kind.phases) { add(36+it) }
+            }
+        }
+        val nearest=choices.minBy { terminal ->
+            (0 until renderWireCount(terminal)).minOf { gridCablePoint(terminal,it).distanceToSqr(localHit) }
+        }
+        return if(kind.phases==3 && nearest in 32..38) {
+            if(nearest<36)ServiceTerminals.HV_LINE_BUNDLE else ServiceTerminals.HV_LOAD_BUNDLE
+        } else nearest
+    }
     override fun getGridElectricalLoad(side: Direction)=if(kind.lvOnly)services[0] else lines[0]
     override fun gridLoads(terminal: Int): List<ElectricalLoad> = when {
         terminal in 0..5 -> listOf(getGridElectricalLoad(Direction.XN))
@@ -202,11 +219,15 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         terminal in 36 until 36+kind.phases && kind.protectedLine -> listOf(outs[terminal-36])
         terminal in 40..42 -> listOf(services[terminal-40])
         terminal==50 -> services
+        terminal==ServiceTerminals.HV_LINE_BUNDLE && kind.phases==3 && !kind.lvOnly -> lines
+        terminal==ServiceTerminals.HV_LOAD_BUNDLE && kind.phases==3 && kind.protectedLine -> outs
         else -> emptyList()
     }
     override fun gridCircuitKey(terminal: Int)=if(terminal<6)"LEGACY" else ServiceTerminals.key(terminal)
-    override fun renderWireCount(terminal: Int)=if(terminal==50)3 else 1
+    override fun renderWireCount(terminal: Int)=if(terminal==50 || terminal in ServiceTerminals.HV_LINE_BUNDLE..ServiceTerminals.HV_LOAD_BUNDLE)3 else 1
     override fun gridCablePoint(terminal: Int,wire: Int): Vec3=when {
+        terminal==ServiceTerminals.HV_LINE_BUNDLE -> gridCablePoint(32+wire,0)
+        terminal==ServiceTerminals.HV_LOAD_BUNDLE -> gridCablePoint(36+wire,0)
         terminal==50 -> Vec3(.405,4.65+wire*.32,0.0)
         terminal in 40..42 -> Vec3(.405,4.65+(terminal-40)*.32,0.0)
         terminal in 36..38 && kind.cutout -> Vec3(-.68,5.85,phaseZ(terminal-36))
@@ -237,7 +258,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         unit?.read(nbt);selectedTerminal=nbt.getInt("utilityTerminal").takeIf { it in terminals } ?: terminals.first()
         transformerPhase=nbt.getInt("utilityPhase").coerceIn(0,kind.phases-1);fuseAmps=nbt.getDouble("utilityFuseAmps").takeIf { it.isFinite() && it in 1.0..2000.0 } ?: 100.0
         gangClosed=!nbt.contains("utilityGangClosed") || nbt.getBoolean("utilityGangClosed");fuses.forEachIndexed { i,f -> f.read(nbt,"utilityFuse$i") };recloser.read(nbt)
-        regulatorTarget=nbt.getDouble("regulatorTarget").takeIf { it.isFinite() && it in 120.0..51_200.0 } ?: 14_000.0;regulatorAutomatic=!nbt.contains("regulatorAuto") || nbt.getBoolean("regulatorAuto")
+        regulatorTarget=nbt.getDouble("regulatorTarget").takeIf { it.isFinite() && it in 120.0..51_200.0 } ?: 12_470.0;regulatorAutomatic=!nbt.contains("regulatorAuto") || nbt.getBoolean("regulatorAuto")
         regulatorTaps.forEachIndexed { i,t -> t.ratio=nbt.getDouble("regulatorRatio$i").takeIf { it.isFinite() && it in .9..1.1 } ?: 1.0 }
         lampEnabled=!nbt.contains("utilityLamp") || nbt.getBoolean("utilityLamp");lampAutomatic=nbt.getBoolean("utilityDusk");secondary?.update();applyContacts()
     }

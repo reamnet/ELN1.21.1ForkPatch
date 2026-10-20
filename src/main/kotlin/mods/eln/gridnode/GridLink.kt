@@ -169,7 +169,7 @@ class GridLink : INBTTReady {
         cable = stackFromNbt(nbt)
         // Migrate the old saved, arbitrary resistance using the actual paid length in the cable stack.
         (Eln.sixNodeItem.getDescriptor(cable) as? UtilityCableDescriptor)?.let {
-            val channels=if(aTerminal in 50..51)3 else 1
+            val channels=if(aTerminal in 50..53)3 else 1
             val meters=it.getRemainingLengthMeters(cable)/channels
             rs = it.resistanceOhms(meters)
             spanThermal = WireSpanThermal(it, meters).also { thermal -> thermal.read(nbt) }
@@ -237,6 +237,7 @@ class GridLink : INBTTReady {
         /** Shared by click-to-link and direct callers. Validate before changing either endpoint. */
         internal fun validateNewLink(a: GridElement, b: GridElement, fromSide: Direction, toSide: Direction,
                                      cable: ElectricalCableDescriptor, cableLength: Int) {
+            validateOverheadEndpoints(a,b)
             if (!(a.transparentNodeDescriptor as GridDescriptor).acceptsGridCable(cable) ||
                 !(b.transparentNodeDescriptor as GridDescriptor).acceptsGridCable(cable)) {
                 throw UserError(tr("Grid links require an intact power cable; signal and melted cables are not supported"))
@@ -271,6 +272,7 @@ class GridLink : INBTTReady {
             addLink(a,b,`as`.int,bs.int,cable,cableLength,cableStack)
 
         fun addLink(a: GridElement,b: GridElement,from: Int,to: Int,cable: ElectricalCableDescriptor,cableLength: Int,cableStack: ItemStack?=null) {
+            validateOverheadEndpoints(a,b)
             if(!(a.transparentNodeDescriptor as GridDescriptor).acceptsGridCable(cable) || !(b.transparentNodeDescriptor as GridDescriptor).acceptsGridCable(cable))
                 throw UserError(tr("Grid links require an intact power cable; signal and melted cables are not supported"))
             val x=a.gridLoads(from);val y=b.gridLoads(to)
@@ -279,13 +281,23 @@ class GridLink : INBTTReady {
             if(ka!=kb && ka!="LEGACY" && kb!="LEGACY")throw UserError(tr("Grid phases or service voltages do not match"))
             if((a.gridLinkList+b.gridLinkList).any { it.links(a,b) && ((from<6 && to<6) || (it.a==a.coordinate() && it.aTerminal==from && it.bTerminal==to) || (it.a==b.coordinate() && it.bTerminal==from && it.aTerminal==to)) })
                 throw UserError(tr("Already connected to this terminal"))
+            // A bundled span and individual phase spans must never duplicate the same circuit.
+            if(a.gridLinkList.any { old -> old.links(a,b) &&
+                a.gridLoads(old.getTerminal(a)).zip(b.gridLoads(old.getTerminal(b))).any { (oldA,oldB) ->
+                    x.zip(y).any { (newA,newB) -> oldA===newA && oldB===newB }
+                } })throw UserError(tr("Already connected to this terminal"))
             if(x.size>1 && cable !is UtilityCableDescriptor && cableLength>cable.newItemStack().maxStackSize)
-                throw UserError(tr("Use a cable spool for this long service bundle"))
+                throw UserError(tr("Use a cable spool for this long multiconductor connection"))
             val stack=linkStack(cable,cableLength,cableStack)
             val meters=cableLength.toDouble()/x.size
             val resistance=if(cable is UtilityCableDescriptor)cable.resistanceOhms(meters) else cable.electricalRs*meters
             val link=GridLink(a.coordinate(),b.coordinate(),from,to,stack,resistance)
             if(!link.connect())throw UserError(tr("Grid endpoint is no longer available"))
+        }
+
+        private fun validateOverheadEndpoints(a: GridElement,b: GridElement) {
+            if(!a.allowsNewGridLinks || !b.allowsNewGridLinks)
+                throw UserError(tr("Terminate overhead wires at a Service Weatherhead; use placed wall cables for meters and panels"))
         }
 
     }
