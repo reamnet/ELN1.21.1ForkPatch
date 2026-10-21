@@ -41,6 +41,16 @@ class ShaftElectricalMathTest {
         }
     }
     @Test fun unloadedGeneratorHasOpenCircuitVoltage() {
-        assertEquals(480.0, ShaftElectricalMath.sourceVoltage(480.0, 0.0, 1e12, .5, 100.0, 1e9))
+        assertEquals(480.0, ShaftElectricalMath.sourceVoltage(480.0, 0.0, Double.POSITIVE_INFINITY, .5, 100.0, 1e9))
+    }
+    @Test fun finiteLeakageObeysDroopAndTheMechanicalEnergyBudget() {
+        for (resistance in listOf(1e8, 1.0001e8, 5e8, 1e9, 1e12)) {
+            assertEquals(3200.0 * resistance / (resistance + 160.0),
+                ShaftElectricalMath.sourceVoltage(3200.0, 0.0, resistance, 160.0, 10.0, 1e9), 1e-9)
+            assertEquals(0.0,
+                ShaftElectricalMath.sourceVoltage(3200.0, 0.0, resistance, 160.0, 10.0, 0.0))
+            val voltage = ShaftElectricalMath.sourceVoltage(3200.0, 0.0, resistance, 160.0, 10.0, 1e-8)
+            assertTrue(voltage * voltage / resistance <= 1.000001e-8)
+        }
     }
 }

@@ -26,7 +26,10 @@ object ShaftElectricalMath {
     fun sourceVoltage(emf: Double, supplyVoltage: Double, resistance: Double, droop: Double,
                       currentLimit: Double, availableOutputPower: Double): Double {
         if (!emf.isFinite() || !supplyVoltage.isFinite()) return 0.0
-        if (!resistance.isFinite() || resistance > 1e8) return emf.coerceAtLeast(0.0)
+        // Only an actually open port has no current. Switch pull-downs and open
+        // contacts/diodes still conduct microamps at 3.2 kV; discarding that load
+        // makes the voltage command disagree with the generator's I-V validation.
+        if (!resistance.isFinite()) return emf.coerceAtLeast(0.0)
         val r = resistance.coerceAtLeast(1e-9)
         var current = ((emf - supplyVoltage) / (r + droop.coerceAtLeast(0.0)))
             .coerceIn(-abs(currentLimit), abs(currentLimit))
