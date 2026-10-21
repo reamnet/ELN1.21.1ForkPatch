@@ -616,6 +616,9 @@ class OneWayDcDcProcess(private val element: OneWayDcDcElement) : ConservativePo
     private var efficiency = 1.0
     private var inputLimit = Double.MAX_VALUE
     private var outputLimit = Double.MAX_VALUE
+    private var powerRoundoff = 0.0
+    private var commandedInput = Double.NaN
+    private var commandedOutput = Double.NaN
 
     private val modernRegulated get() = element.settings.version >= 2 && element.oneWayDescriptor.variable
     private val regulated = RegulatedPowerProcess(
@@ -702,8 +705,10 @@ class OneWayDcDcProcess(private val element: OneWayDcDcElement) : ConservativePo
         if (fixed || !modern) status = "TRANSFERRING"
         element.inputSink.voltage = point.inputVolts
         element.outputSource.voltage = point.outputVolts
+        commandedInput = point.inputVolts; commandedOutput = point.outputVolts
         element.inputSink.enabled = true
         element.outputSource.enabled = true
+        powerRoundoff = portPowerResolution(point.inputVolts, a) * efficiency + portPowerResolution(point.outputVolts, b)
     }
 
     override fun iterationRegion(): String = if (modernRegulated) regulated.iterationRegion() else status
@@ -711,15 +716,19 @@ class OneWayDcDcProcess(private val element: OneWayDcDcElement) : ConservativePo
     override fun acceptsCandidate(): Boolean {
         if (modernRegulated) return regulated.acceptsCandidate()
         if (!element.inputSink.enabled && !element.outputSource.enabled) return true
+        if (!commandMatches(element.inputSink.voltage, commandedInput) ||
+            !commandMatches(element.outputSource.voltage, commandedOutput)) return false
         val inputSystem = element.inputSink.subSystem ?: return false
         val outputSystem = element.outputSource.subSystem ?: return false
         val inputAmps = inputSystem.pendingValue(element.inputSink.currentState)
         val outputAmps = -outputSystem.pendingValue(element.outputSource.currentState)
         if (inputAmps < -1e-7 || outputAmps < -1e-7 || inputAmps > inputLimit * (1 + 1e-6) || outputAmps > outputLimit * (1 + 1e-6)) return false
-        return balancedPower(-pendingSourcePower(element.inputSink), pendingSourcePower(element.outputSource), efficiency)
+        return balancedPower(-pendingSourcePower(element.inputSink), pendingSourcePower(element.outputSource), efficiency, powerRoundoff)
     }
 
-    override fun trialSources(): List<SwitchableVoltageSource> = listOf(element.inputSink, element.outputSource)
+    override fun trialSources(): List<SwitchableVoltageSource> =
+        if (modernRegulated) regulated.trialSources() else listOf(element.inputSink, element.outputSource)
+    override fun isolatesLoadOnFailure() = true
     override fun failClosed() {
         if (modernRegulated) regulated.failClosed()
         retry.trip(); open("NON_CONVERGENT")

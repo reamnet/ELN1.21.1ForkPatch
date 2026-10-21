@@ -77,6 +77,7 @@ class SolarPowerUnit(owner: TransparentNodeElement,val hybrid: Boolean) {
     private var solarUsed=0.0
     private var gridCommand=0.0
     private var outputCommand=0.0
+    private var powerRoundoff=0.0
     var pvWatts=0.0
         private set
     var heatWatts=0.0
@@ -131,6 +132,8 @@ class SolarPowerUnit(owner: TransparentNodeElement,val hybrid: Boolean) {
                 gridCommand=a.volts-a.ohms*amps;inputSource.voltage=gridCommand;inputSource.enabled=true
             } else inputSource.enabled=false
             outputCommand=maxVoltage;outputSource.voltage=maxVoltage;outputSource.enabled=true
+            powerRoundoff=(if(inputSource.enabled)portPowerResolution(gridCommand,a)*OUTPUT_EFFICIENCY else 0.0)+
+                portPowerResolution(outputCommand,b)
             status=if(maxVoltage<target*.999)"LIMITED" else if(gridOutput>1 && solarUsed>1)"ASSIST" else if(gridOutput>1)"GRID" else "SOLAR"
         }
         override fun acceptsCandidate(): Boolean {
@@ -146,7 +149,7 @@ class SolarPowerUnit(owner: TransparentNodeElement,val hybrid: Boolean) {
                 (!inputSource.enabled || commandMatches(inputSource.voltage,gridCommand)) &&
                 ia in -1e-7..MAX_AMPS*1.000001 && oa in -1e-7..MAX_AMPS*1.000001 &&
                 pout<=rating*1.000001 && solarUsed<=solarBudget+1e-6 && solarUsed>=0 &&
-                balancedPower(pin+solarUsed/OUTPUT_EFFICIENCY,pout,OUTPUT_EFFICIENCY)
+                balancedPower(pin+solarUsed/OUTPUT_EFFICIENCY,pout,OUTPUT_EFFICIENCY,powerRoundoff)
             if(!accepted)diagnostic="input $pin W / $ia A; output $pout W / $oa A; solar $solarUsed / $solarBudget W; commands ${inputSource.voltage} / $gridCommand, ${outputSource.voltage} / $outputCommand"
             return accepted
         }

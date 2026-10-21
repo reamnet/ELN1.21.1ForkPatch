@@ -25,6 +25,7 @@ class RegulatedPowerProcess(
     private var commandedOutput = Double.NaN
     private var activeLimits: ConverterLimits? = null
     private var previousTarget = Double.NaN
+    private var powerRoundoff = 0.0
 
     override fun resetFault() { retry.reset(); previousTarget = Double.NaN }
     override fun beginStep(seconds: Double) { retry.advance(seconds) }
@@ -96,6 +97,8 @@ class RegulatedPowerProcess(
                 commandedInput = input.voltage; commandedOutput = output.voltage
                 input.enabled = result.point.inputWatts > 0.0
                 output.enabled = true
+                powerRoundoff = (if (input.enabled) portPowerResolution(input.voltage, a) * rating.electronicsEfficiency else 0.0) +
+                    portPowerResolution(output.voltage, b)
                 status = result.point.limitedBy.firstOrNull()?.name ?: "REGULATING"
             }
         }
@@ -114,7 +117,9 @@ class RegulatedPowerProcess(
         val ampsOut = -b.pendingValue(output.currentState)
         if (!ampsIn.isFinite() || !ampsOut.isFinite() || ampsIn < -1e-7 || ampsOut < -1e-7 ||
             ampsIn > rating.maxInputAmps * (1 + 1e-6) || ampsOut > rating.maxOutputAmps * (1 + 1e-6)) return false
-        return balancedPower(-pendingSourcePower(input), pendingSourcePower(output), rating.electronicsEfficiency)
+        val outputWatts = pendingSourcePower(output)
+        if (outputWatts > rating.maxOutputWatts * (1 + 1e-6) + 1e-7) return false
+        return balancedPower(-pendingSourcePower(input), outputWatts, rating.electronicsEfficiency, powerRoundoff)
     }
 
     override fun failClosed() { retry.trip(); open("NON_CONVERGENT") }

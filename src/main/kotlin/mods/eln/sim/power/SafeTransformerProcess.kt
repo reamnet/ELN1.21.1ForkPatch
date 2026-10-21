@@ -54,7 +54,7 @@ class SafeTransformerProcess(
             input.voltage = a.volts; input.enabled = false
             output.voltage = b.volts; output.enabled = true
             commandedInput = input.voltage; commandedOutput = output.voltage
-            powerRoundoff = powerResolution(output.voltage, b)
+            powerRoundoff = portPowerResolution(output.voltage, b)
             status = "IDLE"
             return
         }
@@ -77,7 +77,7 @@ class SafeTransformerProcess(
         input.enabled = b.ohms < RegulatedConverter.OPEN_OHMS
         output.enabled = a.ohms < RegulatedConverter.OPEN_OHMS
         commandedInput = input.voltage; commandedOutput = output.voltage
-        powerRoundoff = powerResolution(input.voltage, a) + powerResolution(output.voltage, b)
+        powerRoundoff = portPowerResolution(input.voltage, a) + portPowerResolution(output.voltage, b)
         status = "TRANSFERRING"
     }
 
@@ -100,21 +100,7 @@ class SafeTransformerProcess(
             abs(vs - induced) > 1e-7 + 1e-6 * maxOf(abs(vs), abs(induced))) return false
         val pin = -pendingSourcePower(input)
         val pout = pendingSourcePower(output)
-        return balancedPower(pin, pout) ||
-            (pin.isFinite() && pout.isFinite() && powerRoundoff.isFinite() &&
-                abs(pin - pout) <= 1e-7 + 1e-6 * maxOf(abs(pin), abs(pout)) + powerRoundoff)
-    }
-
-    /** A voltage command and its Thevenin voltage are rounded doubles. Across a
-     * stiff HV feeder one ULP can represent more power than an idle machine's
-     * entire draw. Bound only that representational error, using d(V*I)/dV;
-     * do not discard the load or widen acceptance by an arbitrary wattage.
-     */
-    private fun powerResolution(volts: Double, port: PortThevenin): Double {
-        if (!port.ohms.isFinite() || port.ohms <= 0.0) return 0.0
-        val amps = (volts - port.volts) / port.ohms
-        return abs(volts) * (Math.ulp(volts) + Math.ulp(port.volts)) / port.ohms +
-            abs(amps) * Math.ulp(volts)
+        return balancedPower(pin, pout, roundoffWatts = powerRoundoff)
     }
 
     override fun trialSources(): List<SwitchableVoltageSource> =

@@ -59,9 +59,32 @@ fun pendingSourcePower(source: SwitchableVoltageSource): Double {
     return -source.voltage * system.pendingValue(source.currentState)
 }
 
-fun balancedPower(inputWatts: Double, outputWatts: Double, efficiency: Double = 1.0): Boolean =
+fun balancedPower(inputWatts: Double, outputWatts: Double, efficiency: Double = 1.0,
+                  roundoffWatts: Double = 0.0): Boolean =
     inputWatts.isFinite() && outputWatts.isFinite() &&
-        abs(inputWatts * efficiency - outputWatts) <= 1e-7 + 1e-6 * max(abs(inputWatts), abs(outputWatts))
+        roundoffWatts.isFinite() && roundoffWatts >= 0.0 &&
+        abs(inputWatts * efficiency - outputWatts) <= 1e-7 + 1e-6 * max(abs(inputWatts), abs(outputWatts)) + roundoffWatts
+
+/** Bound the power represented by rounding a voltage command and its Thevenin
+ * voltage to doubles. A stiff HV port can have a voltage quantum larger than
+ * the entire drop required by a standby load. This is not a load cutoff.
+ */
+internal fun portPowerResolution(volts: Double, port: PortThevenin): Double {
+    if (!port.ohms.isFinite() || port.ohms <= 0.0) return 0.0
+    val amps = (volts - port.volts) / port.ohms
+    return abs(volts) * (Math.ulp(volts) + Math.ulp(port.volts)) / port.ohms +
+        abs(amps) * Math.ulp(volts)
+}
+
+/** A limited supply must reach its voltage target, power ceiling or current
+ * ceiling. Merely staying below all three can accept a stale coupled trial.
+ * Callers independently validate signs and upper bounds before this check.
+ */
+internal fun supplyLimitReached(volts: Double, amps: Double, nominalVolts: Double,
+                                maxWatts: Double, maxAmps: Double): Boolean =
+    commandMatches(volts, nominalVolts) ||
+        abs(volts * amps - maxWatts) <= 1e-5 + 1e-6 * maxWatts ||
+        abs(amps - maxAmps) <= 1e-7 + 1e-6 * maxAmps
 
 /** A numerical candidate must still obey the actual control voltage law. */
 internal fun commandMatches(actual: Double, commanded: Double): Boolean =

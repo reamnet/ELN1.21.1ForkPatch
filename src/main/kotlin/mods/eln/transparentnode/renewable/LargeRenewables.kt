@@ -22,23 +22,31 @@ class RenewableSupply(val source: SwitchableVoltageSource,private val available:
     var watts=0.0
         private set
     private var command=0.0
-    override fun beginStep(seconds: Double) { watts=available().takeIf { it.isFinite() }?.coerceIn(0.0,20_000.0) ?: 0.0 }
+    private var blocked=false
+    private var region="OPEN"
+    override fun beginStep(seconds: Double) { blocked=false;watts=available().takeIf { it.isFinite() }?.coerceIn(0.0,20_000.0) ?: 0.0 }
     override fun prepareStep() { source.enabled=watts>.01;if(source.enabled) { command=3200.0;source.voltage=command } }
     override fun rootSystemPreStepProcess() {
-        if(!source.enabled)return
+        if(blocked || watts<=.01) { source.enabled=false;region="OPEN";return }
         val t=source.subSystem?.sourceThevenin(source) ?: return
-        if(!t.voltage.isFinite() || t.resistance.isNaN() || t.resistance<=0 || t.voltage>3200.00001) { source.enabled=false;return }
+        // A speculative coupled voltage can temporarily backfeed this port. Open
+        // for that trial, then re-probe if another controller changes the network.
+        if(!t.voltage.isFinite() || t.resistance.isNaN() || t.resistance<=0 || t.voltage>3200.0) { source.enabled=false;region="OPEN";return }
         val disc=hypot(t.voltage,2*sqrt(watts)*sqrt(t.resistance))
         val voltage=if(t.resistance>=1e18)3200.0 else if(t.voltage>=0)(t.voltage+disc)/2 else 2*watts*t.resistance/(disc-t.voltage)
-        command=minOf(3200.0,voltage,t.voltage+50*t.resistance).coerceAtLeast(0.0);source.voltage=command
+        val currentVoltage=t.voltage+50*t.resistance
+        command=minOf(3200.0,voltage,currentVoltage).coerceAtLeast(0.0);source.voltage=command;source.enabled=true
+        region=when(command) { 3200.0 -> "VOLTAGE";currentVoltage -> "CURRENT";else -> "POWER" }
     }
     override fun acceptsCandidate(): Boolean {
         if(!source.enabled)return true
         val power=pendingSourcePower(source)
         val amps=-(source.subSystem?.pendingValue(source.currentState) ?: Double.NaN)
-        return commandMatches(source.voltage,command) && power.isFinite() && power in -1e-6..(watts*1.000001+1e-5) && amps in -1e-7..50.00005
+        return commandMatches(source.voltage,command) && power.isFinite() && power in -1e-6..(watts*1.000001+1e-5) && amps in -1e-7..50.00005 &&
+            supplyLimitReached(source.voltage,amps,3200.0,watts,50.0)
     }
-    override fun failClosed() { source.enabled=false }
+    override fun failClosed() { blocked=true;source.enabled=false }
+    override fun iterationRegion()=region
     override fun trialSources()=listOf(source)
     override fun connectedSystems()=setOfNotNull(source.subSystem)
     override fun voltageSearchHints()=mapOf(source to doubleArrayOf(3200.0))
