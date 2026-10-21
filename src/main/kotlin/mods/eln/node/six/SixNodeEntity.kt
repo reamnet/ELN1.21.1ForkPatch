@@ -39,8 +39,15 @@ class SixNodeEntity(pos: BlockPos, state: BlockState) : NodeBlockEntity(TYPE.get
     var elementRenderList = arrayOfNulls<SixNodeElementRender>(6)
     @JvmField
     var elementRenderIdList = ShortArray(6)
-    var sixNodeCacheBlock = Blocks.AIR
+    @Volatile var sixNodeCacheBlock = Blocks.AIR
     var sixNodeCacheBlockMeta: Byte = 0
+    override fun getModelData(): net.neoforged.neoforge.client.model.data.ModelData =
+        net.neoforged.neoforge.client.model.data.ModelData.builder()
+            .with(SixNodeCoverData.COVER,sixNodeCacheBlock.defaultBlockState()).build()
+    override fun onLoad() {
+        super.onLoad()
+        if(level?.isClientSide==true)requestModelDataUpdate()
+    }
     override fun serverPublishUnserialize(stream: DataInputStream) {
         val sixNodeCacheBlockOld = sixNodeCacheBlock
         super.serverPublishUnserialize(stream)
@@ -93,6 +100,9 @@ class SixNodeEntity(pos: BlockPos, state: BlockState) : NodeBlockEntity(TYPE.get
         if (sixNodeCacheBlock !== sixNodeCacheBlockOld) {
             // 1.14+: the light engine tracks itself; a block check is all the camouflage change needs.
             updateAllLightTypes(world, xCoord, yCoord, zCoord)
+            requestModelDataUpdate()
+            // A cover changes both this chunk's terrain and the shading of adjacent faces.
+            world.sendBlockUpdated(blockPos,blockState,blockState,Block.UPDATE_CLIENTS)
         }
     }
 

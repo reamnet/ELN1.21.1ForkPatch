@@ -3,10 +3,9 @@ package mods.eln.devtest
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
 import mods.eln.node.six.SixNodeEntity
-import mods.eln.node.six.SixNodeRender
+import mods.eln.client.SixNodeCoverModel
 import net.minecraft.client.Minecraft
 import net.minecraft.client.multiplayer.ClientLevel
-import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.core.BlockPos
 import net.minecraft.util.RandomSource
 import net.neoforged.neoforge.client.model.data.ModelData
@@ -26,12 +25,24 @@ internal object CoverRenderingChecks {
         val actual=Vertices();val expected=Vertices()
         val tile=world.getBlockEntity(covered) as SixNodeEntity
         check(!tile.sixNodeCacheBlock.defaultBlockState().isAir)
-        SixNodeRender().renderCover(tile,PoseStack(),MultiBufferSource { actual },0)
         val state=world.getBlockState(ordinary)
         check(state.block===tile.sixNodeCacheBlock)
+        check(tile.blockState.isSolidRender(world,covered)==state.isSolidRender(world,ordinary))
+        check(tile.blockState.isViewBlocking(world,covered)==state.isViewBlocking(world,ordinary))
+        for(side in net.minecraft.core.Direction.entries)check(tile.blockState.getAppearance(world,covered,side,null,null)==state) {
+            "Cover must expose the original block's shader material"
+        }
         val renderer=Minecraft.getInstance().blockRenderer;val model=renderer.getBlockModel(state)
         // Vanilla randomly rotates stone textures by block position. Compare both models
         // with the covered position's seed while retaining the ordinary cube's world light.
+        val coverModel=renderer.getBlockModel(tile.blockState)
+        check(coverModel is SixNodeCoverModel) { "Cover must render as chunk terrain" }
+        val snapshot=world.getModelData(covered)
+        check(snapshot.get(mods.eln.node.six.SixNodeCoverData.COVER)==state) { "Chunk workers must receive the current cover snapshot" }
+        val data=coverModel.getModelData(world,covered,tile.blockState,snapshot)
+        val actualRandom=RandomSource.create(state.getSeed(covered))
+        for(layer in coverModel.getRenderTypes(tile.blockState,actualRandom,data))renderer.modelRenderer.tesselateBlock(
+            world,coverModel,tile.blockState,covered,PoseStack(),actual,true,actualRandom,state.getSeed(covered),0,data,layer)
         val seed=state.getSeed(covered)
         val random=RandomSource.create(seed)
         for(layer in model.getRenderTypes(state,random,ModelData.EMPTY))renderer.modelRenderer.tesselateBlock(

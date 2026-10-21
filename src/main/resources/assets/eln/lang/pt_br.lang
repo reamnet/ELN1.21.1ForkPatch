@@ -142,7 +142,6 @@ Pan_left=Pan left
 Pan_right=Pan right
 Place_against_a_vertical_wall;_connect_cables_on_the_same_wall_face=Place against a vertical wall; connect cables on the same wall face
 Place_this_cabinet_against_a_vertical_wall=Place this cabinet against a vertical wall
-Placed_wall_cables_only=Placed wall cables only
 Pole_Transformer_or_Mains_Step-down_Unit=Pole Transformer or Mains Step-down Unit
 Portable_battery_slot=Espaço de bateria portátil
 Position=Posição
@@ -2920,6 +2919,10 @@ Selected_circuit=Selected circuit
 
 # src/main/kotlin/mods/eln/utility/BreakerPanelClient.kt
 %1$\:_%2$_A=%1$: %2$ A
+240_V_feeder\:_Bottom=240 V feeder: Bottom
+240_V_feeder\:_Top=240 V feeder: Top
+Choose_the_side_receiving_the_240_V_supply_cable_from_your_meter=Choose the side receiving the 240 V supply cable from your meter
+Choose_the_top_or_bottom_240_V_feeder_in_the_GUI;_the_opposite_terminal_is_the_selected_branch=Choose the top or bottom 240 V feeder in the GUI; the opposite terminal is the selected branch
 Circuit_%1$\:_%2$_V=Circuit %1$: %2$ V
 Circuit_%1$\:_insert_an_Electrical_Breaker=Circuit %1$: insert an Electrical Breaker
 Every_circuit_has_a_wireless_power_channel_and_optional_wireless_switch_control=Every circuit has a wireless power channel and optional wireless switch control
@@ -2936,11 +2939,12 @@ Switch\:_Any_on=Switch: Any on
 Switch\:_Toggle=Switch: Toggle
 Switch_link=Switch link
 Terminate_overhead_service_at_a_weatherhead;_feed_this_panel_with_placed_wall_cables=Terminate overhead service at a weatherhead; feed this panel with placed wall cables
-Top_240_V_wall_feeder_supplies_both_120_V_banks;_breakers_tolerate_brief_motor_inrush=Top 240 V wall feeder supplies both 120 V banks; breakers tolerate brief motor inrush
+The_240_V_wall_feeder_supplies_both_120_V_banks;_breakers_tolerate_brief_motor_inrush=The 240 V wall feeder supplies both 120 V banks; breakers tolerate brief motor inrush
+The_opposite_vertical_terminal_supplies_the_selected_breaker_branch=The opposite vertical terminal supplies the selected breaker branch
 Twelve_Circuit_American_Breaker_Panel=Twelve Circuit American Breaker Panel
 Twelve_Circuit_American_Breaker_Panel.name=Twelve Circuit American Breaker Panel
 Twelve_slots_accept_existing_Electrical_Breaker_items=Twelve slots accept existing Electrical Breaker items
-Wall_cables\:_left_L1,_right_L2,_top_240_V,_bottom_selected_branch=Wall cables: left L1, right L2, top 240 V, bottom selected branch
+Wall_cables\:_left_L1,_right_L2;_do_not_feed_power_into_the_selected_branch=Wall cables: left L1, right L2; do not feed power into the selected branch
 Wireless_range\:_%1$=Wireless range: %1$
 
 # src/main/kotlin/mods/eln/utility/DistributionClient.kt
@@ -3040,6 +3044,7 @@ North_American_Meter_Base=North American Meter Base
 North_American_Meter_Base.name=North American Meter Base
 Place_between_the_meter_and_panel;_top_is_input,_bottom_is_output=Place between the meter and panel; top is input, bottom is output
 Placed_wall_cables\:_top_service_input,_bottom_service_output;_insert_a_meter_to_connect=Placed wall cables: top service input, bottom service output; insert a meter to connect
+Placed_wall_cables_only=Placed wall cables only
 Power\:_%1$=Power: %1$
 Red_Handle_Service_Disconnect=Red Handle Service Disconnect
 Red_Handle_Service_Disconnect.name=Red Handle Service Disconnect

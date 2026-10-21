@@ -41,6 +41,9 @@ import kotlin.math.ceil
 @EventBusSubscriber(modid=Eln.MODID,value=[Dist.CLIENT])
 object UtilityDistributionChecks {
     private val mc get()=Minecraft.getInstance()
+    private val coversOnly=java.lang.Boolean.getBoolean("eln.coverRenderingChecks")
+    private val panelOnly=java.lang.Boolean.getBoolean("eln.panelFeederChecks")
+    private val coverBlocks=listOf(Blocks.STONE,Blocks.GRASS_BLOCK,Blocks.OAK_PLANKS,Blocks.QUARTZ_BLOCK)
     private val worldName="utility-distribution-${System.currentTimeMillis()}"
     private val base=BlockPos(256,80,256)
     private val feeder=base;private val recloser=base.east(16);private val transformer=base.east(32);private val secondary=base.east(48)
@@ -104,7 +107,55 @@ object UtilityDistributionChecks {
         @Suppress("UNCHECKED_CAST") val buttons=g.javaClass.getDeclaredField("fuses").apply { isAccessible=true }.get(g) as List<GuiButtonEln>
         val b=buttons[0];g.mouseClicked(b.x+b.width/2.0,b.y+b.height/2.0,0);g.mouseReleased(b.x+b.width/2.0,b.y+b.height/2.0,0)
     }
-    private fun capture(name: String)=Screenshot.grab(mc.gameDirectory,"utility-$name.png",mc.mainRenderTarget) {}
+    private var pendingCapture: String?=null
+    private fun capture(name: String) { pendingCapture=name }
+    @SubscribeEvent fun frame(event: net.neoforged.neoforge.client.event.RenderFrameEvent.Post) {
+        val name=pendingCapture ?: return
+        pendingCapture=null
+        if(coversOnly)Eln.logger.info("COVER_NATIVE rendered camera={} yaw={} pitch={} sections={}",
+            mc.gameRenderer.mainCamera.position,mc.gameRenderer.mainCamera.yRot,mc.gameRenderer.mainCamera.xRot,mc.levelRenderer.sectionStatistics)
+        Screenshot.grab(mc.gameDirectory,"utility-$name.png",mc.mainRenderTarget) {}
+    }
+    private val bottomMeter get()=panel.west(4).below(2)
+    private val fridgePos get()=outlet.south(2)
+    private fun setupBottomPanel(p: ServerPlayer) {
+        val w=p.serverLevel()
+        val m=wall(p,"North American Meter Base",bottomMeter) as HouseServiceElement
+        m.inventory.setItem(0,Eln.findItemStack("Smart Digital Service Meter",1));m.inventory.setChanged()
+        val pan=wall(p,"Twelve Circuit American Breaker Panel",panel) as BreakerPanelElement
+        repeat(2) { pan.inventory.setItem(it,Eln.findItemStack("30A Electrical Breaker",1));pan.circuits[it].use240=true;pan.circuits[it].configure() }
+        pan.setPowerChannel(0,"Bottom feeder kitchen");pan.setPowerChannel(1,"Bottom feeder 240")
+        val path=listOf(bottomMeter.above(),bottomMeter.below())+(1..4).map { bottomMeter.below().east(it) }+
+            listOf(panel.below(2),panel.below())
+        for(pos in path) {
+            w.setBlockAndUpdate(pos.north(),Blocks.STONE.defaultBlockState())
+            check(Eln.sixNodeItem.placeBlockAt(f(p).spool(),p,w,pos,net.minecraft.core.Direction.SOUTH,.5f,.5f,.5f))
+        }
+        val source=bottomMeter.above(2);w.setBlockAndUpdate(source.north(),Blocks.STONE.defaultBlockState())
+        check(Eln.sixNodeItem.placeBlockAt(Eln.findItemStack("Electrical Source",1),p,w,source,net.minecraft.core.Direction.SOUTH,.5f,.5f,.5f))
+        val e=(f(p).node(source) as SixNode).sideElementList.filterIsInstance<mods.eln.sixnode.electricalsource.ElectricalSourceElement>().single()
+        e.readConfigTool(CompoundTag().apply { putDouble("voltage",240.0) },p)
+        val o=wall(p,"120 V Wall Outlet",outlet) as OutletElement
+        o.wireless=true;o.channel="Bottom feeder kitchen";o.reconnect()
+        val fridge=place(p,"Electric Mini Fridge",fridgePos) as mods.eln.transparentnode.kitchen.KitchenElement
+        check(fridge.cord.attach(o.anchor(),false))
+        fixture(p,DecorativeLampStyle.DESK,table).apply {
+            inventory.setItem(0,Eln.findItemStack("240V LED Light Bulb",1));inventory.setChanged();lampSupplyChannel="Bottom feeder 240"
+        }
+        p.teleportTo(w,panel.x+2.0,panel.y+1.0,panel.z+4.0,150f,15f)
+    }
+    private fun verifyBottomPanel(p: ServerPlayer) {
+        val e=panel(p)
+        check(e.feederFromBottom)
+        f(p).near(e.buses[2].voltage,240.0,1.0)
+        f(p).near(e.circuits[0].load.voltage,120.0,1.0)
+        f(p).near(e.circuits[1].load.voltage,240.0,1.0)
+        val o=f(p).machine(outlet) as OutletElement
+        check(o.wirelessPower.supply!=null && o.input.voltage>118)
+        val fridge=f(p).machine(fridgePos) as mods.eln.transparentnode.kitchen.KitchenElement
+        check(fridge.cord.connected && fridge.load.voltage>118 && fridge.resistor.power>1)
+        check(lamp(p,table).electricalLoad.voltage>238)
+    }
     private fun verifyPower(p: ServerPlayer) {
         val t=pole(p,transformer);check(t.transformerPhase==2);check(t.unit!!.ratedWatts>=25_000)
         check(t.unit.controller.status !in setOf("NON_CONVERGENT","INVALID_NETWORK")) { t.unit.controller.status }
@@ -115,7 +166,7 @@ object UtilityDistributionChecks {
     }
     private fun finish(error: Throwable?) {
         done=true
-        Files.writeString(mc.gameDirectory.toPath().resolve(if(java.lang.Boolean.getBoolean("eln.utilityLightingOnly"))"utility-lighting-checks.json" else "utility-distribution-checks.json"),GsonBuilder().setPrettyPrinting().create().toJson(mapOf("world" to worldName,"passed" to passed,"sounds" to sounds,"phase" to phase,"failure" to error?.stackTraceToString())))
+        Files.writeString(mc.gameDirectory.toPath().resolve(if(panelOnly)"panel-feeder-checks.json" else if(coversOnly)"cover-rendering-checks.json" else if(java.lang.Boolean.getBoolean("eln.utilityLightingOnly"))"utility-lighting-checks.json" else "utility-distribution-checks.json"),GsonBuilder().setPrettyPrinting().create().toJson(mapOf("world" to worldName,"passed" to passed,"sounds" to sounds,"phase" to phase,"failure" to error?.stackTraceToString())))
         if(error!=null)Eln.logger.error("UTILITY_NATIVE FAIL phase $phase",error) else Eln.logger.info("UTILITY_NATIVE COMPLETE {} checks",passed.size)
         mc.execute { mc.stop();kotlin.concurrent.thread { Thread.sleep(1500);kotlin.system.exitProcess(if(error==null)0 else 1) } }
     }
@@ -129,10 +180,18 @@ object UtilityDistributionChecks {
         if(java.lang.Boolean.getBoolean("eln.utilityDistributionChecks"))event.sound?.location?.toString()?.takeIf { it.startsWith("eln:utility_") }?.let { sounds[it]=(sounds[it] ?: 0)+1 }
     }
     @SubscribeEvent fun tick(event: ClientTickEvent.Post) {
-        if(!java.lang.Boolean.getBoolean("eln.utilityDistributionChecks") || done)return
+        if((!java.lang.Boolean.getBoolean("eln.utilityDistributionChecks") && !coversOnly && !panelOnly) || done)return
         try {
             check(++total<18000) { "Timeout at phase $phase" };ticks++
-            mc.player?.let { it.setNoGravity(true);it.abilities.flying=true }
+            mc.player?.let {
+                it.setNoGravity(true);it.abilities.flying=true
+                if(coversOnly && phase in 90..92) {
+                    val dx=coverTest.x+1.5-it.x;val dz=coverTest.z+6.0-it.z;val dy=coverTest.y+.5-it.eyeY
+                    it.yRot=Math.toDegrees(kotlin.math.atan2(-dx,dz)).toFloat()
+                    it.xRot=Math.toDegrees(kotlin.math.atan2(-dy,kotlin.math.sqrt(dx*dx+dz*dz))).toFloat()
+                    it.yRotO=it.yRot;it.xRotO=it.xRot
+                }
+            }
             when(phase) {
                 0->if(mc.screen is TitleScreen && mc.overlay==null && ticks>20) {
                     mc.options.guiScale().set(2);mc.window.setWindowed(1440,1000);mc.resizeDisplay()
@@ -140,6 +199,28 @@ object UtilityDistributionChecks {
                         { it.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.FLAT).value().createWorldDimensions() },mc.screen!!);phase=1;ticks=0
                 }
                 1->if(mc.player!=null && mc.level!=null && mc.screen==null) {
+                    if(panelOnly) { server(::setupBottomPanel);next(98,60);return }
+                    if(coversOnly) {
+                        server { p ->
+                            val w=p.serverLevel();w.dayTime=6000;w.gameRules.getRule(GameRules.RULE_DAYLIGHT).set(false,w.server)
+                            for(x in -1..1)for(z in -1..1)w.setChunkForced((coverTest.x shr 4)+x,(coverTest.z shr 4)+z,true)
+                            for(x in -2..7)for(z in -2..15)w.setBlockAndUpdate(coverTest.offset(x,-1,z),Blocks.STONE.defaultBlockState())
+                            for((i,block) in coverBlocks.withIndex()) {
+                                val at=coverTest.south(i*4)
+                                for(pos in listOf(at,at.north())) {
+                                    w.setBlockAndUpdate(pos.below(),Blocks.STONE.defaultBlockState())
+                                    f(p).wire(pos)
+                                    (f(p).node(pos) as SixNode).apply { sixNodeCacheBlock=block;needPublish=true }
+                                    w.chunkSource.lightEngine.checkBlock(pos)
+                                }
+                                for(pos in listOf(at.east(3),at.east(3).north())) {
+                                    w.setBlockAndUpdate(pos.below(),Blocks.STONE.defaultBlockState())
+                                    w.setBlockAndUpdate(pos,block.defaultBlockState())
+                                }
+                            }
+                            p.teleportTo(w,coverTest.x+8.0,coverTest.y+4.0,coverTest.z+18.0,145f,15f)
+                        };next(90,140);return
+                    }
                     if(java.lang.Boolean.getBoolean("eln.utilityLightingOnly")) {
                         server { p ->
                             val w=p.serverLevel();w.gameRules.getRule(GameRules.RULE_DAYLIGHT).set(false,w.server)
@@ -217,6 +298,58 @@ object UtilityDistributionChecks {
                         }
                         p.teleportTo(w,306.0,88.0,275.0,145f,20f)
                     };next(2,240)
+                }
+                98->if(settled()) {
+                    check((mc.level!!.getBlockEntity(panel) as? TransparentNodeEntity)?.elementRender is BreakerPanelRender)
+                    server { p -> gui(p,panel) };next(93,30)
+                }
+                93->if(settled() && mc.screen is BreakerPanelGui) { button("terminal");next(94,30) }
+                94->if(settled()) {
+                    val tile=mc.level!!.getBlockEntity(panel) as TransparentNodeEntity
+                    check((tile.elementRender as BreakerPanelRender).feederFromBottom)
+                    pass("Native feeder button and publish packet select the bottom 240 V input")
+                    button("voltage");next(95,100)
+                }
+                95->if(settled()) {
+                    mc.screen!!.onClose()
+                    server { p ->
+                        verifyBottomPanel(p)
+                        pass("Meter, placed cables, bottom-fed panel, wireless 120 V outlet and corded mini fridge operate beside an independent 240 V lamp")
+                        settings(panel(p),80) { writeInt(1) }
+                    };next(96,60)
+                }
+                96->if(settled()) {
+                    server { p -> verifyBottomPanel(p);pass("Selecting another breaker leaves the bottom feeder and every branch powered") };next(97,20)
+                }
+                97->if(settled())finish(null)
+                90->if(settled()) {
+                    if(mc.levelRenderer.sectionStatistics.startsWith("C: 0/0")) {
+                        check(ticks<800) { "Terrain meshing did not produce any visible sections: ${mc.levelRenderer.sectionStatistics}" }
+                        if(ticks%100==0)Eln.logger.info("COVER_NATIVE waiting for terrain: {}",mc.levelRenderer.sectionStatistics)
+                        return
+                    }
+                    coverBlocks.indices.forEach { i -> CoverRenderingChecks.verify(mc.level!!,coverTest.south(i*4),coverTest.south(i*4).east(3)) }
+                    pass("Chunk cover geometry, tint, ambient occlusion and light match stone, grass, planks and quartz")
+                    check(mc.player!!.distanceToSqr(coverTest.x.toDouble(),coverTest.y.toDouble(),coverTest.z.toDouble())<1600)
+                    Eln.logger.info("COVER_NATIVE camera={} yaw={} pitch={}",mc.player!!.position(),mc.player!!.yRot,mc.player!!.xRot)
+                    capture("terrain-wire-covers")
+                    server { p ->
+                        (f(p).node(coverTest) as SixNode).apply { sixNodeCacheBlock=Blocks.GRASS_BLOCK;needPublish=true }
+                        p.serverLevel().setBlockAndUpdate(coverTest.east(3),Blocks.GRASS_BLOCK.defaultBlockState())
+                    };next(91,100)
+                }
+                91->if(settled()) {
+                    CoverRenderingChecks.verify(mc.level!!,coverTest,coverTest.east(3))
+                    pass("Changing an existing cover rebuilds terrain model data and tint")
+                    server { p -> (f(p).node(coverTest) as SixNode).apply { sixNodeCacheBlock=Blocks.AIR;needPublish=true } };next(92,100)
+                }
+                92->if(settled()) {
+                    val tile=mc.level!!.getBlockEntity(coverTest) as mods.eln.node.six.SixNodeEntity
+                    check(tile.modelData.get(mods.eln.node.six.SixNodeCoverData.COVER)!!.isAir)
+                    val model=mc.blockRenderer.getBlockModel(tile.blockState)
+                    check(model.getRenderTypes(tile.blockState,net.minecraft.util.RandomSource.create(),tile.modelData).isEmpty)
+                    pass("Removing a cover clears chunk terrain without a leftover cube")
+                    finish(null)
                 }
                 2->if(settled()) {
                     CoverRenderingChecks.verify(mc.level!!,coverTest,coverTest.east(3))

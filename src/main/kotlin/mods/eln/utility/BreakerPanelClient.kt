@@ -43,8 +43,9 @@ class BreakerPanelDescriptor: ServiceWallDescriptor(I18N.TR_NAME(I18N.Type.NONE,
         list.add(tr("Left bank: L1 120 V; right bank: L2 120 V; each circuit can select 240 V"))
         list.add(tr("Every circuit has a wireless power channel and optional wireless switch control"))
         list.add(tr("Terminate overhead service at a weatherhead; feed this panel with placed wall cables"))
-        list.add(tr("Top 240 V wall feeder supplies both 120 V banks; breakers tolerate brief motor inrush"))
-        list.add(tr("Wall cables: left L1, right L2, top 240 V, bottom selected branch"))
+        list.add(tr("The 240 V wall feeder supplies both 120 V banks; breakers tolerate brief motor inrush"))
+        list.add(tr("Choose the top or bottom 240 V feeder in the GUI; the opposite terminal is the selected branch"))
+        list.add(tr("Wall cables: left L1, right L2; do not feed power into the selected branch"))
     }
 }
 class BreakerPanelContainer(player: Player,inventory: Container): BasicContainer(player,inventory,Array(12) { i ->
@@ -60,11 +61,12 @@ class PanelCircuitDisplay {
 class BreakerPanelRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDescriptor): GridRender(entity,descriptor) {
     override val inventory=TransparentNodeElementInventory(12,1,this)
     var selected=0;var terminal=50;var range=32
+    var feederFromBottom=false
     val circuits=List(12) { PanelCircuitDisplay() }
     private val connections=LRDUMask()
     private var cable: mods.eln.cable.CableRenderType?=null
     override fun draw() { drawCables();(transparentNodeDescriptor as BreakerPanelDescriptor).drawPanel(front ?: Direction.XN,circuits);cable=drawCable(front!!.inverse,Eln.instance.stdCableRender200V,connections,cable) }
-    override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream);selected=stream.readInt();terminal=stream.readInt();range=stream.readInt();circuits.forEach { it.read(stream) };connections.deserialize(stream);cable=null }
+    override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream);selected=stream.readInt();terminal=stream.readInt();range=stream.readInt();feederFromBottom=stream.readBoolean();circuits.forEach { it.read(stream) };connections.deserialize(stream);cable=null }
     override fun newGuiDraw(side: Direction,player: Player)=BreakerPanelGui(player,this)
 }
 class BreakerPanelGui(player: Player,private val r: BreakerPanelRender): GuiContainerEln(BreakerPanelContainer(player,r.inventory)) {
@@ -87,6 +89,8 @@ class BreakerPanelGui(player: Player,private val r: BreakerPanelRender): GuiCont
         dusk=newGuiButton(8,270,296,"")
         power.setComment(0,tr("Power channel for this breaker; enter the same name on lamps and outlets"))
         control.setComment(0,tr("Optional wireless switch channel; blank means always enabled"))
+        terminal.setComment(0,tr("Choose the side receiving the 240 V supply cable from your meter"))
+        terminal.setComment(1,tr("The opposite vertical terminal supplies the selected breaker branch"))
         refresh()
     }
     private fun refresh() {
@@ -98,8 +102,7 @@ class BreakerPanelGui(player: Player,private val r: BreakerPanelRender): GuiCont
         aggregator.displayString=when(c.aggregator) { 0->tr("Switch: Any on");1->tr("Switch: All on");else->tr("Switch: Toggle") }
         range.displayString=tr("Wireless range: %1$",r.range)
         dusk.displayString=if(c.dusk)tr("Lighting control: Dusk / night") else tr("Lighting control: Manual / switch")
-        terminal.enabled=false
-        terminal.displayString=tr("Placed wall cables only")
+        terminal.displayString=if(r.feederFromBottom)tr("240 V feeder: Bottom") else tr("240 V feeder: Top")
 
     }
     override fun guiObjectEvent(obj: IGuiObject) {
@@ -112,7 +115,7 @@ class BreakerPanelGui(player: Player,private val r: BreakerPanelRender): GuiCont
             voltage->r.clientSendInt(84,i)
             aggregator->r.clientSendInt(85,i)
             range->r.clientSendInt(86,LampSupplyRange.next(r.range))
-            terminal->{ val ts=listOf(50,40,41,42,64+i);r.clientSendInt(87,ts[(ts.indexOf(r.terminal)+1)%ts.size]) }
+            terminal->r.clientSendBoolean(89,!r.feederFromBottom)
             else->{ select.indexOf(obj).takeIf { it>=0 }?.let { r.clientSendInt(80,it) };toggle.indexOf(obj).takeIf { it>=0 }?.let { r.clientSendInt(83,it) } }
         }
     }

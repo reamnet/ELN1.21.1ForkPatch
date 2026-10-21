@@ -46,7 +46,8 @@ import mods.eln.misc.getBlockState
  * clips the look ray against it and reports the face), collision is a full cube only when the
  * node has a volume or a camouflage block, and light opacity follows the camouflage block.
  */
-class SixNodeBlock : NodeBlock(nodeProperties().strength(0.3f, 1.0f), 0), net.minecraft.world.level.block.SimpleWaterloggedBlock {
+class SixNodeBlock : NodeBlock(Properties.of().strength(0.3f, 1.0f).dynamicShape()
+    .isViewBlocking { _,world,pos -> coverState(world,pos)?.isViewBlocking(world,pos) ?: false }, 0), net.minecraft.world.level.block.SimpleWaterloggedBlock {
     init { registerDefaultState(stateDefinition.any().setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED, false)) }
     override fun createBlockStateDefinition(builder: net.minecraft.world.level.block.state.StateDefinition.Builder<Block, BlockState>) {
         super.createBlockStateDefinition(builder)
@@ -153,20 +154,22 @@ class SixNodeBlock : NodeBlock(nodeProperties().strength(0.3f, 1.0f), 0), net.mi
     }
 
 
-    /**
-     * Six-nodes draw entirely from their TESR, including the camouflage block a cable can be
-     * hidden inside. Phase 3 replaces this with an IExtendedBlockState carrying the camouflaged
-     * state plus a delegating baked model.
-     */
+    /** Covers use the terrain pipeline; device faces still use their block entity renderer. */
     override fun getRenderShape(state: BlockState): RenderShape {
-        return RenderShape.INVISIBLE
+        return RenderShape.MODEL
     }
 
-    /**
-     * 1.8 moved per-block tinting out of Block and into BlockColors/IBlockColor, registered on
-     * the client. Camouflaged six-nodes need the camouflage block's tint (grass, leaves); that
-     * handler is registered in phase 3 alongside the camouflage model.
-     */
+    override fun getShadeBrightness(state: BlockState,world: BlockGetter,pos: BlockPos): Float =
+        coverState(world,pos)?.getShadeBrightness(world,pos) ?: super.getShadeBrightness(state,world,pos)
+
+    override fun getOcclusionShape(state: BlockState,world: BlockGetter,pos: BlockPos): VoxelShape =
+        coverState(world,pos)?.takeIf { it.canOcclude() }?.getOcclusionShape(world,pos) ?: Shapes.empty()
+
+    /** Iris uses NeoForge's appearance hook for terrain material IDs. A stone cover
+     * must receive stone's shader material, rather than the six-node's material. */
+    override fun getAppearance(state: BlockState,world: net.minecraft.world.level.BlockAndTintGetter,pos: BlockPos,
+                               side: EnumFacing,queryState: BlockState?,queryPos: BlockPos?): BlockState =
+        coverState(world,pos) ?: state
 
     /*
 	 * @Override public int getLightOpacity(Level world, int x, int y, int z) {
@@ -429,6 +432,12 @@ class SixNodeBlock : NodeBlock(nodeProperties().strength(0.3f, 1.0f), 0), net.mi
         get() = NODE_UUID
 
     companion object {
+        private fun coverState(world: BlockGetter,pos: BlockPos): BlockState? {
+            world.getModelData(pos).get(SixNodeCoverData.COVER)?.let { return it.takeUnless { cover -> cover.isAir } }
+            val tile=LoadedBlockEntities.get(world,pos) as? SixNodeEntity ?: return null
+            val block=if(isRemote(world))tile.sixNodeCacheBlock else (tile.node as? SixNode)?.sixNodeCacheBlock
+            return block?.defaultBlockState()?.takeUnless { it.isAir }
+        }
         const val NODE_UUID = "s"
 
         fun isIn(value: Double, min: Double, max: Double): Boolean {

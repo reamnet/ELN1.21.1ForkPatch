@@ -103,6 +103,10 @@ class BreakerPanelElement(node: TransparentNode,descriptor: TransparentNodeDescr
     val circuits=List(12) { Circuit(it) }
     var selectedCircuit=0
         private set
+    // Preserve existing top-feed / bottom-branch saves. Feeding a selected branch
+    // backwards must not be used as a substitute for the 240 V service terminal.
+    var feederFromBottom=false
+        private set
     var selectedTerminal=50
         private set
     var transmissionRange=32
@@ -155,7 +159,12 @@ class BreakerPanelElement(node: TransparentNode,descriptor: TransparentNodeDescr
     override fun gridCablePoint(terminal: Int,wire: Int)=Vec3(.36,if(terminal>=64)-.43 else .40,if(terminal==50)(wire-1)*.22 else 0.0)
     override fun getElectricalLoad(side: Direction,lrdu: LRDU): ElectricalLoad? {
         if(!(transparentNodeDescriptor as BreakerPanelDescriptor).acceptsCable(front,side,lrdu))return null
-        return when(side) { front.left()->buses[0];front.right()->buses[1];Direction.YP->buses[2];Direction.YN->circuits[selectedCircuit].load;else->null }
+        return when(side) {
+            front.left()->buses[0]
+            front.right()->buses[1]
+            Direction.YP,Direction.YN->if((side==Direction.YN)==feederFromBottom)buses[2] else circuits[selectedCircuit].load
+            else->null
+        }
     }
     override fun getConnectionMask(side: Direction,lrdu: LRDU)=if(getElectricalLoad(side,lrdu)!=null)NodeBase.maskElectricalPower else 0
     override fun getThermalLoad(side: Direction,lrdu: LRDU)=null
@@ -164,14 +173,14 @@ class BreakerPanelElement(node: TransparentNode,descriptor: TransparentNodeDescr
     override fun multiMeterString(side: Direction)=tr("Circuit %1$: %2$",selectedCircuit+1,Utils.plotUIP(circuits[selectedCircuit].load.voltage,circuits[selectedCircuit].load.current))
     override fun thermoMeterString(side: Direction)=""
     override fun getWaila()=linkedMapOf(tr("Circuits") to tr("%1$ installed; %2$ tripped",circuits.count { it.rating>0 },circuits.count { it.breaker.tripped }),tr("Selected circuit") to multiMeterString(front))
-    private fun writeSettings(nbt: CompoundTag) { circuits.forEach { it.write(nbt) };nbt.putInt("panelSelected",selectedCircuit);nbt.putInt("panelTerminal",selectedTerminal);nbt.putInt("panelRange",transmissionRange) }
-    private fun readSettings(nbt: CompoundTag) { circuits.forEach { it.read(nbt) };selectedCircuit=nbt.getInt("panelSelected").coerceIn(0,11);selectedTerminal=nbt.getInt("panelTerminal").takeIf { it==50 || it in 40..42 || it in 64..75 } ?: 50;transmissionRange=nbt.getInt("panelRange").takeIf(LampSupplyRange::isSelectable) ?: 32 }
+    private fun writeSettings(nbt: CompoundTag) { circuits.forEach { it.write(nbt) };nbt.putInt("panelSelected",selectedCircuit);nbt.putInt("panelTerminal",selectedTerminal);nbt.putInt("panelRange",transmissionRange);nbt.putBoolean("panelFeederBottom",feederFromBottom) }
+    private fun readSettings(nbt: CompoundTag) { circuits.forEach { it.read(nbt) };selectedCircuit=nbt.getInt("panelSelected").coerceIn(0,11);selectedTerminal=nbt.getInt("panelTerminal").takeIf { it==50 || it in 40..42 || it in 64..75 } ?: 50;transmissionRange=nbt.getInt("panelRange").takeIf(LampSupplyRange::isSelectable) ?: 32;feederFromBottom=nbt.getBoolean("panelFeederBottom") }
     override fun writeToNBT(nbt: CompoundTag) { super.writeToNBT(nbt);writeSettings(nbt) }
     override fun readFromNBT(nbt: CompoundTag) { super.readFromNBT(nbt);readSettings(nbt) }
     override fun getItemStackNBT()=CompoundTag().also(::writeSettings)
     override fun readItemStackNBT(nbt: CompoundTag?) { if(nbt!=null)readSettings(nbt) }
     override fun networkSerialize(stream: DataOutputStream) {
-        super.networkSerialize(stream);stream.writeInt(selectedCircuit);stream.writeInt(selectedTerminal);stream.writeInt(transmissionRange)
+        super.networkSerialize(stream);stream.writeInt(selectedCircuit);stream.writeInt(selectedTerminal);stream.writeInt(transmissionRange);stream.writeBoolean(feederFromBottom)
         circuits.forEach { c -> stream.writeDouble(c.rating);stream.writeBoolean(c.breaker.enabled);stream.writeBoolean(c.breaker.tripped);stream.writeBoolean(c.contacts[c.bus].closed);stream.writeBoolean(c.use240);stream.writeBoolean(c.dusk);stream.writeUTF(c.powerChannel);stream.writeUTF(c.controlChannel);stream.writeInt(c.aggregator);stream.writeDouble(c.load.voltage);stream.writeDouble(c.contacts[c.bus].current) }
         node!!.lrduCubeMask.getTranslate(front.inverse).serialize(stream)
     }
@@ -187,6 +196,7 @@ class BreakerPanelElement(node: TransparentNode,descriptor: TransparentNodeDescr
             85->stream.readInt().takeIf { it in 0..11 }?.let { circuits[it].aggregator=(circuits[it].aggregator+1)%3 }
             86->stream.readInt().takeIf(LampSupplyRange::isSelectable)?.let { transmissionRange=it }
             88->stream.readInt().takeIf { it in 0..11 }?.let { circuits[it].dusk=!circuits[it].dusk }
+            89->{ val bottom=stream.readBoolean();if(bottom!=feederFromBottom) { feederFromBottom=bottom;reconnect() } }
             87->stream.readInt().takeIf { it==50 || it in 40..42 || it in 64..75 }?.let { selectedTerminal=it }
         }
         needPublish();return id

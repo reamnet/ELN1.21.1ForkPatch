@@ -1,0 +1,37 @@
+{
+  "version": "3.0.34",
+  "unitSuite": {
+    "tests": 798,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "nativeRuntime": {
+    "minecraft": "1.21.1",
+    "neoforge": "21.1.249",
+    "sodium": "0.8.13+mc1.21.1",
+    "iris": "1.8.14-beta.1+mc1.21.1",
+    "shader": "BSL 10.1.8",
+    "renderer": "Mesa llvmpipe"
+  },
+  "cover": {
+    "world": "utility-distribution-1792619551770",
+    "passed": [
+      "Chunk cover geometry, tint, ambient occlusion and light match stone, grass, planks and quartz",
+      "Changing an existing cover rebuilds terrain model data and tint",
+      "Removing a cover clears chunk terrain without a leftover cube"
+    ],
+    "sounds": {},
+    "phase": 92
+  },
+  "panel": {
+    "world": "utility-distribution-1792618843530",
+    "passed": [
+      "Native feeder button and publish packet select the bottom 240 V input",
+      "Meter, placed cables, bottom-fed panel, wireless 120 V outlet and corded mini fridge operate beside an independent 240 V lamp",
+      "Selecting another breaker leaves the bottom feeder and every branch powered"
+    ],
+    "sounds": {},
+    "phase": 97
+  }
+}

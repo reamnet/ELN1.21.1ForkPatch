@@ -37,6 +37,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.31` | — | Keep the Large Generator powered when switches, relays and diodes introduce tiny leakage loads; preserve droop, current limits and shaft-energy limits |
 | `v3.0.32` | — | Prevent false standby-load trips across converter types and hybrid inverters; isolate rejected one-way converters locally; validate converter wattage limits and complete renewable/standby supply operating points |
 | `v3.0.33` | — | Correct height-scaled wind speeds; govern and brake the original wind turbine; account rotor/output energy every electrical step; block backfeed and repair saved overspeed states |
+| `v3.0.34` | — | Select a top or bottom 240 V panel feeder independently of branch voltage; terrain-rendered wire covers with original block shader materials, tint and shading |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`
@@ -49,7 +50,7 @@ release assets remain available with their original filenames.
 `modVersion` in `gradle.properties` is the version source for the jar filename,
 NeoForge metadata and the in-game version. Increment it when preparing the next
 update and create the matching `vX.Y.Z` source tag. For unpublished experiments,
-use an explicit override such as `-PmodVersion=3.0.33-local.1`.
+use an explicit override such as `-PmodVersion=3.0.34-local.1`.
 
 Build with `./gradlew build` to retain previous versioned jars in `build/libs/`.
 `./gradlew clean` removes that directory, and recompiling the same version
