@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": {
+      "item": "minecraft:jungle_planks"
+    },
+    "L": {
+      "item": "eln:classic_four_blade_ceiling_fan"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    " D ",
+    "DLD",
+    " P "
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:tropical_patio_ceiling_fan"
+  }
+}

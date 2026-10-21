@@ -46,7 +46,19 @@ import mods.eln.misc.getBlockState
  * clips the look ray against it and reports the face), collision is a full cube only when the
  * node has a volume or a camouflage block, and light opacity follows the camouflage block.
  */
-class SixNodeBlock : NodeBlock(nodeProperties().strength(0.3f, 1.0f), 0) {
+class SixNodeBlock : NodeBlock(nodeProperties().strength(0.3f, 1.0f), 0), net.minecraft.world.level.block.SimpleWaterloggedBlock {
+    init { registerDefaultState(stateDefinition.any().setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED, false)) }
+    override fun createBlockStateDefinition(builder: net.minecraft.world.level.block.state.StateDefinition.Builder<Block, BlockState>) {
+        super.createBlockStateDefinition(builder)
+        builder.add(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED)
+    }
+    override fun getFluidState(state: BlockState): FluidState =
+        if(state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED))net.minecraft.world.level.material.Fluids.WATER.getSource(false) else super.getFluidState(state)
+    override fun updateShape(state: BlockState, side: EnumFacing, neighbour: BlockState, world: net.minecraft.world.level.LevelAccessor, pos: BlockPos, neighbourPos: BlockPos): BlockState {
+        if(state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED))world.scheduleTick(pos,net.minecraft.world.level.material.Fluids.WATER,net.minecraft.world.level.material.Fluids.WATER.getTickDelay(world))
+        return super.updateShape(state,side,neighbour,world,pos,neighbourPos)
+    }
+
     override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity = SixNodeEntity(pos, state)
 
     override fun getCloneItemStack(state: BlockState, target: HitResult, world: LevelReader, pos: BlockPos, player: Player): ItemStack {
@@ -100,7 +112,19 @@ class SixNodeBlock : NodeBlock(nodeProperties().strength(0.3f, 1.0f), 0) {
             val enabled = if (world is Level && !world.isClientSide) {
                 (entity.node as? SixNode)?.getSideEnable(direction) ?: false
             } else entity.getSyncronizedSideEnable(direction)
-            if (enabled) shape = Shapes.or(shape, faceSlab(direction))
+            if (enabled) {
+                val descriptor=if(world is Level && !world.isClientSide)(entity.node as? SixNode)?.getElement(direction)?.sixNodeElementDescriptor else entity.elementRenderList[direction.int]?.sixNodeDescriptor
+                val large=(descriptor as? mods.eln.sixnode.lampsocket.LampSocketDescriptor)?.fixture?.let { it.depth>=1.5 }==true
+                val slab=if(large)when(direction) {
+                    Direction.YN->Shapes.box(.35,0.0,.35,.65,.07,.65)
+                    Direction.YP->Shapes.box(.35,.93,.35,.65,1.0,.65)
+                    Direction.XN->Shapes.box(0.0,.35,.35,.07,.65,.65)
+                    Direction.XP->Shapes.box(.93,.35,.35,1.0,.65,.65)
+                    Direction.ZN->Shapes.box(.35,.35,0.0,.65,.65,.07)
+                    Direction.ZP->Shapes.box(.35,.35,.93,.65,.65,1.0)
+                } else faceSlab(direction)
+                shape=Shapes.or(shape,slab)
+            }
         }
         return shape
     }
@@ -398,7 +422,7 @@ class SixNodeBlock : NodeBlock(nodeProperties().strength(0.3f, 1.0f), 0) {
     }
 
     override fun propagatesSkylightDown(state: BlockState, world: BlockGetter, pos: BlockPos): Boolean {
-        return !nodeHasCache(world, pos.x, pos.y, pos.z)
+        return !state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED) && !nodeHasCache(world, pos.x, pos.y, pos.z)
     }
 
     val nodeUuid: String

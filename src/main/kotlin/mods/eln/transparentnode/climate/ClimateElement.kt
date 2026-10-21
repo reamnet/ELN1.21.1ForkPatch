@@ -26,7 +26,7 @@ class ClimateElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
     val load=NbtElectricalLoad("climateInput").apply { serialResistance=.002 }
     override val cord=mods.eln.transparentnode.cord.ApplianceCord(this,load)
     override val cordVoltage get()=type.volts
-    override val cordPortable get()=type==ClimateType.PORTABLE
+    override val cordPortable get()=type==ClimateType.PORTABLE || type==ClimateType.PATIO
     val resistor=Resistor(load,null).apply { resistance=1e19 }
     val indoor=NbtThermalLoad("climateIndoor").apply { set(.2,.012,4000.0);setAsSlow() }
     val outdoor=NbtThermalLoad("climateOutdoor").apply { set(.2,.006,6000.0);setAsSlow() }

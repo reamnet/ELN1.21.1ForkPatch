@@ -1,5 +1,6 @@
 """Generate the original, texture-free fixture meshes. Run from the repository root."""
 from pathlib import Path
+from adjustable_street_heads import split_heads
 from math import sin, cos, pi, sqrt
 ROOT = Path(__file__).resolve().parents[2] / 'src/main/resources/assets/eln/model'
 class Mesh:
@@ -54,7 +55,7 @@ class Mesh:
         self.face(list(reversed(rings[0])));self.face(rings[1])
     def save(self,name):
         folder=ROOT/name;folder.mkdir(parents=True,exist_ok=True)
-        (folder/(name+'.obj')).write_text('\n'.join(self.lines)+'\n')
+        (folder/(name+'.obj')).write_text(split_heads('\n'.join(self.lines)+'\n',name))
         (folder/'fixture.mtl').write_text('newmtl Neutral\nKd 1 1 1\nKa 1 1 1\n')
 
 m=Mesh();m.part('Base');m.cone(.01,.12,.19,.14)

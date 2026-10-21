@@ -11,15 +11,21 @@ enum class KitchenType(val model: String,val title: String,val volts: Double,val
     KETTLE("kitchenkettle",I18N.TR_NAME(I18N.Type.NONE,"Electric Kettle"),120.0,1500.0,8.0),
     BLENDER("kitchenblender",I18N.TR_NAME(I18N.Type.NONE,"Countertop Blender"),120.0,400.0,5.0),
     RICE("kitchenricecooker",I18N.TR_NAME(I18N.Type.NONE,"Electric Rice Cooker"),120.0,700.0,12.0),
-    MINI_OVEN("kitchenminioven",I18N.TR_NAME(I18N.Type.NONE,"Electric Mini Oven"),120.0,1300.0,8.0);
+    MINI_OVEN("kitchenminioven",I18N.TR_NAME(I18N.Type.NONE,"Electric Mini Oven"),120.0,1300.0,8.0),
+    MINI_FRIDGE("kitchenminifridge",I18N.TR_NAME(I18N.Type.NONE,"Electric Mini Fridge"),120.0,55.0,60.0),
+    GRILL("deckelectricgrill",I18N.TR_NAME(I18N.Type.NONE,"Patio Electric Grill"),120.0,1800.0,10.0);
+
+    val refrigerator get()=this==FRIDGE || this==MINI_FRIDGE
+    val storageSlots get()=when(this) { FRIDGE->27;MINI_FRIDGE->9;else->0 }
+    val slotCount get()=3+storageSlots
 
     // Existing IDs 21..26 belong to the climate appliances.
-    val subId get()=when(ordinal) { in 0..4 -> 1+ordinal;in 5..7 -> 18+ordinal-5;else -> 27+ordinal-8 }
+    val subId get()=when(ordinal) { 9 -> 60;10 -> 61;in 0..4 -> 1+ordinal;in 5..7 -> 18+ordinal-5;else -> 27+ordinal-8 }
     val sound get()=when(this) {
         MICROWAVE -> "appliance_microwave"
         TOASTER -> "appliance_toaster"
-        STOVE -> "appliance_stove"
-        FRIDGE -> "appliance_fridge"
+        STOVE,GRILL -> "appliance_stove"
+        FRIDGE,MINI_FRIDGE -> "appliance_fridge"
         COFFEE -> "appliance_coffee"
         KETTLE -> "appliance_kettle"
         BLENDER -> "appliance_blender"

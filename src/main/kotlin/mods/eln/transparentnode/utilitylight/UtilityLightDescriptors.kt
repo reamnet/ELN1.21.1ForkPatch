@@ -54,11 +54,11 @@ class UtilityStreetLightDescriptor(name: String, val style: PoleLampStyle = Pole
         creativeTab = Eln.creativeTabLighting
         ghostGroup = GhostGroup().apply {
             for (y in 1..7) addElement(0, y, 0)
-            if(style==PoleLampStyle.ORIGINAL)addElement(-1, 6, 0)
-            if(style!=PoleLampStyle.ORIGINAL)for(x in -2..-1)for(y in 4..6)for(z in -1..1)addElement(x,y,z)
+            for(y in 4..7)for(x in -2..2)for(z in -2..2)if(x!=0 || z!=0)addElement(x,y,z,mods.eln.ghost.GhostBlock.tClearance)
+
         }
     }
-    fun drawLamp(front: Direction, lit: Boolean, installed: Boolean, heightStep: Int = 0, yaw: Int = 0) = preserveMatrix {
+    fun drawLamp(front: Direction, lit: Boolean, installed: Boolean, heightStep: Int = 0, yaw: Int = 0, pitch: Int = 0) = preserveMatrix {
         front.glRotateXnRef()
         GL11.glTranslated(0.0,3.0,0.0)
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
@@ -72,6 +72,8 @@ class UtilityStreetLightDescriptor(name: String, val style: PoleLampStyle = Pole
             GL11.glRotatef(yaw.toFloat(), 0f, 1f, 0f)
             GL11.glColor3f(.46f, .49f, .52f)
             fixture.getPart("Bracket")?.drawNoBind()
+            val p=StreetLightMount.pivot.add(0.0,-3.0,0.0)
+            GL11.glTranslated(p.x,p.y,p.z);GL11.glRotated(pitch.toDouble(),0.0,0.0,1.0);GL11.glTranslated(-p.x,-p.y,-p.z)
             GL11.glColor3f(.22f, .25f, .28f)
             fixture.getPart("Housing")?.drawNoBind()
             if (lit) {

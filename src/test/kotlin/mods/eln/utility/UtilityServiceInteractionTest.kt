@@ -34,11 +34,11 @@ class UtilityServiceInteractionTest {
                 assertTrue(p.transparentNodeDescriptor.ghostGroup!!.elementList.any { it.x==x && it.y==y && it.z==z },"${kind.name}: $terminal has no clickable tie point")
             }
             if(!kind.lvOnly)for(i in 0 until kind.phases) {
-                clickable(32+i);if(kind.protectedLine)clickable(36+i)
+                clickable(32+i);if(kind.protectedLine && i<kind.outputPhases)clickable(36+i)
                 val selected=p.aimedGridTerminal(Direction.ZP,p.gridCablePoint(32+i,0))
                 assertEquals(if(kind.phases==3)52 else 32,selected,kind.name)
                 assertEquals(if(kind.phases==3)p.lines else listOf(p.lines[0]),p.gridLoads(selected))
-                if(kind.protectedLine)assertEquals(if(kind.phases==3)53 else 36,
+                if(kind.protectedLine && i<kind.outputPhases)assertEquals(if(kind.phases==3 && !kind.singlePhaseTap)53 else 36,
                     p.aimedGridTerminal(Direction.ZP,p.gridCablePoint(36+i,0)),kind.name)
             }
             if(kind.phases==3 && !kind.lvOnly) {

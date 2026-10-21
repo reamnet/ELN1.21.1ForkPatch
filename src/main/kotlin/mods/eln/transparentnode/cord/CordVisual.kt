@@ -39,17 +39,17 @@ object CordPath {
         }
         return ceiling-1.0
     }
-    fun draw(points: List<Vec3>,origin: Vec3) {
+    fun draw(points: List<Vec3>,origin: Vec3,color: FloatArray?=null,radius: Double=.018) {
         if(points.size<2)return
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
-            GL11.glDisable(GL11.GL_TEXTURE_2D);GL11.glColor3f(.035f,.04f,.045f)
+            GL11.glDisable(GL11.GL_TEXTURE_2D);GL11.glColor3f(color?.get(0) ?: .035f,color?.get(1) ?: .04f,color?.get(2) ?: .045f)
             GL11.glBegin(GL11.GL_QUADS)
             for(i in 1 until points.size) {
                 val a=points[i-1].subtract(origin);val b=points[i].subtract(origin)
                 val direction=b.subtract(a).normalize()
-                val u=direction.cross(if(abs(direction.y)>.9)Vec3(1.0,0.0,0.0) else Vec3(0.0,1.0,0.0)).normalize().scale(.018)
-                val v=direction.cross(u).normalize().scale(.018)
+                val u=direction.cross(if(abs(direction.y)>.9)Vec3(1.0,0.0,0.0) else Vec3(0.0,1.0,0.0)).normalize().scale(radius)
+                val v=direction.cross(u).normalize().scale(radius)
                 for(j in 0..3) {
                     val p=u.scale(cos(j*PI/2)).add(v.scale(sin(j*PI/2)))
                     val q=u.scale(cos((j+1)*PI/2)).add(v.scale(sin((j+1)*PI/2)))
@@ -67,7 +67,7 @@ class CordDisplay {
         private set
     var rating=CordRating.V120
         private set
-    var socket=0;var horizontal=false;var strip=false
+    var socket=0;var horizontal=false;var strip=false;var recessed=false
     var state="UNPLUGGED"
         private set
     private var cached: List<Vec3> = emptyList()
@@ -75,43 +75,46 @@ class CordDisplay {
     fun read(input: DataInputStream) {
         val next=if(input.readBoolean())BlockPos(input.readInt(),input.readInt(),input.readInt()) to Direction.fromInt(input.readUnsignedByte())!! else null
         if(next!=endpoint) { cached=emptyList();nextUpdate=0L }
-        if(next!=null) { rating=CordRating.entries[input.readUnsignedByte()];socket=input.readUnsignedByte();horizontal=input.readBoolean();strip=input.readBoolean() }
+        if(next!=null) { rating=CordRating.entries[input.readUnsignedByte()];socket=input.readUnsignedByte();horizontal=input.readBoolean();strip=input.readBoolean();recessed=input.readBoolean() }
         endpoint=next;state=input.readUTF()
     }
     fun draw(world: Level,pos: BlockPos,front: Direction,entry: Vec3?=null) {
         val (target,facing)=endpoint ?: return
         val origin=Vec3.atCenterOf(pos)
         val outlet=(world.getBlockEntity(target) as? mods.eln.node.transparent.TransparentNodeEntity)?.elementRender as? OutletRender
-        val turned=outlet?.horizontal ?: horizontal
-        val start=Vec3.atCenterOf(target).add(mods.eln.transparentnode.worklight.WorkLightOptics.world(facing,OutletGeometry.tipLocal(socket,turned,strip)))
+        // No synthetic plug at a missing outlet. Unloaded endpoints resume when their renderer returns.
+        if(outlet==null)return
+        val turned=outlet.horizontal
+        val start=Vec3.atCenterOf(target).add(mods.eln.transparentnode.worklight.WorkLightOptics.world(facing,OutletGeometry.tipLocal(socket,turned,strip,!outlet.wallState.isAir)))
         val end=origin.add(entry ?: mods.eln.transparentnode.worklight.WorkLightOptics.world(front,Vec3(0.0,-.43,-.25)))
         if(start.distanceTo(end)>ApplianceCord.MAX_REACH+1)return
         if(cached.isEmpty() || world.gameTime>=nextUpdate) {
             nextUpdate=world.gameTime+20;cached=CordPath.samples(start,end) { x,z,y -> CordPath.floor(world,x,z,y,pos) }
         }
-        if(((world.getBlockEntity(target) as? mods.eln.node.transparent.TransparentNodeEntity)?.elementRender as? OutletRender)?.occupied!=true)NemaPlug.draw(facing,rating,target.subtract(pos),socket,turned,strip)
+        if(((world.getBlockEntity(target) as? mods.eln.node.transparent.TransparentNodeEntity)?.elementRender as? OutletRender)?.occupied!=true)NemaPlug.draw(facing,rating,target.subtract(pos),socket,turned,strip,!outlet.wallState.isAir)
         CordPath.draw(cached,origin)
     }
 }
 
 /** Moulded body, finger rings, badge, strain relief and the mating metal blades. */
 object NemaPlug {
-    fun draw(front: Direction,rating: CordRating,offset: BlockPos=BlockPos.ZERO,socket: Int=0,horizontal: Boolean=false,strip: Boolean=false)=preserveMatrix {
+    fun draw(front: Direction,rating: CordRating,offset: BlockPos=BlockPos.ZERO,socket: Int=0,horizontal: Boolean=false,strip: Boolean=false,recessed: Boolean=false)=preserveMatrix {
         GL11.glTranslated(offset.x.toDouble(),offset.y.toDouble(),offset.z.toDouble())
+        if(recessed) { val move=mods.eln.transparentnode.worklight.WorkLightOptics.world(front,Vec3(0.0,0.0,1.0));GL11.glTranslated(move.x,move.y,move.z) }
         front.inverse.glRotateZnRef()
         if(horizontal)GL11.glRotatef(90f,0f,0f,1f)
         val shift=OutletGeometry.offset(socket,strip);GL11.glTranslated(shift.x,shift.y,shift.z)
         drawLocal(rating)
     }
     fun drawLocal(rating: CordRating)=preserveMatrix {
-        val model=mods.eln.Eln.obj.getObj(if(rating==CordRating.V120)"nema520plug" else "nema620plug")
+        val model=mods.eln.Eln.obj.getObj(if(rating.industrial)"industrialmachineplug" else if(rating==CordRating.V120)"nema520plug" else "nema620plug")
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
             GL11.glDisable(GL11.GL_TEXTURE_2D)
             GL11.glColor3f(.075f,.080f,.085f);model.getPart("Case")?.drawNoBind()
             GL11.glColor3f(.14f,.15f,.16f);model.getPart("Grip")?.drawNoBind()
             GL11.glColor3f(.73f,.61f,.31f);model.getPart("Blades")?.drawNoBind()
-            if(rating==CordRating.V120)GL11.glColor3f(.22f,.52f,.80f) else GL11.glColor3f(.85f,.48f,.10f)
+            val color=rating.color;GL11.glColor3f(color[0],color[1],color[2])
             model.getPart("Badge")?.drawNoBind()
         } finally { GL11.glPopAttrib() }
         Unit

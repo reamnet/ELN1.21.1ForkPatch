@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "eln:copper_cable"
+    },
+    "I": {
+      "item": "minecraft:iron_bars"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "IRI",
+    " C ",
+    " P "
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:electric_patio_heater"
+  }
+}

@@ -1517,7 +1517,14 @@ object TransparentNodeRegistration {
         transparentNodeItem.addDescriptor(51+(124 shl 6),mods.eln.utility.HouseServiceDescriptor(true))
         transparentNodeItem.addDescriptor(52+(124 shl 6),mods.eln.utility.BreakerPanelDescriptor())
         transparentNodeItem.addDescriptor(56+(124 shl 6),mods.eln.utility.HouseServiceDescriptor(false,disconnect=true))
-        mods.eln.utility.DistributionKind.entries.forEachIndexed { i,kind -> transparentNodeItem.addDescriptor((if(i<16)34+i else 53+i-16)+(124 shl 6),mods.eln.utility.DistributionPoleDescriptor(kind)) }
+        // 55/56 are the strip/disconnect; 58/59 are fairy strings. New enum entries need an explicit free ID.
+        val poleSubIds=intArrayOf(34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,53,54,57)
+        require(poleSubIds.size==mods.eln.utility.DistributionKind.entries.size)
+        mods.eln.utility.DistributionKind.entries.forEachIndexed { i,kind -> transparentNodeItem.addDescriptor(poleSubIds[i]+(124 shl 6),mods.eln.utility.DistributionPoleDescriptor(kind)) }
+        transparentNodeItem.addDescriptor(58+(124 shl 6),mods.eln.transparentnode.festive.FairyLightsDescriptor(TR_NAME(I18N.Type.NONE,"White Fairy Lights on Green Wire"),false))
+        transparentNodeItem.addDescriptor(6+(125 shl 6),mods.eln.transparentnode.festive.FairyLightsDescriptor(TR_NAME(I18N.Type.NONE,"Warm White Deck Globe String Lights"),false,true))
+        transparentNodeItem.addDescriptor(7+(125 shl 6),mods.eln.transparentnode.festive.FairyLightsDescriptor(TR_NAME(I18N.Type.NONE,"Multicolor Deck Globe String Lights"),true,true))
+        transparentNodeItem.addDescriptor(59+(124 shl 6),mods.eln.transparentnode.festive.FairyLightsDescriptor(TR_NAME(I18N.Type.NONE,"Multicolor Fairy Lights on Green Wire"),true))
         var subId: Int
         run {
             subId = 3
@@ -1671,6 +1678,9 @@ object TransparentNodeRegistration {
         mods.eln.transparentnode.fan.FanType.entries.forEachIndexed { i,type ->
             transparentNodeItem.addDescriptor(28+i+(124 shl 6),mods.eln.transparentnode.fan.FanDescriptor(type).apply { setCreativeTab(Eln.creativeTabMachines) })
         }
+        mods.eln.transparentnode.cord.CordRating.entries.filter { it.industrial }.forEachIndexed { i,rating ->
+            transparentNodeItem.addDescriptor(i+(125 shl 6),mods.eln.transparentnode.cord.OutletDescriptor(rating).apply { setCreativeTab(Eln.creativeTabPowerElectronics) })
+        }
         transparentNodeItem.addDescriptor(55+(124 shl 6),mods.eln.transparentnode.cord.OutletDescriptor(strip=true).apply { setCreativeTab(Eln.creativeTabPowerElectronics) })
         transparentNodeItem.addDescriptor(33+(124 shl 6),mods.eln.transparentnode.cord.OutletDescriptor(mods.eln.transparentnode.cord.CordRating.V240).apply { setCreativeTab(Eln.creativeTabPowerElectronics) })
         transparentNodeItem.addDescriptor(32+(124 shl 6),mods.eln.transparentnode.cord.OutletDescriptor().apply { setCreativeTab(Eln.creativeTabPowerElectronics) })
@@ -1683,8 +1693,8 @@ object TransparentNodeRegistration {
             mods.eln.transparentnode.worklight.WorkLightDescriptor(TR_NAME(I18N.Type.NONE, "Gasoline Construction Work Light")).apply {
                 setCreativeTab(Eln.creativeTabLighting)
             })
-        mods.eln.transparentnode.climate.ClimateType.entries.forEachIndexed { index,type ->
-            transparentNodeItem.addDescriptor(21+index+(124 shl 6),
+        mods.eln.transparentnode.climate.ClimateType.entries.forEach { type ->
+            transparentNodeItem.addDescriptor(type.subId+(124 shl 6),
                 mods.eln.transparentnode.climate.ClimateDescriptor(type).apply { setCreativeTab(Eln.creativeTabMachines) })
         }
         // New sub-IDs only: existing poles, towers and switches retain their saved identities.

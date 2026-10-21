@@ -22,12 +22,12 @@ object LampClearance {
             val ghost=Eln.ghostManager.getGhost(at)
             if(ghost==null) {
                 // The owning saved-data table can become available after the chunk itself.
-                if(state.block===Eln.ghostBlock && state.getValue(GhostBlock.SHAPE)==GhostBlock.tCube)complete=false
+                if(state.block===Eln.ghostBlock && state.getValue(GhostBlock.SHAPE)!=GhostBlock.tLampClearance)complete=false
                 continue
             }
             if(ghost.observatorCoordonate!=origin || ghost.uUID!=element.descriptor.ghostGroupUuid)continue
-            if(state.block===Eln.ghostBlock && state.getValue(GhostBlock.SHAPE)==GhostBlock.tCube)
-                world.setBlock(pos,state.setValue(GhostBlock.SHAPE,GhostBlock.tClearance),3)
+            if(state.block===Eln.ghostBlock && state.getValue(GhostBlock.SHAPE)!=GhostBlock.tLampClearance)
+                world.setBlock(pos,state.setValue(GhostBlock.SHAPE,GhostBlock.tLampClearance),3)
         }
         return complete
     }

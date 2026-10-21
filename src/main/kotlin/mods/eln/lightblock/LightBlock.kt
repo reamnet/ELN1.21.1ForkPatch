@@ -31,14 +31,21 @@ class LightBlock : Block(
     // including their block entity and light emission. Remain replaceable and shapeless.
     Properties.of().replaceable().noCollission().noOcclusion().noLootTable().instabreak()
         .pushReaction(PushReaction.DESTROY).lightLevel { it.getValue(LIGHT) }
-), EntityBlock, IMetaBlock {
+), EntityBlock, IMetaBlock, net.minecraft.world.level.block.SimpleWaterloggedBlock {
 
     init {
-        registerDefaultState(stateDefinition.any().setValue(LIGHT, 0))
+        registerDefaultState(stateDefinition.any().setValue(LIGHT, 0).setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED, false))
     }
 
     override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block, BlockState>) {
-        builder.add(LIGHT)
+        builder.add(LIGHT,net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED)
+    }
+
+    override fun getFluidState(state: BlockState): net.minecraft.world.level.material.FluidState =
+        if(state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED))net.minecraft.world.level.material.Fluids.WATER.getSource(false) else super.getFluidState(state)
+    override fun updateShape(state: BlockState, side: net.minecraft.core.Direction, neighbour: BlockState, world: net.minecraft.world.level.LevelAccessor, pos: BlockPos, neighbourPos: BlockPos): BlockState {
+        if(state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED))world.scheduleTick(pos,net.minecraft.world.level.material.Fluids.WATER,net.minecraft.world.level.material.Fluids.WATER.getTickDelay(world))
+        return super.updateShape(state,side,neighbour,world,pos,neighbourPos)
     }
 
     override fun stateForMeta(meta: Int): BlockState = defaultBlockState().setValue(LIGHT, meta.coerceIn(0, 15))

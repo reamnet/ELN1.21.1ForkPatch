@@ -10,7 +10,9 @@ enum class ClimateType(val model: String,val title: String,val watts: Double,val
     FARMHOUSE("farmhousefireplacestand",I18N.TR_NAME(I18N.Type.NONE,"Farmhouse Fireplace TV Stand"),1500.0),
     CORNER("cornerfireplacestand",I18N.TR_NAME(I18N.Type.NONE,"Corner Fireplace TV Stand"),1500.0),
     WINDOW("windowairconditioner",I18N.TR_NAME(I18N.Type.NONE,"Window Air Conditioner"),1000.0,true),
-    MINI_SPLIT("wallminisplit",I18N.TR_NAME(I18N.Type.NONE,"Wall-mounted Mini-split Air Conditioner"),900.0,true);
+    MINI_SPLIT("wallminisplit",I18N.TR_NAME(I18N.Type.NONE,"Wall-mounted Mini-split Air Conditioner"),900.0,true),
+    PATIO("deckpatioheater",I18N.TR_NAME(I18N.Type.NONE,"Electric Patio Heater"),1500.0);
+    val subId get()=if(this==PATIO)62 else 21+ordinal
     val volts get()=120.0
     val sound get()=when(this) {
         WINDOW -> "appliance_window_ac"

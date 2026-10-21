@@ -18,9 +18,13 @@ object DecorativeLampLighting {
             val sourceCell = BlockPos.containing(source)
             if (world.chunkSource.getChunkNow(sourceCell.x shr 4,sourceCell.z shr 4) != null) cells.add(sourceCell)
             if (style.range == 0) continue
-            val beams = if(style.aimHeadCount>0)listOf(element.aim.rotate(Vec3(1.0,0.0,0.0),aimHead))
-                else if (style == DecorativeLampStyle.WAREHOUSE || style == DecorativeLampStyle.PARKING)
-                listOf(style.beam,style.beam.add(0.0,0.0,.28).normalize(),style.beam.add(0.0,0.0,-.28).normalize()) else if(style == DecorativeLampStyle.SCONCE_CYLINDER) listOf(style.beam,Vec3(.15,-1.0,0.0)) else listOf(style.beam)
+            val central=if(style.aimHeadCount>0)element.aim.rotate(if(element.aim.axialPan)Vec3(-1.0,0.0,0.0) else Vec3(1.0,0.0,0.0),aimHead) else style.beam
+            val beams=if(style.wideBeam || style==DecorativeLampStyle.WAREHOUSE) {
+                val u=central.cross(if(kotlin.math.abs(central.y)<.9)Vec3(0.0,1.0,0.0) else Vec3(1.0,0.0,0.0)).normalize()
+                val v=central.cross(u).normalize()
+                listOf(central,central.add(u.scale(.55)).normalize(),central.add(u.scale(-.55)).normalize(),
+                    central.add(v.scale(.40)).normalize(),central.add(v.scale(-.40)).normalize())
+            } else if(style==DecorativeLampStyle.SCONCE_CYLINDER)listOf(central,Vec3(.15,-1.0,0.0)) else listOf(central)
             for (beam in beams) {
                 val direction = style.worldDirection(element.side,element.front,beam)
                 var last: BlockPos? = null
@@ -30,6 +34,7 @@ object DecorativeLampLighting {
                     val state = world.getBlockState(at)
                     if (state.isSolidRender(world,at)) break
                     last = at
+                    if(step%4==0)cells.add(at)
                 }
                 last?.let(cells::add)
             }

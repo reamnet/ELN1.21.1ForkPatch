@@ -28,6 +28,7 @@ fun climateStatus(status: String)=when(status) {
 }
 class ClimateDescriptor(val type: ClimateType) : PowerCabinetDescriptor(type.title,ClimateElement::class.java,ClimateRender::class.java,type.cooling) {
     private val model=Eln.obj.getObj(type.model)
+    init { if(type==ClimateType.PATIO)ghostGroup=mods.eln.ghost.GhostGroup().apply { addElement(0,1,0,mods.eln.ghost.GhostBlock.tClearance) } }
     fun draw(front: Direction,active: Boolean)=preserveMatrix {
         front.inverse.glRotateZnRef()
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
@@ -62,7 +63,7 @@ class ClimateDescriptor(val type: ClimateType) : PowerCabinetDescriptor(type.tit
         val front=(world?.getBlockEntity(BlockPos(x,y,z)) as? TransparentNodeEntity)?.let { it.elementRender?.front ?: (it.node as? TransparentNode)?.element?.front } ?: Direction.ZP
         val portable=type==ClimateType.PORTABLE
         val w=if(portable).27 else .48
-        val points=listOf(Vec3(-w,-.5,-.31),Vec3(w,if(portable).25 else .50,if(portable).04 else .33))
+        val points=listOf(Vec3(-w,-.5,-.31),Vec3(w,if(type==ClimateType.PATIO)1.40 else if(portable).25 else .50,if(portable).04 else .33))
         val a=mods.eln.transparentnode.worklight.WorkLightOptics.world(front,points[0]);val b=mods.eln.transparentnode.worklight.WorkLightOptics.world(front,points[1])
         val box=AABB(kotlin.math.min(a.x,b.x)+x+.5,kotlin.math.min(a.y,b.y)+y+.5,kotlin.math.min(a.z,b.z)+z+.5,
             kotlin.math.max(a.x,b.x)+x+.5,kotlin.math.max(a.y,b.y)+y+.5,kotlin.math.max(a.z,b.z)+z+.5)

@@ -22,6 +22,10 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
     private val cableTexture: ResourceLocation
     private val catenaries = ArrayList<Catenary>()
     protected var idealRenderingAngle: Float = 0.toFloat()
+    var highVoltageRenderAngle=0f
+        private set
+    var lowVoltageRenderAngle=0f
+        private set
 
     init {
         this.descriptor = descriptor as GridDescriptor
@@ -30,7 +34,7 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
     }
 
     override fun draw() {
-        descriptor.draw(idealRenderingAngle)
+        descriptor.draw(highVoltageRenderAngle)
         drawCables()
     }
 
@@ -57,6 +61,7 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
             }
             catenaries.clear()
             idealRenderingAngle = stream.readFloat()
+            highVoltageRenderAngle=stream.readFloat();lowVoltageRenderAngle=stream.readFloat()
             val linkCount = stream.readInt()
             for (i in 0..linkCount - 1) {
                 val wires=stream.readUnsignedByte()
@@ -68,26 +73,26 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
         }
     }
 
+    override fun destructor() { catenaries.forEach { it.destroy() };catenaries.clear();super.destructor() }
+
     override fun cameraDrawOptimisation(): Boolean {
         return false
     }
 
     override fun unoptimizedRenderBoundingBox(): AABB {
-        val margin = 16.0
-        val extent = descriptor.connectRange + margin
-        val cx = tileEntity.xCoord + 0.5
-        val cy = tileEntity.yCoord + 0.5
-        val cz = tileEntity.zCoord + 0.5
-        return AABB(
-            cx - extent, cy - extent, cz - extent,
-            cx + extent, cy + extent, cz + extent
-        )
+        var bounds = descriptor.geometryBounds()
+        for (catenary in catenaries) bounds = bounds.minmax(catenary.bounds)
+        return bounds.move(tileEntity.xCoord + .5, tileEntity.yCoord + .5, tileEntity.zCoord + .5)
     }
 
     private inner class Catenary(start: Vec3, end: Vec3) {
+        val bounds: AABB
         private val list = glGenLists(1)
         init {
             val sections = OverheadCableMesh.sections(start, end)
+            val vertices = sections.flatten()
+            bounds = AABB(vertices.minOf { it.x }, vertices.minOf { it.y }, vertices.minOf { it.z },
+                vertices.maxOf { it.x }, vertices.maxOf { it.y }, vertices.maxOf { it.z }).inflate(.05)
             glNewList(list, GL_COMPILE)
             glBegin(GL_TRIANGLES)
             fun face(a: Vec3, b: Vec3, c: Vec3, d: Vec3) {

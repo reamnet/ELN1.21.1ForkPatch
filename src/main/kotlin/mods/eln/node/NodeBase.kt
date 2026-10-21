@@ -120,7 +120,11 @@ abstract class NodeBase {
         isDestructing = true
         if (!Eln.config.getBooleanOrElse("gameplay.hazards.explosionsEnabled", false)) explosionStrength = 0f
         disconnect()
-        coordinate.world().setBlockToAir(coordinate.x, coordinate.y, coordinate.z)
+        val world=coordinate.world()
+        val pos=net.minecraft.core.BlockPos(coordinate.x,coordinate.y,coordinate.z)
+        val state=world.getBlockState(pos)
+        val wall=(this as? mods.eln.node.transparent.TransparentNode)?.element.let { it as? mods.eln.transparentnode.cord.OutletElement }?.wallState
+        world.setBlock(pos,wall?.takeUnless { it.isAir } ?: state.fluidState.createLegacyBlock(),3)
         NodeManager.instance!!.removeNode(this)
         if (explosionStrength != 0f) {
             coordinate.world().explode(null as Entity?, coordinate.x.toDouble(), coordinate.y.toDouble(), coordinate.z.toDouble(), explosionStrength, true, Level.ExplosionInteraction.BLOCK)

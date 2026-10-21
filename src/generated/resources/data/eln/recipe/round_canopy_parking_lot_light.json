@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": {
+      "item": "minecraft:quartz"
+    },
+    "L": {
+      "item": "eln:twin_parking_lot_light"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    " D ",
+    "DLD",
+    " P "
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:round_canopy_parking_lot_light"
+  }
+}

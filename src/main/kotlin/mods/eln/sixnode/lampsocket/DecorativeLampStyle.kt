@@ -149,29 +149,70 @@ enum class DecorativeLampStyle(val model: String, val itemName: String, val bulb
     FAN_INDUSTRIAL("industrialceilingfan", I18N.TR_NAME(I18N.Type.NONE,"Industrial Five Block Ceiling Fan"),1,.65,0,
         listOf(Vec3(.59,0.0,0.0)),Vec3(1.0,0.0,0.0)),
     FAN_AURA("auraceilingfan", I18N.TR_NAME(I18N.Type.NONE,"Aura Five Blade Ceiling Fan"),7,.55,0,
-        (0..6).map { Vec3(.479,.067*cos(it*2*PI/7),.067*sin(it*2*PI/7)) },Vec3(1.0,0.0,0.0));
+        (0..6).map { Vec3(.479,.067*cos(it*2*PI/7),.067*sin(it*2*PI/7)) },Vec3(1.0,0.0,0.0)),
+    AREA_FLOOD("wideareafloodlight", I18N.TR_NAME(I18N.Type.NONE,"Large Area Floodlight"),4,1.6,18,
+        (0..3).map { Vec3(.75,if(it<2)-.22 else .22,if(it%2==0)-.42 else .42) },Vec3(.94,-.34,0.0)),
+    PARKING_QUAD("quadparkinglight", I18N.TR_NAME(I18N.Type.NONE,"Quad Head Parking Lot Light"),4,6.0,12,
+        (0..3).map { Vec3(5.65,1.10*cos(it*PI/2),1.10*sin(it*PI/2)) },Vec3(-1.0,0.0,0.0)),
+    PARKING_ROUND("roundparkinglight", I18N.TR_NAME(I18N.Type.NONE,"Round Canopy Parking Lot Light"),4,5.8,12,
+        (0..3).map { Vec3(5.35,.45*cos(it*PI/2),.45*sin(it*PI/2)) },Vec3(-1.0,0.0,0.0)),
+    PARKING_OFFSET("offsetparkinglight", I18N.TR_NAME(I18N.Type.NONE,"Offset Twin Arm Parking Lot Light"),2,6.0,12,
+        listOf(Vec3(5.65,-1.1,-.45),Vec3(5.65,1.1,.45)),Vec3(-1.0,0.0,0.0)),
+    POOL_ROUND("poolnichelight", I18N.TR_NAME(I18N.Type.NONE,"Round Niche Pool Light"),1,.22,8,
+        listOf(Vec3(.13,0.0,0.0)),Vec3(1.0,0.0,0.0)),
+    POOL_STRIP("poollinearlight", I18N.TR_NAME(I18N.Type.NONE,"Linear Pool Wall Light"),3,1.0,7,
+        (0..2).map { Vec3(.08,0.0,-.30+it*.30) },Vec3(1.0,0.0,0.0)),
+    POOL_SQUARE("poolsquarelight", I18N.TR_NAME(I18N.Type.NONE,"Square Recessed Pool Light"),1,.18,8,
+        listOf(Vec3(.085,0.0,0.0)),Vec3(1.0,0.0,0.0)),
+    POOL_CORNER("poolcornerlight", I18N.TR_NAME(I18N.Type.NONE,"Pool Corner Wash Light"),2,.25,7,
+        listOf(Vec3(.15,0.0,-.12),Vec3(.15,0.0,.12)),Vec3(1.0,0.0,0.0)),
+    POOL_STEP("poolsteplight", I18N.TR_NAME(I18N.Type.NONE,"Pool Step Marker Light"),1,.12,4,
+        listOf(Vec3(.065,-.03,0.0)),Vec3(.8,-.6,0.0)),
+    PARTY_FESTOON("partyfestoonlights", I18N.TR_NAME(I18N.Type.NONE,"Patio Festoon Party Lights"),5,2.0,1,
+        (0..4).map { Vec3(.12,-.12,-.8+it*.4) },Vec3(1.0,0.0,0.0)),
+    PARTY_TIKI("poolsidetikilight", I18N.TR_NAME(I18N.Type.NONE,"Electric Poolside Tiki Light"),1,1.8,2,
+        listOf(Vec3(1.5,0.0,0.0)),Vec3(1.0,0.0,0.0)),
+    PARTY_WASH("partywashlight", I18N.TR_NAME(I18N.Type.NONE,"Multicolor Party Wash Light"),3,.65,12,
+        listOf(Vec3(.4,.12,-.18),Vec3(.4,.12,0.0),Vec3(.4,.12,.18)),Vec3(.94,-.34,0.0)),
+    PARTY_GLOBE("patioglobestring", I18N.TR_NAME(I18N.Type.NONE,"Poolside Globe String Lights"),4,2.0,1,
+        (0..3).map { Vec3(.15,-.14,-.72+it*.48) },Vec3(1.0,0.0,0.0)),
+    PARTY_LANTERN("poolsidepartylantern", I18N.TR_NAME(I18N.Type.NONE,"Poolside Party Lantern"),1,.9,2,
+        listOf(Vec3(.52,0.0,0.0)),Vec3(1.0,0.0,0.0)),
+    DECK_POST_CAP("deckpostcaplight",I18N.TR_NAME(I18N.Type.NONE,"Deck Post Cap Light"),1,.32,2,
+        listOf(Vec3(.20,0.0,0.0)),Vec3(1.0,0.0,0.0)),
+    DECK_STEP("decksteplight",I18N.TR_NAME(I18N.Type.NONE,"Deck Step Riser Light"),1,.12,3,
+        listOf(Vec3(.07,-.02,0.0)),Vec3(.5,-.866,0.0)),
+    FAN_PATIO("patiotropicalfan",I18N.TR_NAME(I18N.Type.NONE,"Tropical Patio Ceiling Fan"),1,.7,1,
+        listOf(Vec3(.62,0.0,0.0)),Vec3(1.0,0.0,0.0));
 
-    val fan get()=this==FAN_CLASSIC || this==FAN_MODERN || this==FAN_INDUSTRIAL || this==FAN_AURA
-    val fanWatts get()=if(this==FAN_CLASSIC)55.0 else if(this==FAN_MODERN)28.0 else if(this==FAN_INDUSTRIAL)300.0 else if(this==FAN_AURA)45.0 else 0.0
+    val fan get()=this==FAN_CLASSIC || this==FAN_MODERN || this==FAN_INDUSTRIAL || this==FAN_AURA || this==FAN_PATIO
+    val fanWatts get()=if(this==FAN_CLASSIC)55.0 else if(this==FAN_MODERN)28.0 else if(this==FAN_INDUSTRIAL)300.0 else if(this==FAN_AURA)45.0 else if(this==FAN_PATIO)38.0 else 0.0
 
     val miniDot get()=this in DOT_PINHOLE..DOT_TWIN
     val aimHeadCount get()=when {
+        parking || street -> if(this==PARKING_ROUND)1 else bulbs
+        this==AREA_FLOOD || this==PARTY_WASH -> 1
         this==EAVE_TWIN || this==DOT_TWIN -> 2
         miniDot || this==WAREHOUSE || this==POT_GIMBAL || this==HEAVY_FLOOD || this==RIG_FLOOD -> 1
         else -> 0
     }
-    val defaultTilt get()=Math.toDegrees(atan2(beam.y,beam.x))
+    val defaultTilt get()=if(parking || street)0.0 else Math.toDegrees(atan2(beam.y,beam.x))
     fun aimPivot(head: Int)=when {
+        parking || street -> if(this==PARKING_ROUND)Vec3(5.40,0.0,0.0) else heads[head].add(.05,0.0,0.0)
         this==EAVE_TWIN -> Vec3(.13,0.0,if(head==0)-.20 else .20)
         this==DOT_TWIN -> Vec3(.045,0.0,if(head==0)-.09 else .09)
         miniDot || this==POT_GIMBAL -> Vec3(.045,0.0,0.0)
         else -> Vec3(.25,0.0,0.0)
     }
-    fun aimHead(bulb: Int)=if(aimHeadCount==2)bulb else 0
-    fun newAim()=LightAim(aimHeadCount,defaultTilt)
+    fun aimHead(bulb: Int)=if(aimHeadCount==bulbs)bulb else 0
+    fun newAim()=LightAim(aimHeadCount,defaultTilt,parking || street)
 
-    val tableLamp get() = this == DESK || this == TABLE_DRUM || this == TABLE_BANKER || this == TABLE_TASK || this == WINDOW_CANDLE || this == HALLOWEEN_JACK
-    val wallLamp get() = when(this) {
+    val tableLamp get() = this==DECK_POST_CAP || this == DESK || this == TABLE_DRUM || this == TABLE_BANKER || this == TABLE_TASK || this == WINDOW_CANDLE || this == HALLOWEEN_JACK
+    val parking get()=this==PARKING || this in PARKING_QUAD..PARKING_OFFSET
+    val pool get()=this in POOL_ROUND..POOL_STEP
+    val partyString get()=this==PARTY_FESTOON || this==PARTY_GLOBE
+    val wideBeam get()=parking || street || pool || this==AREA_FLOOD || this==PARTY_WASH
+    val wallLamp get() = this==DECK_STEP || pool || partyString || this==AREA_FLOOD || this==PARTY_WASH || when(this) {
         CHRISTMAS_FAIRY,CHRISTMAS_COLOR,CHRISTMAS_ICICLE,CHRISTMAS_STAR,HALLOWEEN_PUMPKIN,HALLOWEEN_GHOST,HALLOWEEN_BAT,HEAVY_FLOOD,HEAVY_BULKHEAD,HEAVY_WALLPACK,HEAVY_YARD,RIG_FLOOD,WAREHOUSE,PORCH,MOTION,SCONCE_CYLINDER,SCONCE_FABRIC,SCONCE_GLOBE,SCONCE_CAGE,SCONCE_CANDLE,OUTDOOR_BARN -> true
         else -> false
     }
@@ -184,8 +225,8 @@ enum class DecorativeLampStyle(val model: String, val itemName: String, val bulb
     val strip get() = this in STRIP_CABINET..STRIP_NEON
     val street get() = this == STREET_LED || this == STREET_BOULEVARD
     val ceiling get() = fan || miniDot || this==EAVE_TWIN || luxury || this == HEAVY_CANOPY || this == RIG_CAGE || this == RIG_LINEAR || this == STRIP_RECESSED || this == RECESSED || this == CHANDELIER || this == SHOP || this == FACTORY || foyer || this == POT_BAFFLE || this == POT_TRIMLESS || this == POT_GIMBAL
-    val uprightItem get() = this == FLOOR_DRUM || street || this == PARKING || tableLamp || this == OUTDOOR_BOLLARD || this == OUTDOOR_POST || ceiling
-    val exposedBulbs get() = luxury || this == FLOOR_DRUM || this == WINDOW_CANDLE || this == HALLOWEEN_JACK || this == STREET_BOULEVARD || foyer || tableLamp || this == SCONCE_CANDLE || this == SCONCE_CAGE || this == SCONCE_GLOBE || this == OUTDOOR_POST || this == DESK || this == CHANDELIER || this == PORCH || this == HOLDER
+    val uprightItem get() = this == FLOOR_DRUM || street || parking || tableLamp || this == OUTDOOR_BOLLARD || this == OUTDOOR_POST || this==PARTY_TIKI || this==PARTY_LANTERN || ceiling
+    val exposedBulbs get() = partyString || this==PARTY_TIKI || this==PARTY_LANTERN || luxury || this == FLOOR_DRUM || this == WINDOW_CANDLE || this == HALLOWEEN_JACK || this == STREET_BOULEVARD || foyer || tableLamp || this == SCONCE_CANDLE || this == SCONCE_CAGE || this == SCONCE_GLOBE || this == OUTDOOR_POST || this == DESK || this == CHANDELIER || this == PORCH || this == HOLDER
 
     fun localFacing(v: Vec3, front: LRDU) = front.rotateOnXnLeft(v.xRot((-PI/2).toFloat()))
     fun worldPoint(origin: Vec3, side: Direction, front: LRDU, local: Vec3): Vec3 =

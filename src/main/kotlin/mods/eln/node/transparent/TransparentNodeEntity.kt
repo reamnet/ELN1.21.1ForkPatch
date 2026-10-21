@@ -54,12 +54,15 @@ open class TransparentNodeEntity(type: BlockEntityType<*>, pos: BlockPos, state:
                 elementRenderId = 0.toShort()
                 elementRender = null
             } else {
-                if (id != elementRenderId) {
+                val changed = id != elementRenderId
+                if (changed) {
                     elementRenderId = id
                     val descriptor = Eln.transparentNodeItem.getDescriptor(id.toInt())
                     elementRender = descriptor!!.RenderClass.getConstructor(TransparentNodeEntity::class.java, TransparentNodeDescriptor::class.java).newInstance(this, descriptor) as TransparentNodeElementRender
                 }
+                val hadCord=elementRender!!.cord.endpoint!=null
                 elementRender!!.networkUnserialize(stream)
+                if (changed || hadCord!=(elementRender!!.cord.endpoint!=null)) level?.sendBlockUpdated(blockPos, blockState, blockState, 3)
             }
         } catch (e: IOException) {
             e.printStackTrace()

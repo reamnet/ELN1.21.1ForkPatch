@@ -89,11 +89,14 @@ abstract class NodeBlock(properties: Properties, blockItemNbr: Int) : Block(prop
 
     //server
     override fun onRemove(state: BlockState, world: Level, pos: BlockPos, newState: BlockState, movedByPiston: Boolean) {
+        var restore: BlockState?=null
         if (!state.`is`(newState.block)) {
             val entity = world.getBlockEntity(pos) as? NodeBlockEntity
+            if(!world.isClientSide)restore=((entity?.node as? mods.eln.node.transparent.TransparentNode)?.element as? mods.eln.transparentnode.cord.OutletElement)?.wallState?.takeUnless { it.isAir }
             entity?.onBreakBlock()
         }
         super.onRemove(state, world, pos, newState, movedByPiston)
+        if(!world.isClientSide && newState.isAir && restore!=null)world.setBlock(pos,restore,3)
     }
 
     override fun neighborChanged(state: BlockState, world: Level, pos: BlockPos, block: Block, fromPos: BlockPos, movedByPiston: Boolean) {

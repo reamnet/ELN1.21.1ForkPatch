@@ -42,6 +42,8 @@ class MainsStepDown(private val owner: TransparentNodeElement, val poleTransform
         private set
     var lampHeightStep = 0
         private set
+    var lampPitch = 0
+        private set
     var lampYaw = 0
         private set
     val primary = NbtElectricalLoad("mainsPrimary")
@@ -105,6 +107,7 @@ class MainsStepDown(private val owner: TransparentNodeElement, val poleTransform
         tag.putBoolean("mainsLampAutomatic", lampAutomatic)
         tag.putInt("mainsLampHeightStep", lampHeightStep)
         tag.putInt("mainsLampYaw", lampYaw)
+        tag.putInt("mainsLampPitch", lampPitch)
     }
     fun read(tag: CompoundTag) {
         ratedWatts=tag.getInt("mainsRatedWatts").takeIf { it in RATINGS } ?: 10_000
@@ -115,12 +118,14 @@ class MainsStepDown(private val owner: TransparentNodeElement, val poleTransform
         lampAutomatic = tag.getBoolean("mainsLampAutomatic")
         lampHeightStep = tag.getInt("mainsLampHeightStep").takeIf(StreetLightMount::validStep) ?: 0
         lampYaw = tag.getInt("mainsLampYaw").takeIf(StreetLightMount::validYaw) ?: 0
+        lampPitch=tag.getInt("mainsLampPitch").takeIf(StreetLightMount::validPitch) ?: 0
         updateController()
     }
     fun packet(id: Byte, stream: DataInputStream): Boolean {
-        if (id.toInt() !in 80..86) return false
+        if (id.toInt() !in 80..86 && id.toInt()!=98) return false
         try {
             when (id.toInt()) {
+                98 -> { val movement=stream.readInt();if(movement in listOf(-5,-1,1,5))lampPitch=(lampPitch+movement).coerceIn(-60,60);return true }
                 86 -> { val next=stream.readInt();if(!poleTransformer && next in RATINGS) { ratedWatts=next;thermal.heatCapacity=2000.0*ratedWatts/10_000;thermal.Rp=.08*10_000/ratedWatts;outputWinding.resistance=.01*10_000/ratedWatts } }
                 80 -> { val value = stream.readInt(); if (!validVoltage(value)) return true; outputVoltage = value }
                 81 -> enabled = stream.readBoolean()
@@ -148,6 +153,7 @@ class MainsStepDown(private val owner: TransparentNodeElement, val poleTransform
         stream.writeBoolean(installed); stream.writeByte(light)
         stream.writeByte(lampHeightStep)
         stream.writeShort(lampYaw)
+        stream.writeByte(lampPitch)
         stream.writeDouble(primary.voltage); stream.writeDouble(secondary.voltage)
         stream.writeDouble(output.power); stream.writeUTF(controller.status)
         owner.node!!.lrduCubeMask.getTranslate(owner.front.down()).serialize(stream)

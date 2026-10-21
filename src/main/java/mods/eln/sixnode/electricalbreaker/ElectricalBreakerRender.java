@@ -1,6 +1,7 @@
 package mods.eln.sixnode.electricalbreaker;
 
 import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.cable.CableRenderType;
 import mods.eln.misc.*;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
@@ -44,6 +45,13 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
         front.glRotateOnX();
         drawInternalPins();
         descriptor.draw(interpol.get(), UtilsClient.distanceFromClientPlayer(getTileEntity()));
+    }
+
+    @Override
+    public void newConnectionType(CableRenderType connectionType) {
+        // Large cable meshes used to continue underneath and through the breaker housing.
+        float[] ends = descriptor.cableStarts(front);
+        System.arraycopy(ends, 0, connectionType.startAt, 0, ends.length);
     }
 
     @Override

@@ -41,8 +41,12 @@ class LightBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(TYPE.get(
             val block = w.getBlock(x, y, z)
 
             if (block !== Eln.lightBlock) {
-                if (!w.getBlockState(x, y, z).isAir) return
-                w.setBlock(x, y, z, Eln.lightBlock, light, 2)
+                val pos=BlockPos(x,y,z)
+                val old=w.getBlockState(pos)
+                val water=old.block===net.minecraft.world.level.block.Blocks.WATER && old.fluidState.isSource
+                if (!old.isAir && !water) return
+                if(light<=0)return
+                w.setBlock(pos,Eln.lightBlock.stateForMeta(light).setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED,water),2)
             }
 
             val t = w.getBlockEntity(x, y, z)
@@ -89,7 +93,7 @@ class LightBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(TYPE.get(
         if (world.isClientSide) return
 
         if (lightList.isEmpty()) {
-            world.setBlockToAir(xCoord, yCoord, zCoord)
+            world.setBlock(blockPos,world.getBlockState(blockPos).fluidState.createLegacyBlock(),3)
             Utils.println("Destroy light at %d %d %d", xCoord, yCoord, zCoord)
             return
         }

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "eln:flexible_appliance_cord"
+    },
+    {
+      "item": "eln:rubber"
+    },
+    {
+      "item": "minecraft:green_dye"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:200_v_workshop_cord"
+  }
+}

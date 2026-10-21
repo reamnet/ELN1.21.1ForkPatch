@@ -57,7 +57,7 @@ class DecorativeLightingTest {
         assertNotNull(mesh(DecorativeLampStyle.PORCH).getPart("Glass"))
         val parking = fixtures.single { it.fixture == DecorativeLampStyle.PARKING }
         assertEquals(5.15,parking.fixture!!.heads.first().x,1e-6) // Previous head height was 3.15.
-        assertEquals(5.43,mesh(DecorativeLampStyle.PARKING).getPart("Metal").boundingBox().max.x,1e-6)
+        assertEquals(5.43,mesh(DecorativeLampStyle.PARKING).getPart("Head0Metal").boundingBox().max.x,1e-6)
         val clearance = parking.getGhostGroup(Direction.YN,LRDU.Up)!!.elementList
         assertEquals(13,clearance.size)
         assertTrue(clearance.any { it.y == 5 && it.x != 0 })

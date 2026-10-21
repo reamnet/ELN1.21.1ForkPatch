@@ -34,7 +34,7 @@ class LampSocketGui(player: Player, val render: LampSocketRender) :
     override fun initGui() {
         super.initGui()
         if(render.aim.heads>0)aiming=LightAimControls(this,82,render.aim) { head,axis,value ->
-            render.clientSetDouble((5+head*2+axis).toByte(),value)
+            render.clientSetDouble((32+head*2+axis).toByte(),value)
         }
         if(render.descriptor.fixture?.fan==true)fanButton=newGuiButton(40,57,96,"")
 

@@ -31,7 +31,8 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 
     Obj3DPart main;
 
-    double nominalVoltage, nominalPower;
+    public double nominalVoltage;
+    double nominalPower;
     double Rp;
 
     public EggIncubatorDescriptor(String name,

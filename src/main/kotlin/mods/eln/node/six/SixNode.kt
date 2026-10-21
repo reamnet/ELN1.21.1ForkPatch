@@ -220,13 +220,13 @@ class SixNode : Node() {
     override fun getElectricalLoad(side: Direction, lrdu: LRDU, mask: Int): ElectricalLoad? {
         val elementSide = side.applyLRDU(lrdu)
         val element = sideElementList[elementSide.int] ?: return null
-        return element.getElectricalLoad(elementSide.getLRDUGoingTo(side)!!, mask)
+        return element.getElectricalLoad(elementSide.getLRDUGoingTo(side)!!, mask).takeUnless { element.machineCord?.blocks(it)==true }
     }
 
     override fun getElectricalLoad(side: Direction, lrdu: LRDU, mask: Int, remoteEndpoint: NodeConnectionEndpoint): ElectricalLoad? {
         val elementSide = side.applyLRDU(lrdu)
         val element = sideElementList[elementSide.int] ?: return null
-        return element.getElectricalLoad(elementSide.getLRDUGoingTo(side)!!, mask, remoteEndpoint)
+        return element.getElectricalLoad(elementSide.getLRDUGoingTo(side)!!, mask, remoteEndpoint).takeUnless { element.machineCord?.blocks(it)==true }
     }
 
     override fun getThermalLoad(side: Direction, lrdu: LRDU, mask: Int): ThermalLoad? {
@@ -238,7 +238,8 @@ class SixNode : Node() {
     override fun getSideConnectionMask(side: Direction, lrdu: LRDU): Int {
         val elementSide = side.applyLRDU(lrdu)
         val element = sideElementList[elementSide.int] ?: return 0
-        return element.getConnectionMask(elementSide.getLRDUGoingTo(side)!!)
+        val local=elementSide.getLRDUGoingTo(side)!!
+        return if(element.machineCord?.blocks(element.getElectricalLoad(local,0))==true) 0 else element.getConnectionMask(local)
     }
 
     override fun getConnectionEndpoint(side: Direction, lrdu: LRDU): NodeConnectionEndpoint {
@@ -383,8 +384,8 @@ class SixNode : Node() {
 
     fun tryConnectTwoInternalElement(side: Direction, element: SixNodeElement, lrdu: LRDU, otherSide: Direction, otherElement: SixNodeElement, otherLRDU: LRDU) {
         println("SixNode.tCTIE:")
-        val mskThis = element.getConnectionMask(lrdu)
-        val mskOther = otherElement.getConnectionMask(otherLRDU)
+        val mskThis = if(element.machineCord?.blocks(element.getElectricalLoad(lrdu,0))==true) 0 else element.getConnectionMask(lrdu)
+        val mskOther = if(otherElement.machineCord?.blocks(otherElement.getElectricalLoad(otherLRDU,0))==true) 0 else otherElement.getConnectionMask(otherLRDU)
         if (compareConnectionMask(mskThis, mskOther)) {
             println("\tConnection OK.")
             lrduElementMask[side, lrdu] = true

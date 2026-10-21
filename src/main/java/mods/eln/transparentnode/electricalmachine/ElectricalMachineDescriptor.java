@@ -27,7 +27,7 @@ import static mods.eln.i18n.I18N.tr;
 public class ElectricalMachineDescriptor extends TransparentNodeDescriptor implements IPlugIn {
     public RecipesList recipe = new RecipesList();
 
-    final double nominalU;
+    public final double nominalU;
     final double nominalP;
     private final ThermalLoadInitializer thermal;
     final ElectricalCableDescriptor cable;

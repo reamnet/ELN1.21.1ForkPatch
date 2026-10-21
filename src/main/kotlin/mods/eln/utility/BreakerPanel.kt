@@ -66,6 +66,7 @@ class BreakerPanelElement(node: TransparentNode,descriptor: TransparentNodeDescr
         var controlChannel=""
         var aggregator=0
         var use240=false
+        var dusk=false
         var accumulator=0.0
         val fixtureDemand=java.util.IdentityHashMap<Any,Double>()
         var wirelessOn=true
@@ -89,13 +90,13 @@ class BreakerPanelElement(node: TransparentNode,descriptor: TransparentNodeDescr
         }
         fun configure() { contacts.forEachIndexed { i,c -> c.closed=i==bus && rating>0 && breaker.enabled && !breaker.tripped && wirelessOn } }
         fun write(tag: CompoundTag) {
-            val p="panel$id";breaker.write(tag,p);tag.putString(p+"Power",powerChannel);tag.putString(p+"Control",controlChannel);tag.putInt(p+"Aggregator",aggregator);tag.putBoolean(p+"240",use240)
+            val p="panel$id";breaker.write(tag,p);tag.putString(p+"Power",powerChannel);tag.putString(p+"Control",controlChannel);tag.putInt(p+"Aggregator",aggregator);tag.putBoolean(p+"240",use240);tag.putBoolean(p+"Dusk",dusk)
             (aggregators[2] as ToogleAggregator).writeToNBT(tag,p+"Toggle")
         }
         fun read(tag: CompoundTag) {
-            val p="panel$id";breaker.read(tag,p);powerChannel=tag.getString(p+"Power").take(64);controlChannel=tag.getString(p+"Control").take(64);aggregator=tag.getInt(p+"Aggregator").coerceIn(0,2);use240=tag.getBoolean(p+"240")
+            val p="panel$id";breaker.read(tag,p);powerChannel=tag.getString(p+"Power").take(64);controlChannel=tag.getString(p+"Control").take(64);aggregator=tag.getInt(p+"Aggregator").coerceIn(0,2);use240=tag.getBoolean(p+"240");dusk=tag.getBoolean(p+"Dusk")
             if(tag.contains(p+"Togglestate"))(aggregators[2] as ToogleAggregator).readFromNBT(tag,p+"Toggle")
-            wirelessOn=controlChannel.isBlank() || controlChannel.equals("true",true)
+            wirelessOn=!dusk && (controlChannel.isBlank() || controlChannel.equals("true",true))
             previousRating=rating;configure()
         }
     }
@@ -110,6 +111,9 @@ class BreakerPanelElement(node: TransparentNode,descriptor: TransparentNodeDescr
     private val txStrength=HashMap<IWirelessSignalTx,Double>()
     private var wirelessClock=0.0
     private var registered=false
+    var darkOutside=false
+        private set
+    internal fun updateDarkness(darkness: Int) { darkOutside=if(darkOutside)darkness>2 else darkness>=4 }
     init {
         electricalLoadList.addAll(buses)
         electricalProcessList.add(IProcess { wiredService.update() })
@@ -119,11 +123,13 @@ class BreakerPanelElement(node: TransparentNode,descriptor: TransparentNodeDescr
     }
     private fun step(dt: Double) {
         (transparentNodeDescriptor as BreakerPanelDescriptor).checkSupport(this)
+        (coordinate().world() as? net.minecraft.server.level.ServerLevel)?.let { updateDarkness(if(it.dimensionType().hasSkyLight())it.skyDarken else 15) }
         wirelessClock-=dt
         if(wirelessClock<=0) { wirelessClock=1.0;txSet.clear();txStrength.clear();WirelessUtils.getTx(WirelessUtils.buildSpot(coordinate(),null,0),txSet,txStrength) }
         circuits.forEach { c ->
             c.refreshDemand()
             c.wirelessOn=when { c.controlChannel.isBlank() || c.controlChannel.equals("true",true)->true;c.controlChannel.equals("false",true)->false;else->txSet[c.controlChannel]?.let { c.aggregators[c.aggregator].aggregate(it)>=.5 } ?: false }
+            if(c.dusk)c.wirelessOn=c.wirelessOn && darkOutside
             if(c.breaker.step(dt,c.contacts[c.bus].current,c.rating)) { play(mods.eln.sound.SoundCommand("eln:circuit_breaker_close").smallRange().mulVolume(.22));needPublish() }
             c.configure()
         }
@@ -166,7 +172,7 @@ class BreakerPanelElement(node: TransparentNode,descriptor: TransparentNodeDescr
     override fun readItemStackNBT(nbt: CompoundTag?) { if(nbt!=null)readSettings(nbt) }
     override fun networkSerialize(stream: DataOutputStream) {
         super.networkSerialize(stream);stream.writeInt(selectedCircuit);stream.writeInt(selectedTerminal);stream.writeInt(transmissionRange)
-        circuits.forEach { c -> stream.writeDouble(c.rating);stream.writeBoolean(c.breaker.enabled);stream.writeBoolean(c.breaker.tripped);stream.writeBoolean(c.contacts[c.bus].closed);stream.writeBoolean(c.use240);stream.writeUTF(c.powerChannel);stream.writeUTF(c.controlChannel);stream.writeInt(c.aggregator);stream.writeDouble(c.load.voltage);stream.writeDouble(c.contacts[c.bus].current) }
+        circuits.forEach { c -> stream.writeDouble(c.rating);stream.writeBoolean(c.breaker.enabled);stream.writeBoolean(c.breaker.tripped);stream.writeBoolean(c.contacts[c.bus].closed);stream.writeBoolean(c.use240);stream.writeBoolean(c.dusk);stream.writeUTF(c.powerChannel);stream.writeUTF(c.controlChannel);stream.writeInt(c.aggregator);stream.writeDouble(c.load.voltage);stream.writeDouble(c.contacts[c.bus].current) }
         node!!.lrduCubeMask.getTranslate(front.inverse).serialize(stream)
     }
     override fun networkUnserialize(stream: DataInputStream): Byte {
@@ -180,6 +186,7 @@ class BreakerPanelElement(node: TransparentNode,descriptor: TransparentNodeDescr
             84->stream.readInt().takeIf { it in 0..11 }?.let { val c=circuits[it];c.use240=!c.use240;c.configure() }
             85->stream.readInt().takeIf { it in 0..11 }?.let { circuits[it].aggregator=(circuits[it].aggregator+1)%3 }
             86->stream.readInt().takeIf(LampSupplyRange::isSelectable)?.let { transmissionRange=it }
+            88->stream.readInt().takeIf { it in 0..11 }?.let { circuits[it].dusk=!circuits[it].dusk }
             87->stream.readInt().takeIf { it==50 || it in 40..42 || it in 64..75 }?.let { selectedTerminal=it }
         }
         needPublish();return id

@@ -115,7 +115,7 @@ object UtilityDistributionChecks {
     }
     private fun finish(error: Throwable?) {
         done=true
-        Files.writeString(mc.gameDirectory.toPath().resolve("utility-distribution-checks.json"),GsonBuilder().setPrettyPrinting().create().toJson(mapOf("world" to worldName,"passed" to passed,"sounds" to sounds,"phase" to phase,"failure" to error?.stackTraceToString())))
+        Files.writeString(mc.gameDirectory.toPath().resolve(if(java.lang.Boolean.getBoolean("eln.utilityLightingOnly"))"utility-lighting-checks.json" else "utility-distribution-checks.json"),GsonBuilder().setPrettyPrinting().create().toJson(mapOf("world" to worldName,"passed" to passed,"sounds" to sounds,"phase" to phase,"failure" to error?.stackTraceToString())))
         if(error!=null)Eln.logger.error("UTILITY_NATIVE FAIL phase $phase",error) else Eln.logger.info("UTILITY_NATIVE COMPLETE {} checks",passed.size)
         mc.execute { mc.stop();kotlin.concurrent.thread { Thread.sleep(1500);kotlin.system.exitProcess(if(error==null)0 else 1) } }
     }
@@ -140,6 +140,13 @@ object UtilityDistributionChecks {
                         { it.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.FLAT).value().createWorldDimensions() },mc.screen!!);phase=1;ticks=0
                 }
                 1->if(mc.player!=null && mc.level!=null && mc.screen==null) {
+                    if(java.lang.Boolean.getBoolean("eln.utilityLightingOnly")) {
+                        server { p ->
+                            val w=p.serverLevel();w.gameRules.getRule(GameRules.RULE_DAYLIGHT).set(false,w.server)
+                            for(x in -3..7)for(z in -4..5)w.setChunkForced((base.x shr 4)+x,(base.z shr 4)+z,true)
+                            PoleLightingGallery.setup(p)
+                        };next(44,100);return
+                    }
                     server { p ->
                         val w=p.serverLevel();w.dayTime=18000;w.gameRules.getRule(GameRules.RULE_DAYLIGHT).set(false,w.server)
                         for(x in -3..7)for(z in -4..5)w.setChunkForced((base.x shr 4)+x,(base.z shr 4)+z,true)
@@ -440,8 +447,39 @@ object UtilityDistributionChecks {
                 31->if(settled()) {
                     check(peakChandelierAmps in 22.0..26.0) { "Chandelier current spike: $peakChandelierAmps A" }
                     pass("The 5400 W chandelier remains below 26 A through grid sag/rise, switching, meter operations and a cold restart")
-                    finish(null)
+                    mc.setScreen(null)
+                    server { p -> PoleLightingGallery.setup(p) };next(44,100)
                 }
+                44->if(settled()) {
+                    capture("pool-party-light-gallery")
+                    server { p ->
+                        PoleLightingGallery.verify(p)
+                        pass("Pool, party and deck fixtures light from wired and wireless feeds, aimed heads sync, pool fittings preserve water, and pole bases retain skylight")
+                    };next(45,40)
+                }
+                45->if(settled()) {
+                    val span=PoleLightingGallery.verifyClientSpan()
+                    pass("Client pole spans retain full geometry bounds outside their owning section: $span")
+                    server { p -> PoleLightingGallery.verifyExpiredWater(p);pass("Underwater lighting restores water; cord-fed workshop machines retain physical power and finish a real recipe; the portable mini fridge cools")
+                        val b=PoleLightingGallery.breakerPos;p.teleportTo(p.serverLevel(),b.x+.5,b.y+2.0,b.z+2.0,180f,40f) };next(47,30)
+                }
+                47->if(settled()) {
+                    capture("breaker-with-copper-1-0-awg")
+                    val tile=mc.level!!.getBlockEntity(PoleLightingGallery.breakerPos) as mods.eln.node.six.SixNodeEntity
+                    val render=tile.elementRenderList.filterIsInstance<mods.eln.sixnode.electricalbreaker.ElectricalBreakerRender>().single()
+                    check(render.connectionType!!.startAt.all { it>0f })
+                    pass("The breaker clips Copper 1/0 AWG Cable 1000V outside its housing in the live client")
+                    server(PoleLightingGallery::viewStrings);next(48,40)
+                }
+                48->if(settled()) {
+                    PoleLightingGallery.verifyStringRenders(true);capture("suspended-deck-strings-lit")
+                    server(PoleLightingGallery::darkStrings);next(49,100)
+                }
+                49->if(settled()) {
+                    PoleLightingGallery.verifyStringRenders(false);capture("suspended-deck-strings-off")
+                    next(46,5)
+                }
+                46->if(settled())finish(null)
             }
         } catch(t: Throwable) { finish(t) }
     }

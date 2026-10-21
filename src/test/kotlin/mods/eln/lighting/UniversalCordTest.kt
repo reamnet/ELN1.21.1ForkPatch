@@ -50,7 +50,7 @@ class UniversalCordTest {
         assertTrue(m.yDim>=4.9);assertTrue(m.zDim>=4.3);assertNotNull(m.getPart("Rotor"))
         assertEquals(300.0,s.fanWatts);assertTrue(s.fan)
         assertEquals(24,d.ghostGroup!!.elementList.size)
-        assertTrue(d.ghostGroup!!.elementList.all { it.meta==mods.eln.ghost.GhostBlock.tClearance })
+        assertTrue(d.ghostGroup!!.elementList.all { it.meta==mods.eln.ghost.GhostBlock.tLampClearance })
     }
     @Test fun ceilingHazardTouchesOnlyTheBladeDiskAndAllowsWalkingBelow() {
         val center=Vec3(1.5,85.0,1.5)

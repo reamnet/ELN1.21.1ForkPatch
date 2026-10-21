@@ -54,8 +54,8 @@ class BreakerPanelContainer(player: Player,inventory: Container): BasicContainer
     }
 })
 class PanelCircuitDisplay {
-    var rating=0.0;var enabled=true;var tripped=false;var closed=false;var use240=false;var power="";var control="";var aggregator=0;var volts=0.0;var amps=0.0
-    fun read(s: DataInputStream) { rating=s.readDouble();enabled=s.readBoolean();tripped=s.readBoolean();closed=s.readBoolean();use240=s.readBoolean();power=s.readUTF();control=s.readUTF();aggregator=s.readInt();volts=s.readDouble();amps=s.readDouble() }
+    var rating=0.0;var enabled=true;var tripped=false;var closed=false;var use240=false;var dusk=false;var power="";var control="";var aggregator=0;var volts=0.0;var amps=0.0
+    fun read(s: DataInputStream) { rating=s.readDouble();enabled=s.readBoolean();tripped=s.readBoolean();closed=s.readBoolean();use240=s.readBoolean();dusk=s.readBoolean();power=s.readUTF();control=s.readUTF();aggregator=s.readInt();volts=s.readDouble();amps=s.readDouble() }
 }
 class BreakerPanelRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDescriptor): GridRender(entity,descriptor) {
     override val inventory=TransparentNodeElementInventory(12,1,this)
@@ -71,8 +71,9 @@ class BreakerPanelGui(player: Player,private val r: BreakerPanelRender): GuiCont
     private val select=ArrayList<GuiButtonEln>();private val toggle=ArrayList<GuiButtonEln>()
     private lateinit var power: GuiTextFieldEln;private lateinit var control: GuiTextFieldEln
     private lateinit var savePower: GuiButtonEln;private lateinit var saveControl: GuiButtonEln;private lateinit var voltage: GuiButtonEln;private lateinit var aggregator: GuiButtonEln;private lateinit var range: GuiButtonEln;private lateinit var terminal: GuiButtonEln
+    private lateinit var dusk: GuiButtonEln
     private var editing=-1
-    override fun newHelper()=GuiHelperContainer(this,312,362,8,280)
+    override fun newHelper()=GuiHelperContainer(this,312,386,8,304)
     override fun initGui() {
         super.initGui()
         repeat(12) { i ->
@@ -83,6 +84,7 @@ class BreakerPanelGui(player: Player,private val r: BreakerPanelRender): GuiCont
         control=newGuiTextField(8,202,212);saveControl=newGuiButton(226,198,78,tr("Switch link"))
         voltage=newGuiButton(8,222,138,"");aggregator=newGuiButton(152,222,152,"")
         range=newGuiButton(8,246,138,"");terminal=newGuiButton(152,246,152,"")
+        dusk=newGuiButton(8,270,296,"")
         power.setComment(0,tr("Power channel for this breaker; enter the same name on lamps and outlets"))
         control.setComment(0,tr("Optional wireless switch channel; blank means always enabled"))
         refresh()
@@ -95,6 +97,7 @@ class BreakerPanelGui(player: Player,private val r: BreakerPanelRender): GuiCont
         voltage.displayString=tr("Circuit %1$: %2$ V",i+1,if(c.use240)240 else 120)
         aggregator.displayString=when(c.aggregator) { 0->tr("Switch: Any on");1->tr("Switch: All on");else->tr("Switch: Toggle") }
         range.displayString=tr("Wireless range: %1$",r.range)
+        dusk.displayString=if(c.dusk)tr("Lighting control: Dusk / night") else tr("Lighting control: Manual / switch")
         terminal.enabled=false
         terminal.displayString=tr("Placed wall cables only")
 
@@ -103,6 +106,7 @@ class BreakerPanelGui(player: Player,private val r: BreakerPanelRender): GuiCont
         super.guiObjectEvent(obj)
         val i=r.selected.coerceIn(0,11)
         when(obj) {
+            dusk->r.clientSendInt(88,i)
             savePower->r.clientSendString(81,"$i\n${power.text}")
             saveControl->r.clientSendString(82,"$i\n${control.text}")
             voltage->r.clientSendInt(84,i)

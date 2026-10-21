@@ -32,6 +32,13 @@ class TransparentNodeBlock : NodeBlock(nodeProperties(), 0), IMetaBlock {
         registerDefaultState(stateDefinition.any().setValue(META, EntityMetaTag.Basic.meta))
     }
 
+    // The custom mesh supplies the visible shape. Its full-block selection box must not
+    // turn an open shaft frame or pole base into a skylight blocker. Entity META=3
+    // selects a block-entity type; it must not be reinterpreted as light opacity 12.
+    override fun getLightBlock(state: net.minecraft.world.level.block.state.BlockState, world: net.minecraft.world.level.BlockGetter, pos: net.minecraft.core.BlockPos) = mods.eln.transparentnode.cord.OutletWall.state(world,pos).getLightBlock(world,pos)
+    override fun propagatesSkylightDown(state: net.minecraft.world.level.block.state.BlockState, world: net.minecraft.world.level.BlockGetter, pos: net.minecraft.core.BlockPos) = mods.eln.transparentnode.cord.OutletWall.state(world,pos).propagatesSkylightDown(world,pos)
+    override fun getOcclusionShape(state: net.minecraft.world.level.block.state.BlockState, world: net.minecraft.world.level.BlockGetter, pos: net.minecraft.core.BlockPos): net.minecraft.world.phys.shapes.VoxelShape = mods.eln.transparentnode.cord.OutletWall.state(world,pos).getOcclusionShape(world,pos)
+
     override fun createBlockStateDefinition(builder: StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState>) {
         builder.add(META)
     }
@@ -54,6 +61,8 @@ class TransparentNodeBlock : NodeBlock(nodeProperties(), 0), IMetaBlock {
                 }
             }
         }
+        val outlet=if(world.isClientSide)null else ((world.getBlockEntity(pos) as? TransparentNodeEntity)?.node as? TransparentNode)?.element as? mods.eln.transparentnode.cord.OutletElement
+        if(!world.isClientSide && outlet?.recessed==true) { outlet.node!!.physicalSelfDestruction(0f);return true }
         return super.onDestroyedByPlayer(state, world, pos, entityPlayer, willHarvest, fluid)
     }
 
@@ -63,10 +72,6 @@ class TransparentNodeBlock : NodeBlock(nodeProperties(), 0), IMetaBlock {
         return if (tile is TransparentNodeEntity) tile.getDamageValue(world, pos.x, pos.y, pos.z) else 0
     }
 
-    override fun getLightBlock(state: BlockState, world: BlockGetter, pos: BlockPos): Int {
-        // 1.7.10 encoded the opacity in the metadata's top bits; 0..15 in state terms.
-        return ((state.getValue(META) and 3) shl 6) shr 4
-    }
 
     // No loot table: the block itself never drops (the element drops through the node).
 

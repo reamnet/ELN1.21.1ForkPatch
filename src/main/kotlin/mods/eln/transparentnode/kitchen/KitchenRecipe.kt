@@ -38,7 +38,7 @@ class KitchenRecipe(val output: ItemStack,val water: Boolean=false,val container
                 KitchenType.KETTLE -> if(waterBottle(input)) KitchenRecipe(ItemStack(KitchenFoods.hotWater.get())) else null
                 KitchenType.BLENDER -> if(fruit(input)) KitchenRecipe(ItemStack(KitchenFoods.smoothie.get()),water=true) else null
                 KitchenType.RICE -> if(grain(input)) KitchenRecipe(ItemStack(KitchenFoods.grains.get()),water=true,container=ItemStack(Items.GLASS_BOTTLE)) else null
-                KitchenType.FRIDGE -> if(input.`is`(Items.WATER_BUCKET)) KitchenRecipe(ItemStack(Items.ICE),container=ItemStack(Items.BUCKET)) else null
+                KitchenType.FRIDGE,KitchenType.MINI_FRIDGE -> if(input.`is`(Items.WATER_BUCKET)) KitchenRecipe(ItemStack(Items.ICE),container=ItemStack(Items.BUCKET)) else null
                 else -> {
                     val recipe=world.recipeManager.getRecipeFor(RecipeType.SMELTING,SingleRecipeInput(input),world).orElse(null) ?: return null
                     val output=recipe.value().assemble(SingleRecipeInput(input),world.registryAccess())
@@ -50,7 +50,7 @@ class KitchenRecipe(val output: ItemStack,val water: Boolean=false,val container
         private fun grain(stack: ItemStack)=stack.`is`(Items.WHEAT) || stack.`is`(net.minecraft.tags.TagKey.create(
             net.minecraft.core.registries.Registries.ITEM,net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("c","crops/rice")))
         fun allowed(type: KitchenType,slot: Int,stack: ItemStack): Boolean = when {
-            slot>=3 -> type==KitchenType.FRIDGE && (stack.has(DataComponents.FOOD) || stack.`is`(Items.POTION))
+            slot>=3 -> type.refrigerator && (stack.has(DataComponents.FOOD) || stack.`is`(Items.POTION))
             slot==2 -> false
             slot==1 -> type in listOf(KitchenType.COFFEE,KitchenType.BLENDER,KitchenType.RICE) && waterBottle(stack)
             type==KitchenType.MICROWAVE && MicrowaveBatteryHeat.accepts(stack) -> true
@@ -59,7 +59,7 @@ class KitchenRecipe(val output: ItemStack,val water: Boolean=false,val container
             type==KitchenType.RICE -> grain(stack)
             type==KitchenType.TOASTER -> stack.`is`(Items.BREAD)
             type==KitchenType.COFFEE -> stack.`is`(Items.COCOA_BEANS)
-            type==KitchenType.FRIDGE -> stack.`is`(Items.WATER_BUCKET)
+            type.refrigerator -> stack.`is`(Items.WATER_BUCKET)
             else -> stack.has(DataComponents.FOOD)
         }
     }

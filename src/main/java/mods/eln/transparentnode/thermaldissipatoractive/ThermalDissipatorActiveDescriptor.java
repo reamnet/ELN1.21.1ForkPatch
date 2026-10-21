@@ -60,7 +60,7 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
     }
 
     double warmLimit, coolLimit;
-    double nominalElectricalU;
+    public double nominalElectricalU;
     double nominalElectricalCoolingPower;
 
     public void applyTo(ThermalLoad load) {

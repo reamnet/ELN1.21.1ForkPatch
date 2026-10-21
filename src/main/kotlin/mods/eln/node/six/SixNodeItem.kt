@@ -139,6 +139,7 @@ class SixNodeItem(b: Supplier<Block>) : GenericItemBlockUsingDamage<SixNodeDescr
         val x = pos.x; val y = pos.y; val z = pos.z
         val metadata = 0
         val direction = fromFacing(side).inverse
+        val fluidOld = world.getFluidState(pos)
         val blockOld = world.getBlock(x, y, z)
         val block = this.block.get() as SixNodeBlock
         if (blockOld === Blocks.AIR || blockOld.isReplaceable(world, x, y, z)) {
@@ -155,7 +156,8 @@ class SixNodeItem(b: Supplier<Block>) : GenericItemBlockUsingDamage<SixNodeDescr
                 val sixNode = SixNode()
                 sixNode.onBlockPlacedBy(Coordinate(x, y, z, world), direction, player, stack)
                 sixNode.createSubBlock(stack, direction, player)
-                world.setBlock(x, y, z, block, metadata, 0x03)
+                world.setBlock(pos,block.defaultBlockState().setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED,
+                    fluidOld.`is`(net.minecraft.world.level.material.Fluids.WATER) && fluidOld.isSource),3)
                 block.getIfOtherBlockIsSolid(world, x, y, z, direction)
                 block.onBlockPlacedBy(world, pos, fromFacing(side).inverse, player, metadata)
                 return true

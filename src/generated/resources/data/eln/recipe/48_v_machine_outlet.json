@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "eln:experimental_wall_outlet"
+    },
+    {
+      "item": "eln:iron_plate"
+    },
+    {
+      "item": "minecraft:light_gray_dye"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:48_v_machine_outlet"
+  }
+}

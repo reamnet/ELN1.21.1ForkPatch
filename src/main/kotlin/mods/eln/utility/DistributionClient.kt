@@ -11,6 +11,7 @@ import mods.eln.gui.*
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
 import mods.eln.node.transparent.*
+import mods.eln.transparentnode.utilitylight.StreetLightMount
 import mods.eln.transparentnode.utilitylight.MainsStepDown
 import mods.eln.transparentnode.utilitylight.isStepDownUnit
 import net.minecraft.world.Container
@@ -27,43 +28,41 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
         creativeTab=Eln.creativeTabPowerElectronics
         ghostGroup=GhostGroup().apply {
             for(y in 1..7)addElement(0,y,0,GhostBlock.tClearance)
-            // The outer insulators/cutouts need clickable clearance cells as well as the shaft.
-            if(!kind.lvOnly && kind.phases==3)for(z in listOf(-1,1))addElement(0,7,z,GhostBlock.tClearance)
-            if(kind.cutout || kind.regulator) {
-                val x=if(kind.cutout)-1 else 1
-                for(z in if(kind.phases==3)listOf(-1,0,1) else listOf(0))addElement(x,6,z,GhostBlock.tClearance)
-            }
+            if(!kind.lvOnly)for(y in 6..7)for(x in -1..1)for(z in -1..1)
+                if(x!=0 || z!=0)addElement(x,y,z,GhostBlock.tClearance)
         }
     }
     override fun rotationIsFixed()=true
-    fun drawEquipment(front: Direction,display: DistributionDisplay?=null)=preserveMatrix {
+    fun drawEquipment(front: Direction,display: DistributionDisplay?=null,hvAngle: Float=mods.eln.gridnode.PoleSpanAlignment.frontAngle(front),lvAngle: Float=mods.eln.gridnode.PoleSpanAlignment.frontAngle(front))=preserveMatrix {
         front.glRotateXnRef();GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
             GL11.glDisable(GL11.GL_TEXTURE_2D)
             fun part(name: String,r: Float,g: Float,b: Float) { GL11.glColor3f(r,g,b);obj.getPart(name)?.drawNoBind() }
             part("main",.39f,.27f,.14f)
+            val base=mods.eln.gridnode.PoleSpanAlignment.frontAngle(front)
+            preserveMatrix {
+            GL11.glRotatef(hvAngle-base,0f,1f,0f)
             if(!kind.lvOnly) {
                 part(if(kind.phases==1)"SingleArm" else "Crossarm",.36f,.25f,.13f)
                 repeat(kind.phases) { i -> part("Pin${if(kind.phases==1)1 else i}",.57f,.66f,.68f) }
             }
-            part("SecondaryRack",.29f,.31f,.32f);repeat(3) { part("Secondary$it",.54f,.65f,.67f) }
             if(kind.transformer && display?.installed!=false) {
                 part("Transformer",.53f,.55f,.54f);part("TransformerPin",.32f,.43f,.44f)
                 part("TransformerFeed${if(kind.phases==1)1 else display?.phase ?: 0}",.12f,.14f,.15f)
-                part("TransformerSecondary",.13f,.15f,.16f)
             }
-            if(kind.transformer || kind.cutout || kind.regulator)repeat(if(kind.transformer)1 else kind.phases) { i ->
-                val visual=if(kind.phases==1 || kind.transformer)1 else i
+            if(kind.transformer || kind.cutout || kind.regulator || kind.singlePhaseTap)repeat(if(kind.transformer || kind.singlePhaseTap)1 else kind.phases) { i ->
+                val visual=if(kind.phases==1 || kind.transformer || kind.singlePhaseTap)1 else i
                 if(kind.cutout || kind.regulator)part("FuseJumper$visual",.13f,.15f,.16f)
                 part("CutoutBase$visual",.32f,.34f,.35f);part("CutoutInsulator$visual",.68f,.68f,.61f)
                 preserveMatrix {
-                    val z=if(kind.phases==1 || kind.transformer)0.0 else (i-1)*.95
+                    val z=if(kind.phases==1 || kind.transformer || kind.singlePhaseTap)0.0 else (i-1)*.95
                     GL11.glTranslated(-.68,5.85,z)
                     if(display?.fuseClosed?.getOrNull(i)==false)GL11.glRotated(125.0,0.0,0.0,1.0)
                     GL11.glTranslated(.68,-5.85,-z)
                     part("FuseDoor$visual",if(display?.fuseBlown?.getOrNull(i)==true).23f else .53f,.36f,.20f)
                 }
             }
+            if(kind.singlePhaseTap)PoleLeadVisual.draw(net.minecraft.world.phys.Vec3(0.0,6.63,((display?.phase ?: 0)-1)*.95),net.minecraft.world.phys.Vec3(-.68,6.4,0.0))
             if(kind==DistributionKind.FEEDER_THREE)repeat(3) { part("Riser$it",.28f,.31f,.32f);part("RiserJumper$it",.13f,.15f,.16f) }
             if(kind.regulator)repeat(kind.phases) { val i=if(kind.phases==1)1 else it;part("Regulator$i",.64f,.66f,.63f);part("RegulatorPin$i",.44f,.48f,.38f);part("RegulatorLoadPin$i",.44f,.48f,.38f);part("RegulatorFeed$i",.13f,.15f,.16f) }
             if(kind.capacitor) { part("CapacitorRack",.35f,.38f,.40f);repeat(3) { part("Capacitor$it",.76f,.77f,.72f);part("CapacitorPin$it",.4f,.45f,.35f);part("CapacitorFeed$it",.13f,.15f,.16f) } }
@@ -79,8 +78,24 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
                 }
                 part("Handle",.37f,.39f,.38f)
             }
-            if(kind.light) {
-                part("LampBracket",.48f,.50f,.51f);part("LampHousing",.26f,.29f,.31f)
+            }
+            preserveMatrix {
+                GL11.glRotatef(lvAngle-base,0f,1f,0f)
+                part("SecondaryRack",.29f,.31f,.32f);repeat(3) { part("Secondary$it",.54f,.65f,.67f) }
+            }
+            if(kind.transformer && display?.installed!=false)repeat(3) { i ->
+                val from=net.minecraft.world.phys.Vec3(-.60,5.15+i*.05,.20).yRot(Math.toRadians((hvAngle-base).toDouble()).toFloat())
+                val to=net.minecraft.world.phys.Vec3(.405,4.65+i*.32,0.0).yRot(Math.toRadians((lvAngle-base).toDouble()).toFloat())
+                val mid=net.minecraft.world.phys.Vec3(-.05,5.6+i*.06,.48)
+                PoleLeadVisual.draw(from,mid);PoleLeadVisual.draw(mid,to)
+            }
+            if(kind.light)preserveMatrix {
+                GL11.glTranslated(0.0,StreetLightMount.offset(display?.heightStep ?: 0),0.0)
+                GL11.glRotated((display?.yaw ?: 0).toDouble(),0.0,1.0,0.0)
+                part("LampBracket",.48f,.50f,.51f)
+                val p=StreetLightMount.pivot
+                GL11.glTranslated(p.x,p.y,p.z);GL11.glRotated((display?.pitch ?: 0).toDouble(),0.0,0.0,1.0);GL11.glTranslated(-p.x,-p.y,-p.z)
+                part("LampHousing",.26f,.29f,.31f)
                 if((display?.light ?: 0)>0) { UtilsClient.disableLight();part("LampLens",1f,.94f,.77f);UtilsClient.enableLight() }
                 else part("LampLens",.14f,.17f,.19f)
             }
@@ -93,8 +108,10 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
         list.add(tr("Aim at HV tie points or the LV rack; three-phase poles link all three phases"))
         list.add(tr("A, B and C are independent electrical circuits"))
         list.add(tr("Hold Shift to use the individual terminal selected in the menu"))
+        list.add(tr("Single-phase branches use the A, B or C insulator you aim at"))
         list.add(tr("Secondary rack carries L1 120 V, L2 120 V and 240 V service circuits"))
         if(kind.transformer) { list.add(tr("Fixed ratio: 12.47 kV nominal primary; output follows grid voltage"));list.add(tr("Insert a physical 10, 25, 50, 75 or 100 kW Pole Transformer"));list.add(tr("Transformer phase is selectable; a blown fuse needs a Pole Fuse Link")) }
+        if(kind.singlePhaseTap) { list.add(tr("A, B and C pass through; a physical fuse protects only the single-phase tap"));list.add(tr("Select tap phase A, B or C; connect the branch to the fused load terminal")) }
         if(kind.cutout || kind.regulator)list.add(tr("Separate line and load terminals; replace blown links with a Pole Fuse Link"))
         if(kind.recloser)list.add(tr("Any phase fault opens all three; timed retries stop at lockout"))
         if(kind.regulator)list.add(tr("Automatic regulation within 10 percent of line voltage; passive, power-conserving taps"))
@@ -109,12 +126,14 @@ class DistributionDisplay {
     var fuseClosed=listOf<Boolean>();var fuseBlown=listOf<Boolean>();var fuseRating=100.0
     var locked=false;var closed=true;var failures=0;var remaining=0.0;var pickup=100.0;var delay=3.0;var maxFailures=3
     var target=12_470.0;var automatic=true;var ratios=listOf<Double>();var light=0;var lampOn=true;var dusk=false
+    var yaw=0;var pitch=0;var heightStep=0
     var input=0.0;var output=0.0;var watts=0.0
     fun write(s: DataOutputStream) {
         s.writeInt(terminal);s.writeInt(phase);s.writeInt(rating);s.writeInt(voltage);s.writeBoolean(enabled);s.writeBoolean(installed)
         s.writeByte(fuseClosed.size);fuseClosed.indices.forEach { s.writeBoolean(fuseClosed[it]);s.writeBoolean(fuseBlown[it]) };s.writeDouble(fuseRating)
         s.writeBoolean(locked);s.writeBoolean(closed);s.writeInt(failures);s.writeDouble(remaining);s.writeDouble(pickup);s.writeDouble(delay);s.writeInt(maxFailures)
         s.writeDouble(target);s.writeBoolean(automatic);s.writeByte(ratios.size);ratios.forEach(s::writeDouble);s.writeByte(light);s.writeBoolean(lampOn);s.writeBoolean(dusk)
+        s.writeShort(yaw);s.writeByte(pitch);s.writeByte(heightStep)
         s.writeDouble(input);s.writeDouble(output);s.writeDouble(watts)
     }
     fun read(s: DataInputStream) {
@@ -122,6 +141,7 @@ class DistributionDisplay {
         val n=s.readUnsignedByte().coerceAtMost(3);val a=ArrayList<Boolean>();val b=ArrayList<Boolean>();repeat(n) { a.add(s.readBoolean());b.add(s.readBoolean()) };fuseClosed=a;fuseBlown=b;fuseRating=s.readDouble()
         locked=s.readBoolean();closed=s.readBoolean();failures=s.readInt();remaining=s.readDouble();pickup=s.readDouble();delay=s.readDouble();maxFailures=s.readInt()
         target=s.readDouble();automatic=s.readBoolean();ratios=List(s.readUnsignedByte().coerceAtMost(3)) { s.readDouble() };light=s.readUnsignedByte();lampOn=s.readBoolean();dusk=s.readBoolean()
+        yaw=s.readUnsignedShort();pitch=s.readByte().toInt();heightStep=s.readByte().toInt()
         input=s.readDouble();output=s.readDouble();watts=s.readDouble()
     }
 }
@@ -137,7 +157,7 @@ class DistributionPoleRender(entity: TransparentNodeEntity,descriptor: Transpare
     private val connections=LRDUMask()
     private var cable: mods.eln.cable.CableRenderType?=null
     override fun draw() {
-        drawCables();(transparentNodeDescriptor as DistributionPoleDescriptor).drawEquipment(front ?: Direction.XN,display)
+        drawCables();(transparentNodeDescriptor as DistributionPoleDescriptor).drawEquipment(front ?: Direction.XN,display,highVoltageRenderAngle,lowVoltageRenderAngle)
         cable=drawCable(Direction.YN,if((transparentNodeDescriptor as DistributionPoleDescriptor).kind==DistributionKind.FEEDER_THREE)Eln.instance.stdCableRender3200V else Eln.instance.stdCableRender200V,connections,cable)
     }
     override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream);display.read(stream);connections.deserialize(stream);cable=null }
@@ -150,16 +170,18 @@ class DistributionGui(player: Player,private val render: DistributionPoleRender)
     private var phase: GuiButtonEln?=null;private var rating: GuiButtonEln?=null;private var voltage: GuiButtonEln?=null;private var operate: GuiButtonEln?=null
     private var current: GuiTextFieldEln?=null;private var applyCurrent: GuiButtonEln?=null;private var retry: GuiTextFieldEln?=null;private var applyRetry: GuiButtonEln?=null;private var max: GuiButtonEln?=null;private var reset: GuiButtonEln?=null
     private var target: GuiTextFieldEln?=null;private var applyTarget: GuiButtonEln?=null;private var auto: GuiButtonEln?=null;private var lamp: GuiButtonEln?=null;private var dusk: GuiButtonEln?=null
+    private var left: GuiButtonEln?=null;private var right: GuiButtonEln?=null;private var up: GuiButtonEln?=null;private var down: GuiButtonEln?=null;private var tiltUp: GuiButtonEln?=null;private var tiltDown: GuiButtonEln?=null
     private val fuses=ArrayList<GuiButtonEln>()
-    override fun newHelper()=GuiHelperContainer(this,240,310,8,228)
-    private fun terminals()=buildList { if(!kind.lvOnly) { repeat(kind.phases) { add(32+it) };if(kind.protectedLine)repeat(kind.phases) { add(36+it) } };add(50);addAll(40..42) }
+    override fun newHelper()=GuiHelperContainer(this,240,if(kind.light)382 else 310,8,if(kind.light)300 else 228)
+    private fun terminals()=buildList { if(!kind.lvOnly) { repeat(kind.phases) { add(32+it) };if(kind.protectedLine)repeat(kind.outputPhases) { add(36+it) } };add(50);addAll(40..42) }
     override fun initGui() {
         super.initGui();terminal=newGuiButton(8,58,224,"")
         if(kind.transformer) {
             phase=newGuiButton(8,82,106,"");rating=newGuiButton(118,82,114,"");voltage=newGuiButton(8,106,106,"").apply { setComment(0,tr("Nominal output at 12.47 kV; follows grid voltage proportionally")) }
             operate=newGuiButton(118,106,114,"")
         }
-        if(kind.cutout || kind.transformer || kind.regulator)repeat(if(kind.transformer)1 else kind.phases) { i -> fuses.add(newGuiButton(8+i*75,134,72,"")) }
+        if(kind.singlePhaseTap)phase=newGuiButton(8,84,224,"")
+        if(kind.cutout || kind.transformer || kind.regulator || kind.singlePhaseTap)repeat(if(kind.transformer || kind.singlePhaseTap)1 else kind.phases) { i -> fuses.add(newGuiButton(8+i*75,134,72,"")) }
         if(kind.cutout || kind.recloser) {
             current=newGuiTextField(8,88,85).apply { text=(if(kind.recloser)d.pickup else d.fuseRating).toString();setComment(0,tr("Trip current in amperes: 1 to 2000 A")) }
             applyCurrent=newGuiButton(98,84,134,tr("Set trip current"))
@@ -174,7 +196,12 @@ class DistributionGui(player: Player,private val render: DistributionPoleRender)
         }
         if(kind==DistributionKind.AIR_BREAK_THREE)operate=newGuiButton(8,84,224,"")
         if(!kind.recloser) { applyCurrent?.enabled=false;current?.enabled=false }
-        if(kind.light) { lamp=newGuiButton(8,162,106,"");dusk=newGuiButton(118,162,114,"") }
+        if(kind.light) {
+            lamp=newGuiButton(8,162,106,"");dusk=newGuiButton(118,162,114,"")
+            left=newGuiButton(8,186,106,tr("Pan left"));right=newGuiButton(118,186,114,tr("Pan right"))
+            down=newGuiButton(8,210,106,tr("Lower lamp"));up=newGuiButton(118,210,114,tr("Raise lamp"))
+            tiltDown=newGuiButton(8,234,106,tr("Tilt down"));tiltUp=newGuiButton(118,234,114,tr("Tilt up"))
+        }
         refresh()
     }
     private fun refresh() {
@@ -183,7 +210,7 @@ class DistributionGui(player: Player,private val render: DistributionPoleRender)
         rating?.enabled=false
         rating?.displayString=tr("Rating: %1$ kW",d.rating/1000);voltage?.displayString=tr("Nominal: %1$ V",d.voltage)
         operate?.displayString=when { kind.transformer -> if(d.enabled)tr("Transformer: On") else tr("Transformer: Off");kind.recloser -> if(d.closed)tr("Open all phases") else tr("Close all phases");else -> if(d.enabled)tr("Open switch") else tr("Close switch") }
-        fuses.forEachIndexed { i,b -> b.displayString=tr("%1$: %2$",listOf("A","B","C")[if(kind.transformer)d.phase.coerceIn(0,2) else i],if(d.fuseBlown.getOrNull(i)==true)tr("Blown") else if(d.fuseClosed.getOrNull(i)!=false)tr("Open") else tr("Close"));b.enabled=d.fuseBlown.getOrNull(i)!=true;b.setComment(0,tr("Right-click the pole holding a Pole Fuse Link to replace a blown fuse")) }
+        fuses.forEachIndexed { i,b -> b.displayString=tr("%1$: %2$",listOf("A","B","C")[if(kind.transformer || kind.singlePhaseTap)d.phase.coerceIn(0,2) else i],if(d.fuseBlown.getOrNull(i)==true)tr("Blown") else if(d.fuseClosed.getOrNull(i)!=false)tr("Open") else tr("Close"));b.enabled=d.fuseBlown.getOrNull(i)!=true;b.setComment(0,tr("Right-click the pole holding a Pole Fuse Link to replace a blown fuse")) }
         max?.displayString=tr("Lockout after %1$ failed reclosures",d.maxFailures)
         auto?.displayString=if(d.automatic)tr("Voltage control: Auto") else tr("Voltage control: Hold tap")
         lamp?.displayString=if(d.lampOn)tr("Lamp: On") else tr("Lamp: Off");dusk?.displayString=if(d.dusk)tr("Dusk: Auto") else tr("Dusk: Manual")
@@ -191,6 +218,12 @@ class DistributionGui(player: Player,private val render: DistributionPoleRender)
     override fun guiObjectEvent(obj: IGuiObject) {
         super.guiObjectEvent(obj)
         when(obj) {
+            left -> render.clientSendInt(85,if(net.minecraft.client.gui.screens.Screen.hasShiftDown())1 else 5)
+            right -> render.clientSendInt(85,if(net.minecraft.client.gui.screens.Screen.hasShiftDown())-1 else -5)
+            down -> render.clientSendInt(84,-1)
+            up -> render.clientSendInt(84,1)
+            tiltDown -> render.clientSendInt(98,if(net.minecraft.client.gui.screens.Screen.hasShiftDown())1 else 5)
+            tiltUp -> render.clientSendInt(98,if(net.minecraft.client.gui.screens.Screen.hasShiftDown())-1 else -5)
             terminal -> { val ts=terminals();render.clientSendInt(87,ts[(ts.indexOf(d.terminal)+1)%ts.size]) }
             phase -> render.clientSendInt(88,(d.phase+1)%kind.phases)
             rating -> render.clientSendInt(86,MainsStepDown.RATINGS[(MainsStepDown.RATINGS.indexOf(d.rating)+1)%5])
@@ -212,9 +245,10 @@ class DistributionGui(player: Player,private val render: DistributionPoleRender)
         drawString(8,8,font.plainSubstrByWidth(tr(kind.title),224))
         if(kind.transformer)drawString(32,35,if(d.installed)tr("Step-down unit installed") else tr("Insert step-down unit"))
         else drawString(8,30,tr("Line: %1$",Utils.plotVolt("",d.input).trim()))
+        if(kind.light)drawString(8,30,tr("Aim: %1$° / %2$°; height: %3$ m",d.yaw,d.pitch,String.format(Locale.ROOT,"%.2f",5.2+StreetLightMount.offset(d.heightStep))))
         if(kind.recloser)drawString(8,184,if(d.locked)tr("Locked out; inspect fault and reset") else if(!d.closed)tr("Retry in %1$ s",String.format(Locale.ROOT,"%.1f",d.remaining)) else tr("All three phases closed"))
-        else if(kind.regulator)drawString(8,190,tr("Tap: %1$ %%",String.format(Locale.ROOT,"%.1f",100*(d.ratios.firstOrNull() ?: 1.0))))
-        else drawString(8,190,tr("Load: %1$",Utils.plotVolt("",d.output).trim()))
-        drawString(8,208,font.plainSubstrByWidth(if(kind.transformer)tr("Nominal primary: 12.47 kV; fixed ratio") else tr("Secondary: L1 120 V / L2 120 V / 240 V"),224))
+        else if(kind.regulator)drawString(8,if(kind.light)262 else 190,tr("Tap: %1$ %%",String.format(Locale.ROOT,"%.1f",100*(d.ratios.firstOrNull() ?: 1.0))))
+        else drawString(8,if(kind.light)262 else 190,tr("Load: %1$",Utils.plotVolt("",d.output).trim()))
+        drawString(8,if(kind.light)276 else 208,font.plainSubstrByWidth(if(kind.transformer)tr("Nominal primary: 12.47 kV; fixed ratio") else tr("Secondary: L1 120 V / L2 120 V / 240 V"),224))
     }
 }

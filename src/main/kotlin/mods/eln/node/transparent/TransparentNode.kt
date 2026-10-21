@@ -84,11 +84,11 @@ class TransparentNode : Node() {
     }
 
     override fun getElectricalLoad(side: Direction, lrdu: LRDU, mask: Int): ElectricalLoad? {
-        return element!!.getElectricalLoad(side, lrdu)
+        return element!!.getElectricalLoad(side, lrdu).takeUnless { element!!.machineCord?.blocks(it)==true }
     }
 
     override fun getElectricalLoad(side: Direction, lrdu: LRDU, mask: Int, remoteEndpoint: NodeConnectionEndpoint): ElectricalLoad? {
-        return element!!.getElectricalLoad(side, lrdu, remoteEndpoint)
+        return element!!.getElectricalLoad(side, lrdu, remoteEndpoint).takeUnless { element!!.machineCord?.blocks(it)==true }
     }
 
     override fun getThermalLoad(side: Direction, lrdu: LRDU, mask: Int): ThermalLoad? {
@@ -96,7 +96,7 @@ class TransparentNode : Node() {
     }
 
     override fun getSideConnectionMask(side: Direction, lrdu: LRDU): Int {
-        return element!!.getConnectionMask(side, lrdu)
+        return if(element!!.machineCord?.blocks(element!!.getElectricalLoad(side,lrdu))==true) 0 else element!!.getConnectionMask(side, lrdu)
     }
 
     override fun getConnectionEndpoint(side: Direction, lrdu: LRDU): NodeConnectionEndpoint {

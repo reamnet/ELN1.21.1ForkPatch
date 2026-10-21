@@ -130,10 +130,12 @@ public final class FixedFunction {
         state.activeTexture = unit;
     }
 
-    /** Leaves the render entered with {@link #begin} / {@link #beginGui}, flushing the buffers. */
+    /** Leaves the render entered with {@link #begin} / {@link #beginGui}; the caller owns buffer flushing. */
     public static void finish() {
         if (--depth == 0) {
-            if (buffers instanceof MultiBufferSource.BufferSource bs) bs.endBatch();
+            // The caller owns this buffer source. LevelRenderer (or the item renderer)
+            // flushes it at the proper stage; flushing here forces a draw for every machine
+            // and prevents neighbouring turbines from sharing material batches.
             buffers = null;
             if (state.scissor) RenderSystem.disableScissor();
         }
@@ -301,6 +303,15 @@ public final class FixedFunction {
         final List<float[]> vertices = new ArrayList<>(); // x y z u v nx ny nz r g b a
         // the matrix current at glBegin, relative to the list start, so replays can honour glTranslate inside a list
         Matrix4f transform;
+        private List<float[]> primitives;
+
+        List<float[]> primitives() {
+            if (primitives == null) {
+                boolean lines = mode == GL11.GL_LINES || mode == GL11.GL_LINE_STRIP || mode == GL11.GL_LINE_LOOP;
+                primitives = lines ? toLines(this) : toQuads(this);
+            }
+            return primitives;
+        }
 
         Batch(int mode) {
             this.mode = mode;
@@ -413,7 +424,8 @@ public final class FixedFunction {
     private static void emit(Batch batch, Matrix4f extra) {
         if (batch.vertices.isEmpty()) return;
         boolean lines = batch.mode == GL11.GL_LINES || batch.mode == GL11.GL_LINE_STRIP || batch.mode == GL11.GL_LINE_LOOP;
-        List<float[]> prims = lines ? toLines(batch) : toQuads(batch);
+        // Recorded topology is immutable. Keep transforms, inherited tint and light dynamic.
+        List<float[]> prims = batch.primitives();
         if (prims.isEmpty()) return;
 
         PoseStack.Pose p = pose.last();
@@ -422,6 +434,7 @@ public final class FixedFunction {
         ResourceLocation tex = textured ? state.texture : WHITE;
         // the lightmap unit off (UtilsClient.disableLight) is full bright: glowing parts, GUI overlays
         int light = state.lightmap ? packedLight : FULL_BRIGHT;
+        Vector4f pos = new Vector4f();
 
         if (buffers != null) {
             // GL_LIGHTING on: the entity types, shaded by the normal. Off: no directional shading at all.
@@ -431,18 +444,19 @@ public final class FixedFunction {
                 : state.cullFace ? RenderType.entityCutout(tex) : RenderType.entityCutoutNoCull(tex);
             VertexConsumer vc = buffers.getBuffer(type);
             if (lines) {
+                Vector3f dir = new Vector3f();
                 for (int i = 0; i + 1 < prims.size(); i += 2) {
                     float[] a = prims.get(i), b = prims.get(i + 1);
-                    Vector3f dir = new Vector3f(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
+                    dir.set(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
                     if (dir.lengthSquared() > 0) dir.normalize();
-                    lineVertex(vc, model, p, a, dir);
-                    lineVertex(vc, model, p, b, dir);
+                    lineVertex(vc, model, p, a, dir, pos);
+                    lineVertex(vc, model, p, b, dir, pos);
                 }
             } else {
                 Matrix3f normals = MeshNormals.matrix(p.normal(), extra);
                 Vector3f normal = new Vector3f();
                 for (float[] vtx : prims) {
-                    Vector4f pos = new Vector4f(vtx[0], vtx[1], vtx[2], 1f).mul(model);
+                    pos.set(vtx[0], vtx[1], vtx[2], 1f).mul(model);
                     MeshNormals.transform(normals, vtx[5], vtx[6], vtx[7], normal);
                     vertexColor(vc.addVertex(pos.x, pos.y, pos.z), vtx)
                         .setUv(vtx[3], vtx[4])
@@ -468,7 +482,7 @@ public final class FixedFunction {
                 RenderSystem.lineWidth(state.lineWidth);
                 bb = Tesselator.getInstance().begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
                 for (float[] vtx : prims) {
-                    Vector4f pos = new Vector4f(vtx[0], vtx[1], vtx[2], 1f).mul(model);
+                    pos.set(vtx[0], vtx[1], vtx[2], 1f).mul(model);
                     vertexColor(bb.addVertex(pos.x, pos.y, pos.z), vtx);
                 }
             } else {
@@ -476,7 +490,7 @@ public final class FixedFunction {
                 RenderSystem.setShaderTexture(0, tex);
                 bb = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
                 for (float[] vtx : prims) {
-                    Vector4f pos = new Vector4f(vtx[0], vtx[1], vtx[2], 1f).mul(model);
+                    pos.set(vtx[0], vtx[1], vtx[2], 1f).mul(model);
                     vertexColor(bb.addVertex(pos.x, pos.y, pos.z).setUv(vtx[3], vtx[4]), vtx);
                 }
             }
@@ -487,8 +501,8 @@ public final class FixedFunction {
         }
     }
 
-    private static void lineVertex(VertexConsumer vc, Matrix4f model, PoseStack.Pose p, float[] vtx, Vector3f dir) {
-        Vector4f pos = new Vector4f(vtx[0], vtx[1], vtx[2], 1f).mul(model);
+    private static void lineVertex(VertexConsumer vc, Matrix4f model, PoseStack.Pose p, float[] vtx, Vector3f dir, Vector4f pos) {
+        pos.set(vtx[0], vtx[1], vtx[2], 1f).mul(model);
         vertexColor(vc.addVertex(pos.x, pos.y, pos.z), vtx).setNormal(p, dir.x, dir.y, dir.z);
     }
 

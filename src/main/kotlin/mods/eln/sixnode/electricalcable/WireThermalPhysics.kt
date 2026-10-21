@@ -18,6 +18,12 @@ class WireThermalPhysics(val material: UtilityCableMaterial, val totalAreaMm2: D
     val failureEnthalpy = meltingEnthalpy + fusionJoules
     val endpointThermalResistance = meters / (2 * conductivity * totalAreaMm2 * 1e-6)
 
+    private val conductorRadius=sqrt(totalAreaMm2 * 1e-6 / PI)
+    private val bareSurface=2 * PI * conductorRadius * meters
+    private val jacketRadius=conductorRadius+.0005
+    private val jacketSurface=2 * PI * jacketRadius * meters
+    private val jacketResistance=ln(jacketRadius/conductorRadius)/(2 * PI * .2 * meters)
+
     fun capacity(celsius: Double) = massKg * (cp20 + cpSlope * (celsius - 20).coerceIn(0.0, meltingCelsius - 20))
 
     /** Joules relative to solid copper/aluminum at 20 C, not relative to changing biome ambient. */
@@ -41,14 +47,12 @@ class WireThermalPhysics(val material: UtilityCableMaterial, val totalAreaMm2: D
      */
     fun coolingConductance(celsius: Double, ambientCelsius: Double, insulated: Boolean): Double {
         require(celsius.isFinite() && ambientCelsius.isFinite())
-        val inner = sqrt(totalAreaMm2 * 1e-6 / PI)
-        val outer = inner + if (insulated) .0005 else 0.0
-        val surface = 2 * PI * outer * meters
+        val surface=if(insulated)jacketSurface else bareSurface
         val t = (celsius + 273.15).coerceAtLeast(1.0)
         val a = (ambientCelsius + 273.15).coerceAtLeast(1.0)
         val emissivity = if (insulated) .9 else .7 // generic jacket / oxidized conductor
         val h = 8.0 + emissivity * 5.670374419e-8 * (t*t + a*a) * (t+a)
-        val jacketR = if (insulated) ln(outer / inner) / (2 * PI * .2 * meters) else 0.0
+        val jacketR = if (insulated) jacketResistance else 0.0
         return 1.0 / (1.0 / (surface * h) + jacketR)
     }
 }

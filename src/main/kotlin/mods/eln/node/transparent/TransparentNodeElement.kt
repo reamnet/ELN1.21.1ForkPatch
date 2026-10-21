@@ -44,6 +44,8 @@ import mods.eln.misc.writeToNBT
 import mods.eln.misc.tagCompound
 
 abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @JvmField var transparentNodeDescriptor: TransparentNodeDescriptor) : GhostObserver, IPlayer, INodeElement {
+    val machineCord: mods.eln.transparentnode.cord.MachineCordDevice? by lazy { mods.eln.transparentnode.cord.MachineCordSupport.create(this) }
+
     @JvmField
     var slowProcessList = ArrayList<IProcess>(4)
     var slowPreProcessList = ArrayList<IProcess>(4)
@@ -75,6 +77,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
     }
 
     open fun connectJob() {
+        mods.eln.transparentnode.cord.CordDevices.get(this)?.cord
         // If we are about to destruct ourselves, do not add any elements to the simulation anymore.
         if (node != null && node!!.isDestructing) return
         val ownerTag = describeSimOwner()
@@ -101,7 +104,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
     open fun disconnectJob() {
         mods.eln.utility.WirelessPowerChannels.disconnectOwner(this)
         mods.eln.transparentnode.cord.WirelessOutletPower.disconnectSupply(this)
-        (this as? CordDevice)?.cord?.disconnect()
+        mods.eln.transparentnode.cord.CordDevices.get(this)?.cord?.disconnect()
         for (load in thermalLoadList) load.clearSimCoordinate()
         Eln.simulator.removeAllSlowProcess(slowProcessList)
         for (p in slowPreProcessList) Eln.simulator.removeSlowPreProcess(p)
@@ -198,7 +201,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
         checkCanStay(false)
     }
 
-    fun checkCanStay(@Suppress("UNUSED_PARAMETER") onCreate: Boolean) {
+    open fun checkCanStay(@Suppress("UNUSED_PARAMETER") onCreate: Boolean) {
         var needDestroy = false
         if (transparentNodeDescriptor.mustHaveFloor()) {
             if (!node!!.isBlockOpaque(Direction.YN)) needDestroy = true
@@ -239,7 +242,13 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
     }
 
     open fun onBreakElement() {
-        (this as? CordDevice)?.cord?.onBroken()
+        if(mods.eln.transparentnode.cord.CordDevices.get(this)?.cord?.moving==true) {
+            if(useUuid())stop(uuid)
+            Eln.ghostManager.removeObserver(node!!.coordinate)
+            Eln.ghostManager.removeGhostAndBlockWithObserver(node!!.coordinate)
+            return
+        }
+        mods.eln.transparentnode.cord.CordDevices.get(this)?.cord?.onBroken()
         if (useUuid()) stop(uuid)
         if (transparentNodeDescriptor.ghostGroup != null) {
             Eln.ghostManager.removeObserver(node!!.coordinate)
@@ -295,8 +304,8 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
     open fun networkSerialize(stream: DataOutputStream) {
         try {
             stream.writeByte(front.int + if (grounded) 8 else 0)
-            stream.writeBoolean(this is CordDevice)
-            (this as? CordDevice)?.cord?.writeNetwork(stream)
+            stream.writeBoolean(mods.eln.transparentnode.cord.CordDevices.get(this)!=null)
+            mods.eln.transparentnode.cord.CordDevices.get(this)?.cord?.writeNetwork(stream)
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -309,13 +318,17 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
     }
 
     abstract fun initialize()
-    open fun readItemStackNBT(nbt: CompoundTag?) {}
+    open fun readItemStackNBT(nbt: CompoundTag?) {
+        if(this is CordDevice && cordPortable && nbt?.contains("carriedAppliance")==true) {
+            val placedFront=front;readFromNBT(nbt.getCompound("carriedAppliance"));front=placedFront
+        }
+    }
     open fun getItemStackNBT(): CompoundTag? {return null}
 
     open fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean = false
 
     open fun readFromNBT(nbt: CompoundTag) {
-        (this as? CordDevice)?.cord?.read(nbt)
+        mods.eln.transparentnode.cord.CordDevices.get(this)?.cord?.read(nbt)
         val inv = inventory
         if (inv != null) {
             readFromNBT(nbt, "inv", inv)
@@ -342,7 +355,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
     }
 
     open fun writeToNBT(nbt: CompoundTag) {
-        (this as? CordDevice)?.cord?.write(nbt)
+        mods.eln.transparentnode.cord.CordDevices.get(this)?.cord?.write(nbt)
         val inv = inventory
         if (inv != null) {
             writeToNBT(nbt, "inv", inv)

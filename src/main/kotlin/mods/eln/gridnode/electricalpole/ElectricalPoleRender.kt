@@ -47,9 +47,12 @@ class ElectricalPoleRender(entity: TransparentNodeEntity, descriptor: Transparen
     override fun draw() {
         super.draw()
         preserveMatrix {
-            GL11.glRotatef(idealRenderingAngle,0f,1f,0f)
+            GL11.glRotatef(lowVoltageRenderAngle,0f,1f,0f)
             PoleSecondaryVisual.draw(Direction.XN)
-            if(descriptor.includeTransformer)PoleFuseVisual.draw(Direction.XN,display.fuseClosed,display.fuseBlown)
+        }
+        if(descriptor.includeTransformer)preserveMatrix {
+            GL11.glRotatef(highVoltageRenderAngle,0f,1f,0f)
+            PoleFuseVisual.draw(Direction.XN,display.fuseClosed,display.fuseBlown)
         }
         cableRenderType = drawCable(front!!.down(), Eln.instance.stdCableRender3200V, eConn, cableRenderType)
     }

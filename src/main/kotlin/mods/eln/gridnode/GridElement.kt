@@ -32,6 +32,14 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
     var gridLinksBooting = HashSet<GridLink>()
     private val desc: GridDescriptor
     private var idealRenderingAngle: Float = 0.toFloat()
+    private val spanAmbientSample=SpanAmbientSample()
+    internal fun spanAmbientCelsius()=spanAmbientSample.sample(coordinate().world().gameTime) { getAmbientTemperatureCelsius() }
+    var highVoltageRenderAngle=0f
+        private set
+    var lowVoltageRenderAngle=0f
+        private set
+    open val alignsPoleSpans=false
+    open fun contributesToPoleAlignment(terminal: Int)=true
 
     init {
         this.desc = descriptor as GridDescriptor
@@ -63,7 +71,8 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
             return true
         }
         val automatic=hit!=null && !entityPlayer.isShiftKeyDown
-        var terminal=if(automatic) aimedGridTerminal(side,hit.yRot(Math.toRadians(-idealRenderingAngle.toDouble()).toFloat())) else selectedGridTerminal(side)
+        var terminal=if(automatic) aimedGridTerminal(side,hit) else selectedGridTerminal(side)
+        val singleTerminal=if(automatic)aimedSingleGridTerminal(side,hit) else terminal
         val p = pending[uuid]
         var other: GridElement? = null
         if (p != null) {
@@ -93,14 +102,14 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
         }
         if (other == null) {
             Utils.sendMessage(entityPlayer, tr("Setting starting point"))
-            pending[uuid]=PendingConnection(coordinate(),terminal,automatic)
+            pending[uuid]=PendingConnection(coordinate(),terminal,automatic,singleTerminal)
         } else {
             var otherTerminal=p!!.terminal
-            // A single-phase pole takes phase A by default. Shift preserves an explicit phase choice.
+            // Preserve the individual insulator hit in either click order; ABC-to-ABC still bundles all phases.
             if(automatic && terminal in ServiceTerminals.HV_LINE_BUNDLE..ServiceTerminals.HV_LOAD_BUNDLE && other.gridLoads(otherTerminal).size==1)
-                terminal=if(terminal==ServiceTerminals.HV_LINE_BUNDLE)32 else 36
+                terminal=singleTerminal
             if(p.automatic && otherTerminal in ServiceTerminals.HV_LINE_BUNDLE..ServiceTerminals.HV_LOAD_BUNDLE && gridLoads(terminal).size==1)
-                otherTerminal=if(otherTerminal==ServiceTerminals.HV_LINE_BUNDLE)32 else 36
+                otherTerminal=p.singleTerminal
             val distance = other.coordinate().trueDistanceTo(this.coordinate())
             val cableLength = Math.ceil(distance).toInt()*gridLoads(terminal).size.coerceAtLeast(1)
             val range = Math.min(connectRange, other.connectRange)
@@ -214,11 +223,18 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
     open fun selectedGridTerminal(side: Direction)=side.int
     /** Existing saved spans still load; new overhead service stops at the weatherhead. */
     open val allowsNewGridLinks=true
+    open fun aimedSingleGridTerminal(side: Direction,localHit: Vec3)=aimedGridTerminal(side,localHit)
     open fun aimedGridTerminal(side: Direction,localHit: Vec3)=selectedGridTerminal(side)
     open fun gridLoads(terminal: Int): List<ElectricalLoad> = Direction.fromInt(terminal)?.let(::getGridElectricalLoad)?.let(::listOf) ?: emptyList()
     open fun gridCircuitKey(terminal: Int)="LEGACY"
+    open fun gridPhase(terminal: Int): Int?=null
+    open fun phaseBusTerminals(terminal: Int)=listOf(terminal)
     open fun renderWireCount(terminal: Int)=2
     open fun gridCablePoint(terminal: Int,wire: Int): Vec3 = getRenderCablePoint(Direction.fromInt(terminal) ?: Direction.XN,wire)
+    fun gridRenderAngle(terminal: Int)=if(!alignsPoleSpans)idealRenderingAngle else
+        if(PoleSpanAlignment.secondary(terminal))lowVoltageRenderAngle else highVoltageRenderAngle
+    fun renderedGridCablePoint(terminal: Int,wire: Int)=gridCablePoint(terminal,wire)
+        .yRot(Math.toRadians(gridRenderAngle(terminal).toDouble()).toFloat())
 
     // TODO: This should check if the wire isn't passing through blocks.
     private fun validLOS(@Suppress("UNUSED_PARAMETER") other: GridElement): Boolean {
@@ -276,12 +292,24 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
             }
             idealRenderingAngle = Math.toDegrees(-optAngle).toFloat()
         }
+        highVoltageRenderAngle=idealRenderingAngle;lowVoltageRenderAngle=idealRenderingAngle
+        if(alignsPoleSpans) {
+            fun spans(secondary: Boolean)=gridLinkList.filter {
+                val terminal=it.getTerminal(this)
+                PoleSpanAlignment.secondary(terminal)==secondary && contributesToPoleAlignment(terminal)
+            }.map { if(it.a==coordinate())it.b.subtract(it.a) else it.a.subtract(it.b) }
+                .distinctBy { listOf(it.x,it.z) }.map { Vec3(it.x.toDouble(),0.0,it.z.toDouble()) }
+            val fallback=PoleSpanAlignment.frontAngle(front)
+            highVoltageRenderAngle=PoleSpanAlignment.angle(spans(false),fallback)
+            lowVoltageRenderAngle=PoleSpanAlignment.angle(spans(true),fallback)
+        }
     }
 
     override fun networkSerialize(stream: DataOutputStream) {
         super.networkSerialize(stream)
         try {
             stream.writeFloat(idealRenderingAngle)
+            stream.writeFloat(highVoltageRenderAngle);stream.writeFloat(lowVoltageRenderAngle)
             // Each wire pair should be drawn by exactly one node.
             // Check for which ones it's this one.
             val ourLinks = gridLinkList.filter { it.a == coordinate()/* && link.connected*/ }
@@ -301,8 +329,8 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
                 val wires=minOf(renderWireCount(ourSide),target.renderWireCount(theirSide))
                 stream.writeByte(wires)
                 for (i in 0 until wires) {
-                    val start = gridCablePoint(ourSide, i).yRot(Math.toRadians(idealRenderingAngle.toDouble()).toFloat())
-                    var end = target.gridCablePoint(theirSide, i).yRot(Math.toRadians(target.idealRenderingAngle.toDouble()).toFloat())
+                    val start = renderedGridCablePoint(ourSide, i)
+                    var end = target.renderedGridCablePoint(theirSide, i)
                     end = end.add(offset.x.toDouble(), offset.y.toDouble(), offset.z.toDouble())
                     writeVec(stream, start)
                     writeVec(stream, end)
@@ -347,7 +375,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
         /**
          * The last place any given player tried to link two instance nodes.
          */
-        private data class PendingConnection(val coordinate: Coordinate,val terminal: Int,val automatic: Boolean)
+        private data class PendingConnection(val coordinate: Coordinate,val terminal: Int,val automatic: Boolean,val singleTerminal: Int)
         private val pending = HashMap<UUID, PendingConnection>()
     }
 }

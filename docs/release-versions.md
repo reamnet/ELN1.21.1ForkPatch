@@ -33,6 +33,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.27` | — | 12.47 kV pole nominal; aim-based HV/LV links and automatic independent three-phase spans; weatherhead-only overhead house entry with placed meter/panel feeders; slow-blow panel breakers; world-lit wire covers |
 | `v3.0.28` | — | Per-fixture wireless load accounting; physical transformer tiers and fuse cartridges; duplex passive outlets, horizontal mounting and six-socket power strip; secondary-fed HV/LV streetlight poles; red-handle service disconnect |
 | `v3.0.29` | — | Reuse identical transformer gauge validations and per-matrix open-port support; track sparse pivot/elimination fill and skip exact-zero arithmetic; preserve all voltage/current/fault acceptance checks |
+| `v3.0.30` | — | Independent pole corner alignment and fused phase taps; visible long spans; correct machine shading and wired bulb brightness; leaner model rendering; pool/party/parking fixtures and miniature/globe sagging light strings; streetlight aiming; smaller lamp targets; reliable portable cords and recessed outlets; holiday lighting controls and per-circuit dusk switching; machine/industrial cords, external disconnect handle and breaker cable clipping; mini fridge, five electrical deck items and bounded span thermal updates |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`
@@ -45,7 +46,7 @@ release assets remain available with their original filenames.
 `modVersion` in `gradle.properties` is the version source for the jar filename,
 NeoForge metadata and the in-game version. Increment it when preparing the next
 update and create the matching `vX.Y.Z` source tag. For unpublished experiments,
-use an explicit override such as `-PmodVersion=3.0.29-local.1`.
+use an explicit override such as `-PmodVersion=3.0.30-local.1`.
 
 Build with `./gradlew build` to retain previous versioned jars in `build/libs/`.
 `./gradlew clean` removes that directory, and recompiling the same version

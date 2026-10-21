@@ -358,6 +358,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
             val event=stream.readByte()
             when (event) {
                 9.toByte() -> if(descriptor.fixture?.fan==true) { fanEnabled=!fanEnabled;computeInventory() }
+                in 32..63 -> aim.set((event.toInt()-32)/2,(event.toInt()-32)%2,stream.readDouble())
                 in 5..8 -> {
                     aim.set((event.toInt()-5)/2,(event.toInt()-5)%2,stream.readDouble())
                 }

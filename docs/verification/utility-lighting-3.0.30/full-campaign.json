@@ -1,0 +1,40 @@
+{
+  "world": "utility-distribution-1792559847704",
+  "passed": [
+    "Wire camouflage matches actual stone vertex colors, world light, textures and directional shading",
+    "Twenty 270 W halogen bulbs draw 5400 W / 22.5 A on their actual 240 V panel branch without tripping its 30 A breaker",
+    "Independent 14/13/12.47 kV legs feed a phase-C 25 kW transformer, secondary streetlight, weatherhead, placed wall feeder, smart meter, twelve-breaker panel, wireless lamps, seven-light Aura fan and a 240 V cord outlet",
+    "Aim-based ghost hits connect all three HV phases atomically and select the LV rack; cabinets reject overhead spans",
+    "Three-phase regulators reach target with passive taps; capacitor branches charge from their own legs",
+    "Single- and three-phase pass-through streetlight poles stay dark on HV alone and light only after their secondary racks receive upstream LV",
+    "A 5 percent primary sag and rise produces 114/228 V and 126/252 V at the loaded house panel; no fixed-voltage regulation or convergence trip",
+    "A duplex outlet powers bottom and top plugs independently, rejects a third device and retains both cords when rotated horizontally",
+    "A cord-fed six-socket power strip powers six real table lamps and rejects a seventh connection",
+    "Replacing the physical transformer item changes capacity from 25 to 50 kW; GUI rating packets cannot grant a free upgrade",
+    "A real 10x panel inrush remains connected for its first second",
+    "A real branch overload trips only its inserted breaker and wireless lamp; the other bank and house service keep working",
+    "Resetting the actual breaker button restores the lamp after removing the fault",
+    "Removing the meter through its native inventory opens all three service channels without shorting the primary feeder",
+    "The smart meter disconnect isolates every service output",
+    "The red-handle service disconnect under the meter opens the real house feeder while the meter remains energised",
+    "Both interchangeable meter styles pass the same real service and retain separate import/export registers",
+    "A B-leg fault opens all three legs, bumps on retries and locks out after two failed reclosures",
+    "Overcurrent blows a cutout link, opens its visible door and sends the client fuse-pop sound",
+    "A full world restart preserves phase/rating, meter energy, seven bulbs, fuse state and recloser lockout, with exactly one copy of every saved span",
+    "Manual reset and a replacement fuse restore service after restart; no cable replacement is needed",
+    "Removing the panel safely withdraws both lamp channels and physical wireless-outlet bridges",
+    "Loaded fuse opening and closing send distinct arc sounds; replacing a blown fuse under a cleared 2 A load consumes one link and makes the quieter pickup arc",
+    "The 5400 W chandelier remains below 26 A through grid sag/rise, switching, meter operations and a cold restart",
+    "Pool, party and deck fixtures light from wired and wireless feeds, aimed heads sync, pool fittings preserve water, and pole bases retain skylight",
+    "Client pole spans retain full geometry bounds outside their owning section: {hvYaw=-45.0, lvYaw=0.0, bounds=AABB[248.8469571259346, 90.0, 239.5] -> [280.96304329368206, 98.5, 258.5589487659716]}",
+    "Underwater lighting restores water; cord-fed workshop machines retain physical power and finish a real recipe; the portable mini fridge cools",
+    "The breaker clips Copper 1/0 AWG Cable 1000V outside its housing in the live client"
+  ],
+  "sounds": {
+    "eln:utility_fuse_blow": 2,
+    "eln:utility_arc_open": 1,
+    "eln:utility_arc_close": 3,
+    "eln:utility_recloser_bump": 5
+  },
+  "phase": 46
+}

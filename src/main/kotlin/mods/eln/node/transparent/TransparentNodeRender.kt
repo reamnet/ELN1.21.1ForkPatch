@@ -13,6 +13,7 @@ import net.minecraft.world.phys.Vec3
 class TransparentNodeRender : BlockEntityRenderer<TransparentNodeEntity> {
     override fun render(entity: TransparentNodeEntity, partialTicks: Float, poseStack: PoseStack, buffer: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
         val elementRender = entity.elementRender ?: return
+        (elementRender as? mods.eln.transparentnode.cord.OutletRender)?.let { mods.eln.transparentnode.cord.OutletWall.draw(entity,it.wallState,poseStack,buffer,packedOverlay) }
         FixedFunction.begin(poseStack, buffer, NodeRenderSupport.neighbourLight(entity), packedOverlay)
         try {
             GL11.glPushMatrix()
@@ -29,5 +30,13 @@ class TransparentNodeRender : BlockEntityRenderer<TransparentNodeEntity> {
 
     override fun getViewDistance(): Int = NodeRenderSupport.viewDistance()
 
-    override fun shouldRender(entity: TransparentNodeEntity, cameraPos: Vec3): Boolean = NodeRenderSupport.shouldRender(entity, cameraPos, viewDistance)
+    // The initial chunk rebuild can precede the element's first sync packet. Register the
+    // renderer outside section culling in either case, then test its actual geometry here.
+    override fun shouldRenderOffScreen(entity: TransparentNodeEntity) =
+        entity.elementRender == null || entity.elementRender?.cord?.endpoint!=null || entity.elementRender is mods.eln.gridnode.GridRender || entity.elementRender is mods.eln.transparentnode.festive.FairyLightsRender
+
+    override fun shouldRender(entity: TransparentNodeEntity, cameraPos: Vec3): Boolean {
+        val box = entity.getRenderBoundingBox()
+        return mods.eln.client.NodeFrustum.inRange(box, cameraPos, viewDistance) && mods.eln.client.NodeFrustum.visible(box)
+    }
 }

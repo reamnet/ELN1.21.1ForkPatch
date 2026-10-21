@@ -41,11 +41,11 @@ class ClimateTest {
     }
     @Test fun newApplianceIdsCannotOverwriteBackupAndSolarMachines() {
         KitchenType.entries.forEachIndexed { i,t ->
-            val id=listOf(1,2,3,4,5,18,19,20,27)[i]
+            val id=listOf(1,2,3,4,5,18,19,20,27,60,61)[i]
             assertEquals(t,(Eln.transparentNodeItem.subItemList[id+(124 shl 6)] as KitchenDescriptor).type)
         }
         for(t in ClimateType.entries) {
-            val d=Eln.transparentNodeItem.subItemList[21+t.ordinal+(124 shl 6)] as ClimateDescriptor
+            val d=Eln.transparentNodeItem.subItemList[t.subId+(124 shl 6)] as ClimateDescriptor
             assertEquals(t,d.type);assertEquals(t.cooling,d.wallMounted)
             val e=ClimateElement(TransparentNode(),d);e.front=Direction.ZP
             var ports=0

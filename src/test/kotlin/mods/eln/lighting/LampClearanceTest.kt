@@ -14,16 +14,16 @@ import kotlin.test.*
 class LampClearanceTest {
     @Test fun everyDecorativeFixtureReservesSpaceWithoutCreatingASolidMasterOrGhostCube() {
         val fixtures=Eln.sixNodeItem.subItemList.values.filterIsInstance<LampSocketDescriptor>().filter { it.fixture!=null }
-        assertEquals(70,fixtures.size)
+        assertEquals(87,fixtures.size)
         assertTrue(fixtures.any { it.hasGhostGroup() })
         for(d in fixtures) {
             assertFalse(d.hasVolume(),d.name)
             for(side in Direction.entries) for(front in LRDU.entries) {
                 d.getGhostGroup(side,front)?.elementList?.forEach {
-                    assertEquals(GhostBlock.tClearance,it.meta,d.name)
+                    assertEquals(GhostBlock.tLampClearance,it.meta,d.name)
                     val state=Eln.ghostBlock.stateForMeta(it.meta)
                     assertTrue(state.getCollisionShape(EmptyBlockGetter.INSTANCE,BlockPos.ZERO).isEmpty,d.name)
-                    assertFalse(state.getShape(EmptyBlockGetter.INSTANCE,BlockPos.ZERO).isEmpty,d.name)
+                    assertTrue(state.getShape(EmptyBlockGetter.INSTANCE,BlockPos.ZERO).isEmpty,d.name)
                 }
             }
         }

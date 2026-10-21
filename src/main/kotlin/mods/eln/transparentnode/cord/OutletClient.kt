@@ -19,14 +19,14 @@ class OutletDescriptor(val rating: CordRating=CordRating.V120,val strip: Boolean
     if(strip)I18N.TR_NAME(I18N.Type.NONE,"Six Socket Power Strip") else rating.outletName,OutletElement::class.java,OutletRender::class.java,true) {
     val displayName=if(!strip && rating==CordRating.V120)I18N.TR_NAME(I18N.Type.NONE,"120 V Wall Outlet") else name
     val sockets get()=if(strip)6 else 2
-    private val model=Eln.obj.getObj(if(strip)"sixsocketpowerstrip" else if(rating==CordRating.V120)"appliancewalloutlet" else "walloutlet240")
+    private val model=Eln.obj.getObj(if(strip)"sixsocketpowerstrip" else if(rating.industrial)"industrialmachineoutlet" else if(rating==CordRating.V120)"appliancewalloutlet" else "walloutlet240")
     // Keep the old registry identity so placed outlets and inventory stacks survive the rename.
     override fun getName(stack: ItemStack)=if(!strip && rating==CordRating.V120)tr("120 V Wall Outlet") else super.getName(stack)
     fun draw(front: Direction,horizontal: Boolean)=preserveMatrix {
         front.inverse.glRotateZnRef();if(horizontal)GL11.glRotatef(90f,0f,0f,1f)
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
-            GL11.glDisable(GL11.GL_TEXTURE_2D);GL11.glColor3f(.86f,.85f,.79f);model.getPart("Case")?.drawNoBind()
+            GL11.glDisable(GL11.GL_TEXTURE_2D);val color=if(rating.industrial)rating.color else floatArrayOf(.86f,.85f,.79f);GL11.glColor3f(color[0],color[1],color[2]);model.getPart("Case")?.drawNoBind()
             GL11.glColor3f(.09f,.095f,.10f);model.getPart("Black")?.drawNoBind();model.getPart("TopSocket")?.drawNoBind()
             GL11.glColor3f(.5f,.51f,.53f);model.getPart("Trim")?.drawNoBind()
         } finally { GL11.glPopAttrib() }
@@ -35,6 +35,9 @@ class OutletDescriptor(val rating: CordRating=CordRating.V120,val strip: Boolean
     override fun addCollisionBoxesToList(box: net.minecraft.world.phys.AABB,list: MutableList<net.minecraft.world.phys.AABB?>,world: net.minecraft.world.level.Level?,x: Int,y: Int,z: Int) {
         val tile=world?.getBlockEntity(net.minecraft.core.BlockPos(x,y,z)) as? TransparentNodeEntity ?: return
         val render=tile.elementRender as? OutletRender;val element=if(world?.isClientSide==false)(tile.node as? TransparentNode)?.element as? OutletElement else null
+        if(render?.wallState?.isAir==false || element?.recessed==true) {
+            val bound=net.minecraft.world.phys.AABB(net.minecraft.core.BlockPos(x,y,z));if(bound.intersects(box))list.add(bound);return
+        }
         val facing=render?.front ?: element?.front ?: return
         val horizontal=render?.horizontal ?: element?.horizontal ?: false
         val width=if(strip).40 else .17;val height=if(strip).22 else .31
@@ -47,7 +50,7 @@ class OutletDescriptor(val rating: CordRating=CordRating.V120,val strip: Boolean
     override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType,item: ItemStack,helper: IItemRenderer.ItemRendererHelper)=true
     override fun renderItem(type: IItemRenderer.ItemRenderType,item: ItemStack,vararg data: Any)=draw(Direction.ZP,false)
     override fun addInformation(itemStack: ItemStack?,entityPlayer: Player?,list: MutableList<String>,par4: Boolean) {
-        list.add(tr("%1$: %2$ V, 20 A nominal; %3$ sockets",rating.socket,rating.volts.toInt(),sockets))
+        list.add(tr("%1$: %2$ V, %3$ A nominal; %4$ sockets",rating.socket,rating.volts.toInt(),rating.amps,sockets))
         list.add(tr("Passive outlet; use an upstream circuit breaker"))
         list.add(tr("Choose wall cables or wireless lamp supply; voltage is not converted"))
         list.add(tr("Rotate in the GUI for horizontal countertop placement"))
@@ -57,22 +60,26 @@ class OutletDescriptor(val rating: CordRating=CordRating.V120,val strip: Boolean
 class OutletRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDescriptor): TransparentNodeElementRender(entity,descriptor) {
     override val inventory=TransparentNodeElementInventory(0,1,this)
     val desc get()=transparentNodeDescriptor as OutletDescriptor
+    var wallState=net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()
     var wireless=false;var channel="";var supplied=false;var horizontal=false;var sockets=0
     val occupied get()=sockets!=0
     var id=UUID(0,0);val tripped get()=false;var volts=0.0;var amps=0.0
     val connections=LRDUMask();private var cable: CableRenderType?=null
     override fun draw() {
         val facing=front ?: return
-        desc.draw(facing,horizontal)
+        preserveMatrix {
+            if(!wallState.isAir) { val offset=mods.eln.transparentnode.worklight.WorkLightOptics.world(facing,Vec3(0.0,0.0,1.0));GL11.glTranslated(offset.x,offset.y,offset.z) }
+            desc.draw(facing,horizontal)
+        }
         var drawn=sockets
-        repeat(desc.sockets) { i -> if(sockets and (1 shl i)!=0)NemaPlug.draw(facing,desc.rating,socket=i,horizontal=horizontal,strip=desc.strip) }
+        repeat(desc.sockets) { i -> if(sockets and (1 shl i)!=0)NemaPlug.draw(facing,desc.rating,socket=i,horizontal=horizontal,strip=desc.strip,recessed=!wallState.isAir) }
         cable=drawCable(facing.inverse,Eln.instance.meduimVoltageCableDescriptor.render,connections,cable)
         val world=tileEntity.level!!;val origin=Vec3.atCenterOf(tileEntity.blockPos)
         for(p in world.players()) {
             val a=CordInteraction.heldAnchor(p.mainHandItem) ?: continue
             if(a.id!=id || p.distanceToSqr(origin.x,origin.y,origin.z)>100)continue
-            if(drawn and (1 shl a.socket)==0) { NemaPlug.draw(facing,a.rating,socket=a.socket,horizontal=horizontal,strip=desc.strip);drawn=drawn or (1 shl a.socket) }
-            val tip=origin.add(mods.eln.transparentnode.worklight.WorkLightOptics.world(facing,OutletGeometry.tipLocal(a.socket,horizontal,desc.strip)))
+            if(drawn and (1 shl a.socket)==0) { NemaPlug.draw(facing,a.rating,socket=a.socket,horizontal=horizontal,strip=desc.strip,recessed=!wallState.isAir);drawn=drawn or (1 shl a.socket) }
+            val tip=origin.add(mods.eln.transparentnode.worklight.WorkLightOptics.world(facing,OutletGeometry.tipLocal(a.socket,horizontal,desc.strip,!wallState.isAir)))
             val end=p.position().add(.2,.8,.2)
             CordPath.draw(CordPath.samples(tip,end) { x,z,y -> CordPath.floor(world,x,z,y) },origin)
         }
@@ -80,17 +87,21 @@ class OutletRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDesc
     override fun cameraDrawOptimisation()=false
     override fun networkUnserialize(input: DataInputStream) {
         super.networkUnserialize(input);id=UUID(input.readLong(),input.readLong());wireless=input.readBoolean();channel=input.readUTF();supplied=input.readBoolean()
-        horizontal=input.readBoolean();sockets=input.readInt();volts=input.readDouble();amps=input.readDouble();connections.deserialize(input);cable=null
+        wallState=net.minecraft.world.level.block.Block.stateById(input.readInt());horizontal=input.readBoolean();sockets=input.readInt();volts=input.readDouble();amps=input.readDouble();connections.deserialize(input);cable=null
     }
     override fun newGuiDraw(side: Direction,player: Player)=OutletGui(player,this)
 }
 class OutletGui(player: Player,private val render: OutletRender): GuiContainerEln(BasicContainer(player,render.inventory,emptyArray())) {
+    private val disconnect=ArrayList<GuiButtonEln>()
     private lateinit var rotate: GuiButtonEln;private lateinit var release: GuiButtonEln;private lateinit var mode: GuiButtonEln;private lateinit var channel: GuiTextFieldEln
-    override fun newHelper()=GuiHelperContainer(this,176,270,8,188)
-    override fun initGui() { super.initGui();rotate=newGuiButton(8,72,160,"");release=newGuiButton(8,97,160,tr("Release lost cords"));mode=newGuiButton(8,122,160,"");channel=newGuiTextField(9,153,158).apply { text=render.channel;setComment(0,tr("Wireless lamp supply channel")) } }
-    override fun guiObjectEvent(obj: IGuiObject) { super.guiObjectEvent(obj);if(obj==rotate)render.clientSendId(84);if(obj==release)render.clientSendId(81);if(obj==mode)render.clientSendId(82);if(obj==channel)render.clientSendString(83,channel.text) }
+    override fun newHelper()=GuiHelperContainer(this,176,if(render.desc.strip)342 else 294,8,if(render.desc.strip)260 else 212)
+    override fun initGui() { super.initGui()
+        repeat(render.desc.sockets) { i -> disconnect.add(newGuiButton(8+(i%2)*82,188+(i/2)*24,78,tr("Unplug %1$",i+1))) }
+        rotate=newGuiButton(8,72,160,"");release=newGuiButton(8,97,160,tr("Unplug all cords"));mode=newGuiButton(8,122,160,"");channel=newGuiTextField(9,153,158).apply { text=render.channel;setComment(0,tr("Wireless lamp supply channel")) } }
+    override fun guiObjectEvent(obj: IGuiObject) { super.guiObjectEvent(obj);disconnect.indexOf(obj).takeIf { it>=0 }?.let { render.clientSendInt(85,it) };if(obj==rotate)render.clientSendId(84);if(obj==release)render.clientSendId(81);if(obj==mode)render.clientSendId(82);if(obj==channel)render.clientSendString(83,channel.text) }
     override fun postDraw(f: Float,x: Int,y: Int) {
         super.postDraw(f,x,y);drawString(8,8,tr("%1$ / %2$ V",render.desc.rating.socket,render.desc.rating.volts.toInt()))
+        disconnect.forEachIndexed { i,b -> b.enabled=render.sockets and (1 shl i)!=0 }
         rotate.displayString=if(render.horizontal)tr("Mount: Horizontal") else tr("Mount: Vertical")
         mode.displayString=if(render.wireless)tr("Wireless lamp supply") else tr("Cable power");channel.enabled=render.wireless
         if(render.wireless)drawString(8,173,if(render.supplied)tr("Supply connected") else tr("No active supply in range"))
@@ -101,8 +112,9 @@ class OutletGui(player: Player,private val render: OutletRender): GuiContainerEl
 }
 object OutletGeometry {
     fun offset(socket: Int,strip: Boolean)=if(strip)Vec3((socket%3-1)*.25,if(socket<3).02 else .22,0.0) else Vec3(0.0,socket*.26,0.0)
-    fun tipLocal(socket: Int,horizontal: Boolean,strip: Boolean): Vec3 {
+    fun tipLocal(socket: Int,horizontal: Boolean,strip: Boolean,recessed: Boolean=false): Vec3 {
         val p=Vec3(0.0,-.1,-.224).add(offset(socket,strip))
-        return if(horizontal)Vec3(-p.y,p.x,p.z) else p
+        val rotated=if(horizontal)Vec3(-p.y,p.x,p.z) else p
+        return if(recessed)rotated.add(0.0,0.0,1.0) else rotated
     }
 }

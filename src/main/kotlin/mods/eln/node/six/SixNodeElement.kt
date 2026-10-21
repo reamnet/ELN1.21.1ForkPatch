@@ -116,7 +116,10 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
         sixNode!!.notifyNeighbor()
     }
 
+    val machineCord: mods.eln.transparentnode.cord.MachineCordDevice? by lazy { mods.eln.transparentnode.cord.MachineCordSupport.create(this) }
+
     open fun connectJob() {
+        mods.eln.transparentnode.cord.CordDevices.get(this)?.cord
         // If we are about to destruct ourselves, do not add any elements to the simulation anymore.
         if (sixNode != null && sixNode!!.isDestructing) return
         val ownerTag = describeSimOwner()
@@ -216,8 +219,8 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
     open fun networkSerialize(stream: DataOutputStream) {
         try {
             stream.writeByte(sixNode!!.lrduElementMask[side]!!.mask + (front.dir shl 4))
-            stream.writeBoolean(this is CordDevice)
-            (this as? CordDevice)?.cord?.writeNetwork(stream)
+            stream.writeBoolean(mods.eln.transparentnode.cord.CordDevices.get(this)!=null)
+            mods.eln.transparentnode.cord.CordDevices.get(this)?.cord?.writeNetwork(stream)
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -237,8 +240,15 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
     }
 
     open fun destroy(entityPlayer: ServerPlayer?) {
-        if((this as? CordDevice)?.cord?.moving==true) { if(useUuid())stop(uuid);return }
-        (this as? CordDevice)?.cord?.onBroken()
+        if(mods.eln.transparentnode.cord.CordDevices.get(this)?.cord?.moving==true) {
+            if(useUuid())stop(uuid)
+            if(sixNodeElementDescriptor.hasGhostGroup()) {
+                Eln.ghostManager.removeObserver(sixNode!!.coordinate)
+                sixNodeElementDescriptor.getGhostGroup(side,front)!!.erase(sixNode!!.coordinate)
+            }
+            return
+        }
+        mods.eln.transparentnode.cord.CordDevices.get(this)?.cord?.onBroken()
         if (useUuid()) {
             stop(uuid)
         }
@@ -267,7 +277,7 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
         get() = Eln.sixNodeItem.getDescriptor(itemStackDamageId)?.newItemStack(1) ?: ItemStack.EMPTY //sixNode.sideElementIdList[side.getInt()]
 
     open fun readFromNBT(nbt: CompoundTag) {
-        (this as? CordDevice)?.cord?.read(nbt)
+        mods.eln.transparentnode.cord.CordDevices.get(this)?.cord?.read(nbt)
         front = readFromNBT(nbt, "sixFront")
         val inv = inventory
         if (inv != null) {
@@ -295,7 +305,7 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
     }
 
     open fun writeToNBT(nbt: CompoundTag) {
-        (this as? CordDevice)?.cord?.write(nbt)
+        mods.eln.transparentnode.cord.CordDevices.get(this)?.cord?.write(nbt)
         front.writeToNBT(nbt, "sixFront")
         val inv = inventory
         if (inv != null) {
@@ -333,7 +343,7 @@ abstract class SixNodeElement(sixNode: SixNode, @JvmField var side: Direction, d
     open fun disconnectJob() {
         mods.eln.utility.WirelessPowerChannels.disconnectOwner(this)
         mods.eln.transparentnode.cord.WirelessOutletPower.disconnectSupply(this)
-        (this as? CordDevice)?.cord?.disconnect()
+        mods.eln.transparentnode.cord.CordDevices.get(this)?.cord?.disconnect()
         for (load in thermalLoadList) load.clearSimCoordinate()
         Eln.simulator.removeAllElectricalComponent(electricalComponentList)
         Eln.simulator.removeAllElectricalComponent(signalReadComponentList)

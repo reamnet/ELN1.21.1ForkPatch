@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_glass_bottle": {
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:glass_bottle"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "eln:poolside_globe_string_lights"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_glass_bottle"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "eln:poolside_globe_string_lights"
+    ]
+  }
+}

@@ -98,7 +98,7 @@ class GridLink : INBTTReady {
                 val thermal=if(index==0)spanThermal ?: WireSpanThermal(utility,meters).also { spanThermal=it }
                     else extraThermals.getOrNull(index-1) ?: WireSpanThermal(utility,meters).also { extraThermals.add(it) }
                 thermal.connect(connection as WireSpanConnection,
-                    { (a.getAmbientTemperatureCelsius()+b.getAmbientTemperatureCelsius())*.5 },{ onBreakElement() })
+                    { (a.spanAmbientCelsius()+b.spanAmbientCelsius())*.5 },{ onBreakElement() })
             }
         }
 
@@ -208,7 +208,8 @@ class GridLink : INBTTReady {
         return cable
     }
 
-    fun getTerminal(element: GridElement)=if(element===elementA())aTerminal else bTerminal
+    // Terminal lookup also runs while a saved span's other chunk is unloaded.
+    fun getTerminal(element: GridElement)=if(element.coordinate()==a)aTerminal else bTerminal
     fun getSide(gridElement: GridElement): Direction = Direction.fromInt(getTerminal(gridElement)) ?: Direction.XN
 
     fun getOtherElement(gridElement: GridElement): GridElement {
@@ -278,7 +279,9 @@ class GridLink : INBTTReady {
             val x=a.gridLoads(from);val y=b.gridLoads(to)
             if(a===b || x.isEmpty() || x.size!=y.size || cableLength<=0)throw UserError(tr("Select matching grid terminal circuits"))
             val ka=a.gridCircuitKey(from);val kb=b.gridCircuitKey(to)
-            if(ka!=kb && ka!="LEGACY" && kb!="LEGACY")throw UserError(tr("Grid phases or service voltages do not match"))
+            val phaseBranch=x.size==1 && (ka=="HV_SINGLE" && kb in setOf("HV0","HV1","HV2","HV_SINGLE") || kb=="HV_SINGLE" && ka in setOf("HV0","HV1","HV2","HV_SINGLE"))
+            if(ka!=kb && ka!="LEGACY" && kb!="LEGACY" && !phaseBranch)throw UserError(tr("Grid phases or service voltages do not match"))
+            if(phaseBranch && !GridPhaseRouting.compatible(a,from,b,to))throw UserError(tr("This single-phase run is already connected to a different HV phase"))
             if((a.gridLinkList+b.gridLinkList).any { it.links(a,b) && ((from<6 && to<6) || (it.a==a.coordinate() && it.aTerminal==from && it.bTerminal==to) || (it.a==b.coordinate() && it.bTerminal==from && it.aTerminal==to)) })
                 throw UserError(tr("Already connected to this terminal"))
             // A bundled span and individual phase spans must never duplicate the same circuit.

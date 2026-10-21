@@ -60,6 +60,7 @@ class StepDownUnitElement(node: TransparentNode, descriptor: TransparentNodeDesc
 
 class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNodeDescriptor) :
     GridElement(node, descriptor, (descriptor as GridDescriptor).connectRange), IConfigurable,mods.eln.transparentnode.cord.CordDevice {
+    override val alignsPoleSpans=true
     override val inventory = object : TransparentNodeElementInventory(1, 1, this@UtilityStreetLightElement) {
         override fun getAccessibleSlotsFromSide(side: Int) = intArrayOf(0)
         override fun canPlaceItemThroughFace(slot: Int, stack: ItemStack?, side: Int) = slot == 0 && isStepDownUnit(stack)
@@ -117,7 +118,7 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
         if (lightLevel > 0) {
             // Light comes from the head, and must not load a remote chunk merely to refresh it.
             for(head in fixture.heads) {
-                val position=front.rotateFromXN(head.add(0.0,StreetLightMount.offset(unit.lampHeightStep),0.0).yRot(Math.toRadians(unit.lampYaw.toDouble()).toFloat()))
+                val position=StreetLightMount.adjust(head,front,unit.lampHeightStep,unit.lampYaw,unit.lampPitch)
                 val offset=net.minecraft.core.BlockPos.containing(position.x+.5,position.y+.5,position.z+.5)
                 val at = node!!.coordinate.newWithOffset(offset.x, offset.y, offset.z)
                 if (world.chunkSource.getChunkNow(at.x shr 4, at.z shr 4) != null)
@@ -163,7 +164,7 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
         put(tr("Step-down unit"), if (installed) tr("Installed") else tr("Missing"))
         put(tr("Lamp"), if (lightLevel > 0) tr("On") else tr("Off"))
     }
-    override fun multiMeterString(side: Direction) = tr("Grid: %1$; output: %2$", Utils.plotVolt("", highBus.voltage), Utils.plotVolt("", unit.secondary.voltage))
+    override fun multiMeterString(side: Direction)=mods.eln.utility.PoleMeter.readings(listOf(highBus),ports.services).joinToString("\n")
     override fun readFromNBT(nbt: CompoundTag) { super.readFromNBT(nbt); unit.read(nbt);mods.eln.utility.PoleHardware.migrate(this,unit.ratedWatts);unit.installRating(mods.eln.utility.PoleHardware.transformerWatts(inventory.getItem(0)) ?: 10_000);ports.read(nbt);fuse.read(nbt,"poleFuse");fuseContact.closed=fuse.closed;serviceSecondary.update();configureLamp() }
     override fun writeToNBT(nbt: CompoundTag) { super.writeToNBT(nbt); unit.write(nbt);ports.write(nbt);fuse.write(nbt,"poleFuse") }
     override fun getItemStackNBT()=CompoundTag().also { unit.write(it);ports.write(it);fuse.write(it,"poleFuse") }

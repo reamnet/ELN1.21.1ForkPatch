@@ -30,7 +30,7 @@ class CordDescriptor(name: String,val rating: CordRating=CordRating.V120): Gener
     init { creativeTab=Eln.creativeTabCables }
     override fun addInformation(itemStack: ItemStack?,entityPlayer: Player?,list: MutableList<String>,par4: Boolean) {
         list.add(tr("Experimental flexible cord: 8 block reach"))
-        list.add(tr("%1$: %2$ V, 20 A",rating.plug,rating.volts.toInt()))
+        list.add(tr("%1$: %2$ V, %3$ A",rating.plug,rating.volts.toInt(),rating.amps))
         list.add(tr("Use on a matching wall outlet, then on a lamp or appliance"))
         list.add(tr("Sneak with an empty hand to carry a plugged appliance"))
         list.add(tr("Sneak-use a cord on the appliance to unplug it"))
@@ -46,7 +46,13 @@ object CordInteraction {
         val descriptor=Utils.getItemObject(held) as? CordDescriptor
         val tool=descriptor!=null
         if(player.level().isClientSide) {
-            if(tool) { event.isCanceled=true;event.cancellationResult=InteractionResult.SUCCESS }
+            val tile=player.level().getBlockEntity(event.pos)
+            val hasCord=when(tile) {
+                is mods.eln.node.transparent.TransparentNodeEntity->tile.elementRender is OutletRender || tile.elementRender?.cord?.endpoint!=null
+                is mods.eln.node.six.SixNodeEntity->tile.elementRenderList.any { it?.cord?.endpoint!=null }
+                else->false
+            }
+            if(tool || player.isShiftKeyDown && held.isEmpty && hasCord) { event.isCanceled=true;event.cancellationResult=InteractionResult.SUCCESS }
             return
         }
         val p=player as? ServerPlayer ?: return
@@ -58,11 +64,16 @@ object CordInteraction {
                 val hit=event.hitVec.location
                 val direction=Eln.sixNodeBlock.resolveElementSide(p.level(),event.pos,Direction.fromFacing(event.face),
                     (hit.x-event.pos.x).toFloat(),(hit.y-event.pos.y).toFloat(),(hit.z-event.pos.z).toFloat())
-                (node.getElement(direction) as? CordDevice) ?: node.sideElementList.filterIsInstance<CordDevice>().singleOrNull()
+                node.getElement(direction)?.takeIf { CordDevices.get(it)!=null } ?: node.sideElementList.filterNotNull().filter { CordDevices.get(it)!=null }.singleOrNull()
             }
             else -> null
         }
-        val device=machine as? CordDevice
+        val device=(machine as? mods.eln.node.INodeElement)?.let(CordDevices::get)
+        if(machine is OutletElement && player.isShiftKeyDown && (held.isEmpty || tool)) {
+            val slot=(0 until machine.capacity).filter(machine::isOccupied).minByOrNull { machine.anchor(it).tip().distanceToSqr(event.hitVec.location) }
+            slot?.let { machine.disconnectSocket(it,p) }
+            event.isCanceled=true;event.cancellationResult=InteractionResult.SUCCESS;return
+        }
         if(!tool) {
             if(player.isShiftKeyDown && held.isEmpty && device?.cordPortable==true && device.cord.plugged) {
                 device.cord.carry(p);event.isCanceled=true;event.cancellationResult=InteractionResult.SUCCESS
@@ -79,14 +90,14 @@ object CordInteraction {
             held.tagCompound=CompoundTag().apply { put("cordSelection",machine.anchor(socket).write()) }
             Utils.sendMessage(player,tr("Cord plugged into outlet; select a lamp or appliance"));return
         }
-        if(device==null) { Utils.sendMessage(player,tr("Connect this cord to a lamp or appliance"));return }
+        if(device==null) { Utils.sendMessage(player,tr("Connect this cord to a lamp, appliance or electrical machine"));return }
         if(selected!=null && selected.rating!=descriptor!!.rating) { Utils.sendMessage(player,tr("Select a matching outlet first"));return }
         if(selected==null) { Utils.sendMessage(player,tr("Select a wall outlet first"));return }
         val consume=!player.abilities.instabuild
         if(device.cord.attach(selected,consume)) {
             held.tagCompound=null
             if(consume)held.shrink(1)
-            Utils.sendMessage(player,tr("Cord connected; sneak with an empty hand to move the appliance"))
+            Utils.sendMessage(player,if(device.cordPortable)tr("Cord connected; sneak with an empty hand to move the appliance") else tr("Machine cord connected; sneak-use the cord to unplug"))
         } else Utils.sendMessage(player,tr("Could not connect: check matching voltage, cord reach, outlet occupancy and the existing plug"))
     }
     fun heldAnchor(stack: ItemStack): CordAnchor? {

@@ -17,11 +17,13 @@ internal class WireSpanThermal(val descriptor: UtilityCableDescriptor, val meter
     private var failure: IProcess? = null
 
     fun connect(connection: WireSpanConnection, ambient: () -> Double, burn: () -> Unit) {
+        val resistanceRefresh=SpanResistanceRefresh()
         fun update() {
             val air = ambient()
             load.updateProperties(air, air, descriptor.insulated && !insulationDamaged)
-            connection.spanOhms = descriptor.resistanceOhms(meters, load.absoluteCelsius)
-            connection.notifyRsChange()
+            resistanceRefresh.update(descriptor.resistanceOhms(meters, load.absoluteCelsius)) { ohms ->
+                connection.spanOhms=ohms;connection.notifyRsChange()
+            }
         }
         update()
         load.setAsSlow()

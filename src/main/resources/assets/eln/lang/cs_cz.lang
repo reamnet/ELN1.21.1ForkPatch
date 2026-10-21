@@ -138,6 +138,8 @@ Output=Výstup
 Output_power=Output power
 Output_voltage=Výstupní napětí
 P\:_%1$_S\:_%2$=P: %1$ S: %2$
+Pan_left=Pan left
+Pan_right=Pan right
 Place_against_a_vertical_wall;_connect_cables_on_the_same_wall_face=Place against a vertical wall; connect cables on the same wall face
 Place_this_cabinet_against_a_vertical_wall=Place this cabinet against a vertical wall
 Placed_wall_cables_only=Placed wall cables only
@@ -153,6 +155,7 @@ Power_loss=Ztrátový výkon
 Power_out\:_%1$-_%2$=Výstupní výkon: %1$- %2$
 Power_sourced=Dodávaný výkon
 Powered_by_cable=Napájeno kabelem
+Powered_by_cord=Powered by cord
 Primary=Primary
 Primary_%1$_ohm;_secondary_%2$_ohm=Primary %1$ ohm; secondary %2$ ohm
 Primary_winding=Primary winding
@@ -192,6 +195,9 @@ Terminate_overhead_wires_at_a_Service_Weatherhead;_use_placed_wall_cables_for_me
 The_relay's_input_behaves\nlike_a_Schmitt_Trigger.=Vstup relé se chová\njako Schmittův klopný obvod.
 Thermal_isolator_slot=Slot pro tepelný izolátor
 Thermal_power=Tepelný výkon
+Tilt\:_%1$°=Tilt: %1$°
+Tilt_down=Tilt down
+Tilt_up=Tilt up
 Toggle=Přepnout
 Toggle_switch=Přepínač
 Toggles_the_output_each_time\nan_emitter's_value_rises.\nUseful_to_allow_multiple_buttons\nto_control_the_same_light.=Přepíná výstup při každém\nvzestupu hodnoty vysílače.\nUžitečné pro ovládání stejného\nsvětla více tlačítky.
@@ -891,6 +897,7 @@ Grid_phases_or_service_voltages_do_not_match=Grid phases or service voltages do 
 Invalid_grid_cable_span=Invalid grid cable span
 Invalid_grid_terminal_circuit=Invalid grid terminal circuit
 Select_matching_grid_terminal_circuits=Select matching grid terminal circuits
+This_single-phase_run_is_already_connected_to_a_different_HV_phase=This single-phase run is already connected to a different HV phase
 Use_a_cable_spool_for_this_long_multiconductor_connection=Use a cable spool for this long multiconductor connection
 
 # src/main/kotlin/mods/eln/gridnode/GridSwitch.kt
@@ -901,12 +908,7 @@ Transfer=Přenos
 # src/main/kotlin/mods/eln/gui/LightAimControls.kt
 Head_%1$/%2$=Head %1$/%2$
 Pan\:_%1$°=Pan: %1$°
-Pan_left=Pan left
-Pan_right=Pan right
 Reset_aim=Reset aim
-Tilt\:_%1$°=Tilt: %1$°
-Tilt_down=Tilt down
-Tilt_up=Tilt up
 
 # src/main/kotlin/mods/eln/integration/create/CreateAdapterClient.kt
 %1$\:1=%1$:1
@@ -1819,6 +1821,8 @@ MPPT_Solar_Controller.name=MPPT Solar Controller
 Mains_Step-down_Unit.name=Mains Step-down Unit
 Medium_Power_Receiver_Antenna.name=Středněvýkonná přijímací anténa
 Medium_Power_Transmitter_Antenna.name=Středněvýkonná vysílací anténa
+Multicolor_Deck_Globe_String_Lights.name=Multicolor Deck Globe String Lights
+Multicolor_Fairy_Lights_on_Green_Wire.name=Multicolor Fairy Lights on Green Wire
 Nixie_Tube.name=Nixie trubice
 Old_480V_Arc_Furnace.name=480V oblouková pec
 One-way_Boost/Buck_vDC/DC_Converter.name=One-way Boost/Buck vDC/DC Converter
@@ -1858,7 +1862,9 @@ Wall-mounted_Automatic_Transfer_Switch.name=Wall-mounted Automatic Transfer Swit
 Wall-mounted_Hybrid_Solar_Inverter.name=Wall-mounted Hybrid Solar Inverter
 Wall-mounted_MPPT_Solar_Controller.name=Wall-mounted MPPT Solar Controller
 Wall-mounted_Programmable_UPS.name=Wall-mounted Programmable UPS
+Warm_White_Deck_Globe_String_Lights.name=Warm White Deck Globe String Lights
 Water_Turbine.name=Vodní turbína
+White_Fairy_Lights_on_Green_Wire.name=White Fairy Lights on Green Wire
 Wind_Turbine.name=Větrná turbína
 Wire_Combiner.name=Slučovač vodičů
 Wire_Insulator.name=Izolátor vodičů
@@ -2094,8 +2100,11 @@ Christmas_Icicle_Lights.name=Christmas Icicle Lights
 Christmas_Star_Wall_Light.name=Christmas Star Wall Light
 Classic_Four_Blade_Ceiling_Fan.name=Classic Four Blade Ceiling Fan
 Crystal_Tier_Foyer_Chandelier.name=Crystal Tier Foyer Chandelier
+Deck_Post_Cap_Light.name=Deck Post Cap Light
+Deck_Step_Riser_Light.name=Deck Step Riser Light
 Deep_Baffle_Recessed_Light.name=Deep Baffle Recessed Light
 Double_Candle_Wall_Sconce.name=Double Candle Wall Sconce
+Electric_Poolside_Tiki_Light.name=Electric Poolside Tiki Light
 Fabric_Shade_Wall_Sconce.name=Fabric Shade Wall Sconce
 Flexible_Neon_LED_Strip.name=Flexible Neon LED Strip
 Garden_Bollard_Light.name=Garden Bollard Light
@@ -2117,6 +2126,8 @@ Industrial_Wall_Pack_Light.name=Industrial Wall Pack Light
 Industrial_Yard_Area_Light.name=Industrial Yard Area Light
 Jack_O_Lantern_Table_Lamp.name=Jack O Lantern Table Lamp
 Lantern_Cage_Foyer_Chandelier.name=Lantern Cage Foyer Chandelier
+Large_Area_Floodlight.name=Large Area Floodlight
+Linear_Pool_Wall_Light.name=Linear Pool Wall Light
 Mini_Bezel_Dot_Spotlight.name=Mini Bezel Dot Spotlight
 Mini_Deep_Baffle_Dot_Light.name=Mini Deep Baffle Dot Light
 Mini_Dot_Spotlight.name=Mini Dot Spotlight
@@ -2127,22 +2138,34 @@ Modern_LED_Street_Light.name=Modern LED Street Light
 Modern_Sputnik_Foyer_Chandelier.name=Modern Sputnik Foyer Chandelier
 Modern_Three_Blade_Ceiling_Fan.name=Modern Three Blade Ceiling Fan
 Multicolor_Christmas_String_Lights.name=Multicolor Christmas String Lights
+Multicolor_Party_Wash_Light.name=Multicolor Party Wash Light
+Offset_Twin_Arm_Parking_Lot_Light.name=Offset Twin Arm Parking Lot Light
 Offshore_Caged_Wellglass_Light.name=Offshore Caged Wellglass Light
 Offshore_Platform_Floodlight.name=Offshore Platform Floodlight
 Offshore_Sealed_Linear_Light.name=Offshore Sealed Linear Light
 Outdoor_Motion_Floodlight.name=Outdoor Motion Floodlight
+Patio_Festoon_Party_Lights.name=Patio Festoon Party Lights
+Pool_Corner_Wash_Light.name=Pool Corner Wash Light
+Pool_Step_Marker_Light.name=Pool Step Marker Light
+Poolside_Globe_String_Lights.name=Poolside Globe String Lights
+Poolside_Party_Lantern.name=Poolside Party Lantern
 Porch_Lantern_Sconce.name=Porch Lantern Sconce
+Quad_Head_Parking_Lot_Light.name=Quad Head Parking Lot Light
 Recessed_LED_Channel.name=Recessed LED Channel
+Round_Canopy_Parking_Lot_Light.name=Round Canopy Parking Lot Light
+Round_Niche_Pool_Light.name=Round Niche Pool Light
 Round_Recessed_Ceiling_Light.name=Round Recessed Ceiling Light
 Rugged_Outdoor_Canopy_Light.name=Rugged Outdoor Canopy Light
 Sculptural_Branch_Chandelier.name=Sculptural Branch Chandelier
 Spiral_Rain_Chandelier.name=Spiral Rain Chandelier
+Square_Recessed_Pool_Light.name=Square Recessed Pool Light
 Standing_Drum_Floor_Lamp.name=Standing Drum Floor Lamp
 Surface_Linear_LED_Strip.name=Surface Linear LED Strip
 Suspended_Factory_Fluorescent_Light.name=Suspended Factory Fluorescent Light
 Thin_Fluorescent_Shop_Light.name=Thin Fluorescent Shop Light
 Traditional_Lantern_Post_Light.name=Traditional Lantern Post Light
 Trimless_Recessed_Downlight.name=Trimless Recessed Downlight
+Tropical_Patio_Ceiling_Fan.name=Tropical Patio Ceiling Fan
 Twin_Adjustable_Eave_Floodlight.name=Twin Adjustable Eave Floodlight
 Twin_Parking_Lot_Light.name=Twin Parking Lot Light
 Under_Cabinet_LED_Strip.name=Under Cabinet LED Strip
@@ -2182,7 +2205,6 @@ Grounded=Uzemněno
 Lamp_slot_empty=Slot pro lampu prázdný
 Motion\:_all_day=Motion: all day
 Motion\:_night=Motion: night
-Powered_by_cord=Powered by cord
 Powered_by_lamp_supply=Napájeno napájením lamp
 Specify_the_lamp_supply_channel=Určete napájecí kanál lampy
 Stays_on_for_30_seconds_after_movement;_walls_block_detection=Stays on for 30 seconds after movement; walls block detection
@@ -2432,6 +2454,7 @@ Thermostat=Thermostat
 
 # src/main/kotlin/mods/eln/transparentnode/climate/ClimateType.kt
 Corner_Fireplace_TV_Stand.name=Corner Fireplace TV Stand
+Electric_Patio_Heater.name=Electric Patio Heater
 Farmhouse_Fireplace_TV_Stand.name=Farmhouse Fireplace TV Stand
 Modern_Fireplace_TV_Stand.name=Modern Fireplace TV Stand
 Portable_Electric_Space_Heater.name=Portable Electric Space Heater
@@ -2448,13 +2471,14 @@ Outlet_already_occupied=Outlet already occupied
 Outlet_breaker_tripped=Outlet breaker tripped
 
 # src/main/kotlin/mods/eln/transparentnode/cord/CordInteraction.kt
-%1$\:_%2$_V,_20_A=%1$: %2$ V, 20 A
-Connect_this_cord_to_a_lamp_or_appliance=Connect this cord to a lamp or appliance
+%1$\:_%2$_V,_%3$_A=%1$: %2$ V, %3$ A
+Connect_this_cord_to_a_lamp,_appliance_or_electrical_machine=Connect this cord to a lamp, appliance or electrical machine
 Cord_connected;_sneak_with_an_empty_hand_to_move_the_appliance=Cord connected; sneak with an empty hand to move the appliance
 Cord_plugged_into_outlet;_select_a_lamp_or_appliance=Cord plugged into outlet; select a lamp or appliance
 Could_not_connect\:_check_matching_voltage,_cord_reach,_outlet_occupancy_and_the_existing_plug=Could not connect: check matching voltage, cord reach, outlet occupancy and the existing plug
 Every_socket_on_this_outlet_is_occupied=Every socket on this outlet is occupied
 Experimental_flexible_cord\:_8_block_reach=Experimental flexible cord: 8 block reach
+Machine_cord_connected;_sneak-use_the_cord_to_unplug=Machine cord connected; sneak-use the cord to unplug
 Select_a_matching_outlet_first=Select a matching outlet first
 Select_a_wall_outlet_first=Select a wall outlet first
 Sneak-use_a_cord_on_the_appliance_to_unplug_it=Sneak-use a cord on the appliance to unplug it
@@ -2463,11 +2487,23 @@ This_cord_requires_a_%1$_outlet=This cord requires a %1$ outlet
 Use_on_a_matching_wall_outlet,_then_on_a_lamp_or_appliance=Use on a matching wall outlet, then on a lamp or appliance
 
 # src/main/kotlin/mods/eln/transparentnode/cord/CordRating.kt
+200_V_Workshop_Cord.name=200 V Workshop Cord
+200_V_Workshop_Outlet.name=200 V Workshop Outlet
 240_V_Wall_Outlet.name=240 V Wall Outlet
+24_V_Machine_Cord.name=24 V Machine Cord
+24_V_Machine_Outlet.name=24 V Machine Outlet
+3.2_kV_Industrial_Cord.name=3.2 kV Industrial Cord
+3.2_kV_Industrial_Outlet.name=3.2 kV Industrial Outlet
+480_V_Industrial_Cord.name=480 V Industrial Cord
+480_V_Industrial_Outlet.name=480 V Industrial Outlet
+48_V_Machine_Cord.name=48 V Machine Cord
+48_V_Machine_Outlet.name=48 V Machine Outlet
+800_V_Industrial_Cord.name=800 V Industrial Cord
+800_V_Industrial_Outlet.name=800 V Industrial Outlet
 Experimental_Wall_Outlet.name=Experimental Wall Outlet
 
 # src/main/kotlin/mods/eln/transparentnode/cord/OutletClient.kt
-%1$\:_%2$_V,_20_A_nominal;_%3$_sockets=%1$: %2$ V, 20 A nominal; %3$ sockets
+%1$\:_%2$_V,_%3$_A_nominal;_%4$_sockets=%1$: %2$ V, %3$ A nominal; %4$ sockets
 %1$_/_%2$_V=%1$ / %2$ V
 %1$_/_%2$_sockets_occupied=%1$ / %2$ sockets occupied
 %1$_V_/_%2$_A=%1$ V / %2$ A
@@ -2481,10 +2517,11 @@ No_active_supply_in_range=No active supply in range
 Passive_outlet;_use_an_upstream_circuit_breaker=Passive outlet; use an upstream circuit breaker
 Plug_a_120_V_appliance_cord_into_another_outlet_to_feed_this_strip=Plug a 120 V appliance cord into another outlet to feed this strip
 Protected_by_upstream_breaker=Protected by upstream breaker
-Release_lost_cords=Release lost cords
 Rotate_in_the_GUI_for_horizontal_countertop_placement=Rotate in the GUI for horizontal countertop placement
 Six_Socket_Power_Strip.name=Six Socket Power Strip
 Supply_connected=Supply connected
+Unplug_%1$=Unplug %1$
+Unplug_all_cords=Unplug all cords
 
 # src/main/kotlin/mods/eln/transparentnode/cord/OutletElement.kt
 %1$_/_%2$_occupied=%1$ / %2$ occupied
@@ -2579,9 +2616,17 @@ Compact_Desktop_Box_Fan.name=Compact Desktop Box Fan
 Industrial_Five_Block_Fan.name=Industrial Five Block Fan
 Metal_Shop_Box_Fan.name=Metal Shop Box Fan
 
-# src/main/kotlin/mods/eln/transparentnode/festive/FestiveElement.kt
-It_probably_works_if_you_apply_~200v_to_the_xmas_wireless_channel=Pravděpodobně to funguje, pokud přivedete ~200V na vánoční bezdrátový kanál
-Not_as_warm_as_it_could_be=Není tak teplé, jak by mohlo být
+# src/main/kotlin/mods/eln/transparentnode/festive/FairyLights.kt
+Black_suspended_wire_with_hanging_globe_bulbs_about_50_cm_apart=Black suspended wire with hanging globe bulbs about 50 cm apart
+Fairy-light_anchors_must_be_0.25_to_8_blocks_apart=Fairy-light anchors must be 0.25 to 8 blocks apart
+First_fairy-light_anchor_selected;_choose_the_other_end=First fairy-light anchor selected; choose the other end
+Green_suspended_wire;_miniature_lamps_every_10_cm=Green suspended wire; miniature lamps every 10 cm
+Select_two_supporting_surfaces_up_to_8_blocks_apart=Select two supporting surfaces up to 8 blocks apart
+Use_a_120_V_or_240_V_cord,_or_set_a_wireless_lamp_supply_channel=Use a 120 V or 240 V cord, or set a wireless lamp supply channel
+
+# src/main/kotlin/mods/eln/transparentnode/festive/FestiveClient.kt
+Holiday_lighting=Holiday lighting
+Set_wireless_channel=Set wireless channel
 
 # src/main/kotlin/mods/eln/transparentnode/floodlight/FloodlightDescriptor.kt
 A_powerful_lamp_that_specializes_in\nthe_illumination_of_large_spaces.\nUses_inserted_light_bulbs.=Výkonná lampa specializovaná na\nosvětlení velkých prostor.\nPoužívá vložené žárovky.
@@ -2601,6 +2646,7 @@ Vertical_angle\:_%1$°=Vertikální úhel: %1$°
 
 # src/main/kotlin/mods/eln/transparentnode/kitchen/KitchenClient.kt
 27_food-storage_slots;_freezes_a_water_bucket_into_ice_and_returns_the_bucket=27 food-storage slots; freezes a water bucket into ice and returns the bucket
+9_food-storage_slots;_compact_120_V_fridge_with_an_ice_compartment=9 food-storage slots; compact 120 V fridge with an ice compartment
 Batteries_hiss_and_explode_when_microwaved=Batteries hiss and explode when microwaved
 Battery_hissing_-_explosion_imminent!=Battery hissing - explosion imminent!
 Battery_rupturing!=Battery rupturing!
@@ -2641,11 +2687,13 @@ Countertop_Blender.name=Countertop Blender
 Electric_Coffee_Maker.name=Electric Coffee Maker
 Electric_Kettle.name=Electric Kettle
 Electric_Microwave.name=Electric Microwave
+Electric_Mini_Fridge.name=Electric Mini Fridge
 Electric_Mini_Oven.name=Electric Mini Oven
 Electric_Refrigerator.name=Electric Refrigerator
 Electric_Rice_Cooker.name=Electric Rice Cooker
 Electric_Toaster.name=Electric Toaster
 Flat_Electric_Cooktop.name=Flat Electric Cooktop
+Patio_Electric_Grill.name=Patio Electric Grill
 
 # src/main/kotlin/mods/eln/transparentnode/renewable/LargeRenewables.kt
 3200_V=3200 V
@@ -2839,7 +2887,6 @@ Selectable_output\:_%1$_V_or_%2$_V=Selectable output: %1$ V or %2$ V
 Step-down_only;_grid_voltage_must_reach_the_selected_output=Step-down only; grid voltage must reach the selected output
 
 # src/main/kotlin/mods/eln/transparentnode/utilitylight/UtilityLightDevices.kt
-Grid\:_%1$;_output\:_%2$=Grid: %1$; output: %2$
 Installed=Installed
 Lamp=Lamp
 Missing=Missing
@@ -2878,6 +2925,8 @@ Circuit_%1$\:_insert_an_Electrical_Breaker=Circuit %1$: insert an Electrical Bre
 Every_circuit_has_a_wireless_power_channel_and_optional_wireless_switch_control=Every circuit has a wireless power channel and optional wireless switch control
 Left_bank\:_L1=Left bank: L1
 Left_bank\:_L1_120_V;_right_bank\:_L2_120_V;_each_circuit_can_select_240_V=Left bank: L1 120 V; right bank: L2 120 V; each circuit can select 240 V
+Lighting_control\:_Dusk_/_night=Lighting control: Dusk / night
+Lighting_control\:_Manual_/_switch=Lighting control: Manual / switch
 Optional_wireless_switch_channel;_blank_means_always_enabled=Optional wireless switch channel; blank means always enabled
 Power_channel_for_this_breaker;_enter_the_same_name_on_lamps_and_outlets=Power channel for this breaker; enter the same name on lamps and outlets
 Power_link=Power link
@@ -2896,6 +2945,8 @@ Wireless_range\:_%1$=Wireless range: %1$
 
 # src/main/kotlin/mods/eln/utility/DistributionClient.kt
 A,_B_and_C_are_independent_electrical_circuits=A, B and C are independent electrical circuits
+A,_B_and_C_pass_through;_a_physical_fuse_protects_only_the_single-phase_tap=A, B and C pass through; a physical fuse protects only the single-phase tap
+Aim\:_%1$°_/_%2$°;_height\:_%3$_m=Aim: %1$° / %2$°; height: %3$ m
 Aim_at_HV_tie_points_or_the_LV_rack;_three-phase_poles_link_all_three_phases=Aim at HV tie points or the LV rack; three-phase poles link all three phases
 All_three_phases_closed=All three phases closed
 Any_phase_fault_opens_all_three;_timed_retries_stop_at_lockout=Any phase fault opens all three; timed retries stop at lockout
@@ -2912,19 +2963,23 @@ Line\:_%1$=Line: %1$
 Load\:_%1$=Load: %1$
 Locked_out;_inspect_fault_and_reset=Locked out; inspect fault and reset
 Lockout_after_%1$_failed_reclosures=Lockout after %1$ failed reclosures
+Lower_lamp=Lower lamp
 Open_all_phases=Open all phases
 Open_switch=Open switch
 Phase\:_%1$=Phase: %1$
+Raise_lamp=Raise lamp
 Rating\:_%1$_kW=Rating: %1$ kW
 Reset_lockout=Reset lockout
 Retry_delay\:_1_to_60_seconds=Retry delay: 1 to 60 seconds
 Retry_in_%1$_s=Retry in %1$ s
 Secondary\:_L1_120_V_/_L2_120_V_/_240_V=Secondary: L1 120 V / L2 120 V / 240 V
 Secondary_rack_carries_L1_120_V,_L2_120_V_and_240_V_service_circuits=Secondary rack carries L1 120 V, L2 120 V and 240 V service circuits
+Select_tap_phase_A,_B_or_C;_connect_the_branch_to_the_fused_load_terminal=Select tap phase A, B or C; connect the branch to the fused load terminal
 Separate_line_and_load_terminals;_replace_blown_links_with_a_Pole_Fuse_Link=Separate line and load terminals; replace blown links with a Pole Fuse Link
 Set_fuse_current=Set fuse current
 Set_retry_delay=Set retry delay
 Set_trip_current=Set trip current
+Single-phase_branches_use_the_A,_B_or_C_insulator_you_aim_at=Single-phase branches use the A, B or C insulator you aim at
 Step-down_unit_installed=Step-down unit installed
 Street_light_draws_from_the_LV_rack_only;_feed_it_from_an_upstream_transformer=Street light draws from the LV rack only; feed it from an upstream transformer
 Tap\:_%1$_%%=Tap: %1$ %%
@@ -2948,11 +3003,12 @@ Single_Phase_Secondary_Fed_Street_Light_Pole.name=Single Phase Secondary Fed Str
 Single_Phase_Transformer_Pole.name=Single Phase Transformer Pole
 Single_Phase_Transformer_Street_Light_Pole.name=Single Phase Transformer Street Light Pole
 Single_Phase_Utility_Pole.name=Single Phase Utility Pole
-Terminal_%1$\:_%2$=Terminal %1$: %2$
+Tap_phase=Tap phase
 Three_Phase_Automatic_Voltage_Regulator_Pole.name=Three Phase Automatic Voltage Regulator Pole
 Three_Phase_Fused_Cutout_Pole.name=Three Phase Fused Cutout Pole
 Three_Phase_Gang_Operated_Air_Break_Switch_Pole.name=Three Phase Gang Operated Air Break Switch Pole
 Three_Phase_Pole_Mounted_Capacitor_Bank.name=Three Phase Pole Mounted Capacitor Bank
+Three_Phase_Pole_with_Fused_Single_Phase_Tap.name=Three Phase Pole with Fused Single Phase Tap
 Three_Phase_Recloser_Pole.name=Three Phase Recloser Pole
 Three_Phase_Secondary_Fed_Street_Light_Pole.name=Three Phase Secondary Fed Street Light Pole
 Three_Phase_Transformer_Pole.name=Three Phase Transformer Pole
@@ -3030,6 +3086,13 @@ Install_in_the_pole_transformer_slot;_capacity_cannot_be_upgraded_in_the_GUI=Ins
 Physical_pole_transformer\:_%1$_kW=Physical pole transformer: %1$ kW
 Pole_fuse_cartridge\:_%1$_A=Pole fuse cartridge: %1$ A
 Right-click_a_cutout_to_install;_sneak_with_an_empty_hand_to_remove_its_fuse=Right-click a cutout to install; sneak with an empty hand to remove its fuse
+
+# src/main/kotlin/mods/eln/utility/PoleMeter.kt
+HV_%1$\:_%2$=HV %1$: %2$
+LV_L1_(120_V)=LV L1 (120 V)
+LV_L2_(120_V)=LV L2 (120 V)
+LV_service_(240_V)=LV service (240 V)
+Load_%1$\:_%2$=Load %1$: %2$
 
 # src/main/kotlin/mods/eln/utility/UtilityItems.kt
 Analog_Glass_Service_Meter.name=Analog Glass Service Meter

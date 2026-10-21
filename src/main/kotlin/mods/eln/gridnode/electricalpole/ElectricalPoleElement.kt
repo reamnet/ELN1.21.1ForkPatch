@@ -46,6 +46,7 @@ data class Transformer(
 
 class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDescriptor)
     : GridElement(node, descriptor, (descriptor as GridDescriptor).connectRange) {
+    override val alignsPoleSpans=true
     companion object { val OUTPUT_VOLTAGES=intArrayOf(120,240,3200) }
     private val desc = descriptor as ElectricalPoleDescriptor
     override val inventory=object: mods.eln.node.transparent.TransparentNodeElementInventory(if(desc.includeTransformer)1 else 0,1,this@ElectricalPoleElement) {
@@ -159,12 +160,7 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
     }
 
     override fun multiMeterString(side: Direction): String {
-        val electricalInfo = if (trafo != null) {
-            Utils.plotVolt("GridU:", electricalLoad.voltage) + Utils.plotAmpere("GridP:", electricalLoad.current) +
-                Utils.plotVolt("  GroundU:", trafo.secondaryLoad.voltage) + Utils.plotAmpere("GroundP:", trafo.secondaryLoad.current)
-        } else {
-            super.multiMeterString(side)
-        }
+        val electricalInfo=mods.eln.utility.PoleMeter.readings(listOf(electricalLoad),ports.services).joinToString("\n")
 
         val connectionInfo = connectionLines(includeCurrentLimit = false).joinToString("\n")
 

@@ -48,19 +48,8 @@ class StringLightsDescriptor(val name: String, val obj: Obj3D): TransparentNodeD
      */
 }
 
-class StringLightsRender(tileEntity: TransparentNodeEntity, transparentNodedescriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, transparentNodedescriptor) {
+class StringLightsRender(tileEntity: TransparentNodeEntity, transparentNodedescriptor: TransparentNodeDescriptor): FestiveRender(tileEntity, transparentNodedescriptor) {
 
-    var powered = false
-
-    override fun networkUnserialize(stream: DataInputStream) {
-        super.networkUnserialize(stream)
-        try {
-            powered = stream.readBoolean()
-
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
 
     override fun draw() {
         (transparentNodeDescriptor as StringLightsDescriptor).draw(front!!, powered)

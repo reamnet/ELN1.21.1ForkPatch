@@ -25,7 +25,8 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
     int rangeMax;
     double electricalPowerRatioEffStart, electricalPowerRatioEffEnd;
     double electricalPowerRatioLostOffset, electricalPowerRatioLostPerBlock;
-    double electricalNominalVoltage, electricalNominalPower;
+    public double electricalNominalVoltage;
+    double electricalNominalPower;
     double electricalMaximalVoltage, electricalMaximalPower;
     double electricalNominalInputR;
     ElectricalCableDescriptor cable;

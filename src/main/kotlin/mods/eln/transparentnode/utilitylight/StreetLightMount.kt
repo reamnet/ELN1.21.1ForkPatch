@@ -15,6 +15,14 @@ object StreetLightMount {
     fun offset(step: Int) = step.coerceIn(MIN_STEP, MAX_STEP) * STEP_METRES
     fun height(step: Int) = DEFAULT_HEIGHT + offset(step)
     fun lightY(step: Int) = floor(height(step)+.5).toInt()
+    fun validPitch(degrees: Int)=degrees in -60..60
+    val pivot=Vec3(-1.10,5.35,0.0)
+    fun tilt(v: Vec3, degrees: Int): Vec3 {
+        val a=Math.toRadians(degrees.toDouble());val c=kotlin.math.cos(a);val s=kotlin.math.sin(a)
+        return Vec3(v.x*c-v.y*s,v.x*s+v.y*c,v.z)
+    }
+    fun adjust(local: Vec3, front: Direction, step: Int, yaw: Int, pitch: Int): Vec3 =
+        front.rotateFromXN(pivot.add(tilt(local.subtract(pivot),pitch)).add(0.0,offset(step),0.0).yRot(Math.toRadians(yaw.toDouble()).toFloat()))
     fun validYaw(degrees: Int) = degrees in 0..359
     fun turn(degrees: Int, movement: Int) = Math.floorMod(degrees + movement, 360)
     fun headPosition(front: Direction, step: Int, yaw: Int): Vec3 =

@@ -78,7 +78,7 @@ object ApplianceSoundChecks {
         e.inventory.clearContent()
         e.inventory.setItem(0,when(e.type) {
             KitchenType.KETTLE -> PotionContents.createItemStack(Items.POTION,Potions.WATER)
-            KitchenType.FRIDGE -> ItemStack(Items.WATER_BUCKET)
+            KitchenType.FRIDGE,KitchenType.MINI_FRIDGE -> ItemStack(Items.WATER_BUCKET)
             else -> ItemStack(when(e.type) {
                 KitchenType.TOASTER -> Items.BREAD
                 KitchenType.COFFEE -> Items.COCOA_BEANS

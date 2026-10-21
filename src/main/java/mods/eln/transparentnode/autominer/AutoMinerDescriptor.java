@@ -42,7 +42,7 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
     private final int deltaZ;
     private final ElectricalCableDescriptor cable;
 
-    final double nominalVoltage;
+    public final double nominalVoltage;
     final double pipeOperationEnergy;
     private final double pipeOperationPower;
 

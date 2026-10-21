@@ -137,6 +137,10 @@ public class ElectricalBreakerDescriptor extends SixNodeDescriptor {
         GL11.glPopAttrib();
     }
 
+    public float[] cableStarts(LRDU front) {
+        return BreakerCableEnds.starts(main, front);
+    }
+
     public void draw(float on, float distance) {
         if (main != null) main.draw();
         if (lever != null) {

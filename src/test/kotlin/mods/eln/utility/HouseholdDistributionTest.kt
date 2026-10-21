@@ -62,7 +62,7 @@ class HouseholdDistributionTest {
             root.addComponent(VoltageSource("feed",o.input,null).apply { voltage=rating.volts })
             root.addComponent(Resistor(o.output,null).apply { resistance=rating.volts/50 })
             repeat(10) { root.step() }
-            assertFalse(o.tripped);assertTrue(o.output.voltage>rating.volts*.99);assertTrue(o.contact.current>49)
+            assertFalse(o.tripped);assertEquals(rating.volts-o.contact.current*o.contact.resistance,o.output.voltage,1e-7);assertTrue(o.contact.current>49)
         }
     }
     @Test fun cartridgeRatingAndRemovalSurviveSavingAndDoNotProduceAReplacementFuse() {

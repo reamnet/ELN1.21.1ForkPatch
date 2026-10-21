@@ -39,11 +39,11 @@ internal object KitchenNativeFixtures {
                 KitchenType.KETTLE -> Items.POTION
                 KitchenType.BLENDER -> Items.APPLE
                 KitchenType.RICE -> Items.WHEAT
-                KitchenType.FRIDGE -> Items.WATER_BUCKET
+                KitchenType.FRIDGE,KitchenType.MINI_FRIDGE -> Items.WATER_BUCKET
                 else -> Items.BEEF
-            },if(type==KitchenType.FRIDGE)1 else 2))
+            },if(type.refrigerator)1 else 2))
             if(type in listOf(KitchenType.COFFEE,KitchenType.BLENDER,KitchenType.RICE))e.inventory.setItem(1,PotionContents.createItemStack(Items.POTION,Potions.WATER))
-            if(type==KitchenType.FRIDGE)e.inventory.setItem(3,ItemStack(Items.APPLE,7))
+            if(type.refrigerator)e.inventory.setItem(3,ItemStack(Items.APPLE,7))
             if(type==KitchenType.KETTLE)e.inventory.setItem(0,PotionContents.createItemStack(Items.POTION,Potions.WATER))
             e.inventory.setChanged()
         }
@@ -78,9 +78,9 @@ internal object KitchenNativeFixtures {
                 KitchenType.KETTLE -> Items.POTION
                 KitchenType.BLENDER -> Items.APPLE
                 KitchenType.RICE -> Items.WHEAT
-                KitchenType.FRIDGE -> Items.WATER_BUCKET
+                KitchenType.FRIDGE,KitchenType.MINI_FRIDGE -> Items.WATER_BUCKET
                 else -> Items.BEEF
-            },if(type==KitchenType.FRIDGE)1 else 2))
+            },if(type.refrigerator)1 else 2))
             e.inventory.setItem(1,if(type in listOf(KitchenType.COFFEE,KitchenType.BLENDER,KitchenType.RICE))PotionContents.createItemStack(Items.POTION,Potions.WATER) else ItemStack.EMPTY)
             e.inventory.setItem(2,ItemStack.EMPTY);e.work.joules=0.0
             if(type==KitchenType.KETTLE)e.inventory.setItem(0,PotionContents.createItemStack(Items.POTION,Potions.WATER))
@@ -118,13 +118,13 @@ internal object KitchenNativeFixtures {
             val e=machine(p,i);val type=entry.first;val out=e.inventory.getItem(2)
             check(!out.isEmpty) { "$type did not produce food/ice; ${e.getWaila()}, progress=${e.work.joules}, temp=${e.temperature}" }
             when(type) {
-                KitchenType.MICROWAVE,KitchenType.STOVE,KitchenType.MINI_OVEN -> check(out.`is`(Items.COOKED_BEEF) && out.count==2)
+                KitchenType.MICROWAVE,KitchenType.STOVE,KitchenType.MINI_OVEN,KitchenType.GRILL -> check(out.`is`(Items.COOKED_BEEF) && out.count==2)
                 KitchenType.TOASTER -> check(out.`is`(KitchenFoods.toast.get()) && out.count==2)
                 KitchenType.COFFEE -> { check(out.`is`(KitchenFoods.coffee.get()) && out.count==1);check(e.inventory.getItem(0).count==1);check(e.inventory.getItem(1).isEmpty) }
                 KitchenType.KETTLE -> check(out.`is`(KitchenFoods.hotWater.get()) && out.count==1)
                 KitchenType.BLENDER -> check(out.`is`(KitchenFoods.smoothie.get()) && out.count==1)
                 KitchenType.RICE -> { check(out.`is`(KitchenFoods.grains.get()));check(e.inventory.getItem(1).`is`(Items.GLASS_BOTTLE)) }
-                KitchenType.FRIDGE -> { check(out.`is`(Items.ICE));check(e.inventory.getItem(1).`is`(Items.BUCKET));check(e.inventory.getItem(3).count==7);check(e.temperature<5.0) }
+                KitchenType.FRIDGE,KitchenType.MINI_FRIDGE -> { check(out.`is`(Items.ICE));check(e.inventory.getItem(1).`is`(Items.BUCKET));check(e.inventory.getItem(3).count==7);check(e.temperature<5.0) }
             }
             check(e.enabled)
         }

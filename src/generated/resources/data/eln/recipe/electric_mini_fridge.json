@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "minecraft:chest"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    },
+    "R": {
+      "item": "eln:copper_cable"
+    }
+  },
+  "pattern": [
+    "PP",
+    "CR",
+    "PP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:electric_mini_fridge"
+  }
+}

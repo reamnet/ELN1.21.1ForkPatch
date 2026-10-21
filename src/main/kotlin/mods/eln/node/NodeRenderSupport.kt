@@ -29,8 +29,8 @@ object NodeRenderSupport {
     fun neighbourLight(entity: BlockEntity): Int {
         val level = entity.level ?: return 15 shl 4 or (15 shl 20)
         val pos = entity.blockPos
-        var sky = 0
-        var block = level.getBlockState(pos).getLightEmission(level, pos)
+        var sky = level.getBrightness(LightLayer.SKY, pos)
+        var block = maxOf(level.getBrightness(LightLayer.BLOCK, pos), level.getBlockState(pos).getLightEmission(level, pos))
         for (direction in Direction.entries) {
             val neighbour = pos.relative(direction)
             sky = maxOf(sky, level.getBrightness(LightLayer.SKY, neighbour))

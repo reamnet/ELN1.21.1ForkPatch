@@ -16,6 +16,7 @@ object UtilityRecipes {
             val detail=when {
                 kind.transformer->findItemStack("Pole Fuse Link")
                 kind.cutout->findItemStack("Pole Fuse Link")
+                kind.singlePhaseTap->findItemStack("Pole Fuse Link")
                 kind.recloser->ItemStack(Items.COMPARATOR)
                 kind.regulator->findItemStack("DC-DC Converter")
                 kind.capacitor->findItemStack("Copper Cable")

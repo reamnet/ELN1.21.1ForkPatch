@@ -279,7 +279,7 @@ abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeEntit
         loopedSoundManager.add(loopedSound)
     }
 
-    fun destructor() {
+    open fun destructor() {
         if (usedUuid()) ClientSetup.uuidManager.kill(uuid)
         loopedSoundManager.dispose()
     }

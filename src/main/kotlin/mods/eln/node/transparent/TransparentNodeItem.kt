@@ -26,6 +26,7 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.core.Direction as EnumFacing
 import net.minecraft.core.BlockPos
 import mods.eln.client.gl.GL11
+import mods.eln.misc.tagCompound
 import mods.eln.misc.setBlock
 
 /**
@@ -43,12 +44,20 @@ class TransparentNodeItem(b: Supplier<Block>) : GenericItemBlockUsingDamage<Tran
         }
         override fun useOn(context: UseOnContext): InteractionResult {
             val player = context.player ?: return InteractionResult.PASS
+            if(descriptor is mods.eln.transparentnode.festive.FairyLightsDescriptor)return mods.eln.transparentnode.festive.FairyLightPlacement.use(context)
             val place = BlockPlaceContext(context)
-            if (!place.canPlace()) return InteractionResult.FAIL
+            val wall=context.level.getBlockState(context.clickedPos)
+            val recess=descriptor is mods.eln.transparentnode.cord.OutletDescriptor && !(descriptor as mods.eln.transparentnode.cord.OutletDescriptor).strip &&
+                context.clickedFace.axis!=net.minecraft.core.Direction.Axis.Y && wall.isSolidRender(context.level,context.clickedPos) && !wall.hasBlockEntity() && wall.fluidState.isEmpty
+            if (!recess && !place.canPlace()) return InteractionResult.FAIL
             val stack = context.itemInHand
             if (!player.mayUseItemAt(place.clickedPos, context.clickedFace, stack)) return InteractionResult.FAIL
             if (context.level.isClientSide) return InteractionResult.SUCCESS
-            if (!(family as TransparentNodeItem).placeBlockAt(stack, player, context.level, place.clickedPos, context.clickedFace)) return InteractionResult.FAIL
+            val target=if(recess)context.clickedPos else place.clickedPos
+            val placed=if(recess)stack.copy().apply {
+                tagCompound=(tagCompound ?: net.minecraft.nbt.CompoundTag()).apply { put("outletWall",net.minecraft.nbt.NbtUtils.writeBlockState(wall)) }
+            } else stack
+            if (!(family as TransparentNodeItem).placeBlockAt(placed, player, context.level, target, context.clickedFace,recess)) return InteractionResult.FAIL
             val sound = context.level.getBlockState(place.clickedPos).getSoundType(context.level, place.clickedPos, player)
             context.level.playSound(null, place.clickedPos, sound.placeSound, SoundSource.BLOCKS, (sound.volume + 1.0f) / 2.0f, sound.pitch * 0.8f)
             stack.shrink(1)
@@ -60,7 +69,8 @@ class TransparentNodeItem(b: Supplier<Block>) : GenericItemBlockUsingDamage<Tran
         Placer(this, descriptor!!, id, block.get(), newProperties(descriptor))
 
     /** Server side: node first, then the block at the descriptor's spawn offset. */
-    fun placeBlockAt(stack: ItemStack, player: Player, world: Level, pos: BlockPos, side: EnumFacing): Boolean {
+    @JvmOverloads
+    fun placeBlockAt(stack: ItemStack, player: Player, world: Level, pos: BlockPos, side: EnumFacing, recessed: Boolean=false): Boolean {
         var x = pos.x
         var y = pos.y
         var z = pos.z
@@ -74,8 +84,8 @@ class TransparentNodeItem(b: Supplier<Block>) : GenericItemBlockUsingDamage<Tran
         y += v[1]
         z += v[2]
         val coord = Coordinate(x, y, z, world)
-        var error: String?
-        if (descriptor.checkCanPlace(coord, front).also { error = it } != null) {
+        var error: String?=null
+        if (!recessed && descriptor.checkCanPlace(coord, front).also { error = it } != null) {
             sendMessage(player, error)
             return false
         }

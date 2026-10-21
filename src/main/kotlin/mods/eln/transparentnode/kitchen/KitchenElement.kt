@@ -21,7 +21,7 @@ import kotlin.math.abs
 
 class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) : TransparentNodeElement(node,descriptor),CordDevice {
     val type=(descriptor as KitchenDescriptor).type
-    override val inventory=object : TransparentNodeElementInventory(if(type==KitchenType.FRIDGE)30 else 3,64,this) {
+    override val inventory=object : TransparentNodeElementInventory(type.slotCount,64,this) {
         override fun getAccessibleSlotsFromSide(side: Int)=IntArray(containerSize) { it }
         override fun canPlaceItemThroughFace(slot: Int,stack: ItemStack?,side: Int)=stack!=null && KitchenRecipe.allowed(type,slot,stack)
         override fun canTakeItemThroughFace(slot: Int,stack: ItemStack?,side: Int)=slot==2 || slot==1 && (stack?.`is`(net.minecraft.world.item.Items.BUCKET)==true || stack?.`is`(net.minecraft.world.item.Items.GLASS_BOTTLE)==true) || slot>=3
@@ -30,7 +30,7 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
     val resistor=Resistor(load,null)
     override val cord=ApplianceCord(this,load)
     override val cordVoltage get()=type.volts
-    override val cordPortable get()=type.volts==120.0 && type!=KitchenType.FRIDGE
+    override val cordPortable get()=type!=KitchenType.FRIDGE
     val work=KitchenWork()
     val batteryHeat=MicrowaveBatteryHeat()
     val batteryJob get()=type==KitchenType.MICROWAVE && MicrowaveBatteryHeat.accepts(inventory.getItem(0))
@@ -64,7 +64,7 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
         cachedInput=input.copy();cachedInputReference=input;cacheReady=true
     }
     override fun inventoryChange(inventory: Container?) { rebuildRecipe(true);configure();needPublish() }
-    private val requested get()=enabled && !detonating && (batteryJob || recipe?.canFit(inventory)==true || type==KitchenType.FRIDGE && temperature>4.5)
+    private val requested get()=enabled && !detonating && (batteryJob || recipe?.canFit(inventory)==true || type.refrigerator && temperature>4.5)
     private fun configure() {
         val connected=requested && abs(load.voltage)<=type.volts*1.2
         active=connected && abs(load.voltage)>=type.volts*.8
@@ -74,7 +74,7 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
         if(!cacheReady)rebuildRecipe(false)
         configure()
         val power=if(active)resistor.power.coerceIn(0.0,type.watts*1.1) else 0.0
-        if(type==KitchenType.FRIDGE) {
+        if(type.refrigerator) {
             val cooling=(power/type.watts).coerceIn(0.0,1.0)*.85
             temperature=(temperature+seconds*(.025-cooling)).coerceIn(3.5,20.0)
         }
@@ -88,11 +88,11 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
             batteryJob && batteryHeat.hissing -> "HISSING"
             batteryJob -> "HEATING_BATTERY"
             job!=null && !job.canFit(inventory) -> "BLOCKED"
-            type==KitchenType.FRIDGE && temperature>5.0 -> "COOLING"
+            type.refrigerator && temperature>5.0 -> "COOLING"
             job!=null && power>1 -> "WORKING"
             else -> "IDLE"
         }
-        if(job!=null && job.canFit(inventory) && enabled && power>0 && (type!=KitchenType.FRIDGE || temperature<=5.0)) {
+        if(job!=null && job.canFit(inventory) && enabled && power>0 && (!type.refrigerator || temperature<=5.0)) {
             if(work.advance(seconds,power,type.watts*type.seconds)) {
                 work.joules=0.0;job.complete(inventory)
                 play(SoundCommand(if(type==KitchenType.TOASTER)"eln:appliance_toaster_pop" else "eln:appliance_done").verySmallRange().mulVolume(.35f,1f))

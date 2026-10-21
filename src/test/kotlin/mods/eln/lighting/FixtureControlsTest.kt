@@ -40,7 +40,7 @@ class FixtureControlsTest {
     }
     @Test fun oldFixtureBeamsKeepTheirDefaultDirectionAndSaveBothHeads() {
         for(s in DecorativeLampStyle.entries.filter { it.aimHeadCount>0 }) {
-            val a=s.newAim();val direction=a.rotate(Vec3(1.0,0.0,0.0),0)
+            val a=s.newAim();val direction=a.rotate(if(a.axialPan)Vec3(-1.0,0.0,0.0) else Vec3(1.0,0.0,0.0),0)
             assertTrue(direction.distanceTo(s.beam.normalize())<1e-10,s.name)
             repeat(a.heads) { h -> a.set(h,0,15.0+h*10);a.set(h,1,-5.0-h*10) }
             val tag=CompoundTag().also(a::write);val restored=s.newAim().also { it.read(tag) }

@@ -286,6 +286,10 @@ object CraftingRecipes {
     /** Always available, including seasonal fixtures outside the holiday season. */
     private fun recipeLightingExpansion() {
         addShapelessRecipe(Eln.findItemStack("String Lights", 2), findItemStack("120V LED Light Bulb"), "materialString")
+        addShapelessRecipe(findItemStack("Warm White Deck Globe String Lights"),findItemStack("White Fairy Lights on Green Wire"),ItemStack(Items.GLASS_BOTTLE),ItemStack(Items.BLACK_DYE))
+        addShapelessRecipe(findItemStack("Multicolor Deck Globe String Lights"),findItemStack("Multicolor Fairy Lights on Green Wire"),ItemStack(Items.GLASS_BOTTLE),ItemStack(Items.BLACK_DYE))
+        addShapelessRecipe(findItemStack("White Fairy Lights on Green Wire"),findItemStack("String Lights"),findItemStack("Flexible Appliance Cord"),ItemStack(Items.WHITE_DYE),ItemStack(Items.GREEN_DYE))
+        addShapelessRecipe(findItemStack("Multicolor Fairy Lights on Green Wire"),findItemStack("String Lights"),findItemStack("Flexible Appliance Cord"),ItemStack(Items.RED_DYE),ItemStack(Items.GREEN_DYE))
         val upgrades = listOf(
             Triple("Window Candle Light","Basic Lamp Holder",Items.HONEYCOMB),
             Triple("Standing Drum Floor Lamp","Ceramic Drum Table Lamp",Items.IRON_INGOT),
@@ -316,7 +320,24 @@ object CraftingRecipes {
             Triple("Halloween Pumpkin String Lights","String Lights",Items.PUMPKIN),
             Triple("Halloween Ghost String Lights","String Lights",Items.WHITE_DYE),
             Triple("Halloween Bat Wall Light","Basic Lamp Holder",Items.BLACK_DYE),
-            Triple("Jack O Lantern Table Lamp","Basic Lamp Holder",Items.CARVED_PUMPKIN)
+            Triple("Jack O Lantern Table Lamp","Basic Lamp Holder",Items.CARVED_PUMPKIN),
+            Triple("Large Area Floodlight","Warehouse Wall Floodlight",Items.DIAMOND),
+            Triple("Quad Head Parking Lot Light","Twin Parking Lot Light",Items.IRON_BLOCK),
+            Triple("Round Canopy Parking Lot Light","Twin Parking Lot Light",Items.QUARTZ),
+            Triple("Offset Twin Arm Parking Lot Light","Twin Parking Lot Light",Items.COPPER_INGOT),
+            Triple("Round Niche Pool Light","Robust Lamp Socket",Items.PRISMARINE_CRYSTALS),
+            Triple("Linear Pool Wall Light","Thin Fluorescent Shop Light",Items.PRISMARINE_CRYSTALS),
+            Triple("Square Recessed Pool Light","Flat Lamp Socket",Items.PRISMARINE_CRYSTALS),
+            Triple("Pool Corner Wash Light","Spot Lamp Socket",Items.PRISMARINE_CRYSTALS),
+            Triple("Pool Step Marker Light","Mini Dot Spotlight",Items.PRISMARINE_CRYSTALS),
+            Triple("Patio Festoon Party Lights","String Lights",Items.ORANGE_DYE),
+            Triple("Electric Poolside Tiki Light","Traditional Lantern Post Light",Items.BAMBOO),
+            Triple("Multicolor Party Wash Light","Warehouse Wall Floodlight",Items.MAGENTA_DYE),
+            Triple("Poolside Globe String Lights","String Lights",Items.GLASS_BOTTLE),
+            Triple("Poolside Party Lantern","Porch Lantern Sconce",Items.LIGHT_BLUE_DYE),
+            Triple("Deck Post Cap Light","Basic Lamp Holder",Items.OAK_SLAB),
+            Triple("Deck Step Riser Light","Flat Lamp Socket",Items.SPRUCE_SLAB),
+            Triple("Tropical Patio Ceiling Fan","Classic Four Blade Ceiling Fan",Items.JUNGLE_PLANKS)
         )
         for ((output, base, material) in upgrades) addRecipe(findItemStack(output)," D ","DLD"," P ",
             'D',ItemStack(material),'L',findItemStack(base),'P',findItemStack("Iron Plate"))
@@ -375,6 +396,12 @@ object CraftingRecipes {
             'I',ItemStack(Items.IRON_INGOT),'P',findItemStack("Iron Plate"),'R',ItemStack(Items.REDSTONE),'C',findItemStack("Copper Cable"))
         addRecipe(findItemStack("Flat Electric Cooktop"), "GGG", "RRR", "PCP",
             'G',ItemStack(Blocks.BLACK_STAINED_GLASS),'R',ItemStack(Items.REDSTONE),'P',findItemStack("Iron Plate"),'C',findItemStack("Copper Cable"))
+        addRecipe(findItemStack("Patio Electric Grill"),"III","RCR","P P",
+            'I',ItemStack(Items.IRON_BARS),'R',ItemStack(Items.REDSTONE),'C',findItemStack("Copper Cable"),'P',findItemStack("Iron Plate"))
+        addRecipe(findItemStack("Electric Patio Heater"),"IRI"," C "," P ",
+            'I',ItemStack(Items.IRON_BARS),'R',ItemStack(Items.REDSTONE),'C',findItemStack("Copper Cable"),'P',findItemStack("Iron Plate"))
+        addRecipe(findItemStack("Electric Mini Fridge"),"PP","CR","PP",
+            'P',findItemStack("Iron Plate"),'C',ItemStack(Blocks.CHEST),'R',findItemStack("Copper Cable"))
         addRecipe(findItemStack("Electric Refrigerator"), "PPP", "GCG", "PRP",
             'P',findItemStack("Iron Plate"),'G',ItemStack(Blocks.GLASS_PANE),'C',ItemStack(Blocks.CHEST),'R',findItemStack("Copper Cable"))
         addRecipe(findItemStack("Electric Coffee Maker"), " I ", "GBG", "PCP",
@@ -423,6 +450,11 @@ object CraftingRecipes {
                 'M',findItemStack("Electrical Motor"),'C',findItemStack("Copper Cable"),'R',ItemStack(Items.REDSTONE))
         addRecipe(findItemStack("Industrial Five Block Ceiling Fan"),"PMP","MLM","PPP",
             'P',findItemStack("Iron Plate"),'M',findItemStack("Electrical Motor"),'L',findItemStack("Basic Lamp Holder"))
+        mods.eln.transparentnode.cord.CordRating.entries.filter { it.industrial }.forEachIndexed { i,rating ->
+            val dye=listOf(Items.PURPLE_DYE,Items.LIGHT_GRAY_DYE,Items.GREEN_DYE,Items.RED_DYE,Items.BLACK_DYE,Items.YELLOW_DYE)[i]
+            addShapelessRecipe(findItemStack(rating.cordName),findItemStack("Flexible Appliance Cord"),findItemStack("Rubber"),ItemStack(dye))
+            addShapelessRecipe(findItemStack(rating.outletName),findItemStack("Experimental Wall Outlet"),findItemStack("Iron Plate"),ItemStack(dye))
+        }
         addShapelessRecipe(findItemStack("240 V Wall Outlet"),findItemStack("Experimental Wall Outlet"),ItemStack(Items.ORANGE_DYE))
         addShapelessRecipe(findItemStack("240 V Appliance Cord"),findItemStack("Flexible Appliance Cord"),ItemStack(Items.ORANGE_DYE))
         addRecipe(findItemStack("Industrial Five Block Fan"),"PMP","MCM","PMP",'P',findItemStack("Iron Plate"),'M',findItemStack("Electrical Motor"),'C',findItemStack("Copper Cable"))

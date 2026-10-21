@@ -37,6 +37,7 @@ class StepDownDisplay {
     var light = 0
     var heightStep = 0
     var yaw = 0
+    var pitch = 0
     var inputVolts = 0.0
     var outputVolts = 0.0
     var watts = 0.0
@@ -47,6 +48,7 @@ class StepDownDisplay {
         installed = stream.readBoolean(); light = stream.readUnsignedByte()
         heightStep = stream.readByte().toInt().coerceIn(StreetLightMount.MIN_STEP, StreetLightMount.MAX_STEP)
         yaw = stream.readUnsignedShort().takeIf(StreetLightMount::validYaw) ?: 0
+        pitch=stream.readByte().toInt().takeIf(StreetLightMount::validPitch) ?: 0
         inputVolts = stream.readDouble(); outputVolts = stream.readDouble(); watts = stream.readDouble()
         status = stream.readUTF()
         connections.deserialize(stream)
@@ -82,8 +84,8 @@ class UtilityStreetLightRender(entity: TransparentNodeEntity, descriptor: Transp
     override fun draw() {
         super.draw()
         mods.eln.utility.PoleFuseVisual.draw(front ?: Direction.XN,display.pole.fuseClosed,display.pole.fuseBlown)
-        mods.eln.utility.PoleSecondaryVisual.draw(front ?: Direction.XN)
-        (transparentNodeDescriptor as UtilityStreetLightDescriptor).drawLamp(front ?: Direction.XN, display.light > 0, display.installed, display.heightStep, display.yaw)
+        mods.eln.misc.preserveMatrix { mods.eln.client.gl.GL11.glRotatef(lowVoltageRenderAngle,0f,1f,0f);mods.eln.utility.PoleSecondaryVisual.draw(Direction.XN) }
+        (transparentNodeDescriptor as UtilityStreetLightDescriptor).drawLamp(front ?: Direction.XN, display.light > 0, display.installed, display.heightStep, display.yaw, display.pitch)
         cable = drawCable(front!!.down(), Eln.instance.stdCableRender200V, display.connections, cable)
     }
     override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream); display.read(stream);display.pole.read(stream) }
@@ -102,11 +104,13 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
     private lateinit var heightDown: GuiButtonEln
     private lateinit var heightUp: GuiButtonEln
     private lateinit var angleLeft: GuiButtonEln
+    private lateinit var tiltDown: GuiButtonEln
+    private lateinit var tiltUp: GuiButtonEln
     private lateinit var angleRight: GuiButtonEln
-    override fun newHelper() = GuiHelperContainer(this, if(pole)332 else 176, if (pole) 280 else 232, 8, if (pole) 198 else 150)
+    override fun newHelper() = GuiHelperContainer(this, if(pole)332 else 176, if (pole) 304 else 232, 8, if (pole) 222 else 150)
     override fun initGui() {
         super.initGui()
-        rating=newGuiButton(8,if(pole)156 else 108,160,"")
+        rating=newGuiButton(8,if(pole)180 else 108,160,"")
         if(pole) {
             terminal=newGuiButton(180,60,144,"")
             fuse=newGuiButton(180,84,144,"").apply { setComment(0,tr("Right-click the pole holding a Pole Fuse Link to replace a blown fuse")) }
@@ -125,6 +129,8 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
             visible = pole
             setComment(0, tr("Turn right by %1$°; hold Shift for %2$° steps", 5, 1))
         }
+        tiltDown=newGuiButton(8,156,36,tr("Down")).apply { visible=pole;setComment(0,tr("Tilt down")) }
+        tiltUp=newGuiButton(132,156,36,tr("Up")).apply { visible=pole;setComment(0,tr("Tilt up")) }
         refresh()
     }
     private fun refresh() {
@@ -151,6 +157,8 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
             automatic -> render.clientSendBoolean(83, !display.automatic)
             heightDown -> render.clientSendInt(84, -1)
             heightUp -> render.clientSendInt(84, 1)
+            tiltDown -> render.clientSendInt(98,if(Screen.hasShiftDown())1 else 5)
+            tiltUp -> render.clientSendInt(98,if(Screen.hasShiftDown())-1 else -5)
             angleLeft -> render.clientSendInt(85, if (Screen.hasShiftDown()) 1 else 5)
             angleRight -> render.clientSendInt(85, if (Screen.hasShiftDown()) -1 else -5)
         }
@@ -174,9 +182,11 @@ class StepDownGui(player: Player, inventory: Container, private val render: Tran
         if (pole) {
             val height = tr("Height: %1$ m", String.format(Locale.ROOT, "%.2f", StreetLightMount.height(display.heightStep)))
             drawString(88 - font.width(height) / 2, 114, height)
+            val tilt=tr("Tilt: %1$°",display.pitch)
+            drawString(88-font.width(tilt)/2,162,tilt)
             val angle = tr("Angle: %1$°", display.yaw)
             drawString(88 - font.width(angle) / 2, 138, angle)
         }
-        drawString(8, if (pole) 180 else 132, font.plainSubstrByWidth(if (pole && !display.installed) tr("Step-down unit required") else converterStateText(display.status), 160))
+        drawString(8, if (pole) 204 else 132, font.plainSubstrByWidth(if (pole && !display.installed) tr("Step-down unit required") else converterStateText(display.status), 160))
     }
 }

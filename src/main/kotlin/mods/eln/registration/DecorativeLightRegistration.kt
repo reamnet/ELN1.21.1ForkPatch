@@ -59,6 +59,17 @@ object DecorativeLightRegistration {
                         when {
                             style.miniDot || style==DecorativeLampStyle.EAVE_TWIN ->
                                 setPlaceDirection(arrayOf(Direction.YP,Direction.XN,Direction.XP,Direction.ZN,Direction.ZP))
+                            style.parking -> {
+                                setPlaceDirection(Direction.YN)
+                                ghostGroup=GhostGroup().apply {
+                                    for(x in 1..4)addElement(x,0,0)
+                                    for(x in 5..6)for(y in -2..2)for(z in -2..2)addElement(x,y,z)
+                                }
+                            }
+                            style==DecorativeLampStyle.PARTY_TIKI || style==DecorativeLampStyle.PARTY_LANTERN -> {
+                                setPlaceDirection(Direction.YN)
+                                if(style==DecorativeLampStyle.PARTY_TIKI)ghostGroup=GhostGroup().apply { addElement(1,0,0) }
+                            }
                             style.tableLamp -> setPlaceDirection(Direction.YN)
                             style == DecorativeLampStyle.FLOOR_DRUM -> {
                                 setPlaceDirection(Direction.YN)
@@ -78,10 +89,11 @@ object DecorativeLightRegistration {
                                     for(x in 1..kotlin.math.ceil(style.depth).toInt())for(y in -2..2)for(z in -2..2)addElement(x,y,z)
                                 }
                             }
+                            style.pool -> Unit // Sealed fittings may also mount on a pool floor or step.
                             style.wallLamp -> setPlaceDirection(arrayOf(Direction.XN,Direction.XP,Direction.ZN,Direction.ZP))
                             style.ceiling -> setPlaceDirection(Direction.YP)
                         }
-                        if(style == DecorativeLampStyle.STRIP_SURFACE || style == DecorativeLampStyle.RIG_LINEAR || style.seasonalString)
+                        if(style == DecorativeLampStyle.STRIP_SURFACE || style == DecorativeLampStyle.RIG_LINEAR || style.seasonalString || style.partyString)
                             ghostGroup=GhostGroup().apply { addElement(0,0,-1);addElement(0,0,1) }
                         if(style.fan)ghostGroup=GhostGroup().apply {
                             val radius=if(style==DecorativeLampStyle.FAN_INDUSTRIAL)2 else 1
@@ -91,7 +103,7 @@ object DecorativeLightRegistration {
                 }
             }
             // These cells reserve model clearance, not full cubes of solid machinery.
-            descriptor.ghostGroup?.elementList?.forEach { it.meta=mods.eln.ghost.GhostBlock.tClearance }
+            descriptor.ghostGroup?.elementList?.forEach { it.meta=mods.eln.ghost.GhostBlock.tLampClearance }
             descriptor.creativeTab=Eln.creativeTabLighting
             Eln.sixNodeItem.addDescriptor(idFor(style),descriptor)
         }

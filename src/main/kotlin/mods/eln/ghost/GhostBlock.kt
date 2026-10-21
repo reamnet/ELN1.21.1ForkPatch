@@ -48,7 +48,7 @@ class GhostBlock : Block(Properties.of().mapColor(MapColor.METAL).strength(0.5f)
         builder.add(SHAPE)
     }
 
-    override fun stateForMeta(meta: Int): BlockState = defaultBlockState().setValue(SHAPE, meta.coerceIn(tCube, tClearance))
+    override fun stateForMeta(meta: Int): BlockState = defaultBlockState().setValue(SHAPE, meta.coerceIn(tCube, tLampClearance))
 
     override fun metaOfState(state: BlockState): Int = state.getValue(SHAPE)
 
@@ -57,7 +57,7 @@ class GhostBlock : Block(Properties.of().mapColor(MapColor.METAL).strength(0.5f)
     override fun getCollisionShape(state: BlockState, world: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape =
         when (shapeOf(state)) {
             tFloor -> FLOOR_SHAPE
-            tLadder, tClearance -> Shapes.empty()
+            tLadder, tClearance, tLampClearance -> Shapes.empty()
             else -> {
                 val element = (world as? Level)?.let { getElement(it, pos.x, pos.y, pos.z) }
                 val te = element?.observatorCoordonate?.tileEntity
@@ -78,12 +78,18 @@ class GhostBlock : Block(Properties.of().mapColor(MapColor.METAL).strength(0.5f)
     override fun getShape(state: BlockState, world: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape =
         when (shapeOf(state)) {
             tFloor -> FLOOR_SHAPE
-            tLadder -> Shapes.empty()
+            tLadder, tLampClearance -> Shapes.empty()
             else -> Shapes.block()
         }
 
     override fun isLadder(state: BlockState, world: LevelReader, pos: BlockPos, entity: LivingEntity): Boolean =
         shapeOf(state) == tLadder
+
+    // Selection boxes reserve/click the model; they are not opaque blocks. In particular a
+    // stack of clearance cells above a turbine must not attenuate skylight on every floor.
+    override fun getLightBlock(state: BlockState, world: BlockGetter, pos: BlockPos) = 0
+    override fun propagatesSkylightDown(state: BlockState, world: BlockGetter, pos: BlockPos) = true
+    override fun getOcclusionShape(state: BlockState, world: BlockGetter, pos: BlockPos): VoxelShape = Shapes.empty()
 
     override fun getRenderShape(state: BlockState): RenderShape = RenderShape.INVISIBLE
 
@@ -132,9 +138,10 @@ class GhostBlock : Block(Properties.of().mapColor(MapColor.METAL).strength(0.5f)
         const val tLadder = 2
         // Reserves placement space without an invisible wall or ladder behavior.
         const val tClearance = 3
+        const val tLampClearance = 4
 
         @JvmField
-        val SHAPE: IntegerProperty = IntegerProperty.create("shape", tCube, tClearance)
+        val SHAPE: IntegerProperty = IntegerProperty.create("shape", tCube, tLampClearance)
 
         private val FLOOR_SHAPE: VoxelShape = Shapes.create(AABB(0.0, 0.0, 0.0, 1.0, 0.0625, 1.0))
     }

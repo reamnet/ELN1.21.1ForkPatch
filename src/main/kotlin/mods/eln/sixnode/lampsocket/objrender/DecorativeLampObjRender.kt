@@ -27,7 +27,8 @@ class DecorativeLampObjRender(val style: DecorativeLampStyle) : ILampSocketObjRe
     private fun swivel(aim: LightAim,head: Int,draw: ()->Unit)=preserveMatrix {
         val p=style.aimPivot(head)
         GL11.glTranslated(p.x,p.y,p.z)
-        GL11.glRotated(-aim.pan(head),0.0,1.0,0.0);GL11.glRotated(aim.tilt(head),0.0,0.0,1.0)
+        if(aim.axialPan)GL11.glRotated(aim.pan(head),1.0,0.0,0.0) else GL11.glRotated(-aim.pan(head),0.0,1.0,0.0)
+        GL11.glRotated(aim.tilt(head),0.0,0.0,1.0)
         GL11.glTranslated(-p.x,-p.y,-p.z);draw()
     }
     private fun lens(index: Int,aim: LightAim) {
@@ -86,8 +87,8 @@ class DecorativeLampObjRender(val style: DecorativeLampStyle) : ILampSocketObjRe
                         else -> GL11.glColor3f(1f,.90f,.65f)
                     }
                     when(style) {
-                        DecorativeLampStyle.CHRISTMAS_FAIRY -> GL11.glColor3f(1f,.76f,.35f)
-                        DecorativeLampStyle.CHRISTMAS_COLOR -> when(i%4) {
+                        DecorativeLampStyle.CHRISTMAS_FAIRY,DecorativeLampStyle.PARTY_FESTOON,DecorativeLampStyle.PARTY_TIKI -> GL11.glColor3f(1f,.76f,.35f)
+                        DecorativeLampStyle.CHRISTMAS_COLOR,DecorativeLampStyle.PARTY_WASH -> when(i%4) {
                             0->GL11.glColor3f(1f,.10f,.05f);1->GL11.glColor3f(.12f,1f,.20f);2->GL11.glColor3f(.15f,.35f,1f);else->GL11.glColor3f(1f,.72f,.08f)
                         }
                         DecorativeLampStyle.CHRISTMAS_ICICLE,DecorativeLampStyle.HALLOWEEN_GHOST -> GL11.glColor3f(.65f,.80f,1f)

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "eln:three_phase_utility_pole"
+    },
+    {
+      "item": "eln:pole_fuse_link"
+    },
+    {
+      "item": "minecraft:iron_nugget"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:three_phase_pole_with_fused_single_phase_tap"
+  }
+}

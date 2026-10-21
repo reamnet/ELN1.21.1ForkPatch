@@ -57,6 +57,14 @@ open class GridDescriptor(name: String, protected val obj: Obj3D, ElementClass: 
         }
     }
 
+    /** Rotation-invariant model bounds, including the pole's optional lamp and LV rack. */
+    fun geometryBounds(): net.minecraft.world.phys.AABB {
+        val radius = maxOf(3.0, kotlin.math.hypot(maxOf(kotlin.math.abs(obj.xMin.toDouble()), kotlin.math.abs(obj.xMax.toDouble())),
+            maxOf(kotlin.math.abs(obj.zMin.toDouble()), kotlin.math.abs(obj.zMax.toDouble()))))
+        return net.minecraft.world.phys.AABB(-radius, minOf(-.5, obj.yMin.toDouble()), -radius,
+            radius, maxOf(8.0, obj.yMax.toDouble()), radius).move(renderOffset)
+    }
+
     open fun hasCustomIcon() = false
 
     // One rule for transformers, all pole kinds, towers and grid switches.

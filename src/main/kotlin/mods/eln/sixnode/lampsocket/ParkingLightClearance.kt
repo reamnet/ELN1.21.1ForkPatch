@@ -26,7 +26,7 @@ object ParkingLightClearance {
                 if (world.getBlockState(BlockPos(at.x,at.y,at.z)).block === Eln.ghostBlock) world.setBlockToAir(at.x,at.y,at.z)
             }
         }
-        for (at in desired) if (at !in ownedPositions) manager.createGhost(at,origin,uuid,meta=mods.eln.ghost.GhostBlock.tClearance)
+        for (at in desired) if (at !in ownedPositions) manager.createGhost(at,origin,uuid,meta=mods.eln.ghost.GhostBlock.tLampClearance)
         return true
     }
 }

@@ -90,6 +90,7 @@ public final class ClientSetup {
     /** Called from FMLCommonSetupEvent on the client. */
     public static void init() {
         NeoForge.EVENT_BUS.register(new TutorialSignOverlay());
+        NeoForge.EVENT_BUS.register(NodeFrustum.INSTANCE);
         NeoForge.EVENT_BUS.register(new mods.eln.eventhandlers.ElnForgeEventsHandler());
         uuidManager = new UuidManager();
         soundClientEventListener = new SoundClientEventListener(uuidManager);

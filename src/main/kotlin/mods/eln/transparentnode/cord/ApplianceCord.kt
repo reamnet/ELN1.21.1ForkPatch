@@ -27,20 +27,20 @@ interface CordDevice {
     fun cordChanged() {}
 }
 
-data class CordAnchor(val dimension: Int,val pos: BlockPos,val id: UUID,val front: Direction,val rating: CordRating = CordRating.V120,val socket: Int=0,val horizontal: Boolean=false,val strip: Boolean=false) {
-    fun tip()=Vec3.atCenterOf(pos).add(mods.eln.transparentnode.worklight.WorkLightOptics.world(front,OutletGeometry.tipLocal(socket,horizontal,strip)))
-    fun write(): CompoundTag=CompoundTag().apply { putInt("dimension",dimension);putLong("position",pos.asLong());putUUID("outletId",this@CordAnchor.id);putInt("facing",front.int);putString("rating",rating.name);putInt("socket",socket);putBoolean("horizontal",horizontal);putBoolean("strip",strip) }
+data class CordAnchor(val dimension: Int,val pos: BlockPos,val id: UUID,val front: Direction,val rating: CordRating = CordRating.V120,val socket: Int=0,val horizontal: Boolean=false,val strip: Boolean=false,val recessed: Boolean=false) {
+    fun tip()=Vec3.atCenterOf(pos).add(mods.eln.transparentnode.worklight.WorkLightOptics.world(front,OutletGeometry.tipLocal(socket,horizontal,strip,recessed)))
+    fun write(): CompoundTag=CompoundTag().apply { putInt("dimension",dimension);putLong("position",pos.asLong());putUUID("outletId",this@CordAnchor.id);putInt("facing",front.int);putString("rating",rating.name);putInt("socket",socket);putBoolean("horizontal",horizontal);putBoolean("strip",strip);putBoolean("recessed",recessed) }
     companion object {
         fun read(tag: CompoundTag): CordAnchor? {
             if(!tag.hasUUID("outletId"))return null
             val front=Direction.fromInt(tag.getInt("facing"))?.takeIf { it.isNotY } ?: return null
-            return CordAnchor(tag.getInt("dimension"),BlockPos.of(tag.getLong("position")),tag.getUUID("outletId"),front,CordRating.read(tag.getString("rating")),tag.getInt("socket").coerceIn(0,5),tag.getBoolean("horizontal"),tag.getBoolean("strip"))
+            return CordAnchor(tag.getInt("dimension"),BlockPos.of(tag.getLong("position")),tag.getUUID("outletId"),front,CordRating.read(tag.getString("rating")),tag.getInt("socket").coerceIn(0,5),tag.getBoolean("horizontal"),tag.getBoolean("strip"),tag.getBoolean("recessed"))
         }
     }
 }
 
 /** A passive conductor joins two real loads only on attachment changes, never on each solver pass. */
-class ApplianceCord(val owner: INodeElement,val input: NbtElectricalLoad) {
+class ApplianceCord(val owner: INodeElement,val input: NbtElectricalLoad,returnLoad: NbtElectricalLoad?=null) {
     var anchor: CordAnchor?=null
         private set
     val plugged get()=anchor!=null
@@ -54,10 +54,11 @@ class ApplianceCord(val owner: INodeElement,val input: NbtElectricalLoad) {
     var state="UNPLUGGED"
         private set
     val conductor=Resistor(null,null)
+    private val returnConductor=returnLoad?.let { Resistor(it,null).apply { resistance=.005 } }
     private var outlet: OutletElement?=null
     private var timer=0.0
     private fun coordinate()=when(owner) { is TransparentNodeElement -> owner.coordinate();is SixNodeElement -> owner.coordinate!!;else -> error("Unsupported cord owner") }
-    private val device get()=owner as CordDevice
+    private val device get()=CordDevices.get(owner) ?: error("Unsupported cord device")
     init { (when(owner) { is TransparentNodeElement -> owner.slowProcessList;is SixNodeElement -> owner.slowProcessList;else -> error("Unsupported cord owner") }).add(IProcess { dt -> timer-=dt;if(timer<=0) { timer=.5;poll() } }) }
     fun inReach(a: CordAnchor): Boolean {
         val c=coordinate()
@@ -72,8 +73,10 @@ class ApplianceCord(val owner: INodeElement,val input: NbtElectricalLoad) {
     }
     private fun find(a: CordAnchor)=findOutlet(a)
     fun poll() {
+        if(!plugged && !connected)return
         val a=anchor
         val target=if(a!=null && inReach(a))find(a) else null
+        if(a!=null && target==null && coordinate().world().hasChunkAt(a.pos) && find(a)==null) { detach();return }
         if(a!=null && target!=null && (a.horizontal!=target.horizontal)) { anchor=target.anchor(a.socket);owner.needPublish() }
         val next=when {
             a==null -> "UNPLUGGED"
@@ -83,6 +86,7 @@ class ApplianceCord(val owner: INodeElement,val input: NbtElectricalLoad) {
             !device.acceptsCord(a.rating) -> "VOLTAGE"
             else -> "CONNECTED"
         }
+        if(next in listOf("OCCUPIED","VOLTAGE","TOO_FAR")) { detach();return }
         if(target!==outlet || next !in listOf("CONNECTED","TRIPPED")) {
             disconnect()
             if(target!=null && a!=null && target.canClaim(this,a.socket) && inReach(a) && device.acceptsCord(a.rating)) {
@@ -90,21 +94,29 @@ class ApplianceCord(val owner: INodeElement,val input: NbtElectricalLoad) {
                 conductor.connectTo(target.output,input)
                 conductor.resistance=.08+.015*Vec3.atCenterOf(coordinate().pos).distanceTo(Vec3.atCenterOf(a.pos))
                 conductor.setOwner("ApplianceCord@${coordinate()}")
-                Eln.simulator.addElectricalComponent(conductor);connected=true
+                Eln.simulator.addElectricalComponent(conductor);returnConductor?.let { it.setOwner("ApplianceCordReturn@${coordinate()}");Eln.simulator.addElectricalComponent(it) };connected=true
             }
         }
         if(state!=next) { state=next;owner.needPublish() }
     }
     fun disconnect() {
-        if(connected) { Eln.simulator.removeElectricalComponent(conductor);conductor.connectTo(null,null) }
+        if(connected) { Eln.simulator.removeElectricalComponent(conductor);returnConductor?.let(Eln.simulator::removeElectricalComponent);conductor.connectTo(null,null) }
         outlet?.release(this)
         outlet=null;connected=false
     }
-    fun unplug(player: ServerPlayer) {
+    fun unplug(player: ServerPlayer)=detach(player)
+    fun detach(player: ServerPlayer?=null) {
         val refund=paid;val item=anchor?.rating?.cordName ?: CordRating.V120.cordName
         anchor?.let(::find)?.release(this,true)
-        disconnect();anchor=null;paid=false;state="UNPLUGGED";device.cordChanged();owner.reconnect();owner.needPublish()
-        if(refund)player.inventory.placeItemBackInInventory(Eln.findItemStack(item,1))
+        disconnect();anchor=null;paid=false;state="UNPLUGGED"
+        if(!moving) {
+            device.cordChanged();owner.reconnect();owner.needPublish()
+            if(refund) {
+                val stack=Eln.findItemStack(item,1)
+                if(player!=null)player.inventory.placeItemBackInInventory(stack)
+                else when(owner) { is TransparentNodeElement->owner.node?.dropItem(stack);is SixNodeElement->owner.sixNode?.dropItem(stack) }
+            }
+        }
     }
     fun onBroken() {
         val refund=paid;val item=anchor?.rating?.cordName ?: CordRating.V120.cordName
@@ -142,7 +154,7 @@ class ApplianceCord(val owner: INodeElement,val input: NbtElectricalLoad) {
     fun write(tag: CompoundTag) { anchor?.let { tag.put("applianceCord",it.write().apply { putBoolean("paid",paid);putUUID("cordId",token) }) } }
     fun writeNetwork(out: DataOutputStream) {
         val a=anchor;out.writeBoolean(a!=null)
-        if(a!=null) { out.writeInt(a.pos.x);out.writeInt(a.pos.y);out.writeInt(a.pos.z);out.writeByte(a.front.int);out.writeByte(a.rating.ordinal);out.writeByte(a.socket);out.writeBoolean(a.horizontal);out.writeBoolean(a.strip) }
+        if(a!=null) { out.writeInt(a.pos.x);out.writeInt(a.pos.y);out.writeInt(a.pos.z);out.writeByte(a.front.int);out.writeByte(a.rating.ordinal);out.writeByte(a.socket);out.writeBoolean(a.horizontal);out.writeBoolean(a.strip);out.writeBoolean(a.recessed) }
         out.writeUTF(state)
     }
     companion object {

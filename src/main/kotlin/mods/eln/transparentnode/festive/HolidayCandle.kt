@@ -19,6 +19,21 @@ class HolidayCandleDescriptor(val name: String, val obj: Obj3D): TransparentNode
         light = obj.getPart("LampOn_Cylinder.002")
     }
 
+    override fun mustHaveFloor()=false
+    override fun checkCanPlace(coord: mods.eln.misc.Coordinate?, front: Direction): String? {
+        if(coord!=null) {
+            val below=coord.pos.below();val world=coord.world()
+            val top=mods.eln.sixnode.lampsocket.LampMounting.surface(world.getBlockState(below).getCollisionShape(world,below).toAabbs(),Direction.YN)
+            if(top==null)return mods.eln.i18n.I18N.tr("Place the candle on a supporting surface")
+        }
+        return super.checkCanPlace(coord,front)
+    }
+    override fun addCollisionBoxesToList(box: net.minecraft.world.phys.AABB,list: MutableList<net.minecraft.world.phys.AABB?>,world: net.minecraft.world.level.Level?,x: Int,y: Int,z: Int) {
+        val entity=world?.getBlockEntity(net.minecraft.core.BlockPos(x,y,z)) as? TransparentNodeEntity
+        val offset=if(world?.isClientSide==true)(entity?.elementRender as? HolidayCandleRender)?.mountOffset ?: 0.0 else ((entity?.node as? TransparentNode)?.element as? FestiveElement)?.mountOffset ?: 0.0
+        val small=net.minecraft.world.phys.AABB(x+.38,y+offset,z+.38,x+.62,y+offset+.6,z+.62)
+        if(small.intersects(box))list.add(small)
+    }
     fun draw(front: Direction, powered: Boolean) {
         if (base != null && light != null && glass != null) {
             front.glRotateZnRef()
@@ -39,21 +54,10 @@ class HolidayCandleDescriptor(val name: String, val obj: Obj3D): TransparentNode
     }
 }
 
-class HolidayCandleRender(tileEntity: TransparentNodeEntity, transparentNodedescriptor: TransparentNodeDescriptor): TransparentNodeElementRender(tileEntity, transparentNodedescriptor) {
+class HolidayCandleRender(tileEntity: TransparentNodeEntity, transparentNodedescriptor: TransparentNodeDescriptor): FestiveRender(tileEntity, transparentNodedescriptor) {
 
-    var powered = false
-
-    override fun networkUnserialize(stream: DataInputStream) {
-        super.networkUnserialize(stream)
-        try {
-            powered = stream.readBoolean()
-
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
 
     override fun draw() {
-        (transparentNodeDescriptor as HolidayCandleDescriptor).draw(front!!, powered)
+        mods.eln.misc.preserveMatrix { GL11.glTranslated(0.0,mountOffset,0.0);(transparentNodeDescriptor as HolidayCandleDescriptor).draw(front!!,powered) }
     }
 }

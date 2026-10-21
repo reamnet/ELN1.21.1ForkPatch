@@ -27,7 +27,7 @@ class PartialLampMountingTest {
         }
         assertFalse(LampMounting.partialAllowed(Eln.instance.highVoltageCableDescriptor,Direction.YP))
         assertEquals(setOf(DecorativeLampStyle.DESK,DecorativeLampStyle.TABLE_DRUM,DecorativeLampStyle.TABLE_BANKER,
-            DecorativeLampStyle.TABLE_TASK,DecorativeLampStyle.WINDOW_CANDLE,DecorativeLampStyle.HALLOWEEN_JACK),
+            DecorativeLampStyle.TABLE_TASK,DecorativeLampStyle.WINDOW_CANDLE,DecorativeLampStyle.HALLOWEEN_JACK,DecorativeLampStyle.DECK_POST_CAP),
             DecorativeLampStyle.entries.filter { it.tableLamp }.toSet())
     }
 }
