@@ -30,11 +30,11 @@ class WindTurbineSlowProcess implements IProcess, INBTTReady {
     private double localWind = 0;
     private double localWindDerive = 0;
     private double localWindTimeCounter = 0;
-    private int counter = 0;
     private double rotorRads = 0.0;
     private double lastElectricalPower = 0.0;
     private double lastAerodynamicPower = 0.0;
     private double stallFactor = 0.0;
+    private double lastLossPower = 0.0;
 
     WindTurbineSlowProcess(String name, WindTurbineElement turbine) {
         this.turbine = turbine;
@@ -107,6 +107,7 @@ class WindTurbineSlowProcess implements IProcess, INBTTReady {
 
     @Override
     public void process(double time) {
+        if (!Double.isFinite(time) || time <= 0.0) return;
         WindTurbineDescriptor d = turbine.descriptor;
         environmentTimeCounter -= time;
         if (environmentTimeCounter < 0.0) {
@@ -173,37 +174,61 @@ class WindTurbineSlowProcess implements IProcess, INBTTReady {
             localWindDerive = 0.0;
         }
 
-        double wind = getWind();
+    }
 
-        /*if (wind > d.maxWind) {
-            if (Math.random() < (wind - d.maxWind) * 0.02) {
-                turbine.selfDestroy();
-            }
-        }*/
+    double maximumRotorRads() {
+        WindTurbineDescriptor d = turbine.descriptor;
+        return d.nominalRotorRads * d.maxVoltage / d.nominalVoltage;
+    }
 
-        double aeroPower = aerodynamicPower(rotorRads, wind, d.rotorRadius, d.rotorSweptArea);
+    double governedRotorRads(double wind) {
+        if (!Double.isFinite(wind) || wind < CUT_IN_WIND || wind >= turbine.descriptor.maxWind) return 0.0;
+        return Math.min(maximumRotorRads(), optimalRotorRads(wind, turbine.descriptor.rotorRadius) * 1.25);
+    }
+
+    double getLastLossPower() { return lastLossPower; }
+
+    void advanceRotor(double seconds) { advanceRotor(seconds, getWind()); }
+
+    /** Once after each accepted electrical step, never during algebraic trials. */
+    void advanceRotor(double seconds, double wind) {
+        if (!Double.isFinite(seconds) || seconds <= 0.0) return;
+        WindTurbineDescriptor d = turbine.descriptor;
+        double limit = governedRotorRads(wind);
+        double optimum = Math.min(d.nominalRotorRads, optimalRotorRads(wind, d.rotorRadius));
+        double governor = limit <= 0.0 ? 0.0 : Math.max(0.0, Math.min(1.0,
+            (limit - rotorRads) / Math.max(0.01, limit - optimum)));
+        double aeroPower = governor == 0.0 ? 0.0 : Math.min(d.nominalPower / d.generationEfficiency,
+            aerodynamicPower(rotorRads, wind, d.rotorRadius, d.rotorSweptArea) * governor);
         double electricalPower = Math.max(0.0, turbine.powerSource.getPower());
         double shaftElectricalPower = electricalPower / d.generationEfficiency;
-        double dragPower = CUT_OUT_DRAG_FACTOR * rotorRads * rotorRads + 0.15 * Math.max(rotorRads, 1.0);
-        double nextEnergy = getRotorEnergy() + (aeroPower - shaftElectricalPower - dragPower) * time;
-        setRotorEnergy(nextEnergy);
-
-        double optimalRads = optimalRotorRads(wind, d.rotorRadius);
-        stallFactor = optimalRads <= 0.0 ? 0.0 : Math.max(0.0, Math.min(1.0, rotorRads / optimalRads));
+        double energy = getRotorEnergy();
+        // Furl/brake on overspeed, calm weather or storm cutout. This removes
+        // energy as a mechanical loss rather than exporting it as unpaid power.
+        double brakePower = Math.max(0.0, energy - rotorEnergy(limit, d.rotorInertia)) / 5.0;
+        double requestedLoss = CUT_OUT_DRAG_FACTOR * rotorRads * rotorRads +
+            0.15 * Math.max(rotorRads, 1.0) + brakePower;
+        double available = Math.max(0.0, energy + (aeroPower - shaftElectricalPower) * seconds);
+        double losses = Math.min(requestedLoss * seconds, available);
+        double maximumEnergy = rotorEnergy(maximumRotorRads(), d.rotorInertia);
+        double next = Math.min(maximumEnergy, available - losses);
+        losses += available - losses - next;
+        setRotorEnergy(next);
+        lastLossPower = losses / seconds + shaftElectricalPower - electricalPower;
+        stallFactor = optimum <= 0.0 ? 0.0 : Math.max(0.0, Math.min(1.0, rotorRads / optimum));
         lastElectricalPower = electricalPower;
         lastAerodynamicPower = aeroPower;
+    }
 
-        counter++;
-        if (counter % 20 == 0) {
-            Utils.println("Wind : " + getWind() + "  Rads : " + rotorRads + " AeroP : " + aeroPower + " ElecP : " + electricalPower);
-        }
+    private static double finiteClamp(double value, double low, double high) {
+        return Double.isFinite(value) ? Math.max(low, Math.min(high, value)) : 0.0;
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt, String str) {
-        localWind = nbt.getDouble(str + name + "localWind");
-        environmentWindFactor = nbt.getDouble(str + name + "environementWindFactor");
-        rotorRads = nbt.getDouble(str + name + "rotorRads");
+        localWind = finiteClamp(nbt.getDouble(str + name + "localWind"), -localWindMax, localWindMax);
+        environmentWindFactor = finiteClamp(nbt.getDouble(str + name + "environementWindFactor"), 0.0, 1.0);
+        rotorRads = finiteClamp(nbt.getDouble(str + name + "rotorRads"), 0.0, maximumRotorRads());
         lastElectricalPower = nbt.getDouble(str + name + "lastElectricalPower");
         lastAerodynamicPower = nbt.getDouble(str + name + "lastAerodynamicPower");
         stallFactor = nbt.getDouble(str + name + "stallFactor");

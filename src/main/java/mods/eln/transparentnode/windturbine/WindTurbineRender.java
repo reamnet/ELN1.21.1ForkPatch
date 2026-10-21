@@ -53,8 +53,7 @@ public class WindTurbineRender extends TransparentNodeElementRender {
         powerFactorFilter.setTarget(powerFactor);
         powerFactorFilter.step(deltaT);
         float alphaN_1 = alpha;
-        alpha += deltaT * descriptor.speed * Math.sqrt(powerFactorFilter.get());
-        if (alpha > 360) alpha -= 360;
+        alpha = (float) ((alpha + deltaT * descriptor.speed * Math.max(0.0, powerFactorFilter.get())) % 360.0);
         if (alpha % 120 > 45 && alphaN_1 % 120 <= 45 && !soundPlaying) {
             this.play(new SoundCommand(descriptor.soundName)
                 .mediumRange()
@@ -91,7 +90,8 @@ public class WindTurbineRender extends TransparentNodeElementRender {
         super.networkUnserialize(stream);
         try {
             wind = stream.readFloat();
-            powerFactor = stream.readFloat();
+            float receivedSpeed = stream.readFloat();
+            powerFactor = Float.isFinite(receivedSpeed) ? Math.max(0f, Math.min(1.25f, receivedSpeed)) : 0f;
             eConn.deserialize(stream);
         } catch (IOException e) {
 

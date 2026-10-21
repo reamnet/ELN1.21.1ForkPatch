@@ -12,7 +12,7 @@ import kotlin.math.max
 /** The generator and its converter loads must solve the same algebraic operating point.
  * Ramp and energy budget advance once per physical step, never during trial solves.
  */
-class ShaftGeneratorProcess(
+class ShaftGeneratorProcess @JvmOverloads constructor(
     private val positive: State,
     private val negative: State?,
     private val source: SwitchableVoltageSource,
@@ -21,7 +21,8 @@ class ShaftGeneratorProcess(
     private val rampRate: Double,
     private val droop: Double,
     private val currentLimit: Double,
-    private val efficiency: Double
+    private val efficiency: Double,
+    private val allowReverse: Boolean = true
 ) : ConservativePowerProcess {
     var voltageTarget = 0.0
         private set
@@ -38,15 +39,19 @@ class ShaftGeneratorProcess(
     }
 
     override fun prepareStep() {
-        if (retry.waiting) { source.enabled = false; return }
+        if (retry.waiting || (!allowReverse && voltageTarget <= 0.0)) { source.enabled = false; return }
         if (!source.enabled) source.voltage = voltageTarget
         source.enabled = true
     }
 
     override fun rootSystemPreStepProcess() {
-        if (retry.waiting) { source.enabled = false; return }
+        if (retry.waiting || (!allowReverse && voltageTarget <= 0.0)) { source.enabled = false; return }
         val port = probePort(positive, negative, source)
         if (!port.volts.isFinite() || port.ohms.isNaN() || port.ohms < 0.0) {
+            source.enabled = false
+            return
+        }
+        if (!allowReverse && port.volts >= voltageTarget) {
             source.enabled = false
             return
         }
@@ -60,10 +65,10 @@ class ShaftGeneratorProcess(
         val system = source.subSystem ?: return false
         val amps = -system.pendingValue(source.currentState)
         val volts = source.voltage
-        if (!amps.isFinite() || !volts.isFinite() || volts < 0.0) return false
+        if (!amps.isFinite() || !volts.isFinite() || volts < 0.0 || (!allowReverse && amps < -1e-7)) return false
         // Check the physical I-V relation directly. Comparing successive voltage commands
         // misses huge current errors on short, low-resistance cables and stiff converter inputs.
-        var expected = ((voltageTarget - volts) / droop).coerceIn(-currentLimit, currentLimit)
+        var expected = ((voltageTarget - volts) / droop).coerceIn(if (allowReverse) -currentLimit else 0.0, currentLimit)
         if (expected > 0.0) {
             if (outputPowerBudget <= 0.0) expected = 0.0
             else if (volts > 0.0) expected = minOf(expected, outputPowerBudget / volts)
