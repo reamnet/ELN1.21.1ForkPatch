@@ -1,6 +1,7 @@
 package mods.eln.sim.mna
 
 import org.apache.commons.numbers.core.DD
+import java.util.BitSet
 
 /** Pivoted LU in the same double-double precision as the stamp matrix.
  * Large cable networks are sparse: factor once, solve triangular systems, and cache only
@@ -20,12 +21,16 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
     val reusedOrdering = previous != null && previous.size == size
 
     init {
+        // Track actual fill while eliminating. Scanning every zero in the dense
+        // storage for each Markowitz pivot made sparse feeder startup cubic.
+        val entries = Array(size) { BitSet(size) }
         if (reusedOrdering) {
             previous!!.permutation.copyInto(permutation); previous.columns.copyInto(columns)
         }
         for (row in 0 until size) for (column in 0 until size) {
             val value = matrix[permutation[row]][columns[column]]
             lu[row][column] = if (value.isZero) DD.ZERO else value.divide(rowScale[permutation[row]])
+            if (!lu[row][column].isZero) entries[row].set(column)
         }
         for (column in 0 until size) {
             // Markowitz ordering eliminates voltage constraints and leaf branches first.
@@ -41,51 +46,89 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
                 }
             } else {
                 val rowCount = IntArray(size); val columnCount = IntArray(size); val maximum = DoubleArray(size)
-                for (r in column until size) for (c in column until size) if (!lu[r][c].isZero) {
-                    rowCount[r]++; columnCount[c]++
-                    maximum[c] = maxOf(maximum[c], lu[r][c].abs().toDouble())
+                for (r in column until size) {
+                    var c = entries[r].nextSetBit(column)
+                    while (c >= 0) {
+                        rowCount[r]++; columnCount[c]++
+                        maximum[c] = maxOf(maximum[c], lu[r][c].abs().toDouble())
+                        c = entries[r].nextSetBit(c + 1)
+                    }
                 }
                 var cost = Long.MAX_VALUE; var width = Int.MAX_VALUE
-                for (r in column until size) for (c in column until size) {
-                    if (lu[r][c].isZero || lu[r][c].abs().toDouble() < maximum[c] * .1) continue
-                    val fill = (rowCount[r] - 1).toLong() * (columnCount[c] - 1)
-                    if (fill < cost || (fill == cost && rowCount[r] < width)) {
-                        pivot = r; pivotColumn = c; cost = fill; width = rowCount[r]
+                for (r in column until size) {
+                    var c = entries[r].nextSetBit(column)
+                    while (c >= 0) {
+                        if (lu[r][c].abs().toDouble() >= maximum[c] * .1) {
+                            val fill = (rowCount[r] - 1).toLong() * (columnCount[c] - 1)
+                            if (fill < cost || (fill == cost && rowCount[r] < width)) {
+                                pivot = r; pivotColumn = c; cost = fill; width = rowCount[r]
+                            }
+                        }
+                        c = entries[r].nextSetBit(c + 1)
                     }
                 }
             }
             check(pivot >= 0 && lu[pivot][pivotColumn].isFinite) { "Matrix is singular" }
             if (pivot != column) {
                 val row = lu[column]; lu[column] = lu[pivot]; lu[pivot] = row
+                val pattern = entries[column]; entries[column] = entries[pivot]; entries[pivot] = pattern
                 val index = permutation[column]; permutation[column] = permutation[pivot]; permutation[pivot] = index
             }
             if (pivotColumn != column) {
                 for (row in 0 until size) {
                     val value = lu[row][column]; lu[row][column] = lu[row][pivotColumn]; lu[row][pivotColumn] = value
+                    if (entries[row][column] != entries[row][pivotColumn]) {
+                        entries[row].flip(column); entries[row].flip(pivotColumn)
+                    }
                 }
                 val index = columns[column]; columns[column] = columns[pivotColumn]; columns[pivotColumn] = index
             }
-            val active = (column + 1 until size).filter { !lu[column][it].isZero }.toIntArray()
+            val active = indices(entries[column], column + 1, size)
             for (row in column + 1 until size) {
                 if (lu[row][column].isZero) continue
                 val factor = lu[row][column].divide(lu[column][column])
                 lu[row][column] = factor
-                for (j in active) lu[row][j] = lu[row][j].subtract(factor.multiply(lu[column][j]))
+                entries[row].set(column, !factor.isZero)
+                for (j in active) {
+                    lu[row][j] = lu[row][j].subtract(factor.multiply(lu[column][j]))
+                    entries[row].set(j, !lu[row][j].isZero)
+                }
             }
         }
-        lower = Array(size) { row -> (0 until row).filter { !lu[row][it].isZero }.toIntArray() }
-        upper = Array(size) { row -> (row + 1 until size).filter { !lu[row][it].isZero }.toIntArray() }
-        upperTranspose = Array(size) { column -> (0 until column).filter { !lu[it][column].isZero }.toIntArray() }
-        lowerTranspose = Array(size) { column -> (column + 1 until size).filter { !lu[it][column].isZero }.toIntArray() }
+        lower = Array(size) { row -> indices(entries[row], 0, row) }
+        upper = Array(size) { row -> indices(entries[row], row + 1, size) }
+        val lowerColumns = Array(size) { ArrayList<Int>() }
+        val upperColumns = Array(size) { ArrayList<Int>() }
+        for (row in 0 until size) {
+            for (column in lower[row]) lowerColumns[column].add(row)
+            for (column in upper[row]) upperColumns[column].add(row)
+        }
+        upperTranspose = Array(size) { upperColumns[it].toIntArray() }
+        lowerTranspose = Array(size) { lowerColumns[it].toIntArray() }
+    }
+
+    private fun indices(entries: BitSet, start: Int, end: Int): IntArray {
+        val result = IntArray(entries.cardinality())
+        var count = 0
+        var column = entries.nextSetBit(start)
+        while (column >= 0 && column < end) {
+            result[count++] = column
+            column = entries.nextSetBit(column + 1)
+        }
+        return result.copyOf(count)
     }
 
     fun solve(rhs: DoubleArray): Array<DD> {
-        val value = Array(size) { DD.of(rhs[permutation[it]]).divide(rowScale[permutation[it]]) }
-        for (row in 0 until size) for (j in lower[row])
+        val value = Array(size) {
+            val input = rhs[permutation[it]]
+            if (input == 0.0) DD.ZERO else if (rowScale[permutation[it]] == 1.0) DD.of(input)
+            else DD.of(input).divide(rowScale[permutation[it]])
+        }
+        for (row in 0 until size) for (j in lower[row]) if (!value[j].isZero)
             value[row] = value[row].subtract(lu[row][j].multiply(value[j]))
         for (row in size - 1 downTo 0) {
-            for (j in upper[row]) value[row] = value[row].subtract(lu[row][j].multiply(value[j]))
-            value[row] = value[row].divide(lu[row][row])
+            for (j in upper[row]) if (!value[j].isZero) value[row] = value[row].subtract(lu[row][j].multiply(value[j]))
+            if (!value[row].isZero && lu[row][row] != DD.ONE) value[row] = value[row].divide(lu[row][row])
         }
         val result = Array(size) { DD.ZERO }
         for (row in 0 until size) result[columns[row]] = value[row]
@@ -96,13 +139,14 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
     fun inverseRow(index: Int): Array<DD> = inverseRows[index] ?: run {
         val value = Array(size) { if (columns[it] == index) DD.ONE else DD.ZERO }
         for (row in 0 until size) {
-            for (j in upperTranspose[row]) value[row] = value[row].subtract(lu[j][row].multiply(value[j]))
-            value[row] = value[row].divide(lu[row][row])
+            for (j in upperTranspose[row]) if (!value[j].isZero) value[row] = value[row].subtract(lu[j][row].multiply(value[j]))
+            if (!value[row].isZero && lu[row][row] != DD.ONE) value[row] = value[row].divide(lu[row][row])
         }
-        for (row in size - 1 downTo 0) for (j in lowerTranspose[row])
+        for (row in size - 1 downTo 0) for (j in lowerTranspose[row]) if (!value[j].isZero)
             value[row] = value[row].subtract(lu[j][row].multiply(value[j]))
         val result = Array(size) { DD.ZERO }
-        for (row in 0 until size) result[permutation[row]] = value[row].divide(rowScale[permutation[row]])
+        for (row in 0 until size) result[permutation[row]] = if (value[row].isZero || rowScale[permutation[row]] == 1.0) value[row]
+            else value[row].divide(rowScale[permutation[row]])
         inverseRows[index] = result
         result
     }

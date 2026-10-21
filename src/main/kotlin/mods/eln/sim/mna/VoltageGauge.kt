@@ -5,6 +5,7 @@ import mods.eln.sim.mna.state.State
 import mods.eln.sim.mna.state.VoltageState
 import kotlin.math.abs
 import kotlin.math.max
+import java.util.function.Function
 
 /** Removes only an additive voltage reference freedom. No leakage current is invented.
  * Each discarded KCL equation is checked after solving; an unbalanced current source into
@@ -14,6 +15,9 @@ class VoltageGauge(matrix: Array<DoubleArray>, states: List<State>) {
     private val original = matrix.map { it.copyOf() }
     private val rows: IntArray
     private val savedRhs: DoubleArray
+    private var lastProbeRhs: DoubleArray? = null
+    private var lastProbeValid = false
+    private val supportedExcitations = HashMap<Long, Boolean>()
 
     init {
         val references = mutableListOf<Int>()
@@ -61,6 +65,42 @@ class VoltageGauge(matrix: Array<DoubleArray>, states: List<State>) {
             val row = rows[i]
             savedRhs[i] = rhs[row]
             rhs[row] = 0.0
+        }
+    }
+
+    /** The gauge belongs to one stamped matrix. Repeated probes may reuse validation
+     * only for an identical physical RHS, including equations discarded by the gauge.
+     * A source voltage/current change therefore cannot reuse an obsolete result.
+     */
+    fun validProbe(physicalRhs: DoubleArray, solve: Function<DoubleArray, DoubleArray>): Boolean {
+        for (i in rows.indices) savedRhs[i] = physicalRhs[rows[i]]
+        if (lastProbeRhs?.contentEquals(physicalRhs) == true) return lastProbeValid
+        val rhs = physicalRhs.copyOf()
+        applyRhs(rhs)
+        val accepted = valid(solve.apply(rhs))
+        lastProbeRhs = physicalRhs.copyOf()
+        lastProbeValid = accepted
+        return accepted
+    }
+
+    /** Unit-current support depends on the matrix and port, never source commands.
+     * Keep it separate from the changing physical-RHS validation cache. A new
+     * matrix creates a new gauge, so opening a contact or changing a resistor
+     * discards every cached result before another probe can use it.
+     */
+    fun supportsProbe(positive: Int, negative: Int, physicalRhs: DoubleArray,
+                      solve: Function<DoubleArray, DoubleArray>): Boolean {
+        val key = ((positive + 1).toLong() shl 32) or (negative + 1).toLong()
+        try {
+            return supportedExcitations.getOrPut(key) {
+                val rhs = DoubleArray(physicalRhs.size)
+                if (positive >= 0) rhs[positive] += 1.0
+                if (negative >= 0) rhs[negative] -= 1.0
+                applyRhs(rhs)
+                valid(solve.apply(rhs))
+            }
+        } finally {
+            for (i in rows.indices) savedRhs[i] = physicalRhs[rows[i]]
         }
     }
 

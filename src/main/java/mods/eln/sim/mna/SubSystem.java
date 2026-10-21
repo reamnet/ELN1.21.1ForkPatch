@@ -420,10 +420,7 @@ public class SubSystem {
         DD[] portRow = responseRow(index);
         DD current = dot(portRow, rhs);
         if (voltageGauge.getActive()) {
-            double[] trial = new double[stateCount];
-            DD[] solution = solvePrecise(rhs);
-            for (int row = 0; row < stateCount; row++) trial[row] = solution[row].doubleValue();
-            if (!voltageGauge.valid(trial)) return result;
+            if (!voltageGauge.validProbe(Idata, values -> asDoubles(solvePrecise(values)))) return result;
         }
         DD conductance = portRow[index].negate();
         DD intercept = current.add(conductance.multiply(source.getVoltage()));
@@ -453,13 +450,9 @@ public class SubSystem {
         DD[] bRow = b == null ? null : responseRow(b.getId());
         if (voltageGauge.getActive()) {
             // Reject an already unbalanced floating network before classifying a port as open.
-            if (!voltageGauge.valid(asDoubles(solvePrecise(rhs)))) return result;
-            double[] excitation = new double[stateCount];
-            if (a != null) excitation[a.getId()] += 1;
-            if (b != null) excitation[b.getId()] -= 1;
-            voltageGauge.applyRhs(excitation);
-            boolean supported = voltageGauge.valid(asDoubles(solvePrecise(excitation)));
-            voltageGauge.applyRhs(Idata.clone()); // Restore validation's original physical RHS.
+            if (!voltageGauge.validProbe(Idata, values -> asDoubles(solvePrecise(values)))) return result;
+            boolean supported = voltageGauge.supportsProbe(a == null ? -1 : a.getId(), b == null ? -1 : b.getId(),
+                    Idata, values -> asDoubles(solvePrecise(values)));
             if (!supported) {
                 result.voltage = 0.0; result.resistance = Double.POSITIVE_INFINITY;
                 return result;
