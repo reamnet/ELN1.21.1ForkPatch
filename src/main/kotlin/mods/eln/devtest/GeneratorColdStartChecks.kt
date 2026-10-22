@@ -40,7 +40,7 @@ object GeneratorColdStartChecks {
     private var work: CompletableFuture<Void>? = null
     private val results = mutableListOf<Map<String, Any>>()
     private val recovery = mutableListOf<String>()
-    private const val caseCount = 18
+    private const val caseCount = 22
     private fun origin(i: Int) = BlockPos(512 + i * 31, 65, 533)
     private fun output(i: Int) = origin(i).offset(4, 0, if (i % 4 < 2) -1 else 1)
 
@@ -54,9 +54,10 @@ object GeneratorColdStartChecks {
             is OneWayDcDcElement -> f.converterValues(e)
             else -> error("Unexpected generator load $e")
         }.also { data ->
-            val target = if (i % 2 == 0) 120.0 else 240.0
+            val target = if (i >= 18) 12_500.0 else if (i % 2 == 0) 120.0 else 240.0
+            val watts = if (i >= 18) { if (i % 2 == 0) 5_000.0 else 20_000.0 } else 60.0
             check(kotlin.math.abs((data["outputV"] as Double) - target) < 1.0 &&
-                (data["outputW"] as Double) > 59.0 && data["status"] != "NON_CONVERGENT") {
+                (data["outputW"] as Double) > watts * .98 && data["status"] != "NON_CONVERGENT") {
                 "Generator-fed converter case $i flickered or lost power: $data"
             }
         }
@@ -118,13 +119,14 @@ object GeneratorColdStartChecks {
                                     f.ground(output.east(2))
                                 } else {
                                     cable(output.east())
-                                    val name = when (i % 3) {
+                                    val name = if (i >= 18) "Variable DC-DC Converter" else when (i % 3) {
                                         0 -> "Mains Step-down Unit"
                                         1 -> "Variable DC-DC Converter"
                                         else -> "One-way Buck vDC/DC Converter"
                                     }
                                     val e = f.placeMachine(f.requiredItem(name), output.east(2))
-                                    val target = if (i % 2 == 0) 120 else 240
+                                    val target = if (i >= 18) 12_500 else if (i % 2 == 0) 120 else 240
+                                    val watts = if (i >= 18) { if (i % 2 == 0) 5_000.0 else 20_000.0 } else 60.0
                                     e.front = Direction.ZP
                                     if (e is StepDownUnitElement) e.unit.read(CompoundTag().apply { putInt("mainsOutputVoltage", target) })
                                     else {
@@ -139,7 +141,7 @@ object GeneratorColdStartChecks {
                                     }
                                     e.reconnect()
                                     cable(output.east(3))
-                                    f.load(output.east(4), target.toDouble() * target / 60.0, Direction.XP)
+                                    f.load(output.east(4), target.toDouble() * target / watts, Direction.XP)
                                     f.ground(output.east(5))
                                 }
                             }

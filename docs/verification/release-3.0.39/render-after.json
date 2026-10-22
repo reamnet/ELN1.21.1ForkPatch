@@ -1,0 +1,74 @@
+{
+  "passed": [
+    "transformer-street-pole emits complete real vertex buffers",
+    "crystal-chandelier emits complete real vertex buffers",
+    "overhead-span emits complete real vertex buffers",
+    "utility-straight emits complete real vertex buffers",
+    "utility-terminal emits complete real vertex buffers",
+    "duplex-outlet-plugs emits complete real vertex buffers",
+    "industrial-pump emits complete real vertex buffers",
+    "Real emitted vertices, normals and inherited tint match camera/local transforms",
+    "Packed entity and unlit buffers match every original vertex attribute including Iris extensions",
+    "All real generator and motor LED meshes retain live colors and emissive light",
+    "Three-phase primary insulator meshes retain their phase positions under all four placement directions",
+    "Cached exposed round and flat utility cables match fresh meshes across camera, connection, dye and palette changes"
+  ],
+  "modelsPerTrial": 20,
+  "warmupTrials": 40,
+  "samples": {
+    "transformer-street-pole": {
+      "trials": 80,
+      "medianMs": 5.965132,
+      "p95Ms": 9.597146
+    },
+    "crystal-chandelier": {
+      "trials": 80,
+      "medianMs": 15.040183,
+      "p95Ms": 21.293819
+    },
+    "overhead-span": {
+      "trials": 80,
+      "medianMs": 0.313688,
+      "p95Ms": 0.669626
+    },
+    "utility-straight": {
+      "trials": 80,
+      "medianMs": 0.090178,
+      "p95Ms": 0.771915
+    },
+    "utility-terminal": {
+      "trials": 80,
+      "medianMs": 0.128264,
+      "p95Ms": 0.309077
+    },
+    "duplex-outlet-plugs": {
+      "trials": 80,
+      "medianMs": 4.450447,
+      "p95Ms": 8.223717
+    },
+    "industrial-pump": {
+      "trials": 80,
+      "medianMs": 2.895029,
+      "p95Ms": 4.648405
+    }
+  },
+  "vertices": {
+    "transformer-street-pole": 122880,
+    "crystal-chandelier": 333040,
+    "overhead-span": 5280,
+    "utility-straight": 1280,
+    "utility-terminal": 2560,
+    "duplex-outlet-plugs": 111360,
+    "industrial-pump": 55360
+  },
+  "strides": {
+    "transformer-street-pole": 54,
+    "crystal-chandelier": 54,
+    "overhead-span": 54,
+    "utility-straight": 54,
+    "utility-terminal": 54,
+    "duplex-outlet-plugs": 54,
+    "industrial-pump": 54
+  },
+  "irisPackActive": true
+}

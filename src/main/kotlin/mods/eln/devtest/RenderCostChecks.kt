@@ -10,6 +10,12 @@ import mods.eln.misc.Direction
 import mods.eln.client.itemrender.IItemRenderer.ItemRenderType
 import mods.eln.sixnode.lampsocket.*
 import mods.eln.utility.*
+import mods.eln.node.six.SixNodeEntity
+import mods.eln.sixnode.electricalcable.*
+import mods.eln.transparentnode.cord.*
+import mods.eln.transparentnode.pump.IndustrialPumpDescriptor
+import mods.eln.misc.LRDU
+import net.minecraft.core.BlockPos
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.TitleScreen
 import net.minecraft.client.renderer.MultiBufferSource
@@ -35,7 +41,11 @@ object RenderCostChecks {
     private val vertices=linkedMapOf<String,Int>()
     private val strides=linkedMapOf<String,Int>()
     private var case=0;private var trial=0
-    private val names=listOf("transformer-street-pole","crystal-chandelier","overhead-span")
+    private val names=listOf("transformer-street-pole","crystal-chandelier","overhead-span","utility-straight","utility-terminal","duplex-outlet-plugs","industrial-pump")
+    private lateinit var straight: UtilityCableRender
+    private lateinit var terminal: UtilityCableRender
+    private lateinit var outlet: OutletDescriptor
+    private lateinit var pump: IndustrialPumpDescriptor
     private var cable: GridRender.Catenary?=null
     private lateinit var pole: DistributionPoleDescriptor
     private lateinit var lamp: LampSocketDescriptor
@@ -48,6 +58,10 @@ object RenderCostChecks {
             0->pole.drawEquipment(Direction.XN,display,45f,20f)
             1->lamp.renderType.draw(lamp,ItemRenderType.INVENTORY,8.0)
             2->{ GL11.glColor3f(.72f,.4f,.2f);cable!!.draw() }
+            3->straight.draw()
+            4->terminal.draw()
+            5->{ outlet.draw(Direction.ZP,false);NemaPlug.draw(Direction.ZP,CordRating.V120,socket=0);NemaPlug.draw(Direction.ZP,CordRating.V120,socket=1) }
+            6->pump.draw(active=true,angle=37f)
         }
     }
     private fun sample(index: Int): Pair<Double,Int> {
@@ -67,6 +81,8 @@ object RenderCostChecks {
     }
     private fun finish(error: Throwable?) {
         done=true;cable?.destroy();arena?.close()
+        if(::straight.isInitialized)straight.destructor()
+        if(::terminal.isInitialized)terminal.destructor()
         val results=samples.mapValues { (_,values) -> val sorted=values.sorted();mapOf("trials" to sorted.size,"medianMs" to sorted[sorted.size/2],"p95Ms" to sorted[(sorted.lastIndex*.95).toInt()]) }
         val pack=runCatching { Class.forName("net.irisshaders.iris.Iris").getMethod("isPackInUseQuick").invoke(null) }.getOrNull()
         val path=mc.gameDirectory.toPath().resolve(System.getProperty("eln.renderCostOutput","render-cost-checks.json"))
@@ -87,6 +103,12 @@ object RenderCostChecks {
                 1->if(mc.player!=null && mc.level!=null && mc.screen==null && ticks>60) {
                     pole=Eln.transparentNodeItem.subItemList.values.filterIsInstance<DistributionPoleDescriptor>().single { it.kind==DistributionKind.STREET_THREE }
                     lamp=Eln.sixNodeItem.subItemList.values.filterIsInstance<LampSocketDescriptor>().single { it.fixture==DecorativeLampStyle.CRYSTAL }
+                    val descriptor=UtilityCableDescriptor.allDescriptors().single { !it.melted && it.material==UtilityCableMaterial.COPPER && it.sizeLabel=="2 AWG" && it.insulated && it.insulationVoltageRating==40000.0 }
+                    val entity=SixNodeEntity(BlockPos(0,80,0),Eln.sixNodeBlock.defaultBlockState()).apply { level=mc.level }
+                    straight=UtilityCableRender(entity,Direction.YN,descriptor).apply { front=LRDU.Left;connectedSide[LRDU.Left]=true;connectedSide[LRDU.Right]=true }
+                    terminal=UtilityCableRender(entity,Direction.YN,descriptor).apply { front=LRDU.Left;connectedSide[LRDU.Left]=true }
+                    outlet=Eln.transparentNodeItem.subItemList.values.filterIsInstance<OutletDescriptor>().single { it.rating==CordRating.V120 && !it.strip }
+                    pump=Eln.transparentNodeItem.subItemList.values.filterIsInstance<IndustrialPumpDescriptor>().single()
                     arena=ByteBufferBuilder(8*1024*1024)
                     FixedFunction.begin(PoseStack(),MultiBufferSource { error("Recording must not emit geometry") },0,0)
                     try { cable=GridRender.Catenary(Vec3(0.0,7.0,0.0),Vec3(32.0,10.0,18.0)) } finally { FixedFunction.finish() }
@@ -102,6 +124,7 @@ object RenderCostChecks {
                     PackedEmissionChecks.verify();passed+="Packed entity and unlit buffers match every original vertex attribute including Iris extensions"
                     check(PowerClientChecks.run()==0);passed+="All real generator and motor LED meshes retain live colors and emissive light"
                     PolePhaseRenderChecks.verify();passed+="Three-phase primary insulator meshes retain their phase positions under all four placement directions"
+                    UtilityCableMeshChecks.verify();passed+="Cached exposed round and flat utility cables match fresh meshes across camera, connection, dye and palette changes"
                         finish(null)
                     }
                 }

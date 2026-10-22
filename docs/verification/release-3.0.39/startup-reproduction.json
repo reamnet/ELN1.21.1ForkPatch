@@ -1,0 +1,14 @@
+{
+  "unfixedSource": "2c0328c1b7b2301fe93381a4d0d82180658bc8b2",
+  "case": {
+    "shaftRadPerSecond": 200,
+    "targetVoltage": 12500,
+    "loadWatts": 5000,
+    "cableResistanceOhms": 0.001
+  },
+  "unfixedUnitResult": {
+    "primaryVoltage": 24.190506,
+    "secondaryVoltage": 6179.80957,
+    "converterStatus": "TRANSFERRING"
+  }
+}

@@ -969,11 +969,18 @@ class UtilityCableRender(
         bindTexture(descriptor.render.cableTexture)
         glListCall()
         drawHotMetalGlow()
-        if (shouldDrawExposedSingleConductor()) {
-            drawSingleExposedConductor()
-        }
-        if (shouldDrawExposedFlatConductors()) {
-            drawFlatConductors()
+        val single = shouldDrawExposedSingleConductor()
+        val flat = shouldDrawExposedFlatConductors()
+        if (single || flat) {
+            if (!cableListReady[0]) {
+                GL11.glNewList(cableList[0], GL11.GL_COMPILE)
+                if (single) drawSingleExposedConductor() else drawFlatConductors()
+                GL11.glEndList()
+                cableListReady[0] = true
+            }
+            // Texture bindings are live state, rather than recorded geometry commands.
+            if (single) bindTexture(EXPOSED_TEXTURE)
+            GL11.glCallList(cableList[0])
         }
         emitOverheatSmoke()
         GL11.glColor3f(1f, 1f, 1f)
@@ -992,6 +999,7 @@ class UtilityCableRender(
     override fun glListEnable() = true
 
     override fun publishUnserialize(stream: DataInputStream) {
+        cableListReady[0] = false
         super.publishUnserialize(stream)
         try {
             color = (stream.readByte().toInt() shr 4) and 0xF
@@ -1272,5 +1280,8 @@ class UtilityCableRender(
     private fun shouldSpreadConductorsOnZ(): Boolean {
         val mask = renderConnectionMask(jacket = false)
         return (mask[LRDU.Up] || mask[LRDU.Down]) && !(mask[LRDU.Left] || mask[LRDU.Right])
+    }
+    companion object {
+        private val EXPOSED_TEXTURE = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("eln", "sprites/cable.png")
     }
 }

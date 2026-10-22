@@ -13,6 +13,10 @@ interface ConservativePowerProcess : IRootSystemPreStepProcess {
     fun beginStep(seconds: Double) {}
     /** Initial trial commands only. Never advances a physical state or bypasses acceptance. */
     fun prepareStep() {}
+    /** Preferred initial bus voltage during source startup only; every trial still needs validation. */
+    fun startupVoltageTargets(): Map<SwitchableVoltageSource, Double> = emptyMap()
+    /** Target-voltage input clamps that need to follow a starting source's bus guess. */
+    fun startupInputSources(): List<SwitchableVoltageSource> = emptyList()
     /** Voltage commands eligible for a bounded algebraic convergence correction. */
     fun trialSources(): List<SwitchableVoltageSource> = emptyList()
     /** Piecewise operating region for a one-sided numerical derivative only. */

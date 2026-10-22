@@ -252,6 +252,7 @@ public class RootSystem {
             converter.beginStep(dt);
             converter.prepareStep();
         }
+        converterConvergence.seedStartupVoltages(converters);
         // Legacy partition/transformer proxies still need their configured sweeps.
         // Exact converter networks have their own bounded trial/acceptance loop below;
         // multiplying that loop by the default 50 legacy sweeps only repeats port probes.

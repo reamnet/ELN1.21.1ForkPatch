@@ -27,11 +27,13 @@ class ShaftGeneratorProcess @JvmOverloads constructor(
     var voltageTarget = 0.0
         private set
     private var outputPowerBudget = 0.0
+    private var fieldIncreasing = false
     private val retry = ConverterRetry()
 
     override fun beginStep(seconds: Double) {
         retry.advance(seconds)
         val requested = emf().takeIf { it.isFinite() }?.coerceAtLeast(0.0) ?: 0.0
+        fieldIncreasing = requested > voltageTarget + 1e-6
         voltageTarget += (requested - voltageTarget).coerceIn(-rampRate * seconds, rampRate * seconds)
         // A sudden shaft slowdown cannot retain the previous, higher EMF during the ramp.
         voltageTarget = minOf(voltageTarget, requested)
@@ -43,6 +45,14 @@ class ShaftGeneratorProcess @JvmOverloads constructor(
         if (!source.enabled) source.voltage = voltageTarget
         source.enabled = true
     }
+
+    // The converter's input clamp must move with this guess. Seeding only our
+    // source is immediately undone when its port probe sees the old low clamp.
+    // Include gradual shaft acceleration, but leave normal droop and steady
+    // current-limited operation alone once the field stops increasing.
+    override fun startupVoltageTargets(): Map<SwitchableVoltageSource, Double> =
+        if (fieldIncreasing && !retry.waiting && source.enabled &&
+            source.voltage < voltageTarget - droop * currentLimit - 1e-6) mapOf(source to voltageTarget) else emptyMap()
 
     override fun rootSystemPreStepProcess() {
         if (retry.waiting || (!allowReverse && voltageTarget <= 0.0)) { source.enabled = false; return }

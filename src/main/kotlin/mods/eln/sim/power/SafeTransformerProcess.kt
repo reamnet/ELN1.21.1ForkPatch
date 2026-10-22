@@ -103,6 +103,9 @@ class SafeTransformerProcess(
         return balancedPower(pin, pout, roundoffWatts = powerRoundoff)
     }
 
+    override fun startupInputSources(): List<SwitchableVoltageSource> =
+        if (voltageTarget != null) listOf(input) else emptyList()
+
     override fun trialSources(): List<SwitchableVoltageSource> =
         // An unloaded target output is already fixed by its control law. Probing
         // it as a free variable can activate an otherwise idle attached drive.

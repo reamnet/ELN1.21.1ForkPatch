@@ -3,6 +3,9 @@ package mods.eln.devtest
 import com.mojang.blaze3d.vertex.*
 import mods.eln.client.gl.FixedFunction
 import mods.eln.client.gl.GL11
+import mods.eln.client.gl.MeshNormals
+import org.joml.Vector3f
+import org.joml.Vector4f
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.client.renderer.texture.OverlayTexture
 
@@ -11,18 +14,23 @@ internal object PackedEmissionChecks {
     fun verify() {
         val colors=listOf(floatArrayOf(0f,.4f,.8f,.16f),floatArrayOf(1f,.9f,.65f,1f),floatArrayOf(.12f,1f,.2f,.5f),floatArrayOf(.15f,.35f,1f,0f))
         val points=listOf(floatArrayOf(0f,0f,0f),floatArrayOf(1f,0f,0f),floatArrayOf(1f,1f,0f),floatArrayOf(0f,1f,0f))
-        for(format in listOf(DefaultVertexFormat.NEW_ENTITY,DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP)) {
+        for(frame in 0..3)for(format in listOf(DefaultVertexFormat.NEW_ENTITY,DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP)) {
+            val pose=PoseStack()
+            if(frame>0) { pose.translate(17.25+frame,80.5,-32.0);pose.mulPose(org.joml.Quaternionf().rotateXYZ(.17f*frame,.31f,-.12f));pose.scale(if(frame==3)-.7f else 1.2f,.8f,1.6f) }
+            if(frame==2)pose.last().pose().m03(.02f).m23(.04f)
             fun snapshot(legacy: Boolean): List<Byte> {
                 ByteBufferBuilder(8192).use { arena ->
                     val buffer=BufferBuilder(arena,VertexFormat.Mode.QUADS,format)
                     if(legacy) {
                         for(i in 0..3) { val p=points[i];val c=colors[i]
-                            buffer.addVertex(p[0],p[1],p[2]).setColor(c[0],c[1],c[2],c[3])
+                            val position=Vector4f(p[0],p[1],p[2],1f).mul(pose.last().pose())
+                            val normal=MeshNormals.transform(pose.last().normal(),0f,0f,1f,Vector3f())
+                            buffer.addVertex(position.x,position.y,position.z).setColor(c[0],c[1],c[2],c[3])
                                 .setUv(if(i==1 || i==2)1f else 0f,if(i>=2)1f else 0f)
-                                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(0x00e000c0).setNormal(0f,0f,1f)
+                                .setOverlay(OverlayTexture.NO_OVERLAY).setLight(0x00e000c0).setNormal(normal.x,normal.y,normal.z)
                         }
                     } else {
-                        FixedFunction.begin(PoseStack(),MultiBufferSource { buffer },0x00e000c0,OverlayTexture.NO_OVERLAY)
+                        FixedFunction.begin(pose,MultiBufferSource { buffer },0x00e000c0,OverlayTexture.NO_OVERLAY)
                         try {
                             if(format!=DefaultVertexFormat.NEW_ENTITY)GL11.glDisable(GL11.GL_LIGHTING)
                             GL11.glBegin(GL11.GL_QUADS)
@@ -43,7 +51,7 @@ internal object PackedEmissionChecks {
                     }
                 }
             }
-            check(snapshot(true)==snapshot(false)) { "Packed emission differs from the original consumer API ($format)" }
+            check(snapshot(true)==snapshot(false)) { "Packed emission differs from the original consumer API ($format / frame $frame)" }
         }
     }
 }

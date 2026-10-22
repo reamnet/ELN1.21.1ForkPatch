@@ -1,0 +1,73 @@
+{
+  "passed": [
+    "transformer-street-pole emits complete real vertex buffers",
+    "crystal-chandelier emits complete real vertex buffers",
+    "overhead-span emits complete real vertex buffers",
+    "utility-straight emits complete real vertex buffers",
+    "utility-terminal emits complete real vertex buffers",
+    "duplex-outlet-plugs emits complete real vertex buffers",
+    "industrial-pump emits complete real vertex buffers",
+    "Real emitted vertices, normals and inherited tint match camera/local transforms",
+    "Packed entity and unlit buffers match every original vertex attribute including Iris extensions",
+    "All real generator and motor LED meshes retain live colors and emissive light",
+    "Three-phase primary insulator meshes retain their phase positions under all four placement directions"
+  ],
+  "modelsPerTrial": 20,
+  "warmupTrials": 40,
+  "samples": {
+    "transformer-street-pole": {
+      "trials": 80,
+      "medianMs": 5.224502,
+      "p95Ms": 10.656284
+    },
+    "crystal-chandelier": {
+      "trials": 80,
+      "medianMs": 13.910563,
+      "p95Ms": 42.645708
+    },
+    "overhead-span": {
+      "trials": 80,
+      "medianMs": 0.253286,
+      "p95Ms": 0.540644
+    },
+    "utility-straight": {
+      "trials": 80,
+      "medianMs": 0.057044,
+      "p95Ms": 0.130871
+    },
+    "utility-terminal": {
+      "trials": 80,
+      "medianMs": 0.274124,
+      "p95Ms": 0.858446
+    },
+    "duplex-outlet-plugs": {
+      "trials": 80,
+      "medianMs": 4.657473,
+      "p95Ms": 8.760661
+    },
+    "industrial-pump": {
+      "trials": 80,
+      "medianMs": 2.363304,
+      "p95Ms": 5.097016
+    }
+  },
+  "vertices": {
+    "transformer-street-pole": 122880,
+    "crystal-chandelier": 333040,
+    "overhead-span": 5280,
+    "utility-straight": 1280,
+    "utility-terminal": 2560,
+    "duplex-outlet-plugs": 111360,
+    "industrial-pump": 55360
+  },
+  "strides": {
+    "transformer-street-pole": 54,
+    "crystal-chandelier": 54,
+    "overhead-span": 54,
+    "utility-straight": 54,
+    "utility-terminal": 54,
+    "duplex-outlet-plugs": 54,
+    "industrial-pump": 54
+  },
+  "irisPackActive": true
+}

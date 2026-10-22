@@ -17,6 +17,28 @@ class ConverterConvergence {
     private val derivatives = mutableMapOf<List<ConservativePowerProcess>, Derivative>()
     fun clear() = derivatives.clear()
 
+    /** Move stiff source and converter-input guesses together while a generator
+     * builds its field. Otherwise a valid constant-current / constant-power low
+     * branch can latch startup even though a normal-voltage solution exists. */
+    fun seedStartupVoltages(processes: List<ConservativePowerProcess>) {
+        val inputSystems = processes.flatMap { it.startupInputSources() }
+            .filter { it.enabled }.mapNotNull { it.subSystem }.toSet()
+        if (inputSystems.isEmpty()) return
+        val targets = processes.flatMap { it.startupVoltageTargets().entries }
+            .filter { (source, target) -> source.enabled && source.subSystem in inputSystems && source.voltage > 0 &&
+                target.isFinite() && target > source.voltage }
+        if (targets.isEmpty()) return
+        val sources = processes.flatMap { it.trialSources() }.distinct()
+        for ((system, requests) in targets.groupBy { it.key.subSystem }) {
+            if (system == null) continue
+            val request = requests.maxBy { it.value }
+            val scale = request.value / request.key.voltage
+            val bus = sources.filter { it.enabled && it.subSystem === system }
+            if (!scale.isFinite() || bus.any { !(it.voltage * scale).isFinite() }) continue
+            for (source in bus) source.voltage *= scale
+        }
+    }
+
     /** A Newton tangent inside a constant-current plateau can point away from every
      * finite solution. Try the actual source-law breakpoints on that electrical
      * network, then run the unchanged controllers and acceptance checks again.
