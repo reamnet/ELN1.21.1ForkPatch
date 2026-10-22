@@ -23,10 +23,11 @@ object PowerClientChecks {
         val lights = mutableListOf<Int>()
         val consumer = Proxy.newProxyInstance(VertexConsumer::class.java.classLoader, arrayOf(VertexConsumer::class.java)) { proxy, method, args ->
             when (method.name) {
-                "setColor" -> if (args?.size == 4) colors.add(args.map { (it as Number).toDouble() / if (it is Int) 255.0 else 1.0 })
+                "setColor" -> if (args?.size == 4 && args[0] is Int) colors.add(args.map { (it as Number).toDouble() / if (it is Int) 255.0 else 1.0 })
                 "setLight" -> lights.add(args!![0] as Int)
             }
-            if (method.returnType == VertexConsumer::class.java) proxy else null
+            if(method.isDefault)java.lang.reflect.InvocationHandler.invokeDefault(proxy,method,*(args ?: emptyArray()))
+            else if (method.returnType == VertexConsumer::class.java) proxy else null
         } as VertexConsumer
         val buffers = MultiBufferSource { consumer }
         for (d in Eln.transparentNodeItem.subItemList.values.filterNotNull()) {

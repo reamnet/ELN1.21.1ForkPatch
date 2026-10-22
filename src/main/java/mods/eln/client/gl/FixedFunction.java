@@ -62,6 +62,7 @@ public final class FixedFunction {
         int blendSrc = GL11.GL_SRC_ALPHA, blendDst = GL11.GL_ONE_MINUS_SRC_ALPHA;
         float lineWidth = 1f;
         float r = 1f, g = 1f, b = 1f, a = 1f;
+        int packedColor = -1;
         ResourceLocation texture = null;
         int[] scissorBox = {0, 0, 0, 0};
 
@@ -294,6 +295,7 @@ public final class FixedFunction {
         state.g = g;
         state.b = b;
         state.a = a;
+        state.packedColor = VertexColors.pack(r, g, b, a);
     }
 
     // ------------------------------------------------------------------ immediate mode
@@ -304,6 +306,30 @@ public final class FixedFunction {
         // the matrix current at glBegin, relative to the list start, so replays can honour glTranslate inside a list
         Matrix4f transform;
         private List<float[]> primitives;
+        private List<float[]> solidPrimitives;
+        private int[] colors, solidColors;
+
+        List<float[]> primitives(boolean solid) {
+            // Textured meshes retain their original per-triangle shader metadata.
+            if (!solid || mode != GL11.GL_TRIANGLES) return primitives();
+            if (solidPrimitives == null) solidPrimitives = RecordedQuads.triangles(vertices);
+            return solidPrimitives;
+        }
+
+        int[] colors(boolean solid) {
+            if (solid && mode == GL11.GL_TRIANGLES) {
+                if (solidColors == null) solidColors = packColors(primitives(true));
+                return solidColors;
+            }
+            if (colors == null) colors = packColors(primitives());
+            return colors;
+        }
+
+        private static int[] packColors(List<float[]> vertices) {
+            int[] result = new int[vertices.size()];
+            for (int i = 0; i < result.length; i++) result[i] = VertexColors.pack(vertices.get(i));
+            return result;
+        }
 
         List<float[]> primitives() {
             if (primitives == null) {
@@ -419,8 +445,7 @@ public final class FixedFunction {
     }
 
     private static VertexConsumer vertexColor(VertexConsumer consumer, float[] vertex) {
-        return Float.isNaN(vertex[8]) ? consumer.setColor(state.r, state.g, state.b, state.a)
-            : consumer.setColor(vertex[8], vertex[9], vertex[10], vertex[11]);
+        return consumer.setColor(Float.isNaN(vertex[8]) ? state.packedColor : VertexColors.pack(vertex));
     }
 
     // ------------------------------------------------------------------ emission
@@ -428,12 +453,12 @@ public final class FixedFunction {
         if (batch.vertices.isEmpty()) return;
         boolean lines = batch.mode == GL11.GL_LINES || batch.mode == GL11.GL_LINE_STRIP || batch.mode == GL11.GL_LINE_LOOP;
         // Recorded topology is immutable. Keep transforms, inherited tint and light dynamic.
-        List<float[]> prims = batch.primitives();
+        boolean textured = state.texture2d && state.texture != null;
+        List<float[]> prims = batch.primitives(!textured);
         if (prims.isEmpty()) return;
 
         PoseStack.Pose p = pose.last();
         Matrix4f model = extra == null ? p.pose() : new Matrix4f(p.pose()).mul(extra);
-        boolean textured = state.texture2d && state.texture != null;
         ResourceLocation tex = textured ? state.texture : WHITE;
         // the lightmap unit off (UtilsClient.disableLight) is full bright: glowing parts, GUI overlays
         int light = state.lightmap ? packedLight : FULL_BRIGHT;
@@ -459,7 +484,9 @@ public final class FixedFunction {
                 Matrix3f normals = extra == null ? p.normal() : MeshNormals.matrix(p.normal(), extra);
                 Vector3f normal = new Vector3f();
                 float normalX = Float.NaN, normalY = Float.NaN, normalZ = Float.NaN;
-                for (float[] vtx : prims) {
+                int[] colors = batch.colors(!textured);
+                for (int i = 0; i < prims.size(); i++) {
+                    float[] vtx = prims.get(i);
                     pos.set(vtx[0], vtx[1], vtx[2], 1f).mul(model);
                     // A face shares its normal across all four vertices (including
                     // duplicated triangle vertices). Transform/normalize it only once.
@@ -468,10 +495,11 @@ public final class FixedFunction {
                         normalX = vtx[5]; normalY = vtx[6]; normalZ = vtx[7];
                         MeshNormals.transform(normals, normalX, normalY, normalZ, normal);
                     }
-                    vertexColor(vc.addVertex(pos.x, pos.y, pos.z), vtx)
-                        .setUv(vtx[3], vtx[4])
-                        .setOverlay(packedOverlay)
-                        .setLight(light)
+                    int color = Float.isNaN(vtx[8]) ? state.packedColor : colors[i];
+                    // Keep the chained API: Iris disables the complete-vertex fast
+                    // format and its generic bulk fallback costs more than these writes.
+                    vc.addVertex(pos.x, pos.y, pos.z).setColor(color)
+                        .setUv(vtx[3], vtx[4]).setOverlay(packedOverlay).setLight(light)
                         .setNormal(normal.x, normal.y, normal.z);
                 }
             }

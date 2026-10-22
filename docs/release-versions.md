@@ -39,6 +39,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.33` | — | Correct height-scaled wind speeds; govern and brake the original wind turbine; account rotor/output energy every electrical step; block backfeed and repair saved overspeed states |
 | `v3.0.34` | — | Select a top or bottom 240 V panel feeder independently of branch voltage; terrain-rendered wire covers with original block shader materials, tint and shading |
 | `v3.0.35` | — | 480 V, 40 B/s generic fluid pump with voltage-scaled flow, water/tank intake and operating sound; leaner shared model transforms and device-level rendering profiling |
+| `v3.0.36` | — | Reduce pole, decorative lamp and overhead span vertex submission; cache packed colors and preserve standard consumer writes with shader compatibility checks |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`
@@ -51,7 +52,7 @@ release assets remain available with their original filenames.
 `modVersion` in `gradle.properties` is the version source for the jar filename,
 NeoForge metadata and the in-game version. Increment it when preparing the next
 update and create the matching `vX.Y.Z` source tag. For unpublished experiments,
-use an explicit override such as `-PmodVersion=3.0.35-local.1`.
+use an explicit override such as `-PmodVersion=3.0.36-local.1`.
 
 Build with `./gradlew build` to retain previous versioned jars in `build/libs/`.
 `./gradlew clean` removes that directory, and recompiling the same version

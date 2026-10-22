@@ -85,7 +85,7 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
         return bounds.move(tileEntity.xCoord + .5, tileEntity.yCoord + .5, tileEntity.zCoord + .5)
     }
 
-    private inner class Catenary(start: Vec3, end: Vec3) {
+    internal class Catenary(start: Vec3, end: Vec3) {
         val bounds: AABB
         private val list = glGenLists(1)
         init {
@@ -94,12 +94,11 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
             bounds = AABB(vertices.minOf { it.x }, vertices.minOf { it.y }, vertices.minOf { it.z },
                 vertices.maxOf { it.x }, vertices.maxOf { it.y }, vertices.maxOf { it.z }).inflate(.05)
             glNewList(list, GL_COMPILE)
-            glBegin(GL_TRIANGLES)
+            glBegin(GL_QUADS)
             fun face(a: Vec3, b: Vec3, c: Vec3, d: Vec3) {
                 val normal = b.subtract(a).cross(c.subtract(a)).normalize()
                 glNormal3f(normal.x.toFloat(), normal.y.toFloat(), normal.z.toFloat())
-                for ((point, uv) in listOf(a to (0f to 0f), b to (1f to 0f), c to (1f to 1f),
-                    a to (0f to 0f), c to (1f to 1f), d to (0f to 1f))) {
+                for ((point, uv) in listOf(a to (0f to 0f), b to (1f to 0f), c to (1f to 1f), d to (0f to 1f))) {
                     glTexCoord2f(uv.first, uv.second)
                     glVertex3f(point.x.toFloat(), point.y.toFloat(), point.z.toFloat())
                 }

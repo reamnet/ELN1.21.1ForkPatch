@@ -20,9 +20,10 @@ internal object RenderMeshChecks {
             when(method.name) {
                 "addVertex"->if(args?.size==3)positions+=Vector3f((args[0] as Number).toFloat(),(args[1] as Number).toFloat(),(args[2] as Number).toFloat())
                 "setNormal"->if(args?.size==3)normals+=Vector3f((args[0] as Number).toFloat(),(args[1] as Number).toFloat(),(args[2] as Number).toFloat())
-                "setColor"->if(args?.size==4)colors+=args.map { (it as Number).toFloat()/if(it is Int)255f else 1f }
+                "setColor"->if(args?.size==4 && args[0] is Int)colors+=args.map { (it as Number).toFloat()/if(it is Int)255f else 1f }
             }
-            if(method.returnType==VertexConsumer::class.java)proxy else null
+            if(method.isDefault)java.lang.reflect.InvocationHandler.invokeDefault(proxy,method,*(args ?: emptyArray()))
+            else if(method.returnType==VertexConsumer::class.java)proxy else null
         } as VertexConsumer
         val buffers=MultiBufferSource { vc }
         val points=listOf(Vector3f(0f,0f,0f),Vector3f(1f,0f,0f),Vector3f(1f,1f,0f),Vector3f(0f,1f,0f))
