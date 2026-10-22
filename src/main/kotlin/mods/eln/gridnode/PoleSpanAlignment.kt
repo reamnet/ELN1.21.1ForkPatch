@@ -22,4 +22,15 @@ object PoleSpanAlignment {
         return if(best==0.0)0f else Math.toDegrees(-best).toFloat()
     }
     fun secondary(terminal: Int)=terminal in 40..42 || terminal==50
+
+    /** A crossarm has two equivalent angles, but its A/B/C ordering does not. */
+    fun oriented(angle: Float,reference: Float,span: Vec3): Float {
+        // Compare phase order across this particular span, rather than just the
+        // angles between arms: junctions can aim their arms towards other branches.
+        fun side(degrees: Float): Double {
+            val radians=Math.toRadians(degrees.toDouble())
+            return span.x*cos(radians)-span.z*sin(radians)
+        }
+        return if(side(angle)*side(reference)<-1e-12)angle+180f else angle
+    }
 }

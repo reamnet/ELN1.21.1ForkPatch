@@ -57,6 +57,7 @@ enum class DistributionKind(val title: String,val phases: Int=3,val transformer:
 class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeDescriptor):
     GridElement(node,descriptor,(descriptor as GridDescriptor).connectRange) {
     override val alignsPoleSpans=true
+    override val alignsPrimaryPhaseOrder get()=kind.phases==3 && !kind.lvOnly
     override fun contributesToPoleAlignment(terminal: Int)=!kind.singlePhaseTap || terminal!=36
     val kind=(descriptor as DistributionPoleDescriptor).kind
     override val inventory=object: TransparentNodeElementInventory(if(kind.transformer)1 else 0,1,this@DistributionPoleElement) {

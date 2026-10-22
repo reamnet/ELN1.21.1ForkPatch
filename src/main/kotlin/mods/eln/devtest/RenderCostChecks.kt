@@ -101,6 +101,7 @@ object RenderCostChecks {
                     RenderMeshChecks.verify();passed+="Real emitted vertices, normals and inherited tint match camera/local transforms"
                     PackedEmissionChecks.verify();passed+="Packed entity and unlit buffers match every original vertex attribute including Iris extensions"
                     check(PowerClientChecks.run()==0);passed+="All real generator and motor LED meshes retain live colors and emissive light"
+                    PolePhaseRenderChecks.verify();passed+="Three-phase primary insulator meshes retain their phase positions under all four placement directions"
                         finish(null)
                     }
                 }

@@ -32,6 +32,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
     var gridLinksBooting = HashSet<GridLink>()
     private val desc: GridDescriptor
     private var idealRenderingAngle: Float = 0.toFloat()
+    private var localPrimaryRenderAngle=0f
     private val spanAmbientSample=SpanAmbientSample()
     internal fun spanAmbientCelsius()=spanAmbientSample.sample(coordinate().world().gameTime) { getAmbientTemperatureCelsius() }
     var highVoltageRenderAngle=0f
@@ -39,6 +40,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
     var lowVoltageRenderAngle=0f
         private set
     open val alignsPoleSpans=false
+    open val alignsPrimaryPhaseOrder=false
     open fun contributesToPoleAlignment(terminal: Int)=true
 
     init {
@@ -246,10 +248,13 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
         return true
     }
 
-    // TODO: One pole turns, all connected cables should be recalculated,
-    // not just the ones being rendered here.
     /* Compute a rendering angle that minimizes any straight-on cables. */
     fun updateIdealRenderAngle() {
+        updateLocalRenderAngle()
+        if(alignsPrimaryPhaseOrder)alignPrimaryPhaseOrder()
+    }
+
+    private fun updateLocalRenderAngle() {
         if (desc.rotationIsFixed()) {
             when (front) {
                 Direction.XN -> idealRenderingAngle = 0f
@@ -302,6 +307,51 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
             val fallback=PoleSpanAlignment.frontAngle(front)
             highVoltageRenderAngle=PoleSpanAlignment.angle(spans(false),fallback)
             lowVoltageRenderAngle=PoleSpanAlignment.angle(spans(true),fallback)
+        }
+        localPrimaryRenderAngle=highVoltageRenderAngle
+    }
+
+    /** Keep the same phase on the same side through a connected run, including the
+     * half-turn seam in the local crossarm optimiser. Only topology changes run this;
+     * neither simulation ticks nor rendering traverse the network. */
+    internal fun alignPrimaryPhaseOrder(resolve: (Coordinate)->GridElement? = {
+        mods.eln.node.NodeManager.instance?.getTransparentNodeFromCoordinate(it) as? GridElement
+    }) {
+        val order=compareBy<GridElement>({ it.coordinate().dimension },{ it.coordinate().x },{ it.coordinate().y },{ it.coordinate().z })
+        fun neighbours(e: GridElement)=e.gridLinkList.mapNotNull { link ->
+            val terminal=link.getTerminal(e)
+            if(PoleSpanAlignment.secondary(terminal) || !e.contributesToPoleAlignment(terminal))return@mapNotNull null
+            val other=resolve(if(link.a==e.coordinate())link.b else link.a) ?: return@mapNotNull null
+            if(!other.alignsPrimaryPhaseOrder || !other.contributesToPoleAlignment(link.getTerminal(other)))null else other
+        }.distinct().sortedWith(order)
+        val graph=linkedMapOf<GridElement,List<GridElement>>()
+        val pending=ArrayDeque<GridElement>();pending.add(this)
+        while(pending.isNotEmpty()) {
+            val e=pending.removeFirst()
+            if(e in graph)continue
+            val adjacent=neighbours(e);graph[e]=adjacent
+            adjacent.filterNot { it in graph }.forEach(pending::addLast)
+        }
+        val old=graph.keys.associateWith { it.highVoltageRenderAngle }
+        // Only the endpoint whose topology changed needs the 128-angle local search.
+        // Its neighbours retain their local result; orienting the graph is linear.
+        graph.keys.forEach { it.highVoltageRenderAngle=it.localPrimaryRenderAngle }
+        // Stable root and traversal make placement order and save/load order irrelevant.
+        val root=graph.keys.minWith(order)
+        val visited=hashSetOf(root);pending.add(root)
+        while(pending.isNotEmpty()) {
+            val e=pending.removeFirst()
+            for(other in graph.getValue(e))if(visited.add(other)) {
+                val span=other.coordinate().subtract(e.coordinate())
+                other.highVoltageRenderAngle=PoleSpanAlignment.oriented(other.highVoltageRenderAngle,e.highVoltageRenderAngle,
+                    Vec3(span.x.toDouble(),0.0,span.z.toDouble()))
+                pending.addLast(other)
+            }
+        }
+        for(e in graph.keys)if(e.highVoltageRenderAngle!=old[e]) {
+            e.needPublish()
+            // A neighbouring pole can own the packet containing this span's endpoints.
+            for(link in e.gridLinkList)resolve(if(link.a==e.coordinate())link.b else link.a)?.needPublish()
         }
     }
 

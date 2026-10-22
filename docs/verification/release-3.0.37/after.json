@@ -1,0 +1,41 @@
+{
+  "passed": [
+    "transformer-street-pole emits complete real vertex buffers",
+    "crystal-chandelier emits complete real vertex buffers",
+    "overhead-span emits complete real vertex buffers",
+    "Real emitted vertices, normals and inherited tint match camera/local transforms",
+    "Packed entity and unlit buffers match every original vertex attribute including Iris extensions",
+    "All real generator and motor LED meshes retain live colors and emissive light",
+    "Three-phase primary insulator meshes retain their phase positions under all four placement directions"
+  ],
+  "modelsPerTrial": 20,
+  "warmupTrials": 40,
+  "samples": {
+    "transformer-street-pole": {
+      "trials": 80,
+      "medianMs": 6.040002,
+      "p95Ms": 10.774207
+    },
+    "crystal-chandelier": {
+      "trials": 80,
+      "medianMs": 14.526296,
+      "p95Ms": 31.185139
+    },
+    "overhead-span": {
+      "trials": 80,
+      "medianMs": 0.316785,
+      "p95Ms": 0.842212
+    }
+  },
+  "vertices": {
+    "transformer-street-pole": 122880,
+    "crystal-chandelier": 333040,
+    "overhead-span": 5280
+  },
+  "strides": {
+    "transformer-street-pole": 54,
+    "crystal-chandelier": 54,
+    "overhead-span": 54
+  },
+  "irisPackActive": true
+}

@@ -1,0 +1,301 @@
+{
+  "suite": "power-client-leds",
+  "complete": true,
+  "failures": 0,
+  "results": [
+    {
+      "id": "eln:polarized_shaft_motor",
+      "check": "led-0-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 15
+    },
+    {
+      "id": "eln:polarized_shaft_motor",
+      "check": "led-1-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 10
+    },
+    {
+      "id": "eln:polarized_shaft_motor",
+      "check": "led-2-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 8
+    },
+    {
+      "id": "eln:polarized_shaft_motor",
+      "check": "led-3-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 8
+    },
+    {
+      "id": "eln:polarized_shaft_motor",
+      "check": "led-4-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 7
+    },
+    {
+      "id": "eln:polarized_shaft_motor",
+      "check": "led-5-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 12
+    },
+    {
+      "id": "eln:polarized_shaft_motor",
+      "check": "led-6-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 7
+    },
+    {
+      "id": "eln:polarized_shaft_generator",
+      "check": "led-0-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 4
+    },
+    {
+      "id": "eln:polarized_shaft_generator",
+      "check": "led-1-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 2
+    },
+    {
+      "id": "eln:polarized_shaft_generator",
+      "check": "led-2-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 2
+    },
+    {
+      "id": "eln:polarized_shaft_generator",
+      "check": "led-3-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 2
+    },
+    {
+      "id": "eln:polarized_shaft_generator",
+      "check": "led-4-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 2
+    },
+    {
+      "id": "eln:polarized_shaft_generator",
+      "check": "led-5-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 2
+    },
+    {
+      "id": "eln:polarized_shaft_generator",
+      "check": "led-6-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 2
+    },
+    {
+      "id": "eln:large_shaft_motor",
+      "check": "led-0-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 3
+    },
+    {
+      "id": "eln:large_shaft_motor",
+      "check": "led-1-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 2
+    },
+    {
+      "id": "eln:large_shaft_motor",
+      "check": "led-2-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 1
+    },
+    {
+      "id": "eln:large_shaft_motor",
+      "check": "led-3-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 2
+    },
+    {
+      "id": "eln:large_shaft_motor",
+      "check": "led-4-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 1
+    },
+    {
+      "id": "eln:large_shaft_motor",
+      "check": "led-5-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 2
+    },
+    {
+      "id": "eln:large_shaft_motor",
+      "check": "led-6-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 1
+    },
+    {
+      "id": "eln:large_generator",
+      "check": "led-0-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 2
+    },
+    {
+      "id": "eln:large_generator",
+      "check": "led-1-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 2
+    },
+    {
+      "id": "eln:large_generator",
+      "check": "led-2-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 1
+    },
+    {
+      "id": "eln:large_generator",
+      "check": "led-3-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 4
+    },
+    {
+      "id": "eln:large_generator",
+      "check": "led-4-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 2
+    },
+    {
+      "id": "eln:large_generator",
+      "check": "led-5-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 2
+    },
+    {
+      "id": "eln:large_generator",
+      "check": "led-6-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 2
+    },
+    {
+      "id": "eln:shaft_motor",
+      "check": "led-0-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 58
+    },
+    {
+      "id": "eln:shaft_motor",
+      "check": "led-1-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 3
+    },
+    {
+      "id": "eln:shaft_motor",
+      "check": "led-2-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 1
+    },
+    {
+      "id": "eln:shaft_motor",
+      "check": "led-3-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 1
+    },
+    {
+      "id": "eln:shaft_motor",
+      "check": "led-4-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 2
+    },
+    {
+      "id": "eln:shaft_motor",
+      "check": "led-5-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 1
+    },
+    {
+      "id": "eln:shaft_motor",
+      "check": "led-6-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 2
+    },
+    {
+      "id": "eln:generator",
+      "check": "led-0-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 1
+    },
+    {
+      "id": "eln:generator",
+      "check": "led-1-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 1
+    },
+    {
+      "id": "eln:generator",
+      "check": "led-2-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 1
+    },
+    {
+      "id": "eln:generator",
+      "check": "led-3-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 1
+    },
+    {
+      "id": "eln:generator",
+      "check": "led-4-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 1
+    },
+    {
+      "id": "eln:generator",
+      "check": "led-5-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 2
+    },
+    {
+      "id": "eln:generator",
+      "check": "led-6-live-colors",
+      "status": "passed",
+      "detail": "",
+      "milliseconds": 1
+    }
+  ]
+}

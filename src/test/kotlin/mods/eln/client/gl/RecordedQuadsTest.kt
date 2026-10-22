@@ -21,6 +21,14 @@ class RecordedQuadsTest {
         val reversedOutput=RecordedQuads.triangles(reversed)
         assertSameTriangles(reversed,reversedOutput)
     }
+    @Test fun signedZeroOnSharedNormalsAndUvsDoesNotSplitAnOtherwiseIdenticalFace() {
+        val input=quad().map { it.copyOf() }
+        input[3][3]=-0f;input[3][5]=-0f;input[4][6]=-0f
+        val output=RecordedQuads.triangles(input)
+        assertEquals(4,output.size)
+        assertTrue(output.all { it[7]==1f && it[8].isNaN() })
+        assertEquals(listOf(0f to 0f,1f to 0f,1f to 1f,0f to 1f),output.map { it[0] to it[1] })
+    }
     @Test fun uvNormalAndColorSeamsNeverJoin() {
         for((index,attribute) in listOf(3 to 3,3 to 5,3 to 8,4 to 4,4 to 9)) {
             val input=quad().map { it.copyOf() };input[index][attribute]=.35f

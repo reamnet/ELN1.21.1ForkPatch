@@ -15,6 +15,53 @@ import kotlin.test.*
 class PoleAlignmentAndTapTest {
     private fun pole(kind: DistributionKind)=DistributionPoleElement(TransparentNode().apply { coordinate=Coordinate(0,64,0,0) },
         Eln.transparentNodeItem.subItemList.values.filterIsInstance<DistributionPoleDescriptor>().single { it.kind==kind })
+    @Test fun oppositePlacementDirectionsAndBentRunsKeepTheSamePrimaryPhaseOrder() {
+        val fronts=listOf(Direction.XN,Direction.XP,Direction.ZN,Direction.ZP)
+        val layouts=listOf(
+            listOf(0 to 0,20 to 0,40 to 0),
+            listOf(0 to 0,20 to 0,40 to -20),listOf(0 to 0,20 to 0,40 to 20),
+            listOf(0 to 0,20 to 0,20 to -20),listOf(0 to 0,20 to 0,20 to 20),
+            listOf(0 to 0,20 to -20,40 to -40))
+        for(front in fronts)for(positions in layouts) {
+            val poles=positions.mapIndexed { i,(x,z) -> pole(DistributionKind.THREE).apply {
+                node!!.coordinate=Coordinate(x,64,z,0)
+                this.front=if(i==1)front.inverse else front
+            } }
+            val links=poles.zipWithNext().map { (a,b) ->
+                GridLink(a.coordinate(),b.coordinate(),52,52,net.minecraft.world.item.ItemStack.EMPTY,1.0).also {
+                    a.gridLinkList.add(it);b.gridLinkList.add(it)
+                }
+            }
+            val byCoordinate=poles.associateBy { it.coordinate() }
+            poles.forEach { it.updateIdealRenderAngle() }
+            poles.last().alignPrimaryPhaseOrder { byCoordinate[it] }
+            val angles=poles.map { it.highVoltageRenderAngle }
+            // Visiting in the opposite order must not flip the phase positions again.
+            poles.first().alignPrimaryPhaseOrder { byCoordinate[it] }
+            assertEquals(angles,poles.map { it.highVoltageRenderAngle })
+            for((a,b) in poles.zipWithNext()) {
+                val delta=b.coordinate().subtract(a.coordinate())
+                val across=Vec3(-delta.z.toDouble(),0.0,delta.x.toDouble())
+                val aOrder=a.renderedGridCablePoint(34,0).subtract(a.renderedGridCablePoint(32,0)).dot(across)
+                val bOrder=b.renderedGridCablePoint(34,0).subtract(b.renderedGridCablePoint(32,0)).dot(across)
+                assertTrue(aOrder*bOrder>0,"Primary A/C wires crossed: $front $positions $angles")
+                repeat(3) { phase ->
+                    assertSame(a.lines[phase],a.gridLoads(52)[phase]);assertSame(b.lines[phase],b.gridLoads(52)[phase])
+                    assertEquals(32+phase,b.aimedSingleGridTerminal(Direction.XP,b.renderedGridCablePoint(32+phase,0)))
+                }
+            }
+            // Geometry alignment does not rewrite saved terminals or the LV rack.
+            assertTrue(links.all { it.getTerminal(poles[1])==52 })
+            assertEquals(poles[1].gridCablePoint(50,1).yRot(Math.toRadians(poles[1].lowVoltageRenderAngle.toDouble()).toFloat()),poles[1].renderedGridCablePoint(50,1))
+        }
+    }
+    @Test fun phaseOrderingUsesTheSharedSpanEvenWhenJunctionArmsPointTowardsOtherBranches() {
+        val span=Vec3(20.0,0.0,-20.0)
+        // The arms differ by only 70 degrees, but A/C lie on opposite sides of this span.
+        assertEquals(170f,PoleSpanAlignment.oriented(-10f,-80f,span))
+        assertEquals(170f,PoleSpanAlignment.oriented(170f,-80f,span))
+        assertEquals(170f,PoleSpanAlignment.oriented(-10f,-80f,span.scale(-1.0)))
+    }
     @Test fun straightRunsAndCornersBisectWithoutUsingVerticalOrSecondarySpans() {
         assertEquals(-45f,PoleSpanAlignment.angle(listOf(Vec3(20.0,0.0,0.0),Vec3(0.0,0.0,20.0)),180f))
         assertEquals(0f,PoleSpanAlignment.angle(listOf(Vec3(-20.0,2.0,0.0),Vec3(20.0,-2.0,0.0)),90f))
