@@ -51,11 +51,13 @@ open class TransparentNodeEntity(type: BlockEntityType<*>, pos: BlockPos, state:
         try {
             val id = stream.readShort()
             if (id.toInt() == 0) {
+                elementRender?.cord?.destroy()
                 elementRenderId = 0.toShort()
                 elementRender = null
             } else {
                 val changed = id != elementRenderId
                 if (changed) {
+                    elementRender?.cord?.destroy()
                     elementRenderId = id
                     val descriptor = Eln.transparentNodeItem.getDescriptor(id.toInt())
                     elementRender = descriptor!!.RenderClass.getConstructor(TransparentNodeEntity::class.java, TransparentNodeDescriptor::class.java).newInstance(this, descriptor) as TransparentNodeElementRender

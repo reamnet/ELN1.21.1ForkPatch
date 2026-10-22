@@ -163,6 +163,7 @@ abstract class SixNodeElementRender(open var tileEntity: SixNodeEntity, @JvmFiel
     }
 
     fun destructor() {
+        cord.destroy()
         if (usedUuid()) ClientSetup.uuidManager.kill(uuid)
         if (glListEnable()) {
             glDeleteListsSafe(glList)

@@ -73,14 +73,14 @@ class OutletRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDesc
         }
         var drawn=sockets
         repeat(desc.sockets) { i -> if(sockets and (1 shl i)!=0)NemaPlug.draw(facing,desc.rating,socket=i,horizontal=horizontal,strip=desc.strip,recessed=!wallState.isAir) }
-        cable=drawCable(facing.inverse,Eln.instance.meduimVoltageCableDescriptor.render,connections,cable)
+        cable=drawCable(if(wallState.isAir)facing.inverse else facing,Eln.instance.meduimVoltageCableDescriptor.render,connections,cable)
         val world=tileEntity.level!!;val origin=Vec3.atCenterOf(tileEntity.blockPos)
         for(p in world.players()) {
             val a=CordInteraction.heldAnchor(p.mainHandItem) ?: continue
             if(a.id!=id || p.distanceToSqr(origin.x,origin.y,origin.z)>100)continue
             if(drawn and (1 shl a.socket)==0) { NemaPlug.draw(facing,a.rating,socket=a.socket,horizontal=horizontal,strip=desc.strip,recessed=!wallState.isAir);drawn=drawn or (1 shl a.socket) }
             val tip=origin.add(mods.eln.transparentnode.worklight.WorkLightOptics.world(facing,OutletGeometry.tipLocal(a.socket,horizontal,desc.strip,!wallState.isAir)))
-            val end=p.position().add(.2,.8,.2)
+            val end=p.getPosition(net.minecraft.client.Minecraft.getInstance().timer.getGameTimeDeltaPartialTick(false)).add(.2,.8,.2)
             CordPath.draw(CordPath.samples(tip,end) { x,z,y -> CordPath.floor(world,x,z,y) },origin)
         }
     }

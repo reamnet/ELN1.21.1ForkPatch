@@ -307,6 +307,7 @@ abstract class NodeBase {
                 }
             }
         }
+        mods.eln.transparentnode.cord.OutletWiring.connect(this)
     }
 
     open fun disconnectJob() {

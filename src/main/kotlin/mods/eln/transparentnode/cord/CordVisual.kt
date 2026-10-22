@@ -13,19 +13,33 @@ object CordPath {
     fun samples(start: Vec3,end: Vec3,ground: (Double,Double,Double)->Double): List<Vec3> {
         val dx=end.x-start.x;val dz=end.z-start.z;val length=hypot(dx,dz)
         if(!length.isFinite() || !start.y.isFinite() || !end.y.isFinite())return emptyList()
-        val n=(ceil(length*4).toInt()).coerceIn(8,48)
-        return (0..n).map { i ->
+        val n=(ceil(length*6).toInt()).coerceIn(8,64)
+        if(length<1e-6)return (0..n).map { start.lerp(end,it.toDouble()/n) }
+        val path=(0..n).map { i ->
             if(i==0)return@map start
             if(i==n)return@map end
             val t=i.toDouble()/n
             val bow=sin(PI*t)*min(.35,length*.06)
             val x=start.x+dx*t+if(length>1e-6)-dz/length*bow else 0.0
             val z=start.z+dz*t+if(length>1e-6)dx/length*bow else 0.0
-            val y=if(i==0)start.y else if(i==n)end.y else {
-                val floor=ground(x,z,max(start.y,end.y))+.025
-                max(floor,start.y+(end.y-start.y)*t-sin(PI*t)*1.5)
+            Vec3(x,start.y+(end.y-start.y)*t-sin(PI*t)*1.5,z)
+        }
+        val support=path.mapIndexed { i,p ->
+            if(i==0 || i==n)p.y else {
+                val floor=ground(p.x,p.z,max(start.y,end.y))+.025
+                if(floor.isFinite())max(floor,p.y) else p.y
             }
-            Vec3(x,y,z)
+        }
+        // An upper parabolic envelope anticipates steps and rounds the climb/drop.
+        // Unlike averaging or a free spline it never dips below sampled obstacles.
+        return path.mapIndexed { i,p ->
+            if(i==0)start else if(i==n)end else {
+                val y=support.indices.maxOf { j ->
+                    val distance=(i-j)*length/n
+                    support[j]-distance*distance/(2*.45)
+                }
+                Vec3(p.x,y,p.z)
+            }
         }
     }
     fun floor(world: Level,x: Double,z: Double,ceiling: Double,ignore: BlockPos?=null): Double {
@@ -37,28 +51,40 @@ object CordPath {
             val top=boxes.filter { x-p.x>=it.minX && x-p.x<=it.maxX && z-p.z>=it.minZ && z-p.z<=it.maxZ }.maxOfOrNull { it.maxY }
             if(top!=null && y+top<=ceiling+.6)return y+top
         }
-        return ceiling-1.0
+        return Double.NEGATIVE_INFINITY
     }
     fun draw(points: List<Vec3>,origin: Vec3,color: FloatArray?=null,radius: Double=.018) {
         if(points.size<2)return
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
             GL11.glDisable(GL11.GL_TEXTURE_2D);GL11.glColor3f(color?.get(0) ?: .035f,color?.get(1) ?: .04f,color?.get(2) ?: .045f)
+            val rings=rings(points,radius)
             GL11.glBegin(GL11.GL_QUADS)
-            for(i in 1 until points.size) {
-                val a=points[i-1].subtract(origin);val b=points[i].subtract(origin)
-                val direction=b.subtract(a).normalize()
-                val u=direction.cross(if(abs(direction.y)>.9)Vec3(1.0,0.0,0.0) else Vec3(0.0,1.0,0.0)).normalize().scale(radius)
-                val v=direction.cross(u).normalize().scale(radius)
+            for(i in 1 until rings.size) {
                 for(j in 0..3) {
-                    val p=u.scale(cos(j*PI/2)).add(v.scale(sin(j*PI/2)))
-                    val q=u.scale(cos((j+1)*PI/2)).add(v.scale(sin((j+1)*PI/2)))
-                    val n=p.add(q).normalize();GL11.glNormal3d(n.x,n.y,n.z)
-                    for(k in listOf(a.add(p),a.add(q),b.add(q),b.add(p)))GL11.glVertex3d(k.x,k.y,k.z)
+                    val next=(j+1)%4
+                    val a=rings[i-1][j];val b=rings[i-1][next];val c=rings[i][next];val d=rings[i][j]
+                    val normal=b.subtract(a).cross(c.subtract(a)).normalize()
+                    GL11.glNormal3d(normal.x,normal.y,normal.z)
+                    for(k in listOf(a,b,c,d))GL11.glVertex3d(k.x-origin.x,k.y-origin.y,k.z-origin.z)
                 }
             }
             GL11.glEnd()
         } finally { GL11.glPopAttrib() }
+    }
+    /** Shared rings and transported frames avoid disconnected elbows and vertical-frame flips. */
+    fun rings(points: List<Vec3>,radius: Double): List<List<Vec3>> {
+        var previous=Vec3.ZERO
+        return points.mapIndexed { i,p ->
+            val delta=points[min(i+1,points.lastIndex)].subtract(points[max(0,i-1)])
+            val tangent=if(delta.lengthSqr()>1e-12)delta.normalize() else Vec3(0.0,1.0,0.0)
+            var u=previous.subtract(tangent.scale(previous.dot(tangent)))
+            if(u.lengthSqr()<1e-12)u=tangent.cross(if(abs(tangent.y)>.9)Vec3(1.0,0.0,0.0) else Vec3(0.0,1.0,0.0))
+            if(u.lengthSqr()<1e-12)u=Vec3(1.0,0.0,0.0)
+            u=u.normalize();previous=u
+            val v=tangent.cross(u).normalize()
+            listOf(p.add(u.scale(radius)),p.add(v.scale(radius)),p.subtract(u.scale(radius)),p.subtract(v.scale(radius)))
+        }
     }
 }
 
@@ -72,9 +98,13 @@ class CordDisplay {
         private set
     private var cached: List<Vec3> = emptyList()
     private var nextUpdate=0L
+    private var mesh=0
+    private var cachedStart: Vec3?=null
+    private var cachedEnd: Vec3?=null
+    fun destroy() { if(mesh!=0)GL11.glDeleteLists(mesh,1);mesh=0;cached=emptyList();nextUpdate=0L;cachedStart=null;cachedEnd=null }
     fun read(input: DataInputStream) {
         val next=if(input.readBoolean())BlockPos(input.readInt(),input.readInt(),input.readInt()) to Direction.fromInt(input.readUnsignedByte())!! else null
-        if(next!=endpoint) { cached=emptyList();nextUpdate=0L }
+        if(next!=endpoint)destroy()
         if(next!=null) { rating=CordRating.entries[input.readUnsignedByte()];socket=input.readUnsignedByte();horizontal=input.readBoolean();strip=input.readBoolean();recessed=input.readBoolean() }
         endpoint=next;state=input.readUTF()
     }
@@ -88,11 +118,19 @@ class CordDisplay {
         val start=Vec3.atCenterOf(target).add(mods.eln.transparentnode.worklight.WorkLightOptics.world(facing,OutletGeometry.tipLocal(socket,turned,strip,!outlet.wallState.isAir)))
         val end=origin.add(entry ?: mods.eln.transparentnode.worklight.WorkLightOptics.world(front,Vec3(0.0,-.43,-.25)))
         if(start.distanceTo(end)>ApplianceCord.MAX_REACH+1)return
-        if(cached.isEmpty() || world.gameTime>=nextUpdate) {
-            nextUpdate=world.gameTime+20;cached=CordPath.samples(start,end) { x,z,y -> CordPath.floor(world,x,z,y,pos) }
+        if(cached.isEmpty() || start!=cachedStart || end!=cachedEnd || world.gameTime>=nextUpdate) {
+            nextUpdate=world.gameTime+20
+            val points=CordPath.samples(start,end) { x,z,y -> CordPath.floor(world,x,z,y,pos) }
+            if(points!=cached) {
+                if(mesh!=0)GL11.glDeleteLists(mesh,1)
+                mesh=GL11.glGenLists(1);GL11.glNewList(mesh,GL11.GL_COMPILE);CordPath.draw(points,origin);GL11.glEndList()
+                cached=points
+            }
+            cachedStart=start;cachedEnd=end
         }
         if(((world.getBlockEntity(target) as? mods.eln.node.transparent.TransparentNodeEntity)?.elementRender as? OutletRender)?.occupied!=true)NemaPlug.draw(facing,rating,target.subtract(pos),socket,turned,strip,!outlet.wallState.isAir)
-        CordPath.draw(cached,origin)
+        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
+        try { GL11.glDisable(GL11.GL_TEXTURE_2D);GL11.glCallList(mesh) } finally { GL11.glPopAttrib() }
     }
 }
 

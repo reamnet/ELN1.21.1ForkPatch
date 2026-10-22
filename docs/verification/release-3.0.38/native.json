@@ -1,0 +1,9 @@
+{
+  "passed": [
+    "All 8 outlet ratings on 4 wall faces power real loads behind an occupied face cell; original surface mounting also works",
+    "Cable/wireless mode isolates and restores the feeder; 480 V pump stays corded and adjacent fridge stays isolated",
+    "Live mesh transforms and shader attributes passed",
+    "Cold world reload preserves all wired outlet feeds, original mounts and the live 480 V cord link"
+  ],
+  "outlets": 36
+}

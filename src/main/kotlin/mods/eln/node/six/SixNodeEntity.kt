@@ -59,10 +59,12 @@ class SixNodeEntity(pos: BlockPos, state: BlockState) : NodeBlockEntity(TYPE.get
             while (idx < 6) {
                 val id = stream.readShort()
                 if (id.toInt() == 0) {
+                    elementRenderList[idx]?.cord?.destroy()
                     elementRenderIdList[idx] = 0.toShort()
                     elementRenderList[idx] = null
                 } else {
                     if (id != elementRenderIdList[idx]) {
+                        elementRenderList[idx]?.cord?.destroy()
                         var failed = false
                         elementRenderIdList[idx] = id
                         val descriptor = Eln.sixNodeItem.getDescriptor(id.toInt())

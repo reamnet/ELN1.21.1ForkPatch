@@ -93,7 +93,14 @@ class OutletElement(node: TransparentNode,descriptor: TransparentNodeDescriptor)
         };return false
     }
     override fun disconnectJob() { occupants.filterNotNull().toList().forEach { it.disconnect() };cord.disconnect();wirelessPower.disconnect();super.disconnectJob() }
-    override fun getElectricalLoad(side: Direction,lrdu: LRDU)=if(!wireless && !cord.plugged && desc.acceptsCable(front,side,lrdu))input else null
+    override fun getElectricalLoad(side: Direction,lrdu: LRDU)=if(!wireless && !cord.plugged &&
+        (desc.acceptsCable(front,side,lrdu) || recessed && side==front && OutletWiring.surfaceEndpoint(this,lrdu)!=null))input else null
+    override fun getElectricalLoad(side: Direction,lrdu: LRDU,remote: mods.eln.node.NodeConnectionEndpoint): mods.eln.sim.ElectricalLoad? {
+        // A machine immediately in front must still use its plug, not accidentally
+        // acquire power through the new wall-face terminal mask.
+        if(recessed && side==front && remote!=OutletWiring.surfaceEndpoint(this,lrdu))return null
+        return getElectricalLoad(side,lrdu)
+    }
     override fun getConnectionMask(side: Direction,lrdu: LRDU)=if(getElectricalLoad(side,lrdu)!=null)NodeBase.maskElectricalPower else 0
     override fun getThermalLoad(side: Direction,lrdu: LRDU)=null
     override fun onNeighborBlockChange() { super.onNeighborBlockChange();if(!recessed)desc.checkWallSupport(this) }
@@ -114,7 +121,7 @@ class OutletElement(node: TransparentNode,descriptor: TransparentNodeDescriptor)
         out.writeBoolean(wireless);out.writeUTF(channel);out.writeBoolean(wirelessPower.supply!=null)
         out.writeInt(net.minecraft.world.level.block.Block.getId(wallState));out.writeBoolean(horizontal);out.writeInt((0 until capacity).fold(0) { bits,i -> if(isOccupied(i))bits or (1 shl i) else bits })
         out.writeDouble(input.voltage);out.writeDouble(contact.current)
-        node!!.lrduCubeMask.getTranslate(front.inverse).serialize(out)
+        (if(recessed)node!!.lrduCubeMask[front]!! else node!!.lrduCubeMask.getTranslate(front.inverse)).serialize(out)
     }
     override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt);wireless=nbt.getBoolean("outletWireless");channel=nbt.getString("outletChannel").ifBlank { mods.eln.sixnode.lampsocket.LampChannelMemory.DEFAULT_CHANNEL }
