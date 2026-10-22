@@ -15,27 +15,36 @@ import net.minecraft.world.phys.Vec3
 /** Draws the six faces of a six-node through the fixed-function emulator (see mods.eln.client.gl). */
 class SixNodeRender : BlockEntityRenderer<SixNodeEntity> {
     override fun render(entity: SixNodeEntity, partialTicks: Float, poseStack: PoseStack, buffer: MultiBufferSource, packedLight: Int, packedOverlay: Int) {
-        Minecraft.getInstance().profiler.push("SixNode")
-        FixedFunction.begin(poseStack, buffer, NodeRenderSupport.neighbourLight(entity), packedOverlay)
+        val profiler=Minecraft.getInstance().profiler
+        profiler.push("SixNode")
         try {
-            GL11.glPushMatrix()
-            GL11.glTranslatef(.5f, .5f, .5f)
-            for ((idx, render) in entity.elementRenderList.withIndex()) {
-                if (render != null) {
-                    glDefaultColor()
-                    GL11.glPushMatrix()
-                    fromInt(idx)!!.glRotateXnRef()
-                    GL11.glTranslatef(-0.5f, 0f, 0f)
-                    render.draw()
-                    GL11.glPopMatrix()
-                    render.cord.draw(entity.level!!,entity.blockPos,fromInt(idx)!!,fromInt(idx)!!.rotateFromXN(Vec3(-.40,0.0,0.0)))
+            profiler.push("lighting")
+            val light=try { NodeRenderSupport.neighbourLight(entity) } finally { profiler.pop() }
+            FixedFunction.begin(poseStack,buffer,light,packedOverlay)
+            try {
+                GL11.glPushMatrix()
+                GL11.glTranslatef(.5f,.5f,.5f)
+                for ((idx,render) in entity.elementRenderList.withIndex()) {
+                    if(render==null)continue
+                    profiler.push(render.sixNodeDescriptor.name)
+                    try {
+                        glDefaultColor()
+                        GL11.glPushMatrix()
+                        val side=fromInt(idx)!!
+                        side.glRotateXnRef()
+                        GL11.glTranslatef(-.5f,0f,0f)
+                        try { render.draw() } finally { GL11.glPopMatrix() }
+                        // Avoid constructing cord attachment vectors for unplugged devices.
+                        if(render.cord.endpoint!=null) {
+                            profiler.push("cord")
+                            try { render.cord.draw(entity.level!!,entity.blockPos,side,side.rotateFromXN(Vec3(-.40,0.0,0.0))) }
+                            finally { profiler.pop() }
+                        }
+                    } finally { profiler.pop() }
                 }
-            }
-            GL11.glPopMatrix()
-        } finally {
-            FixedFunction.finish()
-        }
-        Minecraft.getInstance().profiler.pop()
+                GL11.glPopMatrix()
+            } finally { FixedFunction.finish() }
+        } finally { profiler.pop() }
     }
 
     override fun getRenderBoundingBox(entity: SixNodeEntity): AABB = entity.getRenderBoundingBox()

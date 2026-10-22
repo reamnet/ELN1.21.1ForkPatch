@@ -333,8 +333,11 @@ public final class FixedFunction {
         current = new Batch(mode);
         if (recording != null) {
             // matrix relative to the list start
-            Matrix4f rel = new Matrix4f(recordingBase).invert().mul(pose.last().pose());
-            current.transform = rel;
+            // OBJ lists normally contain no matrix commands. Keep that exact case
+            // transform-free instead of inverting and multiplying the camera matrix,
+            // then repeating that identity transform for every vertex on every frame.
+            Matrix4f at = pose.last().pose();
+            if (!recordingBase.equals(at)) current.transform = new Matrix4f(recordingBase).invert().mul(at);
         }
     }
 
@@ -453,11 +456,18 @@ public final class FixedFunction {
                     lineVertex(vc, model, p, b, dir, pos);
                 }
             } else {
-                Matrix3f normals = MeshNormals.matrix(p.normal(), extra);
+                Matrix3f normals = extra == null ? p.normal() : MeshNormals.matrix(p.normal(), extra);
                 Vector3f normal = new Vector3f();
+                float normalX = Float.NaN, normalY = Float.NaN, normalZ = Float.NaN;
                 for (float[] vtx : prims) {
                     pos.set(vtx[0], vtx[1], vtx[2], 1f).mul(model);
-                    MeshNormals.transform(normals, vtx[5], vtx[6], vtx[7], normal);
+                    // A face shares its normal across all four vertices (including
+                    // duplicated triangle vertices). Transform/normalize it only once.
+                    // This cache belongs to this emission; lighting and animation remain live.
+                    if (vtx[5] != normalX || vtx[6] != normalY || vtx[7] != normalZ) {
+                        normalX = vtx[5]; normalY = vtx[6]; normalZ = vtx[7];
+                        MeshNormals.transform(normals, normalX, normalY, normalZ, normal);
+                    }
                     vertexColor(vc.addVertex(pos.x, pos.y, pos.z), vtx)
                         .setUv(vtx[3], vtx[4])
                         .setOverlay(packedOverlay)
