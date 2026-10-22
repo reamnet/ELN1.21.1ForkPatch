@@ -1513,6 +1513,7 @@ object TransparentNodeRegistration {
     }
 
     private fun registerGridDevices(id: Int) {
+        transparentNodeItem.addDescriptor(8+(125 shl 6),mods.eln.transparentnode.pump.IndustrialPumpDescriptor().apply { setCreativeTab(Eln.creativeTabMachines) })
         transparentNodeItem.addDescriptor(50+(124 shl 6),mods.eln.utility.HouseServiceDescriptor(false))
         transparentNodeItem.addDescriptor(51+(124 shl 6),mods.eln.utility.HouseServiceDescriptor(true))
         transparentNodeItem.addDescriptor(52+(124 shl 6),mods.eln.utility.BreakerPanelDescriptor())

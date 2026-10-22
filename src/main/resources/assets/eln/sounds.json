@@ -571,5 +571,14 @@
         "stream": false
       }
     ]
+  },
+  "industrial_pump": {
+    "sounds": [
+      {
+        "name": "eln:industrial_pump",
+        "stream": false
+      }
+    ],
+    "subtitle": "Pumping"
   }
 }

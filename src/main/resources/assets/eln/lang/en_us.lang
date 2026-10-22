@@ -50,6 +50,7 @@ Default_position=Default position
 Dielectric_slot=Dielectric slot
 Disabled=Disabled
 Discharge_power\:_%1$W=Discharge power: %1$W
+Down=Down
 Dusk\:_Auto=Dusk: Auto
 Dusk\:_Manual=Dusk: Manual
 Efficiency=Efficiency
@@ -202,6 +203,7 @@ Toggle_switch=Toggle switch
 Toggles_the_output_each_time\nan_emitter's_value_rises.\nUseful_to_allow_multiple_buttons\nto_control_the_same_light.=Toggles the output each time\nan emitter's value rises.\nUseful to allow multiple buttons\nto control the same light.
 Transforms_an_input_voltage_to\nan_output_voltage.=Transforms an input voltage to\nan output voltage.
 Unavailable=Unavailable
+Up=Up
 Used=Used
 Used_to_cool_down_turbines.=Used to cool down turbines.
 Uses_the_biggest\nvalue_on_the_channel.=Uses the biggest\nvalue on the channel.
@@ -2694,6 +2696,39 @@ Electric_Toaster.name=Electric Toaster
 Flat_Electric_Cooktop.name=Flat Electric Cooktop
 Patio_Electric_Grill.name=Patio Electric Grill
 
+# src/main/kotlin/mods/eln/transparentnode/pump/IndustrialPumpClient.kt
+40-bucket_input_and_output_buffers;_compatible_with_standard_NeoForge_fluid_pipes=40-bucket input and output buffers; compatible with standard NeoForge fluid pipes
+480_V_/_4000_W;_nominal_flow_40_buckets_per_second=480 V / 4000 W; nominal flow 40 buckets per second
+480_V_Industrial_Fluid_Pump=480 V Industrial Fluid Pump
+480_V_Industrial_Fluid_Pump.name=480 V Industrial Fluid Pump
+Blue_port\:_selectable_intake;_orange_ports\:_fluid_output=Blue port: selectable intake; orange ports: fluid output
+Draws_from_adjacent_tanks,_pipes_or_source_blocks;_valid_infinite_water_stays_renewable=Draws from adjacent tanks, pipes or source blocks; valid infinite water stays renewable
+East=East
+Flow\:_%1$_B/s=Flow: %1$ B/s
+Flow_follows_supply_voltage\:_432_V_\=_36_B/s;_528_V_\=_44_B/s=Flow follows supply voltage: 432 V = 36 B/s; 528 V = 44 B/s
+Input_buffer\:_%1$_/_40_B=Input buffer: %1$ / 40 B
+Intake\:_%1$=Intake: %1$
+Intake_dry=Intake dry
+No_liquid=No liquid
+Nominal\:_40_B/s_at_480_V=Nominal: 40 B/s at 480 V
+North=North
+Output_buffer\:_%1$_/_40_B=Output buffer: %1$ / 40 B
+Output_full_or_another_liquid_remains=Output full or another liquid remains
+Overvoltage_protection=Overvoltage protection
+Place_this_blue_intake_against_water_or_a_tank;_all_other_faces_are_outputs=Place this blue intake against water or a tank; all other faces are outputs
+Power_with_fixed_cables_or_a_480_V_Industrial_Cord=Power with fixed cables or a 480 V Industrial Cord
+Pump_chunk_unloaded=Pump chunk unloaded
+Pumping=Pumping
+South=South
+Supply\:_%1$_V_/_%2$_W=Supply: %1$ V / %2$ W
+Waiting_for_electrical_power=Waiting for electrical power
+West=West
+
+# src/main/kotlin/mods/eln/transparentnode/pump/IndustrialPumpElement.kt
+%1$_B/s=%1$ B/s
+Flow=Flow
+Supply=Supply
+
 # src/main/kotlin/mods/eln/transparentnode/renewable/LargeRenewables.kt
 3200_V=3200 V
 Available_power=Available power
@@ -2858,7 +2893,6 @@ UPS_rack_compatible;_larger_capacity_does_not_raise_the_UPS_output_rating=UPS ra
 12.47_kV_fixed_ratio=12.47 kV fixed ratio
 240_V_service_circuit=240 V service circuit
 Angle\:_%1$°=Angle: %1$°
-Down=Down
 Height\:_%1$_m=Height: %1$ m
 L1\:_120_V;_L2\:_120_V=L1: 120 V; L2: 120 V
 Mains_Step-down_Unit=Mains Step-down Unit
@@ -2870,7 +2904,6 @@ Transformer\:_%1$_kW=Transformer: %1$ kW
 Turn_left_by_%1$°;_hold_Shift_for_%2$°_steps=Turn left by %1$°; hold Shift for %2$° steps
 Turn_right_by_%1$°;_hold_Shift_for_%2$°_steps=Turn right by %1$°; hold Shift for %2$° steps
 Unit_installed=Unit installed
-Up=Up
 Utility_Pole_Street_Light=Utility Pole Street Light
 
 # src/main/kotlin/mods/eln/transparentnode/utilitylight/UtilityLightDescriptors.kt

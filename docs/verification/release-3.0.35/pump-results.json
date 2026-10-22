@@ -1,0 +1,13 @@
+{
+  "passed": [
+    "Live Ender Fluid Conduits deliver voltage-scaled water at 480.0 V (39.9982 B/s)",
+    "Live Ender Fluid Conduits deliver voltage-scaled water at 432.0 V (35.998400000000004 B/s)",
+    "Live Ender Fluid Conduits deliver voltage-scaled water at 528.0 V (43.998 B/s)",
+    "Cached model emission preserves positions, normals and live tint under camera/animation/nonuniform scale",
+    "Running pump loads and plays its original motor/water loop with voltage-dependent pitch",
+    "Live GUI opens; switching off stops pumping and silences the loop",
+    "Finite world lava removes exactly one source bucket without creating fluid",
+    "Adjacent Ender IO tank supplies 5000 mB of another mod\u0027s fluid through the same generic pump"
+  ],
+  "receivedMb": 5000
+}

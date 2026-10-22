@@ -1,0 +1,10 @@
+{
+  "command": "./gradlew --no-daemon --max-workers=3 test generateLangFiles runData",
+  "tests": 804,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "suites": 199,
+  "build": "SUCCESSFUL",
+  "duration": "2m 57s"
+}

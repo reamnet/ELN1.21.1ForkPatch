@@ -426,6 +426,8 @@ object CraftingRecipes {
         addRecipe(findItemStack("Automatic Transfer Switch"), "IPI", "RCR", "IPI",
             'I',findItemStack("Iron Plate"),'P',ItemStack(Items.COMPARATOR),'R',ItemStack(Items.REDSTONE),
             'C',findItemStack("Copper Cable"))
+        addRecipe(findItemStack("480 V Industrial Fluid Pump"),"PBP","MCM","PBP",
+            'P',findItemStack("Iron Plate"),'B',ItemStack(Items.BUCKET),'M',findItemStack("Electrical Motor"),'C',findItemStack("Copper Cable"))
         addRecipe(findItemStack("Standby Gasoline Generator"), "PPP", "BGB", "CRC",
             'P',findItemStack("Iron Plate"),'B',ItemStack(Items.BUCKET),'G',findItemStack("240V Fuel Generator"),
             'C',findItemStack("Copper Cable"),'R',ItemStack(Items.REDSTONE))
