@@ -74,9 +74,9 @@ object TerrainModels {
             else -> error("Unknown terrain model owner")
         }
         val key=MeshKey(descriptor,side,appearance)
-        if(key in unsupported) { removeBody(owner);return }
         val previous=bodies[owner]
         if (previous?.key==key) return
+        if(unsupported.isNotEmpty() && key in unsupported) { removeBody(owner);return }
         val mesh=pool[key] ?: run {
             val collector=capture!!
             collector.enabled=true
@@ -94,10 +94,31 @@ object TerrainModels {
         for (section in split.keys) { sections.getOrPut(section) { IdentityHashMap() }[owner]=body;dirty(section) }
     }
 
+    /** Old renderers describe visual state in their draw commands. Fingerprint cached batches
+     * and transforms, without expanding or transforming their vertices every client tick. */
+    fun drawElement(owner: Any,draw: ()->Unit) {
+        if(explicit(owner) || !enabled) { draw();return }
+        val moving=LegacyMovingParts.names(owner)
+        if(discovering==null) {
+            if(bodies.containsKey(owner))MeshPartSelection.automatic(moving,true,draw) else draw()
+            return
+        }
+        @Suppress("UNCHECKED_CAST")
+        val previous=bodies[owner]?.key?.appearance as? List<DrawSignature>
+        val signature=SignatureCapture(previous ?: emptyList())
+        val old=capture
+        FixedFunction.setMeshSink(signature)
+        GL11.glPushMatrix();GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
+        try { FixedFunction.preserveVertexState { MeshPartSelection.automatic(moving,false,draw) } }
+        finally { GL11.glPopAttrib();GL11.glPopMatrix();FixedFunction.setMeshSink(old) }
+        body(owner,signature.finish()) { MeshPartSelection.automatic(moving,false,draw) }
+    }
+
     internal fun meshFor(owner: Any)=bodies[owner]?.mesh
+    internal fun refreshNow(node: NodeBlockEntity) { lastUpdate.remove(node);update(node) }
     internal fun sectionsFor(owner: Any)=bodies[owner]?.sections?.keys ?: emptySet()
 
-    fun dynamic(draw: () -> Unit) { if (!MeshPartSelection.staticPass()) draw() }
+    fun dynamic(draw: () -> Unit) { MeshPartSelection.dynamic(draw) }
 
     fun update(node: NodeBlockEntity) {
         if (!enabled || node.level !is ClientLevel || node.isRemoved) return
@@ -114,7 +135,7 @@ object TerrainModels {
             is TransparentNodeEntity -> listOfNotNull(node.elementRender)
             else -> emptyList()
         }
-        if (renders.none(::eligible)) { nodeBodies[node]?.toList()?.forEach(::removeBody);return }
+        if (renders.isEmpty()) { nodeBodies[node]?.toList()?.forEach(::removeBody);return }
         if (discovering!=null || FixedFunction.inWorld()) return
         discovering=node;visited.clear();capture=TerrainCapture()
         FixedFunction.setMeshSink(capture)
@@ -124,13 +145,13 @@ object TerrainModels {
             GL11.glTranslatef(.5f,.5f,.5f)
             when(node) {
                 is SixNodeEntity -> for ((index,render) in node.elementRenderList.withIndex()) {
-                    if(render==null || !eligible(render))continue
+                    if(render==null)continue
                     GL11.glColor4f(1f,1f,1f,1f)
                     GL11.glPushMatrix()
-                    try { Direction.fromInt(index)!!.glRotateXnRef();GL11.glTranslatef(-.5f,0f,0f);render.draw() }
+                    try { Direction.fromInt(index)!!.glRotateXnRef();GL11.glTranslatef(-.5f,0f,0f);drawElement(render) { render.draw() } }
                     finally { GL11.glPopMatrix() }
                 }
-                is TransparentNodeEntity -> node.elementRender?.draw()
+                is TransparentNodeEntity -> node.elementRender?.let { render->drawElement(render) { render.draw() } }
             }
             val owners=nodeBodies[node]?.toList() ?: emptyList()
             owners.filter { it !in visited }.forEach(::removeBody)
@@ -152,8 +173,8 @@ object TerrainModels {
         val s=SectionPos.of(key);mc.levelRenderer.setSectionDirty(s.x(),s.y(),s.z())
     }
     private fun clear() { bodies.clear();nodeBodies.clear();lastUpdate.clear();sections.clear();pool.clear();unsupported.clear();world=null }
-    private fun eligible(render: Any): Boolean = if(render is mods.eln.sixnode.lampsocket.LampSocketRender)
-        render.descriptor.fixture!=null else render.javaClass.simpleName in SUPPORTED
+    private fun explicit(render: Any): Boolean = if(render is mods.eln.sixnode.lampsocket.LampSocketRender)
+        render.descriptor.fixture!=null else render.javaClass.simpleName in SUPPORTED || render is mods.eln.transparentnode.festive.FairyLightsRender
     private val SUPPORTED=setOf("KitchenRender","FanRender","RenewableRender","IndustrialPumpRender","UpsRender",
         "ClimateRender","BackupRender","OutletRender","DistributionPoleRender","HouseServiceRender","BreakerPanelRender",
         "WorkLightRender","StepDownUnitRender","UtilityStreetLightRender","HolidayCandleRender","StringLightsRender","ChristmasTreeRender","WallWirelessRender")
@@ -185,8 +206,7 @@ object TerrainModels {
                 val color=data[p+8]
                 consumer.addVertex(Float.fromBits(data[p])+slice.x,Float.fromBits(data[p+1])+slice.y,Float.fromBits(data[p+2])+slice.z)
                     .setColor(TerrainColors.shade(color,shade))
-                    .setUv(sprite.getU(if(material.texture==FixedFunction.WHITE).5f else .5f+(Float.fromBits(data[p+3])-.5f)*(1f-sprite.uvShrinkRatio())),
-                        sprite.getV(if(material.texture==FixedFunction.WHITE).5f else .5f+(Float.fromBits(data[p+4])-.5f)*(1f-sprite.uvShrinkRatio())))
+                    .setUv(TerrainAtlas.u(material.texture,sprite,Float.fromBits(data[p+3])),TerrainAtlas.v(material.texture,sprite,Float.fromBits(data[p+4])))
                     .setLight(if(material.fullBright)0x00f000f0 else light).setNormal(nx,ny,nz)
             }
         }

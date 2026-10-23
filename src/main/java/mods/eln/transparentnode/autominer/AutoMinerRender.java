@@ -142,13 +142,15 @@ public class AutoMinerRender extends TransparentNodeElementRender {
             UtilsClient.enableLight();
         }
 
-        if (drawRay) {
-            float raySize = 0.625f - 0.02f * 2;
-            float scale = 1f / render.resWidth * raySize;
+        if (drawRay && mods.eln.client.terrain.MeshPartSelection.beginDynamic()) {
+            try {
+                float raySize = 0.625f - 0.02f * 2;
+                float scale = 1f / render.resWidth * raySize;
 
-            GL11.glTranslatef(-raySize, 0, 0);
-            GL11.glScalef(scale, -scale, 1);
-            render.draw(0.4f, 1.3f, 0.8f);
+                GL11.glTranslatef(-raySize, 0, 0);
+                GL11.glScalef(scale, -scale, 1);
+                render.draw(0.4f, 1.3f, 0.8f);
+            } finally { mods.eln.client.terrain.MeshPartSelection.endDynamic(); }
         }
 
         GL11.glPopMatrix();

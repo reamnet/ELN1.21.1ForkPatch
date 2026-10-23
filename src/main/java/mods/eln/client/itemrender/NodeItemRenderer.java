@@ -34,6 +34,8 @@ public final class NodeItemRenderer extends BlockEntityWithoutLevelRenderer {
         return instance;
     }
 
+    public static void clearCache() { if (instance != null) instance.asBlockInInventory.clear(); }
+
     private final java.util.Map<Object, Boolean> asBlockInInventory = new java.util.IdentityHashMap<>();
 
     /**

@@ -23,12 +23,15 @@ internal data class TerrainSlice(val batch: TerrainBatch, val quads: IntArray?, 
 internal class TerrainCapture : FixedFunction.MeshSink {
     var enabled = false
     var supported = true
+    var unsupportedReason:String?=null
     private val batches = linkedMapOf<TerrainMaterial, IntArrayList>()
     override fun accepts() = enabled
+    override fun unsupported(reason: String) { supported=false;unsupportedReason=reason }
     override fun capture(texture: ResourceLocation, unlit: Boolean, fullBright: Boolean, blend: Boolean, cull: Boolean,
         lines: Boolean, vertices: MutableList<FloatArray>, model: Matrix4f, normals: Matrix3f, color: Int) {
         if (lines || vertices.size % 4 != 0 || !TerrainAtlas.supported(texture) ||
-            (texture!=FixedFunction.WHITE && vertices.any { !it[3].isFinite() || !it[4].isFinite() || it[3] !in -8f..8f || it[4] !in -8f..8f })) {
+            (texture!=FixedFunction.WHITE && (vertices.any { !it[3].isFinite() || !it[4].isFinite() || it[3] !in -4096f..4096f || it[4] !in -4096f..4096f } ||
+                vertices.chunked(4).any { face -> (ceil(face.maxOf { it[3] })-floor(face.minOf { it[3] })+1)*(ceil(face.maxOf { it[4] })-floor(face.minOf { it[4] })+1)>1024 }))) {
             if(java.lang.Boolean.getBoolean("eln.terrainChecks"))mods.eln.Eln.logger.warn("Terrain unsupported texture={} available={} lines={} vertices={} uv={}..{} / {}..{}",texture,TerrainAtlas.supported(texture),lines,vertices.size,vertices.minOf { it[3] },vertices.maxOf { it[3] },vertices.minOf { it[4] },vertices.maxOf { it[4] })
             supported = false; return
         }

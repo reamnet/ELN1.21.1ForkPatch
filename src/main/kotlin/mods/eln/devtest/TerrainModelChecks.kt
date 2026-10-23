@@ -70,7 +70,7 @@ object TerrainModelChecks {
     private fun setup() {
         val p=mc.singleplayerServer!!.playerList.players.first();val w=p.serverLevel();val f=NativeCampaignFixtures(w,p)
         w.dayTime=6000L;w.gameRules.getRule(GameRules.RULE_DAYLIGHT).set(false,mc.singleplayerServer)
-        val descriptors=Eln.transparentNodeItem.subItemList.values
+        val descriptors=Eln.transparentNodeItem.subItemList.values.filterNotNull()
         val selected=listOf(
             descriptors.filterIsInstance<DistributionPoleDescriptor>().single { it.kind==DistributionKind.STREET_THREE },
             descriptors.filterIsInstance<FanDescriptor>().first { it.type==FanType.CLASSIC },
@@ -105,12 +105,28 @@ object TerrainModelChecks {
             w.setBlockAndUpdate(if(style.ceiling)pos.above() else pos.below(),Blocks.STONE.defaultBlockState())
             check(Eln.sixNodeItem.placeBlockAt(desc.newItemStack(1),p,w,pos,if(style.ceiling)net.minecraft.core.Direction.DOWN else net.minecraft.core.Direction.UP,.5f,.5f,.5f))
         }
+        if(java.lang.Boolean.getBoolean("eln.terrainCatalogChecks")) {
+            val oldMachines=listOf("GeneratorRender","MotorRender","FabricatorRender","ElectricalFurnaceRender")
+            for((i,name) in oldMachines.withIndex()) {
+                val d=descriptors.first { it.RenderClass.simpleName==name }
+                val pos=BlockPos(310+i*8,79,268);positions+=pos
+                w.setChunkForced(pos.x shr 4,pos.z shr 4,true);w.setBlockAndUpdate(pos.below(),Blocks.STONE.defaultBlockState())
+                check(Eln.transparentNodeItem.placeBlockAt(d.newItemStack(1),p,w,pos,net.minecraft.core.Direction.UP))
+            }
+            val oldSix=listOf("ElectricalGateSourceRender","ElectricalMathRender","ElectricalVuMeterRender","ElectricalDataLoggerRender")
+            for((i,name) in oldSix.withIndex()) {
+                val d=Eln.sixNodeItem.subItemList.values.filterIsInstance<SixNodeDescriptor>().first { it.RenderClass.simpleName==name }
+                val pos=BlockPos(310+i*8,79,280);positions+=pos
+                w.setChunkForced(pos.x shr 4,pos.z shr 4,true);w.setBlockAndUpdate(pos.below(),Blocks.STONE.defaultBlockState())
+                check(Eln.sixNodeItem.placeBlockAt(d.newItemStack(1),p,w,pos,net.minecraft.core.Direction.UP,.5f,.5f,.5f))
+            }
+        }
         camera()
     }
     private fun draw(owner:Any) {
         when(owner) {
-            is TransparentNodeElementRender->owner.draw()
-            is SixNodeElementRender->{owner.side.glRotateXnRef();mods.eln.client.gl.GL11.glTranslatef(-.5f,0f,0f);owner.draw()}
+            is TransparentNodeElementRender->TerrainModels.drawElement(owner) { owner.draw() }
+            is SixNodeElementRender->{owner.side.glRotateXnRef();mods.eln.client.gl.GL11.glTranslatef(-.5f,0f,0f);TerrainModels.drawElement(owner) { owner.draw() }}
         }
     }
     private fun captured(owner:Any,original:Boolean):TerrainMesh {
@@ -119,7 +135,8 @@ object TerrainModelChecks {
         FixedFunction.setMeshSink(c);FixedFunction.begin(PoseStack(),MultiBufferSource { error("Capture emitted live geometry") },0,0)
         try { mods.eln.client.gl.GL11.glTranslatef(.5f,.5f,.5f);draw(owner) }
         finally { FixedFunction.setMeshSink(null);FixedFunction.finish();System.clearProperty("eln.disableTerrainModels") }
-        check(c.supported);return c.finish()
+        // Font glyphs are deliberately live and use their own atlas, outside the quad sink.
+        check(c.supported || c.unsupportedReason=="font") { "Unsupported capture for ${owner.javaClass.simpleName}: ${c.unsupportedReason}" };return c.finish()
     }
     private fun vertices(m:TerrainMesh)=m.batches.flatMap { b->b.vertices.toList().chunked(9).map { b.material.toString()+it.joinToString(",") } }.sorted()
     private fun verify() {
@@ -159,8 +176,9 @@ object TerrainModelChecks {
         lamp.lightValue=0;lamp.bulbCount=0;TerrainModels.remove(lamp.tileEntity);TerrainModels.update(lamp.tileEntity)
         passed+="Lamp glow and pole aiming rebuild their meshes; moving fan blades retain independent live geometry"
         verifyAllFixtures()
+        LegacyTerrainChecks.run()
         // Compare actual model rendering after warmup; only bodies are changed, no synthetic substitute.
-        val owners=listOf(pole,renders.filterIsInstance<LampSocketRender>().first())
+        val owners=listOf(pole,renders.filterIsInstance<LampSocketRender>().first())+renders.filterNotNull().filter { it.javaClass.simpleName in setOf("GeneratorRender","ElectricalMathRender") }
         val arena=ByteBufferBuilder(16*1024*1024)
         try { for(owner in owners) {
             for(original in listOf(true,false)) {
@@ -211,6 +229,15 @@ object TerrainModelChecks {
         Files.createDirectories(output)
         Screenshot.takeScreenshot(mc.mainRenderTarget).use { it.writeToFile(output.resolve("$name.png")) }
     }
+    @SubscribeEvent fun itemGallery(event:net.neoforged.neoforge.client.event.RenderGuiEvent.Post) {
+        if(!java.lang.Boolean.getBoolean("eln.terrainCatalogChecks") || done || phase<2)return
+        val names=listOf("GeneratorRender","MotorRender","FabricatorRender","UpsRender","DistributionPoleRender","KitchenRender","IndustrialPumpRender","HouseServiceRender")
+        val descriptors=Eln.transparentNodeItem.subItemList.values.filterIsInstance<TransparentNodeDescriptor>()
+        val items=names.map { name->descriptors.first { it.RenderClass.simpleName==name }.newItemStack(1) }+
+            Eln.sixNodeItem.subItemList.values.filterIsInstance<LampSocketDescriptor>().filter { it.fixture!=null }.take(8).map { it.newItemStack(1) }
+        val g=event.guiGraphics;g.fill(2,2,8*22+6,2*22+6,0xff444444.toInt())
+        items.forEachIndexed { i,item->g.renderItem(item,6+(i%8)*22,6+(i/8)*22) }
+    }
     @SubscribeEvent fun tick(event:ClientTickEvent.Post) {
         if(!java.lang.Boolean.getBoolean("eln.terrainChecks") || done)return
         try {
@@ -228,10 +255,10 @@ object TerrainModelChecks {
                 }
                 6->if(ticks>100 && settledFrames>30) {
                     screenshot("terrain");phase=3;ticks=0
-                    System.setProperty("eln.disableTerrainModels","true")
+                    System.setProperty("eln.disableTerrainModels","true");System.setProperty("eln.disableBakedItems","true")
                     positions.mapNotNull { mc.level!!.getBlockEntity(it) as? NodeBlockEntity }.forEach(TerrainModels::remove)
                 }
-                3->if(ticks>80) { screenshot("original");System.clearProperty("eln.disableTerrainModels");phase=4;ticks=0 }
+                3->if(ticks>80) { screenshot("original");System.clearProperty("eln.disableTerrainModels");System.clearProperty("eln.disableBakedItems");phase=4;ticks=0 }
                 4->if(ticks>100) {
                     screenshot("restored");check(renders.all { TerrainModels.meshFor(it!!)!=null })
                     passed+="Unbake/rebake removes old section entries and restores every model"

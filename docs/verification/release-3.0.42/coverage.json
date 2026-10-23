@@ -1,0 +1,55 @@
+{
+  "registeredDescriptors": 588,
+  "rendererClasses": 131,
+  "nonemptyStationaryBodies": 580,
+  "emptyOrLiveOnly": [
+    {
+      "descriptor": "Signal 20H inductor",
+      "renderer": "mods.eln.sixnode.signalinductor.SignalInductorRender"
+    },
+    {
+      "descriptor": "Multicolor Deck Globe String Lights",
+      "renderer": "mods.eln.transparentnode.festive.FairyLightsRender"
+    },
+    {
+      "descriptor": "Warm White Deck Globe String Lights",
+      "renderer": "mods.eln.transparentnode.festive.FairyLightsRender"
+    },
+    {
+      "descriptor": "Multicolor Fairy Lights on Green Wire",
+      "renderer": "mods.eln.transparentnode.festive.FairyLightsRender"
+    },
+    {
+      "descriptor": "White Fairy Lights on Green Wire",
+      "renderer": "mods.eln.transparentnode.festive.FairyLightsRender"
+    },
+    {
+      "descriptor": "Overhead Lines",
+      "renderer": "mods.eln.railroad.OverheadLinesRender"
+    },
+    {
+      "descriptor": "Power capacitor",
+      "renderer": "mods.eln.transparentnode.powercapacitor.PowerCapacitorRender"
+    },
+    {
+      "descriptor": "Power inductor",
+      "renderer": "mods.eln.transparentnode.powerinductor.PowerInductorRender"
+    }
+  ],
+  "catalogFailures": 0,
+  "previewCases": 2352,
+  "newlyBakedPreviewCases": 1652,
+  "previouslyBakedPreviewCases": 518,
+  "liveFontPreviewCases": 182,
+  "previewFailures": 0,
+  "preservedAttributes": [
+    "position",
+    "UV",
+    "normal",
+    "ARGB color",
+    "material",
+    "full-bright state"
+  ],
+  "coldCaptureChecks": true,
+  "hotCableAndMeterChecks": true
+}

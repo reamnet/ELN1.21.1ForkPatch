@@ -657,7 +657,7 @@ class WireMachineRender(entity: TransparentNodeEntity, descriptor: TransparentNo
     }
 
     private fun emitInsulatorSmoke() {
-        if (!running) return
+        if (!running || mods.eln.client.terrain.MeshPartSelection.staticPass()) return
         val world = tileEntity.level ?: return
         if (!world.isClientSide) return
         if (world.rand.nextFloat() > 0.08f) return

@@ -1,0 +1,12 @@
+{
+  "bsl": {
+    "staticPreviewMeanAbsoluteRgbDifference": 0.003134645061728395,
+    "staticPreviewPercentPixelsOver8": 0.002893518518518519,
+    "note": "Static preview gallery only. World pixels include live animation and time-dependent shader effects."
+  },
+  "vanilla": {
+    "staticPreviewMeanAbsoluteRgbDifference": 0.003134645061728395,
+    "staticPreviewPercentPixelsOver8": 0.002893518518518519,
+    "note": "Static preview gallery only. World pixels include live animation and time-dependent shader effects."
+  }
+}

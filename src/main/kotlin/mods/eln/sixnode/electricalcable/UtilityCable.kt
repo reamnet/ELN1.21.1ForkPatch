@@ -1100,17 +1100,20 @@ class UtilityCableRender(
         if (glowAlpha <= 0f) {
             return
         }
-        val glowColor = hotGlowColor(temperatureCelsius.toDouble())
-        disableLight()
-        enableBlend()
-        GL11.glColor4f(glowColor[0], glowColor[1], glowColor[2], glowAlpha)
-        bindTexture(descriptor.render.cableTexture)
-        glListCall()
-        disableBlend()
-        enableLight()
+        mods.eln.client.terrain.TerrainModels.dynamic {
+            val glowColor = hotGlowColor(temperatureCelsius.toDouble())
+            disableLight()
+            enableBlend()
+            GL11.glColor4f(glowColor[0], glowColor[1], glowColor[2], glowAlpha)
+            bindTexture(descriptor.render.cableTexture)
+            glListCall()
+            disableBlend()
+            enableLight()
+        }
     }
 
     private fun emitOverheatSmoke() {
+        if (mods.eln.client.terrain.MeshPartSelection.staticPass()) return
         if (!descriptor.insulated || descriptor.melted) {
             return
         }

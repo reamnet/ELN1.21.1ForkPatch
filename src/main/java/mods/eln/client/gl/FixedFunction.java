@@ -263,6 +263,8 @@ public final class FixedFunction {
     }
 
     public static void drawString(net.minecraft.client.gui.Font font, String text, float x, float y, int color, boolean shadow) {
+        if (mods.eln.client.terrain.MeshPartSelection.staticPass()) return;
+        if (meshSink != null) { meshSink.unsupported("font"); return; }
         if (pose == null) return;
         MultiBufferSource source = buffers;
         boolean own = false;
@@ -279,9 +281,47 @@ public final class FixedFunction {
      * EntityItem in place). World renders only: in a GUI, GuiGraphics.renderItem is the way.
      */
     public static void drawItem(net.minecraft.world.item.ItemStack stack, net.minecraft.world.item.ItemDisplayContext context) {
+        if (mods.eln.client.terrain.MeshPartSelection.staticPass()) return;
+        if (meshSink != null) { meshSink.unsupported("nested item"); return; }
         if (buffers == null || stack.isEmpty()) return;
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
-        mc.getItemRenderer().renderStatic(stack, context, packedLight, packedOverlay, pose, buffers, mc.level, 0);
+        mods.eln.client.terrain.MeshPartSelection.unfiltered(() ->
+            mc.getItemRenderer().renderStatic(stack, context, packedLight, packedOverlay, pose, buffers, mc.level, 0));
+    }
+
+    /** Item meshes can be requested inside an active world render. Capture in a separate context,
+     * then restore the caller's complete emulator state, including its matrix and attribute stacks. */
+    public static void isolated(Runnable draw) {
+        PoseStack oldPose = pose;
+        MultiBufferSource oldBuffers = buffers;
+        int oldLight = packedLight, oldOverlay = packedOverlay, oldDepth = depth;
+        State oldState = state;
+        Deque<State> oldAttrib = new ArrayDeque<>(attribStack);
+        Batch oldCurrent = current;
+        List<Batch> oldRecording = recording;
+        Matrix4f oldBase = recordingBase;
+        boolean oldColorSet = recordingColorSet;
+        float[] oldEntry = recordingEntryColor;
+        float ou = u, ov = v, ox = nx, oy = ny, oz = nz;
+        MeshSink oldSink = meshSink;
+        depth = 0; buffers = null; meshSink = null; recording = null; current = null;
+        pose = new PoseStack(); state = new State(); attribStack.clear(); resetVertexState();
+        try { mods.eln.client.terrain.MeshPartSelection.unfiltered(draw); }
+        finally {
+            pose = oldPose; buffers = oldBuffers; packedLight = oldLight; packedOverlay = oldOverlay; depth = oldDepth;
+            state = oldState; attribStack.clear(); attribStack.addAll(oldAttrib);
+            current = oldCurrent; recording = oldRecording; recordingBase = oldBase;
+            recordingColorSet = oldColorSet; recordingEntryColor = oldEntry;
+            u = ou; v = ov; nx = ox; ny = oy; nz = oz; meshSink = oldSink;
+        }
+    }
+
+    /** Lazy display-list compilation changes the current UV/normal. A fingerprint pass must
+     * leave these just as it found them before the actual mesh capture or next node runs. */
+    public static void preserveVertexState(Runnable draw) {
+        float ou = u, ov = v, ox = nx, oy = ny, oz = nz;
+        try { draw.run(); }
+        finally { u = ou; v = ov; nx = ox; ny = oy; nz = oz; }
     }
 
     /** The texture bound through {@link #bindTexture}; the GUI helpers blit from it. */
@@ -308,6 +348,13 @@ public final class FixedFunction {
         private List<float[]> primitives;
         private List<float[]> solidPrimitives;
         private int[] colors, solidColors;
+        private boolean recorded;
+        private Object identity;
+        Object identity() {
+            if (recorded) return this;
+            if (identity == null) identity = new mods.eln.client.terrain.GeometrySignature(mode, vertices);
+            return identity;
+        }
 
         List<float[]> primitives(boolean solid) {
             // Textured meshes retain their original per-triangle shader metadata.
@@ -357,6 +404,7 @@ public final class FixedFunction {
 
     static void begin(int mode) {
         current = new Batch(mode);
+        current.recorded = recording != null;
         if (recording != null) {
             // matrix relative to the list start
             // OBJ lists normally contain no matrix commands. Keep that exact case
@@ -380,6 +428,7 @@ public final class FixedFunction {
 
     static void vertex(float x, float y, float z) {
         if (current == null) return; // glVertex outside glBegin: GL ignores it too
+        if (recording == null && mods.eln.client.terrain.MeshPartSelection.suppressDirectGeometry()) return;
         // A list records commands, not the caller's current color. OBJ lists contain no glColor:
         // their LEDs/dyes must inherit each invocation's color, including after a black first frame.
         float red = recording != null && !recordingColorSet ? Float.NaN : state.r;
@@ -451,6 +500,9 @@ public final class FixedFunction {
     /** Main-thread geometry snapshot only. Chunk workers consume the immutable result, never GL state. */
     public interface MeshSink {
         boolean accepts();
+        default boolean batch(Object identity, ResourceLocation texture, boolean unlit, boolean fullBright, boolean blend, boolean cull,
+                              Matrix4f model, Matrix3f normals, int color) { return true; }
+        default void unsupported(String reason) {}
         void capture(ResourceLocation texture, boolean unlit, boolean fullBright, boolean blend, boolean cull,
                      boolean lines, List<float[]> vertices, Matrix4f model, Matrix3f normals, int color);
     }
@@ -459,23 +511,26 @@ public final class FixedFunction {
 
     // ------------------------------------------------------------------ emission
     private static void emit(Batch batch, Matrix4f extra) {
-        if (batch.vertices.isEmpty() || (meshSink != null && !meshSink.accepts())) return;
+        if (batch.vertices.isEmpty() || mods.eln.client.terrain.MeshPartSelection.suppressDirectGeometry() || (meshSink != null && !meshSink.accepts())) return;
         boolean lines = batch.mode == GL11.GL_LINES || batch.mode == GL11.GL_LINE_STRIP || batch.mode == GL11.GL_LINE_LOOP;
         // Recorded topology is immutable. Keep transforms, inherited tint and light dynamic.
         boolean textured = state.texture2d && state.texture != null;
-        List<float[]> prims = batch.primitives(!textured);
-        if (prims.isEmpty()) return;
-
         PoseStack.Pose p = pose.last();
         Matrix4f model = extra == null ? p.pose() : new Matrix4f(p.pose()).mul(extra);
         ResourceLocation tex = textured ? state.texture : WHITE;
-        // the lightmap unit off (UtilsClient.disableLight) is full bright: glowing parts, GUI overlays
         int light = state.lightmap ? packedLight : FULL_BRIGHT;
+        Matrix3f capturedNormals = null;
+        if (meshSink != null) {
+            capturedNormals = extra == null ? p.normal() : MeshNormals.matrix(p.normal(), extra);
+            if (!meshSink.batch(batch.identity(), tex, !state.lighting, !state.lightmap, state.blend, state.cullFace,
+                model, capturedNormals, state.packedColor)) return;
+        }
+        List<float[]> prims = batch.primitives(!textured);
+        if (prims.isEmpty()) return;
         Vector4f pos = new Vector4f();
         if (meshSink != null) {
-            Matrix3f normals = extra == null ? p.normal() : MeshNormals.matrix(p.normal(), extra);
             meshSink.capture(tex, !state.lighting, !state.lightmap, state.blend, state.cullFace,
-                lines, prims, model, normals, state.packedColor);
+                lines, prims, model, capturedNormals, state.packedColor);
             return;
         }
 

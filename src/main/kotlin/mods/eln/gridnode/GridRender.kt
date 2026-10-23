@@ -40,6 +40,7 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
 
     open fun drawCables() {
         if (mods.eln.client.terrain.TerrainModels.isDiscovering) return
+        mods.eln.client.terrain.MeshPartSelection.dynamic {
         UtilsClient.bindTexture(cableTexture)
         // TODO: Try not to need this. (How? Math.)
         glDisable(GL_CULL_FACE)
@@ -47,6 +48,7 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
             catenary.draw()
         }
         glEnable(GL_CULL_FACE)
+        }
     }
 
     @Throws(IOException::class)

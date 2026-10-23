@@ -33,7 +33,7 @@ class SixNodeRender : BlockEntityRenderer<SixNodeEntity> {
                         val side=fromInt(idx)!!
                         side.glRotateXnRef()
                         GL11.glTranslatef(-.5f,0f,0f)
-                        try { render.draw() } finally { GL11.glPopMatrix() }
+                        try { mods.eln.client.terrain.TerrainModels.drawElement(render) { render.draw() } } finally { GL11.glPopMatrix() }
                         // Avoid constructing cord attachment vectors for unplugged devices.
                         if(render.cord.endpoint!=null) {
                             profiler.push("cord")

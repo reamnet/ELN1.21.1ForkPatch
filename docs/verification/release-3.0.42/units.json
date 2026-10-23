@@ -1,0 +1,10 @@
+{
+  "tests": 836,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "suites": 205,
+  "build": "SUCCESSFUL",
+  "duration": "4m 22s (native client and unit suite combined)",
+  "command": "./gradlew --no-daemon --max-workers=3 runClient test"
+}

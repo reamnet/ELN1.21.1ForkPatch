@@ -93,7 +93,7 @@ public class TeleporterRender extends TransparentNodeElementRender {
             d.door_in.draw(doorInterpolator.get() * doorAlphaOpen, 0, 0, 1);
             d.indoor_open.draw();
         }
-        if (voltage > 0.6f) {
+        if (voltage > 0.6f && !mods.eln.client.terrain.MeshPartSelection.staticPass()) {
 
             GL11.glColor3f(1f, 0f, 0f);
             d.leds[0].draw();

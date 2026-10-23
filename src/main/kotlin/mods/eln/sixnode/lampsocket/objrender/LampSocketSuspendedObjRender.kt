@@ -51,6 +51,9 @@ class LampSocketSuspendedObjRender(obj: Obj3D, val onOffModel: Boolean, val leng
 
         base.draw()
 
+        val moving = canSwing
+        if(moving && !mods.eln.client.terrain.MeshPartSelection.beginDynamic())return
+        try {
         GL11.glDisable(GL11.GL_CULL_FACE)
         GL11.glTranslated(baseLength, 0.0, 0.0)
 
@@ -92,7 +95,7 @@ class LampSocketSuspendedObjRender(obj: Obj3D, val onOffModel: Boolean, val leng
 
         GL11.glDisable(GL11.GL_CULL_FACE)
 
-        if (lightAlphaPlaneNoDepth != null) {
+        if (lightAlphaPlaneNoDepth != null && !mods.eln.client.terrain.MeshPartSelection.staticPass()) {
             // Beautiful effect, but overlay the whole render (i.e. through wall), so distance limited.
             val coefficient = /* 1.5 */ 2.0 - distanceToPlayer
 
@@ -111,6 +114,8 @@ class LampSocketSuspendedObjRender(obj: Obj3D, val onOffModel: Boolean, val leng
         }
 
         GL11.glEnable(GL11.GL_CULL_FACE)
+        } finally { if(moving)mods.eln.client.terrain.MeshPartSelection.endDynamic() }
+
     }
 
 }

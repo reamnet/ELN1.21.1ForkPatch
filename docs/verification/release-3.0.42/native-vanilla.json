@@ -1,0 +1,77 @@
+{
+  "passed": [
+    "DistributionPoleRender: all original positions, UVs, normals, colors and materials retained",
+    "FanRender: all original positions, UVs, normals, colors and materials retained",
+    "RenewableRender: all original positions, UVs, normals, colors and materials retained",
+    "UpsRender: all original positions, UVs, normals, colors and materials retained",
+    "BackupRender: all original positions, UVs, normals, colors and materials retained",
+    "IndustrialPumpRender: all original positions, UVs, normals, colors and materials retained",
+    "KitchenRender: all original positions, UVs, normals, colors and materials retained",
+    "OutletRender: all original positions, UVs, normals, colors and materials retained",
+    "BreakerPanelRender: all original positions, UVs, normals, colors and materials retained",
+    "HouseServiceRender: all original positions, UVs, normals, colors and materials retained",
+    "RenewableRender: all original positions, UVs, normals, colors and materials retained",
+    "UtilityStreetLightRender: all original positions, UVs, normals, colors and materials retained",
+    "ClimateRender: all original positions, UVs, normals, colors and materials retained",
+    "WorkLightRender: all original positions, UVs, normals, colors and materials retained",
+    "StepDownUnitRender: all original positions, UVs, normals, colors and materials retained",
+    "ChristmasTreeRender: all original positions, UVs, normals, colors and materials retained",
+    "HolidayCandleRender: all original positions, UVs, normals, colors and materials retained",
+    "StringLightsRender: all original positions, UVs, normals, colors and materials retained",
+    "LampSocketRender: all original positions, UVs, normals, colors and materials retained",
+    "LampSocketRender: all original positions, UVs, normals, colors and materials retained",
+    "LampSocketRender: all original positions, UVs, normals, colors and materials retained",
+    "GeneratorRender: all original positions, UVs, normals, colors and materials retained",
+    "MotorRender: all original positions, UVs, normals, colors and materials retained",
+    "FabricatorRender: all original positions, UVs, normals, colors and materials retained",
+    "ElectricalFurnaceRender: all original positions, UVs, normals, colors and materials retained",
+    "ElectricalGateSourceRender: all original positions, UVs, normals, colors and materials retained",
+    "ElectricalMathRender: all original positions, UVs, normals, colors and materials retained",
+    "ElectricalVuMeterRender: all original positions, UVs, normals, colors and materials retained",
+    "ElectricalDataLoggerRender: all original positions, UVs, normals, colors and materials retained",
+    "Renderer compiles section geometry; tall poles span independent sections; watt telemetry reuses shared geometry",
+    "Lamp glow and pole aiming rebuild their meshes; moving fan blades retain independent live geometry",
+    "Every registered decorative lamp style (87) and wireless wall control (4) retains its complete static/animated mesh",
+    "Unbake/rebake removes old section entries and restores every model",
+    "Resource/atlas reload recaptures every body"
+  ],
+  "timings": {
+    "DistributionPoleRenderOriginal": {
+      "medianMs20Models": 2.686547,
+      "vertices20Models": 99200
+    },
+    "DistributionPoleRenderTerrain": {
+      "medianMs20Models": 0.019393,
+      "vertices20Models": 0
+    },
+    "LampSocketRenderOriginal": {
+      "medianMs20Models": 7.235268,
+      "vertices20Models": 252400
+    },
+    "LampSocketRenderTerrain": {
+      "medianMs20Models": 0.029238,
+      "vertices20Models": 0
+    },
+    "GeneratorRenderOriginal": {
+      "medianMs20Models": 1.939818,
+      "vertices20Models": 75840
+    },
+    "GeneratorRenderTerrain": {
+      "medianMs20Models": 1.281345,
+      "vertices20Models": 47360
+    },
+    "ElectricalMathRenderOriginal": {
+      "medianMs20Models": 0.199618,
+      "vertices20Models": 6560
+    },
+    "ElectricalMathRenderTerrain": {
+      "medianMs20Models": 0.088828,
+      "vertices20Models": 2400
+    }
+  },
+  "atlasTextures": 755,
+  "atlasRevision": 2,
+  "directionalShadeDown": 0.5,
+  "capturedBodies": 734,
+  "compiledSections": 68
+}

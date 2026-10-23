@@ -63,15 +63,19 @@ object UtilsClient {
         get() = Minecraft.getInstance().player!!
 
     fun drawHaloNoLightSetup(halo: Obj3DPart?, r: Float, g: Float, b: Float, w: Level, x: Int, y: Int, z: Int, bilinear: Boolean) {
-        if (halo == null) return
-        withBilinearFilters(halo, bilinear) {
-            val light = getLight(w, x, y, z) * 19 / 15 - 4
-            val e: Entity = clientPlayer
-            val d = (Math.abs(x - e.x) + Math.abs(y - e.y) + Math.abs(z - e.z)).toFloat()
-            GL11.glColor4f(r, g, b, 1f - light / 15f)
-            halo.draw(d * 20, 1f, 0f, 0f)
-            GL11.glColor4f(1f, 1f, 1f, 1f)
-        }
+        if (!mods.eln.client.terrain.MeshPartSelection.beginDynamic()) return
+        try {
+            if (halo == null) return
+            withBilinearFilters(halo, bilinear) {
+                val light = getLight(w, x, y, z) * 19 / 15 - 4
+                val e: Entity = clientPlayer
+                val d = (Math.abs(x - e.x) + Math.abs(y - e.y) + Math.abs(z - e.z)).toFloat()
+                GL11.glColor4f(r, g, b, 1f - light / 15f)
+                halo.draw(d * 20, 1f, 0f, 0f)
+                GL11.glColor4f(1f, 1f, 1f, 1f)
+            }
+
+        } finally { mods.eln.client.terrain.MeshPartSelection.endDynamic() }
     }
 
     @JvmStatic
@@ -92,7 +96,11 @@ object UtilsClient {
 
     @JvmStatic
     fun drawHaloNoLightSetup(halo: Obj3DPart?, r: Float, g: Float, b: Float, e: BlockEntity, bilinear: Boolean) {
-        drawHaloNoLightSetup(halo, r, g, b, e.level!!, e.xCoord, e.yCoord, e.zCoord, bilinear)
+        if (!mods.eln.client.terrain.MeshPartSelection.beginDynamic()) return
+        try {
+            drawHaloNoLightSetup(halo, r, g, b, e.level!!, e.xCoord, e.yCoord, e.zCoord, bilinear)
+
+        } finally { mods.eln.client.terrain.MeshPartSelection.endDynamic() }
     }
 
     @JvmStatic
@@ -102,23 +110,27 @@ object UtilsClient {
 
     @JvmStatic
     fun drawHaloNoLightSetup(halo: Obj3DPart?, @Suppress("UNUSED_PARAMETER") distance: Float) {
-        if (halo == null) return
-        // This overload deliberately draws without rebinding, using the first face group's texture.
-        // Preserve that behavior while restoring the texture's original filters afterward.
-        val faceGroup = halo.faceGroup.firstOrNull()
-        if (faceGroup?.textureResource == null) {
-            halo.drawNoBind()
-            return
-        }
-        faceGroup.bindTexture()
-        val filterState = saveTextureFilter()
-        setBilinearFilter()
+        if (!mods.eln.client.terrain.MeshPartSelection.beginDynamic()) return
         try {
-            halo.drawNoBind()
-        } finally {
+            if (halo == null) return
+            // This overload deliberately draws without rebinding, using the first face group's texture.
+            // Preserve that behavior while restoring the texture's original filters afterward.
+            val faceGroup = halo.faceGroup.firstOrNull()
+            if (faceGroup?.textureResource == null) {
+                halo.drawNoBind()
+                return
+            }
             faceGroup.bindTexture()
-            restoreTextureFilter(filterState)
-        }
+            val filterState = saveTextureFilter()
+            setBilinearFilter()
+            try {
+                halo.drawNoBind()
+            } finally {
+                faceGroup.bindTexture()
+                restoreTextureFilter(filterState)
+            }
+
+        } finally { mods.eln.client.terrain.MeshPartSelection.endDynamic() }
     }
 
     @JvmStatic
@@ -132,13 +144,17 @@ object UtilsClient {
 
     @JvmStatic
     fun drawHaloNoLightSetup(halo: Obj3DPart?, r: Float, g: Float, b: Float, e: Entity, bilinear: Boolean) {
-        if (halo == null) return
-        withBilinearFilters(halo, bilinear) {
-            val light = getLight(e.level(), Mth.floor(e.x), Mth.floor(e.y), Mth.floor(e.z))
-            GL11.glColor4f(r, g, b, 1f - light / 15f)
-            halo.draw()
-            GL11.glColor4f(1f, 1f, 1f, 1f)
-        }
+        if (!mods.eln.client.terrain.MeshPartSelection.beginDynamic()) return
+        try {
+            if (halo == null) return
+            withBilinearFilters(halo, bilinear) {
+                val light = getLight(e.level(), Mth.floor(e.x), Mth.floor(e.y), Mth.floor(e.z))
+                GL11.glColor4f(r, g, b, 1f - light / 15f)
+                halo.draw()
+                GL11.glColor4f(1f, 1f, 1f, 1f)
+            }
+
+        } finally { mods.eln.client.terrain.MeshPartSelection.endDynamic() }
     }
 
     @JvmStatic
@@ -420,7 +436,7 @@ object UtilsClient {
      */
     @JvmStatic
     fun drawEntityItem(entityItem: ItemEntity?, x: Double, y: Double, z: Double, roty: Float, scale: Float) {
-        if (entityItem == null) return
+        if (mods.eln.client.terrain.MeshPartSelection.staticPass() || entityItem == null) return
         val stack = entityItem.item
         if (stack.isEmpty) return
         GL11.glPushMatrix()
@@ -432,66 +448,74 @@ object UtilsClient {
     }
 
     fun drawConnectionPinSixNode(d: Float, w: Float, h: Float) {
-        var d = d
-        var w = w
-        var h = h
-        d += 0.1f
-        d *= 0.0625f
-        w *= 0.0625f
-        h *= 0.0625f
-        val w2 = w * 0.5f
-        disableTexture()
-        GL11.glBegin(GL11.GL_QUADS)
-        GL11.glVertex3f(-w2, d, 0f)
-        GL11.glVertex3f(w2, d, 0f)
-        GL11.glVertex3f(w2, d, h)
-        GL11.glVertex3f(-w2, d, h)
-        GL11.glEnd()
-        enableTexture()
+        if (!mods.eln.client.terrain.MeshPartSelection.beginDynamic()) return
+        try {
+            var d = d
+            var w = w
+            var h = h
+            d += 0.1f
+            d *= 0.0625f
+            w *= 0.0625f
+            h *= 0.0625f
+            val w2 = w * 0.5f
+            disableTexture()
+            GL11.glBegin(GL11.GL_QUADS)
+            GL11.glVertex3f(-w2, d, 0f)
+            GL11.glVertex3f(w2, d, 0f)
+            GL11.glVertex3f(w2, d, h)
+            GL11.glVertex3f(-w2, d, h)
+            GL11.glEnd()
+            enableTexture()
+
+        } finally { mods.eln.client.terrain.MeshPartSelection.endDynamic() }
     }
 
     @JvmStatic
     fun drawConnectionPinSixNode(front: LRDU, dList: FloatArray, w: Float, h: Float) {
-        // front.glRotateOnX();
-        // drawConnectionPinSixNode(d[front.toInt()], w, h);
-        var w = w
-        var h = h
-        var d = dList[front.toInt()]
-        d += 0.04f
-        d *= 0.0625f
-        w *= 0.0625f
-        h *= 0.0625f
-        val w2 = w * 0.5f
-        disableTexture()
-        GL11.glBegin(GL11.GL_QUADS)
-        when (front) {
-            LRDU.Left -> {
-                GL11.glVertex3f(0f, -w2, -d)
-                GL11.glVertex3f(0f, w2, -d)
-                GL11.glVertex3f(h, w2, -d)
-                GL11.glVertex3f(h, -w2, -d)
+        if (!mods.eln.client.terrain.MeshPartSelection.beginDynamic()) return
+        try {
+            // front.glRotateOnX();
+            // drawConnectionPinSixNode(d[front.toInt()], w, h);
+            var w = w
+            var h = h
+            var d = dList[front.toInt()]
+            d += 0.04f
+            d *= 0.0625f
+            w *= 0.0625f
+            h *= 0.0625f
+            val w2 = w * 0.5f
+            disableTexture()
+            GL11.glBegin(GL11.GL_QUADS)
+            when (front) {
+                LRDU.Left -> {
+                    GL11.glVertex3f(0f, -w2, -d)
+                    GL11.glVertex3f(0f, w2, -d)
+                    GL11.glVertex3f(h, w2, -d)
+                    GL11.glVertex3f(h, -w2, -d)
+                }
+                LRDU.Right -> {
+                    GL11.glVertex3f(h, -w2, d)
+                    GL11.glVertex3f(h, w2, d)
+                    GL11.glVertex3f(0f, w2, d)
+                    GL11.glVertex3f(0f, -w2, d)
+                }
+                LRDU.Down -> {
+                    GL11.glVertex3f(h, -d, -w2)
+                    GL11.glVertex3f(h, -d, w2)
+                    GL11.glVertex3f(0f, -d, w2)
+                    GL11.glVertex3f(0f, -d, -w2)
+                }
+                LRDU.Up -> {
+                    GL11.glVertex3f(0f, d, -w2)
+                    GL11.glVertex3f(0f, d, w2)
+                    GL11.glVertex3f(h, d, w2)
+                    GL11.glVertex3f(h, d, -w2)
+                }
             }
-            LRDU.Right -> {
-                GL11.glVertex3f(h, -w2, d)
-                GL11.glVertex3f(h, w2, d)
-                GL11.glVertex3f(0f, w2, d)
-                GL11.glVertex3f(0f, -w2, d)
-            }
-            LRDU.Down -> {
-                GL11.glVertex3f(h, -d, -w2)
-                GL11.glVertex3f(h, -d, w2)
-                GL11.glVertex3f(0f, -d, w2)
-                GL11.glVertex3f(0f, -d, -w2)
-            }
-            LRDU.Up -> {
-                GL11.glVertex3f(0f, d, -w2)
-                GL11.glVertex3f(0f, d, w2)
-                GL11.glVertex3f(h, d, w2)
-                GL11.glVertex3f(h, d, -w2)
-            }
-        }
-        GL11.glEnd()
-        enableTexture()
+            GL11.glEnd()
+            enableTexture()
+
+        } finally { mods.eln.client.terrain.MeshPartSelection.endDynamic() }
     }
 
     /** ItemRenderer is owned by Minecraft on 1.8+; constructing one would miss the model manager. */

@@ -92,101 +92,105 @@ public class DataLogs implements INBTTReady {
     }
 
     static void draw(byte[] value, int size, float samplingPeriod, float maxValue, float minValue, byte unitType, boolean showZeroLine, float margeX, float margeY, String textHeader) {
-        if (value == null) return;
-        if (size < 2) return;
-        final Font fontrenderer = Minecraft.getInstance().font;
-        final float scale = 0.01f;
+        if (!mods.eln.client.terrain.MeshPartSelection.beginDynamic()) return;
+        try {
+            if (value == null) return;
+            if (size < 2) return;
+            final Font fontrenderer = Minecraft.getInstance().font;
+            final float scale = 0.01f;
 
-        final String yTop = textHeader + " " + getYstring(1f, maxValue, minValue, unitType);
-        final String yMid = textHeader + " " + getYstring(0.5f, maxValue, minValue, unitType);
-        final String yBottom = textHeader + " " + getYstring(0.0f, maxValue, minValue, unitType);
-        final String tStart = textHeader + Utils.plotTime((size - 1) * (double) samplingPeriod);
-        final String tEnd = textHeader + Utils.plotTime(0);
+            final String yTop = textHeader + " " + getYstring(1f, maxValue, minValue, unitType);
+            final String yMid = textHeader + " " + getYstring(0.5f, maxValue, minValue, unitType);
+            final String yBottom = textHeader + " " + getYstring(0.0f, maxValue, minValue, unitType);
+            final String tStart = textHeader + Utils.plotTime((size - 1) * (double) samplingPeriod);
+            final String tEnd = textHeader + Utils.plotTime(0);
 
-        // Keep axis near the original right edge position so the graph keeps full width.
-        final float rightEdge = Math.max(0.2f, margeX - 0.05f);
-        //long startT = System.nanoTime();
-        GL11.glLineWidth(1f);
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        //L11.glEnable(GL11.GL_LINE_SMOOTH);
-        //GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
-        float dx = 1f / (size - 1);
-        GL11.glBegin(GL11.GL_LINE_STRIP);
-        for (int idx = 0; idx < size; idx++) {
-            GL11.glVertex2f(rightEdge - dx * idx * rightEdge, margeY - ((int) value[idx] + 128) / 255f * margeY);
-        }
-        GL11.glEnd();
-
-        GL11.glBegin(GL11.GL_QUAD_STRIP);
-        for (int idx = 0; idx < size; idx++) {
-            float x = rightEdge - dx * idx * rightEdge;
-            float y = margeY - ((int) value[idx] + 128) / 255f * margeY;
-                /*float dy = 0.0f;
-				int dyInt; 
-				if (idx == 0) dyInt = value[idx] - value[idx + 1];
-				else if (idx == size-1) dyInt = value[idx - 1] - value[idx];
-				else dyInt = value[idx - 1] - value[idx + 1];
-				dy = -(dyInt) / 255f * margeY;
-				float norm = (float) Math.sqrt(dy * dy + dx * dx);
-				float rx = dy / norm * 0.01f, ry = -dx / norm * 0.01f;
-				if ((idx & 1) == 0)
-					GL11.glColor3f(1f, 0f, 0f);
-				else
-					GL11.glColor3f(0f, 1f, 0f);
-				
-				GL11.glVertex2f(x - rx,y - ry);
-				GL11.glVertex2f(x + rx,y + ry);*/
-
-            GL11.glVertex2f(x, y + 0.01f);
-            GL11.glVertex2f(x, y - 0.01f);
-        }
-        GL11.glEnd();
-
-        float temp = 0.01f;
-        GL11.glBegin(GL11.GL_QUAD_STRIP);
-        GL11.glVertex2f(rightEdge + temp, 0f);
-        GL11.glVertex2f(rightEdge - temp, 0f);
-        GL11.glVertex2f(rightEdge + temp, margeY + temp);
-        GL11.glVertex2f(rightEdge - temp, margeY - temp);
-        GL11.glVertex2f(0f, margeY + temp);
-        GL11.glVertex2f(0f, margeY - temp);
-        GL11.glEnd();
-
-        if (showZeroLine && ((minValue < 0 && maxValue > 0) || (minValue > 0 && maxValue < 0))) {
-            temp = 0.005f;
-            float zeroY = (maxValue) / (maxValue - minValue) * margeY;
-            GL11.glBegin(GL11.GL_QUAD_STRIP);
-            GL11.glVertex2f(rightEdge, zeroY + temp);
-            GL11.glVertex2f(rightEdge, zeroY - temp);
-            GL11.glVertex2f(0f, zeroY + temp);
-            GL11.glVertex2f(0f, zeroY - temp);
+            // Keep axis near the original right edge position so the graph keeps full width.
+            final float rightEdge = Math.max(0.2f, margeX - 0.05f);
+            //long startT = System.nanoTime();
+            GL11.glLineWidth(1f);
+            GL11.glDisable(GL11.GL_TEXTURE_2D);
+            //L11.glEnable(GL11.GL_LINE_SMOOTH);
+            //GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
+            float dx = 1f / (size - 1);
+            GL11.glBegin(GL11.GL_LINE_STRIP);
+            for (int idx = 0; idx < size; idx++) {
+                GL11.glVertex2f(rightEdge - dx * idx * rightEdge, margeY - ((int) value[idx] + 128) / 255f * margeY);
+            }
             GL11.glEnd();
-        }
-		/*
-		GL11.glBegin(GL11.GL_LINE_STRIP);
-			GL11.glVertex2f(margeX, 0f);
-			GL11.glVertex2f(margeX, margeY);
-			GL11.glVertex2f(0f, margeY);
-		GL11.glEnd();
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		*/
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
 
-        GL11.glPushMatrix();
-        GL11.glScalef(scale, scale, 1f);
-        //mods.eln.client.gl.FixedFunction.drawString(fontrenderer, "Time", (int)( 0.5f / scale), (int)(0.8f / scale), 0);
-        int yLabelX = (int) (rightEdge / scale) + 2;
-        mods.eln.client.gl.FixedFunction.drawString(fontrenderer, yTop, yLabelX, (int) (0f / scale), 0);
-        mods.eln.client.gl.FixedFunction.drawString(fontrenderer, yMid, yLabelX, (int) ((margeY / 2 - 0.05f) / scale), 0);
-        mods.eln.client.gl.FixedFunction.drawString(fontrenderer, yBottom, yLabelX, (int) ((margeY - 0.08f) / scale), 0);
+            GL11.glBegin(GL11.GL_QUAD_STRIP);
+            for (int idx = 0; idx < size; idx++) {
+                float x = rightEdge - dx * idx * rightEdge;
+                float y = margeY - ((int) value[idx] + 128) / 255f * margeY;
+                    /*float dy = 0.0f;
+                    int dyInt;
+                    if (idx == 0) dyInt = value[idx] - value[idx + 1];
+                    else if (idx == size-1) dyInt = value[idx - 1] - value[idx];
+                    else dyInt = value[idx - 1] - value[idx + 1];
+                    dy = -(dyInt) / 255f * margeY;
+                    float norm = (float) Math.sqrt(dy * dy + dx * dx);
+                    float rx = dy / norm * 0.01f, ry = -dx / norm * 0.01f;
+                    if ((idx & 1) == 0)
+                        GL11.glColor3f(1f, 0f, 0f);
+                    else
+                        GL11.glColor3f(0f, 1f, 0f);
 
-        mods.eln.client.gl.FixedFunction.drawString(fontrenderer, tStart, (int) (0f / scale), (int) ((margeY + 0.03) / scale), 0);
-        int rightTimeX = (int) (margeX / scale) - fontrenderer.width(tEnd) - 2;
-        mods.eln.client.gl.FixedFunction.drawString(fontrenderer, tEnd, rightTimeX, (int) ((margeY + 0.03) / scale), 0);
-        //mods.eln.client.gl.FixedFunction.drawString(fontrenderer, "Time", (int)(0.5f / scale), (int)(0.8f / scale), 0);
-        GL11.glPopMatrix();
-        //startT = System.nanoTime() - startT;
-        //Utils.println("startT : " + startT);
+                    GL11.glVertex2f(x - rx,y - ry);
+                    GL11.glVertex2f(x + rx,y + ry);*/
+
+                GL11.glVertex2f(x, y + 0.01f);
+                GL11.glVertex2f(x, y - 0.01f);
+            }
+            GL11.glEnd();
+
+            float temp = 0.01f;
+            GL11.glBegin(GL11.GL_QUAD_STRIP);
+            GL11.glVertex2f(rightEdge + temp, 0f);
+            GL11.glVertex2f(rightEdge - temp, 0f);
+            GL11.glVertex2f(rightEdge + temp, margeY + temp);
+            GL11.glVertex2f(rightEdge - temp, margeY - temp);
+            GL11.glVertex2f(0f, margeY + temp);
+            GL11.glVertex2f(0f, margeY - temp);
+            GL11.glEnd();
+
+            if (showZeroLine && ((minValue < 0 && maxValue > 0) || (minValue > 0 && maxValue < 0))) {
+                temp = 0.005f;
+                float zeroY = (maxValue) / (maxValue - minValue) * margeY;
+                GL11.glBegin(GL11.GL_QUAD_STRIP);
+                GL11.glVertex2f(rightEdge, zeroY + temp);
+                GL11.glVertex2f(rightEdge, zeroY - temp);
+                GL11.glVertex2f(0f, zeroY + temp);
+                GL11.glVertex2f(0f, zeroY - temp);
+                GL11.glEnd();
+            }
+            /*
+            GL11.glBegin(GL11.GL_LINE_STRIP);
+                GL11.glVertex2f(margeX, 0f);
+                GL11.glVertex2f(margeX, margeY);
+                GL11.glVertex2f(0f, margeY);
+            GL11.glEnd();
+            GL11.glEnable(GL11.GL_TEXTURE_2D);
+            */
+            GL11.glEnable(GL11.GL_TEXTURE_2D);
+
+            GL11.glPushMatrix();
+            GL11.glScalef(scale, scale, 1f);
+            //mods.eln.client.gl.FixedFunction.drawString(fontrenderer, "Time", (int)( 0.5f / scale), (int)(0.8f / scale), 0);
+            int yLabelX = (int) (rightEdge / scale) + 2;
+            mods.eln.client.gl.FixedFunction.drawString(fontrenderer, yTop, yLabelX, (int) (0f / scale), 0);
+            mods.eln.client.gl.FixedFunction.drawString(fontrenderer, yMid, yLabelX, (int) ((margeY / 2 - 0.05f) / scale), 0);
+            mods.eln.client.gl.FixedFunction.drawString(fontrenderer, yBottom, yLabelX, (int) ((margeY - 0.08f) / scale), 0);
+
+            mods.eln.client.gl.FixedFunction.drawString(fontrenderer, tStart, (int) (0f / scale), (int) ((margeY + 0.03) / scale), 0);
+            int rightTimeX = (int) (margeX / scale) - fontrenderer.width(tEnd) - 2;
+            mods.eln.client.gl.FixedFunction.drawString(fontrenderer, tEnd, rightTimeX, (int) ((margeY + 0.03) / scale), 0);
+            //mods.eln.client.gl.FixedFunction.drawString(fontrenderer, "Time", (int)(0.5f / scale), (int)(0.8f / scale), 0);
+            GL11.glPopMatrix();
+            //startT = System.nanoTime() - startT;
+            //Utils.println("startT : " + startT);
+
+        } finally { mods.eln.client.terrain.MeshPartSelection.endDynamic(); }
     }
 
     public static String getYstring(float factor, float maxValue, float minValue, byte unitType) {

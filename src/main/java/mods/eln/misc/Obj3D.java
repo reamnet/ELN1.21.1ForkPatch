@@ -133,6 +133,8 @@ public class Obj3D {
     public class Obj3DPart {
         // TODO(Baughn): Profile, see if it makes sense to use vertex arrays.
 
+        private String meshName = "";
+        public String getMeshName() { return meshName; }
         List<Vertex> vertex;
         List<Uv> uv;
 
@@ -179,86 +181,122 @@ public class Obj3D {
         }
 
         public void draw(float angle, float x, float y, float z) {
-            if (locked) return;
+            if (!mods.eln.client.terrain.MeshPartSelection.beginAnimated()) { stateOnly(); return; }
+            try {
+                if (locked) return;
 
-            GL11.glPushMatrix();
+                GL11.glPushMatrix();
 
-            GL11.glTranslatef(ox, oy, oz);
-            GL11.glRotatef(angle, x, y, z);
-            GL11.glTranslatef(-ox, -oy, -oz);
-            draw();
+                GL11.glTranslatef(ox, oy, oz);
+                GL11.glRotatef(angle, x, y, z);
+                GL11.glTranslatef(-ox, -oy, -oz);
+                draw();
 
-            GL11.glPopMatrix();
+                GL11.glPopMatrix();
+
+            } finally { mods.eln.client.terrain.MeshPartSelection.endDynamic(); }
         }
 
         public void draw(float angle, float x, float y, float z, float texOffsetX, float texOffsetY) {
-            if (locked) return;
+            if (!mods.eln.client.terrain.MeshPartSelection.beginAnimated()) return;
+            try {
+                if (locked) return;
 
-            GL11.glPushMatrix();
+                GL11.glPushMatrix();
 
-            GL11.glTranslatef(ox, oy, oz);
-            GL11.glRotatef(angle, x, y, z);
-            GL11.glTranslatef(-ox, -oy, -oz);
-            draw(texOffsetX, texOffsetY);
+                GL11.glTranslatef(ox, oy, oz);
+                GL11.glRotatef(angle, x, y, z);
+                GL11.glTranslatef(-ox, -oy, -oz);
+                draw(texOffsetX, texOffsetY);
 
-            GL11.glPopMatrix();
+                GL11.glPopMatrix();
+
+            } finally { mods.eln.client.terrain.MeshPartSelection.endDynamic(); }
         }
 
         public void draw(float angle, float x, float y, float z, float angle2, float x2, float y2, float z2) {
-            if (locked) return;
+            if (!mods.eln.client.terrain.MeshPartSelection.beginAnimated()) { stateOnly(); return; }
+            try {
+                if (locked) return;
 
-            GL11.glPushMatrix();
+                GL11.glPushMatrix();
 
-            GL11.glTranslatef(ox, oy, oz);
-            GL11.glRotatef(angle, x, y, z);
-            GL11.glTranslatef(ox2, oy2, oz2);
-            GL11.glRotatef(angle2, x2, y2, z2);
-            GL11.glTranslatef(-ox2, -oy2, -oz2);
-            GL11.glTranslatef(-ox, -oy, -oz);
-            draw();
+                GL11.glTranslatef(ox, oy, oz);
+                GL11.glRotatef(angle, x, y, z);
+                GL11.glTranslatef(ox2, oy2, oz2);
+                GL11.glRotatef(angle2, x2, y2, z2);
+                GL11.glTranslatef(-ox2, -oy2, -oz2);
+                GL11.glTranslatef(-ox, -oy, -oz);
+                draw();
 
-            GL11.glPopMatrix();
+                GL11.glPopMatrix();
+
+            } finally { mods.eln.client.terrain.MeshPartSelection.endDynamic(); }
         }
 
         public void drawNoBind(float angle, float x, float y, float z) {
-            if (locked) return;
+            if (!mods.eln.client.terrain.MeshPartSelection.beginAnimated()) return;
+            try {
+                if (locked) return;
 
-            GL11.glPushMatrix();
+                GL11.glPushMatrix();
 
-            GL11.glTranslatef(ox, oy, oz);
-            GL11.glRotatef(angle, x, y, z);
-            GL11.glTranslatef(-ox, -oy, -oz);
-            drawNoBind();
+                GL11.glTranslatef(ox, oy, oz);
+                GL11.glRotatef(angle, x, y, z);
+                GL11.glTranslatef(-ox, -oy, -oz);
+                drawNoBind();
 
-            GL11.glPopMatrix();
+                GL11.glPopMatrix();
+
+            } finally { mods.eln.client.terrain.MeshPartSelection.endDynamic(); }
         }
 
         public void drawNoBind() {
-            if (locked) return;
+            if (!mods.eln.client.terrain.MeshPartSelection.beginPart(meshName)) return;
+            try {
+                if (locked) return;
 
+                for (FaceGroup fg : faceGroup) {
+                    fg.drawNoBind();
+                }
+
+            } finally { mods.eln.client.terrain.MeshPartSelection.endPart(); }
+        }
+
+        private void stateOnly() {
+            if (locked) return;
             for (FaceGroup fg : faceGroup) {
-                fg.drawNoBind();
+                if (fg.textureResource != null) fg.bindTexture();
+                else GL11.glEnable(GL11.GL_TEXTURE_2D);
             }
         }
 
         public void draw() {
-            if (locked) return;
+            if (!mods.eln.client.terrain.MeshPartSelection.beginPart(meshName)) { stateOnly(); return; }
+            try {
+                if (locked) return;
 
-            //	Minecraft.getInstance().getProfiler().push("OBJ");
-            for (FaceGroup fg : faceGroup) {
-                fg.draw();
-            }
-            //	Minecraft.getInstance().getProfiler().pop();
+                //	Minecraft.getInstance().getProfiler().push("OBJ");
+                for (FaceGroup fg : faceGroup) {
+                    fg.draw();
+                }
+                //	Minecraft.getInstance().getProfiler().pop();
+
+            } finally { mods.eln.client.terrain.MeshPartSelection.endPart(); }
         }
 
         public void draw(float texOffsetX, float texOffsetY) {
-            if (locked) return;
+            if (!mods.eln.client.terrain.MeshPartSelection.beginAnimated()) return;
+            try {
+                if (locked) return;
 
-            //	Minecraft.getInstance().getProfiler().push("OBJ");
-            for (FaceGroup fg : faceGroup) {
-                fg.drawVertex(texOffsetX, texOffsetY);
-            }
-            //	Minecraft.getInstance().getProfiler().pop();
+                //	Minecraft.getInstance().getProfiler().push("OBJ");
+                for (FaceGroup fg : faceGroup) {
+                    fg.drawVertex(texOffsetX, texOffsetY);
+                }
+                //	Minecraft.getInstance().getProfiler().pop();
+
+            } finally { mods.eln.client.terrain.MeshPartSelection.endDynamic(); }
         }
 
         // Returns the bounding box of the vertices we'd draw.
@@ -445,11 +483,13 @@ public class Obj3D {
                                 part.clear();
                             } else {
                                 part = new Obj3DPart(vertex, uv);
+                                part.meshName = words[1];
                                 nameToPartHash.put(words[1], part);
                             }
                         } else {
                             part = new Obj3DPart(vertex, uv);
-                            nameToPartHash.put(words[1], part);
+                            part.meshName = words[1];
+                                nameToPartHash.put(words[1], part);
                         }
 
                     } else if (words[0].equals("v")) {
@@ -599,7 +639,6 @@ public class Obj3D {
     }
 
     public Obj3DPart getPart(String part) {
-        if (!mods.eln.client.terrain.MeshPartSelection.allows(part)) return null;
         return nameToPartHash.get(part);
     }
 
