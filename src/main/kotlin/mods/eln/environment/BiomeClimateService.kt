@@ -6,12 +6,13 @@ import mods.eln.Eln
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Holder
 import net.minecraft.core.registries.Registries
-import net.minecraft.resources.ResourceKey
 import net.minecraft.world.level.Level
+import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.biome.Biome
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 import java.util.Locale
+import java.util.WeakHashMap
 
 object BiomeClimateService {
     private const val TICKS_PER_DAY = 24000.0
@@ -35,7 +36,15 @@ object BiomeClimateService {
     /** Profiles by biome registry key ("minecraft:frozen_ocean"); biomes are a dynamic registry since 1.16. */
     private val profilesByBiomeId = HashMap<String, BiomeClimateProfile>()
     private val missingProfileBiomeKeys = HashSet<String>()
-    private val weatherByDimension = HashMap<ResourceKey<Level>, WeatherSnapshot>()
+    // Values contain no Level/chunk references, so a closed world can be collected.
+    private val samplesByWorld = WeakHashMap<Level, WorldSamples>()
+    private class WorldSamples {
+        val positions = ClimateSampleCache<ResolvedBiome, ClimateFrame>()
+        var frame: ClimateFrame? = null
+    }
+    private data class ResolvedBiome(val biome: Holder<Biome>, val profile: BiomeClimateProfile)
+    private data class ClimateFrame(val tick: Long, val dayTime: Long, val raining: Boolean,
+        val thundering: Boolean, val dayBlend: Double, val lavaRamp: Boolean, val undergroundMultiplier: Double)
     @Volatile private var loaded = false
     @Volatile private var startupAuditComplete = false
 
@@ -43,11 +52,33 @@ object BiomeClimateService {
     fun sample(world: Level, x: Int, y: Int, z: Int): ClimateState {
         ensureLoaded()
 
-        val weather = getWeatherSnapshot(world)
-        val biome = world.getBiome(BlockPos(x, y, z))
-        val profile = resolveProfileForBiome(biome)
+        val samples = synchronized(samplesByWorld) { samplesByWorld.getOrPut(world) { WorldSamples() } }
+        val frame = synchronized(samples) {
+            val tick = world.gameTime
+            val dayTime = world.dayTime
+            val rain = world.isRaining
+            val thunder = world.isThundering
+            samples.frame?.takeIf { it.tick == tick && it.dayTime == dayTime && it.raining == rain && it.thundering == thunder }
+                ?: ClimateFrame(tick, dayTime, rain, thunder, dayBlendForWorldTicks(dayTime),
+                    Eln.config.getBooleanOrElse("simulation.thermal.ambient.lavaRampEnabled", true),
+                    Eln.config.getDoubleOrElse("simulation.thermal.ambient.undergroundBiomeTemperatureMultiplier", 0.2))
+                    .also { samples.frame = it }
+        }
+        return samples.positions.sample(BlockPos.asLong(x, y, z), frame.tick, frame, { previous ->
+            val biome = if (world is ServerLevel) {
+                // Keep vanilla's exact 3-D biome zoom, replacing only its potentially blocking source.
+                world.biomeManager.withDifferentSource { qx, qy, qz ->
+                    world.chunkSource.getChunkNow(qx shr 2, qz shr 2)?.getNoiseBiome(qx, qy, qz)
+                        ?: previous?.biome ?: world.getUncachedNoiseBiome(qx, qy, qz)
+                }.getBiome(BlockPos(x, y, z))
+            } else world.getBiome(BlockPos(x, y, z))
+            if (previous != null && biome === previous.biome) previous else ResolvedBiome(biome, resolveProfileForBiome(biome))
+        }, { resolved -> calculate(resolved.biome, resolved.profile, frame, x, y, z) })
+    }
 
-        val dayBlend = dayBlendForWorldTicks(world.dayTime)
+    private fun calculate(biome: Holder<Biome>, profile: BiomeClimateProfile, weather: ClimateFrame,
+        x: Int, y: Int, z: Int): ClimateState {
+        val dayBlend = weather.dayBlend
         val biomeTemperatureC = interpolateTemperature(profile.dayHighCelsius, profile.nightLowCelsius, dayBlend)
         var temperatureC = biomeTemperatureC
         var humidity = interpolateHumidity(profile.dayHumidityPercent, profile.nightHumidityPercent, dayBlend)
@@ -61,7 +92,7 @@ object BiomeClimateService {
             }
         }
 
-        temperatureC = applyDepthTemperatureProfile(temperatureC, y)
+        temperatureC = depthTemperature(temperatureC, y, weather.lavaRamp, weather.undergroundMultiplier)
 
         humidity = humidity.coerceIn(0.0, 100.0)
         return ClimateState(
@@ -294,7 +325,13 @@ object BiomeClimateService {
 
     @JvmStatic
     fun applyDepthTemperatureProfile(surfaceTemperatureCelsius: Double, y: Int): Double {
-        val undergroundTemperatureCelsius = undergroundTemperatureCelsius(surfaceTemperatureCelsius)
+        return depthTemperature(surfaceTemperatureCelsius, y,
+            Eln.config.getBooleanOrElse("simulation.thermal.ambient.lavaRampEnabled", true),
+            Eln.config.getDoubleOrElse("simulation.thermal.ambient.undergroundBiomeTemperatureMultiplier", 0.2))
+    }
+
+    private fun depthTemperature(surfaceTemperatureCelsius: Double, y: Int, lavaRamp: Boolean, multiplier: Double): Double {
+        val undergroundTemperatureCelsius = UNDERGROUND_BASELINE_C + surfaceTemperatureCelsius * multiplier
 
         if (y >= SURFACE_Y) {
             return surfaceTemperatureCelsius
@@ -303,7 +340,7 @@ object BiomeClimateService {
             val t = (SURFACE_Y - y).toDouble() / (SURFACE_Y - UPPER_UNDERGROUND_Y).toDouble()
             return interpolateLinear(surfaceTemperatureCelsius, undergroundTemperatureCelsius, t)
         }
-        if (!Eln.config.getBooleanOrElse("simulation.thermal.ambient.lavaRampEnabled", true) || y > LAVA_TRANSITION_START_Y) {
+        if (!lavaRamp || y > LAVA_TRANSITION_START_Y) {
             return undergroundTemperatureCelsius
         }
         if (y <= LAVA_TRANSITION_END_Y) {
@@ -329,26 +366,6 @@ object BiomeClimateService {
             }
             loadProfiles()
             loaded = true
-        }
-    }
-
-    private fun getWeatherSnapshot(world: Level): WeatherSnapshot {
-        val dimension = world.dimension()
-        val tick = world.gameTime
-
-        synchronized(this) {
-            val cached = weatherByDimension[dimension]
-            if (cached != null && cached.tick == tick) {
-                return cached
-            }
-
-            val snapshot = WeatherSnapshot(
-                tick = tick,
-                raining = world.isRaining,
-                thundering = world.isThundering
-            )
-            weatherByDimension[dimension] = snapshot
-            return snapshot
         }
     }
 
@@ -479,12 +496,6 @@ object BiomeClimateService {
         }
     }
 }
-
-private data class WeatherSnapshot(
-    val tick: Long,
-    val raining: Boolean,
-    val thundering: Boolean
-)
 
 private data class BiomeClimateProfile(
     val dayHighCelsius: Double,

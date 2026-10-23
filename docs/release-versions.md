@@ -43,6 +43,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.37` | — | Consistent A/B/C primary crossarm orientation through opposite-facing three-phase poles and bends; remove redundant untextured mesh splits caused by signed-zero attributes |
 | `v3.0.38` | — | Direct wall-cable feeds for recessed outlets at every voltage, including behind appliances; smoother terrain-following cords, continuous tube bends, interpolated carried ends and cached stationary meshes |
 | `v3.0.39` | — | Recover Large Generator startup with target-voltage step-up converters; cache exposed utility conductor meshes to reduce repeated rendering work |
+| `v3.0.40` | — | Cache exact ambient climate samples and biome discovery; prevent thermal monitoring from waiting on chunk loads while retaining live thermal protection |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`
@@ -55,7 +56,7 @@ release assets remain available with their original filenames.
 `modVersion` in `gradle.properties` is the version source for the jar filename,
 NeoForge metadata and the in-game version. Increment it when preparing the next
 update and create the matching `vX.Y.Z` source tag. For unpublished experiments,
-use an explicit override such as `-PmodVersion=3.0.39-local.1`.
+use an explicit override such as `-PmodVersion=3.0.40-local.1`.
 
 Build with `./gradlew build` to retain previous versioned jars in `build/libs/`.
 `./gradlew clean` removes that directory, and recompiling the same version

@@ -1,0 +1,10 @@
+{
+  "command": "./gradlew --no-daemon --max-workers=3 test",
+  "tests": 824,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "suites": 203,
+  "build": "SUCCESSFUL",
+  "duration": "2m 43s"
+}
