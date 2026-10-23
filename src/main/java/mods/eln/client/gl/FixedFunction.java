@@ -448,9 +448,18 @@ public final class FixedFunction {
         return consumer.setColor(Float.isNaN(vertex[8]) ? state.packedColor : VertexColors.pack(vertex));
     }
 
+    /** Main-thread geometry snapshot only. Chunk workers consume the immutable result, never GL state. */
+    public interface MeshSink {
+        boolean accepts();
+        void capture(ResourceLocation texture, boolean unlit, boolean fullBright, boolean blend, boolean cull,
+                     boolean lines, List<float[]> vertices, Matrix4f model, Matrix3f normals, int color);
+    }
+    private static MeshSink meshSink;
+    public static void setMeshSink(MeshSink sink) { meshSink = sink; }
+
     // ------------------------------------------------------------------ emission
     private static void emit(Batch batch, Matrix4f extra) {
-        if (batch.vertices.isEmpty()) return;
+        if (batch.vertices.isEmpty() || (meshSink != null && !meshSink.accepts())) return;
         boolean lines = batch.mode == GL11.GL_LINES || batch.mode == GL11.GL_LINE_STRIP || batch.mode == GL11.GL_LINE_LOOP;
         // Recorded topology is immutable. Keep transforms, inherited tint and light dynamic.
         boolean textured = state.texture2d && state.texture != null;
@@ -463,6 +472,12 @@ public final class FixedFunction {
         // the lightmap unit off (UtilsClient.disableLight) is full bright: glowing parts, GUI overlays
         int light = state.lightmap ? packedLight : FULL_BRIGHT;
         Vector4f pos = new Vector4f();
+        if (meshSink != null) {
+            Matrix3f normals = extra == null ? p.normal() : MeshNormals.matrix(p.normal(), extra);
+            meshSink.capture(tex, !state.lighting, !state.lightmap, state.blend, state.cullFace,
+                lines, prims, model, normals, state.packedColor);
+            return;
+        }
 
         if (buffers != null) {
             // GL_LIGHTING on: the entity types, shaded by the normal. Off: no directional shading at all.

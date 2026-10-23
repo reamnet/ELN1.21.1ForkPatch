@@ -103,7 +103,9 @@ class BackupRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDesc
     }
     override fun draw() {
         cable=drawCable((transparentNodeDescriptor as BackupDescriptor).connectionPlane(front ?: Direction.ZP),Eln.instance.stdCableRender3200V,display.connections,cable)
-        (transparentNodeDescriptor as BackupDescriptor).draw(front ?: Direction.ZP,display)
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(front,display.status in listOf("RUNNING","COOLDOWN","MAINS","GENERATOR"))) {
+            (transparentNodeDescriptor as BackupDescriptor).draw(front ?: Direction.ZP,display)
+        }
     }
     override fun cameraDrawOptimisation()=false
     private var smokeClock=0f

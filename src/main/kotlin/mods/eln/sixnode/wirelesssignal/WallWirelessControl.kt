@@ -62,6 +62,9 @@ class WallWirelessElement(node: SixNode,side: Direction,descriptor: SixNodeDescr
 }
 
 class WallWirelessRender(entity: SixNodeEntity,side: Direction,descriptor: SixNodeDescriptor) : WirelessSignalSourceRender(entity,side,descriptor) {
+    override fun draw() {
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(front,indicatorOn()),setOf("Lever")) { super.draw() }
+    }
     override fun refresh(deltaT: Float) {
         if(!deltaT.isFinite() || deltaT<=0)return
         val elapsed=deltaT.coerceAtMost(1f)

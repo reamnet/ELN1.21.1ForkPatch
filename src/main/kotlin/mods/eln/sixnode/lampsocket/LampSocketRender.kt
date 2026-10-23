@@ -146,7 +146,13 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, sixNodeDescri
         GL11.glPushMatrix()
         GL11.glTranslated(-inset,0.0,0.0)
         GL11.glRotated(descriptor.initialRenderAngleOffset, 1.0, 0.0, 0.0)
-        descriptor.renderType.draw(this, UtilsClient.distanceFromClientPlayer(this.tileEntity).toDouble())
+        if(descriptor.fixture!=null) mods.eln.client.terrain.TerrainModels.body(this,
+            listOf(front,inset,bulbCount,lightValue>=MIN_LIGHT_ON_VALUE,lampDescriptor?.lampData?.technology?.lampType,
+                (0 until aim.heads).map { listOf(aim.pan(it),aim.tilt(it)) }),
+            if(descriptor.fixture?.fan==true)setOf("Rotor") else emptySet()) {
+                descriptor.renderType.draw(this,0.0)
+            }
+        else descriptor.renderType.draw(this, UtilsClient.distanceFromClientPlayer(this.tileEntity).toDouble())
         GL11.glPopMatrix()
     }
 

@@ -39,6 +39,7 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
     }
 
     open fun drawCables() {
+        if (mods.eln.client.terrain.TerrainModels.isDiscovering) return
         UtilsClient.bindTexture(cableTexture)
         // TODO: Try not to need this. (How? Math.)
         glDisable(GL_CULL_FACE)

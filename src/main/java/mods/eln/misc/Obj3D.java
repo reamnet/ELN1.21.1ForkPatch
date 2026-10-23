@@ -599,6 +599,7 @@ public class Obj3D {
     }
 
     public Obj3DPart getPart(String part) {
+        if (!mods.eln.client.terrain.MeshPartSelection.allows(part)) return null;
         return nameToPartHash.get(part);
     }
 

@@ -82,7 +82,9 @@ class IndustrialPumpRender(entity: TransparentNodeEntity,descriptor: Transparent
     override fun refresh(deltaT: Float) { super.refresh(deltaT);if(status=="RUNNING")angle=(angle+deltaT*720*(kotlin.math.abs(volts)/480).toFloat())%360 }
     override fun draw() {
         cable=drawCable(Direction.YN,Eln.instance.meduimVoltageCableDescriptor.render,connections,cable)
-        (transparentNodeDescriptor as IndustrialPumpDescriptor).draw(intake,status=="RUNNING" && watts>1,angle)
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(intake,status=="RUNNING" && watts>1),setOf("Rotor")) {
+            (transparentNodeDescriptor as IndustrialPumpDescriptor).draw(intake,status=="RUNNING" && watts>1,angle)
+        }
     }
     override fun networkUnserialize(stream: DataInputStream) {
         super.networkUnserialize(stream);enabled=stream.readBoolean();intake=net.minecraft.core.Direction.entries[stream.readUnsignedByte().coerceIn(0,5)]

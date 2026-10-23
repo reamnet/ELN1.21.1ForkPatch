@@ -169,6 +169,7 @@ open class TransparentNodeEntity(type: BlockEntityType<*>, pos: BlockPos, state:
         if (elementRender != null) {
             elementRender!!.refresh(deltaT)
         }
+        mods.eln.client.terrain.TerrainModels.update(this)
     }
 
     override fun isProvidingWeakPower(side: Direction?): Int {

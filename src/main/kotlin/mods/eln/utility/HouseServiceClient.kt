@@ -47,7 +47,7 @@ class HouseServiceDescriptor(val meter: Boolean,val disconnect: Boolean=false): 
                 part("SmartScreen",.16f,.24f,.20f)
                 if(powered)UtilsClient.disableLight()
                 GL11.glColor3f(if(powered).42f else .06f,if(powered).84f else .12f,if(powered).52f else .08f)
-                drawMeterDigits(energy)
+                mods.eln.client.terrain.TerrainModels.dynamic { drawMeterDigits(energy) }
                 if(powered)UtilsClient.enableLight()
                 part("Disconnect",if(disconnect).8f else .12f,if(disconnect).08f else .60f,.09f)
             }
@@ -88,7 +88,9 @@ class HouseServiceRender(entity: TransparentNodeEntity,descriptor: TransparentNo
     private val connections=LRDUMask()
     private var cable: mods.eln.cable.CableRenderType?=null
     override fun draw() {
-        drawCables();(transparentNodeDescriptor as HouseServiceDescriptor).drawService(front ?: Direction.XN,type,imported,disconnected,powered,disk)
+        drawCables();mods.eln.client.terrain.TerrainModels.body(this,listOf(front,type,disconnected,powered),setOf("Disk","DiskMark")+(0..4).map { "Needle$it" }) {
+            (transparentNodeDescriptor as HouseServiceDescriptor).drawService(front ?: Direction.XN,type,imported,disconnected,powered,disk)
+        }
         cable=drawCable(front!!.inverse,Eln.instance.stdCableRender200V,connections,cable)
     }
     override fun refresh(deltaT: Float) { super.refresh(deltaT);disk=(disk+watts*deltaT.coerceIn(0f,.25f)*.01)%360 }

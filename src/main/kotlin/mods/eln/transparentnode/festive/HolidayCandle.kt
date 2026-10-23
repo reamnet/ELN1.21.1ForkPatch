@@ -58,6 +58,6 @@ class HolidayCandleRender(tileEntity: TransparentNodeEntity, transparentNodedesc
 
 
     override fun draw() {
-        mods.eln.misc.preserveMatrix { GL11.glTranslated(0.0,mountOffset,0.0);(transparentNodeDescriptor as HolidayCandleDescriptor).draw(front!!,powered) }
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(front,powered,mountOffset)) { mods.eln.misc.preserveMatrix { GL11.glTranslated(0.0,mountOffset,0.0);(transparentNodeDescriptor as HolidayCandleDescriptor).draw(front!!,powered) } }
     }
 }

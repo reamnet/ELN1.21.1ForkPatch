@@ -78,7 +78,9 @@ class UpsRender(entity: TransparentNodeEntity, descriptor: TransparentNodeDescri
     val display=UpsDisplay()
     private val left=LRDUMask();private val right=LRDUMask();private var cable: CableRenderType?=null
     override fun draw() {
-        (transparentNodeDescriptor as UpsDescriptor).draw(front ?: Direction.XN,display)
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(front,display.active>0 && display.energy>0 || display.bypass && display.inputVolts>1,display.status=="BACKUP")) {
+            (transparentNodeDescriptor as UpsDescriptor).draw(front ?: Direction.XN,display)
+        }
         val direction=front ?: return
         val plane=(transparentNodeDescriptor as UpsDescriptor).connectionPlane(direction)
         val a=plane.getLRDUGoingTo(direction.left())!!

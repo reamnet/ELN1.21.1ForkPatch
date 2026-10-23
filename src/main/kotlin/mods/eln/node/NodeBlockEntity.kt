@@ -197,6 +197,7 @@ abstract class NodeBlockEntity(type: BlockEntityType<*>, pos: BlockPos, state: B
 
     //client only
     open fun destructor() {
+        if (level?.isClientSide==true) mods.eln.client.terrain.TerrainModels.remove(this)
         clientList.remove(this)
     }
 

@@ -213,6 +213,7 @@ class SixNodeEntity(pos: BlockPos, state: BlockState) : NodeBlockEntity(TYPE.get
         for (e in elementRenderList) {
             e?.refresh(deltaT)
         }
+        mods.eln.client.terrain.TerrainModels.update(this)
     }
 
     override fun isProvidingWeakPower(side: Direction?): Int {

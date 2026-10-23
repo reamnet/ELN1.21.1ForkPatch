@@ -135,7 +135,7 @@ class RenewableRender(entity: TransparentNodeEntity,descriptor: TransparentNodeD
     private val renewable get()=transparentNodeDescriptor as RenewableDescriptor
     override fun draw() {
         cable=drawCable(renewable.connectionPlane(front ?: Direction.ZP),Eln.instance.stdCableRender3200V,display.connections,cable)
-        renewable.draw(front ?: Direction.ZP,angle)
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(front),if(renewable.large)setOf("Rotor") else emptySet()) { renewable.draw(front ?: Direction.ZP,angle) }
     }
     override fun refresh(deltaT: Float) { super.refresh(deltaT);if(renewable.large)angle=(angle+deltaT*if(available>.01)35f else 0f)%360f }
     override fun cameraDrawOptimisation()=false

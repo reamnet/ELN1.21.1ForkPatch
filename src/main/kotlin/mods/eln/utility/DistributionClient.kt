@@ -157,7 +157,12 @@ class DistributionPoleRender(entity: TransparentNodeEntity,descriptor: Transpare
     private val connections=LRDUMask()
     private var cable: mods.eln.cable.CableRenderType?=null
     override fun draw() {
-        drawCables();(transparentNodeDescriptor as DistributionPoleDescriptor).drawEquipment(front ?: Direction.XN,display,highVoltageRenderAngle,lowVoltageRenderAngle)
+        drawCables()
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(front,highVoltageRenderAngle,lowVoltageRenderAngle,
+            display.installed,display.phase,display.fuseClosed,display.fuseBlown,display.closed,display.enabled,
+            display.heightStep,display.yaw,display.pitch,display.light>0)) {
+            (transparentNodeDescriptor as DistributionPoleDescriptor).drawEquipment(front ?: Direction.XN,display,highVoltageRenderAngle,lowVoltageRenderAngle)
+        }
         cable=drawCable(Direction.YN,if((transparentNodeDescriptor as DistributionPoleDescriptor).kind==DistributionKind.FEEDER_THREE)Eln.instance.stdCableRender3200V else Eln.instance.stdCableRender200V,connections,cable)
     }
     override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream);display.read(stream);connections.deserialize(stream);cable=null }

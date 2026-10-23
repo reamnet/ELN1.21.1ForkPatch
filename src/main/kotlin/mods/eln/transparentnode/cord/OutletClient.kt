@@ -67,12 +67,14 @@ class OutletRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDesc
     val connections=LRDUMask();private var cable: CableRenderType?=null
     override fun draw() {
         val facing=front ?: return
-        preserveMatrix {
-            if(!wallState.isAir) { val offset=mods.eln.transparentnode.worklight.WorkLightOptics.world(facing,Vec3(0.0,0.0,1.0));GL11.glTranslated(offset.x,offset.y,offset.z) }
-            desc.draw(facing,horizontal)
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(facing,horizontal,wallState.isAir,sockets)) {
+            preserveMatrix {
+                if(!wallState.isAir) { val offset=mods.eln.transparentnode.worklight.WorkLightOptics.world(facing,Vec3(0.0,0.0,1.0));GL11.glTranslated(offset.x,offset.y,offset.z) }
+                desc.draw(facing,horizontal)
+            }
+            repeat(desc.sockets) { i -> if(sockets and (1 shl i)!=0)NemaPlug.draw(facing,desc.rating,socket=i,horizontal=horizontal,strip=desc.strip,recessed=!wallState.isAir) }
         }
         var drawn=sockets
-        repeat(desc.sockets) { i -> if(sockets and (1 shl i)!=0)NemaPlug.draw(facing,desc.rating,socket=i,horizontal=horizontal,strip=desc.strip,recessed=!wallState.isAir) }
         cable=drawCable(if(wallState.isAir)facing.inverse else facing,Eln.instance.meduimVoltageCableDescriptor.render,connections,cable)
         val world=tileEntity.level!!;val origin=Vec3.atCenterOf(tileEntity.blockPos)
         for(p in world.players()) {

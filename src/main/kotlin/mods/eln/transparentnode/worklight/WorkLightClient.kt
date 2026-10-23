@@ -64,7 +64,9 @@ class WorkLightRender(entity: TransparentNodeEntity,descriptor: TransparentNodeD
     }) }
     override fun draw() {
         cable=drawCable(Direction.YN,fixture.cableRenderDescriptor,connections,cable)
-        preserveMatrix { front!!.inverse.glRotateZnRef();fixture.drawFixture(light,count,technology,aim) }
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(front,light>=8,count,technology,(0 until aim.heads).map { listOf(aim.pan(it),aim.tilt(it)) })) {
+            preserveMatrix { front!!.inverse.glRotateZnRef();fixture.drawFixture(light,count,technology,aim) }
+        }
     }
     override fun cameraDrawOptimisation()=false
     override fun networkUnserialize(stream: DataInputStream) {

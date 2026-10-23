@@ -52,7 +52,7 @@ class StringLightsRender(tileEntity: TransparentNodeEntity, transparentNodedescr
 
 
     override fun draw() {
-        (transparentNodeDescriptor as StringLightsDescriptor).draw(front!!, powered)
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(front,powered)) { (transparentNodeDescriptor as StringLightsDescriptor).draw(front!!,powered) }
     }
 }
 

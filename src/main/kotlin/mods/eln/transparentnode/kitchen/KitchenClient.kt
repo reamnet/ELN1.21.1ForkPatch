@@ -119,7 +119,9 @@ class KitchenRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDes
         cable=drawCable(Direction.YN,Eln.instance.meduimVoltageCableDescriptor.render,display.connections,cable)
         val below=tileEntity.blockPos.below();val world=tileEntity.level!!
         val height=mods.eln.sixnode.lampsocket.LampMounting.surface(world.getBlockState(below).getCollisionShape(world,below).toAabbs(),Direction.YN) ?: 1.0
-        (transparentNodeDescriptor as KitchenDescriptor).draw(front ?: Direction.ZP,display.active,(1-height).coerceIn(-.5,1.0))
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(front,display.active,height)) {
+            (transparentNodeDescriptor as KitchenDescriptor).draw(front ?: Direction.ZP,display.active,(1-height).coerceIn(-.5,1.0))
+        }
     }
     override fun cameraDrawOptimisation()=false
     override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream);display.read(stream);cable=null }

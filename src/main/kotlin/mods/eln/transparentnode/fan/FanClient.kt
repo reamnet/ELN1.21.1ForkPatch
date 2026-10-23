@@ -83,7 +83,7 @@ class FanRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDescrip
     override fun refresh(deltaT: Float) { visual.step(deltaT,speed,type.rpm);super.refresh(deltaT) }
     override fun draw() {
         cable=drawCable(Direction.YN,Eln.instance.meduimVoltageCableDescriptor.render,connections,cable)
-        (transparentNodeDescriptor as FanDescriptor).draw(front ?: Direction.ZP,visual.angle)
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(front),setOf("Rotor")) { (transparentNodeDescriptor as FanDescriptor).draw(front ?: Direction.ZP,visual.angle) }
     }
     override fun cameraDrawOptimisation()=false
     override fun networkUnserialize(input: DataInputStream) {

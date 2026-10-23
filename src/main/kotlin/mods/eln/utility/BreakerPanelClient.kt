@@ -65,7 +65,7 @@ class BreakerPanelRender(entity: TransparentNodeEntity,descriptor: TransparentNo
     val circuits=List(12) { PanelCircuitDisplay() }
     private val connections=LRDUMask()
     private var cable: mods.eln.cable.CableRenderType?=null
-    override fun draw() { drawCables();(transparentNodeDescriptor as BreakerPanelDescriptor).drawPanel(front ?: Direction.XN,circuits);cable=drawCable(front!!.inverse,Eln.instance.stdCableRender200V,connections,cable) }
+    override fun draw() { drawCables();mods.eln.client.terrain.TerrainModels.body(this,listOf(front,circuits.map { listOf(it.rating>0,it.closed,it.tripped) })) { (transparentNodeDescriptor as BreakerPanelDescriptor).drawPanel(front ?: Direction.XN,circuits) };cable=drawCable(front!!.inverse,Eln.instance.stdCableRender200V,connections,cable) }
     override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream);selected=stream.readInt();terminal=stream.readInt();range=stream.readInt();feederFromBottom=stream.readBoolean();circuits.forEach { it.read(stream) };connections.deserialize(stream);cable=null }
     override fun newGuiDraw(side: Direction,player: Player)=BreakerPanelGui(player,this)
 }

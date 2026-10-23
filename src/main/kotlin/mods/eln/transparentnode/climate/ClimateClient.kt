@@ -88,7 +88,7 @@ class ClimateRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDes
     private var cable: CableRenderType?=null
     override fun draw() {
         val d=transparentNodeDescriptor as ClimateDescriptor;val facing=front ?: return
-        d.draw(facing,display.active);cable=drawCable(d.connectionPlane(facing),Eln.instance.meduimVoltageCableDescriptor.render,display.connections,cable)
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(facing,display.active)) { d.draw(facing,display.active) };cable=drawCable(d.connectionPlane(facing),Eln.instance.meduimVoltageCableDescriptor.render,display.connections,cable)
     }
     override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream);display.read(stream);cable=null }
     override fun newGuiDraw(side: Direction,player: Player)=ClimateGui(player,this)

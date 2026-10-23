@@ -63,7 +63,7 @@ class StepDownUnitRender(entity: TransparentNodeEntity, descriptor: TransparentN
     private val secondaryMask = LRDUMask()
     private var cable: CableRenderType? = null
     override fun draw() {
-        (transparentNodeDescriptor as StepDownUnitDescriptor).draw(front ?: Direction.XN)
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(front)) { (transparentNodeDescriptor as StepDownUnitDescriptor).draw(front ?: Direction.XN) }
         // Faces follow the same left-input/right-output convention as variable converters.
         primaryMask.set(0); secondaryMask.set(0)
         val primary = front!!.down().getLRDUGoingTo(front!!.left())!!
@@ -82,10 +82,14 @@ class UtilityStreetLightRender(entity: TransparentNodeEntity, descriptor: Transp
     val display = StepDownDisplay()
     private var cable: CableRenderType? = null
     override fun draw() {
-        super.draw()
-        mods.eln.utility.PoleFuseVisual.draw(front ?: Direction.XN,display.pole.fuseClosed,display.pole.fuseBlown)
-        mods.eln.misc.preserveMatrix { mods.eln.client.gl.GL11.glRotatef(lowVoltageRenderAngle,0f,1f,0f);mods.eln.utility.PoleSecondaryVisual.draw(Direction.XN) }
-        (transparentNodeDescriptor as UtilityStreetLightDescriptor).drawLamp(front ?: Direction.XN, display.light > 0, display.installed, display.heightStep, display.yaw, display.pitch)
+        drawCables()
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(front,highVoltageRenderAngle,lowVoltageRenderAngle,
+            display.pole.fuseClosed,display.pole.fuseBlown,display.installed,display.heightStep,display.yaw,display.pitch,display.light>0)) {
+            (transparentNodeDescriptor as UtilityStreetLightDescriptor).draw(highVoltageRenderAngle)
+            mods.eln.utility.PoleFuseVisual.draw(front ?: Direction.XN,display.pole.fuseClosed,display.pole.fuseBlown)
+            mods.eln.misc.preserveMatrix { mods.eln.client.gl.GL11.glRotatef(lowVoltageRenderAngle,0f,1f,0f);mods.eln.utility.PoleSecondaryVisual.draw(Direction.XN) }
+            (transparentNodeDescriptor as UtilityStreetLightDescriptor).drawLamp(front ?: Direction.XN, display.light > 0, display.installed, display.heightStep, display.yaw, display.pitch)
+        }
         cable = drawCable(front!!.down(), Eln.instance.stdCableRender200V, display.connections, cable)
     }
     override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream); display.read(stream);display.pole.read(stream) }

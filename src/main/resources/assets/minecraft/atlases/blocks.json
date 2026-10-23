@@ -2,6 +2,8 @@
   "sources": [
     { "type": "directory", "source": "blocks", "prefix": "blocks/" },
     { "type": "directory", "source": "items", "prefix": "items/" },
-    { "type": "directory", "source": "voltages", "prefix": "voltages/" }
+    { "type": "directory", "source": "voltages", "prefix": "voltages/" },
+    { "type": "single", "resource": "eln:block/terrain_white" },
+    { "type": "eln:terrain_textures" }
   ]
 }

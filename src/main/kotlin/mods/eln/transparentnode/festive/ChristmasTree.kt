@@ -30,10 +30,11 @@ class ChristmasTreeDescriptor(val name: String, val obj: Obj3D): TransparentNode
         ghostGroup = gg
     }
 
-    fun draw(front: Direction, delta: Int, powered: Boolean) {
+    fun draw(front: Direction, delta: Int, powered: Boolean, treeOnly: Boolean?=null) {
         if (star != null && tree != null && string1 != null && string2 != null) {
             front.glRotateZnRef()
             GL11.glTranslatef(0.5f, -0.5f, 0.5f)
+            if(treeOnly!=true) {
             if (powered) {
                 UtilsClient.drawLight(star)
                 if (delta > 10) {
@@ -48,7 +49,8 @@ class ChristmasTreeDescriptor(val name: String, val obj: Obj3D): TransparentNode
                 string1?.draw()
                 string2?.draw()
             }
-            tree?.draw()
+            }
+            if(treeOnly!=false)tree?.draw()
         }
     }
 }
@@ -57,7 +59,10 @@ class ChristmasTreeRender(tileEntity: TransparentNodeEntity, transparentNodedesc
     var x = 0
 
     override fun draw() {
-        (transparentNodeDescriptor as ChristmasTreeDescriptor).draw(front!!, x, powered)
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(front)) {
+            mods.eln.misc.preserveMatrix { (transparentNodeDescriptor as ChristmasTreeDescriptor).draw(front!!,0,false,true) }
+        }
+        mods.eln.misc.preserveMatrix { (transparentNodeDescriptor as ChristmasTreeDescriptor).draw(front!!,x,powered,false) }
     }
 
     override fun refresh(deltaT: Float) {
