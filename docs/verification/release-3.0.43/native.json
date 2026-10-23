@@ -1,0 +1,15 @@
+{
+  "passed": [
+    "Cold fridge save/load retains Freshness age across an explicit unloaded-time interval",
+    "Production blocks placed; water capabilities accept all six pipe faces and reject lava",
+    "Real grid draws 800 W for washing and the material-dependent reactor demand; save/read keeps paid progress and reserved water",
+    "Spoiled timer and Freshness age stay unchanged in the cold refrigerator",
+    "Washer completes a repaired, unusable wet item with its name intact; reactor pauses during an outage",
+    "Dryer draws 6000 W at 240 V; reactor keeps its sample and paid work across save/read",
+    "Washer, dryer and six-block reactor use nonempty baked terrain bodies and baked item previews",
+    "Drying restores usable repaired equipment; reactor makes a block without consuming its sample",
+    "FF spoilage progress remains paused; removing food immediately restores Spoiled processing",
+    "30 A dryer cord powers the machine and isolates its fixed-cable terminals",
+    "Reactor GUI opens with synchronized progress, power and inventory"
+  ]
+}

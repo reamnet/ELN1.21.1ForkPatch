@@ -51,3 +51,6 @@ type="required"
 versionRange="[${kffVersion},)"
 ordering="BEFORE"
 side="BOTH"
+
+[[mixins]]
+config="eln.compat.mixins.json"

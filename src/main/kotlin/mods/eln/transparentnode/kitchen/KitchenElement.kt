@@ -22,6 +22,11 @@ import kotlin.math.abs
 class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) : TransparentNodeElement(node,descriptor),CordDevice {
     val type=(descriptor as KitchenDescriptor).type
     override val inventory=object : TransparentNodeElementInventory(type.slotCount,64,this) {
+        override fun getItem(slot: Int): ItemStack = super.getItem(slot).also {
+            if(type.refrigerator && slot>=3)mods.eln.compat.RefrigeratorPreservation.touch(it,this@KitchenElement)
+        }
+        override fun removeItem(slot: Int,amt: Int): ItemStack { preserveFood();return super.removeItem(slot,amt).also(mods.eln.compat.RefrigeratorPreservation::release) }
+        override fun removeItemNoUpdate(slot: Int): ItemStack { preserveFood();return super.removeItemNoUpdate(slot).also(mods.eln.compat.RefrigeratorPreservation::release) }
         override fun getAccessibleSlotsFromSide(side: Int)=IntArray(containerSize) { it }
         override fun canPlaceItemThroughFace(slot: Int,stack: ItemStack?,side: Int)=stack!=null && KitchenRecipe.allowed(type,slot,stack)
         override fun canTakeItemThroughFace(slot: Int,stack: ItemStack?,side: Int)=slot==2 || slot==1 && (stack?.`is`(net.minecraft.world.item.Items.BUCKET)==true || stack?.`is`(net.minecraft.world.item.Items.GLASS_BOTTLE)==true) || slot>=3
@@ -44,6 +49,20 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
         private set
     var status="IDLE"
         private set
+    val coldStorage get()=type.refrigerator && temperature<=5.0
+    private var foodClock=-1L
+    private var foodWasCold=false
+    private fun preserveFood() {
+        if(!type.refrigerator || net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer()==null)return
+        val world=node?.coordinate?.world() as? ServerLevel ?: return
+        val now=world.gameTime
+        val elapsed=if(foodWasCold && foodClock>=0)(now-foodClock).coerceAtLeast(0) else 0
+        for(slot in 3 until inventory.containerSize) {
+            val stack=inventory.getItem(slot)
+            if(coldStorage || elapsed>0)mods.eln.compat.RefrigeratorPreservation.pause(stack,elapsed,now)
+        }
+        foodClock=now;foodWasCold=coldStorage
+    }
     private var recipe: KitchenRecipe?=null
     private var cachedInput=ItemStack.EMPTY
     private var cacheReady=false
@@ -74,6 +93,7 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
         if(!cacheReady)rebuildRecipe(false)
         configure()
         val power=if(active)resistor.power.coerceIn(0.0,type.watts*1.1) else 0.0
+        preserveFood()
         if(type.refrigerator) {
             val cooling=(power/type.watts).coerceIn(0.0,1.0)*.85
             temperature=(temperature+seconds*(.025-cooling)).coerceIn(3.5,20.0)
@@ -153,9 +173,13 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
         work.joules=nbt.getDouble("kitchenJoules").takeIf { it.isFinite() }?.coerceIn(0.0,type.watts*type.seconds) ?: 0.0
         temperature=if(nbt.contains("kitchenTemperature"))nbt.getDouble("kitchenTemperature").takeIf { it.isFinite() }?.coerceIn(3.5,20.0) ?: 20.0 else 20.0
         batteryHeat.read(nbt);cacheReady=false
+        foodClock=if(nbt.contains("fridgeFoodClock"))nbt.getLong("fridgeFoodClock") else -1L
+        foodWasCold=nbt.getBoolean("fridgeFoodWasCold")
+        preserveFood()
     }
     override fun writeToNBT(nbt: CompoundTag) {
-        super.writeToNBT(nbt);nbt.putBoolean("kitchenEnabled",enabled);nbt.putDouble("kitchenJoules",work.joules);nbt.putDouble("kitchenTemperature",temperature);batteryHeat.write(nbt)
+        preserveFood()
+        super.writeToNBT(nbt);nbt.putLong("fridgeFoodClock",foodClock);nbt.putBoolean("fridgeFoodWasCold",foodWasCold);nbt.putBoolean("kitchenEnabled",enabled);nbt.putDouble("kitchenJoules",work.joules);nbt.putDouble("kitchenTemperature",temperature);batteryHeat.write(nbt)
     }
     override fun multiMeterString(side: Direction)=Utils.plotVolt("U:",load.voltage)+Utils.plotPower("P:",resistor.power)
     override fun getWaila()=linkedMapOf(tr("State") to kitchenStatus(status),tr("Voltage") to Utils.plotVolt("",load.voltage),tr("Power") to Utils.plotPower("",resistor.power))

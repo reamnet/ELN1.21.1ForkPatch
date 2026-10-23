@@ -19,7 +19,7 @@ class OutletDescriptor(val rating: CordRating=CordRating.V120,val strip: Boolean
     if(strip)I18N.TR_NAME(I18N.Type.NONE,"Six Socket Power Strip") else rating.outletName,OutletElement::class.java,OutletRender::class.java,true) {
     val displayName=if(!strip && rating==CordRating.V120)I18N.TR_NAME(I18N.Type.NONE,"120 V Wall Outlet") else name
     val sockets get()=if(strip)6 else 2
-    private val model=Eln.obj.getObj(if(strip)"sixsocketpowerstrip" else if(rating.industrial)"industrialmachineoutlet" else if(rating==CordRating.V120)"appliancewalloutlet" else "walloutlet240")
+    private val model=Eln.obj.getObj(if(strip)"sixsocketpowerstrip" else if(rating==CordRating.V240_30)"dryeroutlet30" else if(rating.industrial)"industrialmachineoutlet" else if(rating==CordRating.V120)"appliancewalloutlet" else "walloutlet240")
     // Keep the old registry identity so placed outlets and inventory stacks survive the rename.
     override fun getName(stack: ItemStack)=if(!strip && rating==CordRating.V120)tr("120 V Wall Outlet") else super.getName(stack)
     fun draw(front: Direction,horizontal: Boolean)=preserveMatrix {

@@ -1513,6 +1513,10 @@ object TransparentNodeRegistration {
     }
 
     private fun registerGridDevices(id: Int) {
+        mods.eln.transparentnode.laundry.MatterMachineKind.entries.forEach { kind ->
+            transparentNodeItem.addDescriptor(kind.subId+(125 shl 6),mods.eln.transparentnode.laundry.MatterMachineDescriptor(kind).apply { setCreativeTab(Eln.creativeTabMachines) })
+        }
+        transparentNodeItem.addDescriptor(12+(125 shl 6),mods.eln.transparentnode.cord.OutletDescriptor(mods.eln.transparentnode.cord.CordRating.V240_30).apply { setCreativeTab(Eln.creativeTabPowerElectronics) })
         transparentNodeItem.addDescriptor(8+(125 shl 6),mods.eln.transparentnode.pump.IndustrialPumpDescriptor().apply { setCreativeTab(Eln.creativeTabMachines) })
         transparentNodeItem.addDescriptor(50+(124 shl 6),mods.eln.utility.HouseServiceDescriptor(false))
         transparentNodeItem.addDescriptor(51+(124 shl 6),mods.eln.utility.HouseServiceDescriptor(true))

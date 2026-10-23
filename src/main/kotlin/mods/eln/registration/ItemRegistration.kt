@@ -138,6 +138,7 @@ object ItemRegistration {
         registerWireMachineItems(118)
 
         mods.eln.transparentnode.kitchen.KitchenFoods.register()
+        mods.eln.transparentnode.laundry.WetEquipment.register()
 
         registerArmor()
         registerTool()
@@ -370,6 +371,7 @@ object ItemRegistration {
     }
 
     private fun registerWireToolItems(id: Int) {
+        Eln.sharedItem.addElement(6+(125 shl 6),mods.eln.transparentnode.cord.CordDescriptor(mods.eln.transparentnode.cord.CordRating.V240_30.cordName,mods.eln.transparentnode.cord.CordRating.V240_30))
         mods.eln.transparentnode.cord.CordRating.entries.filter { it.industrial }.forEachIndexed { i,rating ->
             Eln.sharedItem.addElement(i+(125 shl 6),mods.eln.transparentnode.cord.CordDescriptor(rating.cordName,rating))
         }

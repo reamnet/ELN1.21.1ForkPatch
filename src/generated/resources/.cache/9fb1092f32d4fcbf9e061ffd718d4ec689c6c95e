@@ -1,4 +1,4 @@
-// 1.21.1	2026-10-21T22:30:38.885239996	Recipes
+// 1.21.1	2026-10-23T19:24:43.642984594	Recipes
 72b08ae301f68a7a5b4ffeb00733765cfc9259c5 data/eln/advancement/recipes/misc/100_a_pole_fuse.json
 de21adcd90ac44899fa6d8e71cbbe823fbc0d070 data/eln/advancement/recipes/misc/100_kw_pole_transformer.json
 c45ab92bbdd9de0dab6c23fed31d9bcc1fda2fb0 data/eln/advancement/recipes/misc/100a_electrical_breaker.json
@@ -46,6 +46,8 @@ d1c24d3f6d3718dcabc341695da1568123a86dd7 data/eln/advancement/recipes/misc/200a_
 6d6dfb5154709b07ffae7d18d9cc5e5ea3abcd87 data/eln/advancement/recipes/misc/20a_electrical_breaker.json
 a29f2540b36decb51784de50bc406ae422a7356a data/eln/advancement/recipes/misc/20a_lead_fuse.json
 95e487a15dcb5f99802fa3f968794fe4bd8ceee3 data/eln/advancement/recipes/misc/20a_switch.json
+b9da251a1e1b2a2e902b9dd123fc30fbaba8b889 data/eln/advancement/recipes/misc/240_v_30_a_dryer_cord.json
+81468da204a26bb60e470d6a39005049a87d8760 data/eln/advancement/recipes/misc/240_v_30_a_dryer_outlet.json
 d707f23bc6f26d7da9b00a7623fca0dd8764a86e data/eln/advancement/recipes/misc/240_v_appliance_cord.json
 00c6dcdd8721609b83aa833e7cd2335fbe665a04 data/eln/advancement/recipes/misc/240_v_wall_outlet.json
 9ea6e3b0fe8beeb1ba93c3336d616c68d22796af data/eln/advancement/recipes/misc/240v_active_thermal_dissipator.json
@@ -235,6 +237,7 @@ f3fb39ee635c664d073796021b23596d366757e5 data/eln/advancement/recipes/misc/e-coa
 10f28a7dff194803eeb78e84f4d7db549066553d data/eln/advancement/recipes/misc/e-coal_helmet.json
 9ef5d65a3a24a0fedce2ff6ae5ec60d1abc6f43f data/eln/advancement/recipes/misc/e-coal_leggings.json
 38713309d9bba1b02f8fa4a0be6b45fedf6fc953 data/eln/advancement/recipes/misc/electric_coffee_maker.json
+c43aa8abc9891655ddced7cca6c1210b24f6cf33 data/eln/advancement/recipes/misc/electric_dryer.json
 14a0777ee3831ecfb08dadab4c6f2df91e4c4d45 data/eln/advancement/recipes/misc/electric_kettle.json
 16277033e3aab1c330e19689d9b9bdc59ea33ac2 data/eln/advancement/recipes/misc/electric_microwave.json
 4c170077462b3139f4468b3e018f47a1c4d18806 data/eln/advancement/recipes/misc/electric_mini_fridge.json
@@ -244,6 +247,7 @@ a1de2bf1631446d7bd1a23ba308afd785028df12 data/eln/advancement/recipes/misc/elect
 d5ab84339cb22079d804b4b4e69f4fabe02937f0 data/eln/advancement/recipes/misc/electric_refrigerator.json
 312de06c001fc5972dcb1804cc238176cd2cf03c data/eln/advancement/recipes/misc/electric_rice_cooker.json
 5b51fc11a7612ab2fa75ca16027eabf7f3db7eeb data/eln/advancement/recipes/misc/electric_toaster.json
+0e973b35f7e4089d3f6569e50b22ad355b713f98 data/eln/advancement/recipes/misc/electric_washing_machine.json
 e50d5650d8270237420bf90252e007d13589d8fa data/eln/advancement/recipes/misc/electrical_anemometer_sensor.json
 d29861569859888d9f4e77410f87f365c99a7841 data/eln/advancement/recipes/misc/electrical_daylight_sensor.json
 ef8000b0fa0cdd24084e6aaad6d1d5b20825b893 data/eln/advancement/recipes/misc/electrical_entity_sensor.json
@@ -273,6 +277,7 @@ e55b6c6443773dd670bdbabffb59cb1ed3e3f0f2 data/eln/advancement/recipes/misc/farmh
 74b479e00c7d3dd85aebf1c289e2bb5da423f277 data/eln/advancement/recipes/misc/fluorescent_lamp_socket.json
 4bf4598f8217acc8f35b125a4a8572d9c8bc51a4 data/eln/advancement/recipes/misc/flywheel.json
 9babf0d0beee3e30e5ef384768fbfec94d27310d data/eln/advancement/recipes/misc/fuel_heat_furnace.json
+4b3404d4f68f009e3840c99dd75f44d2a64f4d7d data/eln/advancement/recipes/misc/fusion_matter_reactor.json
 6aa13317b07904b5b37561ddb2ab8cfe04438a3f data/eln/advancement/recipes/misc/garden_bollard_light.json
 cf2c462cb285f9f26a2e65f0981dcee77cd92ec5 data/eln/advancement/recipes/misc/gas_turbine.json
 50ea48728887c1b9c994846c057d1b0d8ec0b42f data/eln/advancement/recipes/misc/gasoline_construction_work_light.json
@@ -683,6 +688,8 @@ ddde8ea3354e82402fb1daf84068c5284a839bae data/eln/recipe/200_v_workshop_outlet.j
 ce129e1745afda223c2f9fa147aadcb3cafc8490 data/eln/recipe/20a_electrical_breaker.json
 c4b6a1e4d8ca644aabc28c5632a03895dd81b6b9 data/eln/recipe/20a_lead_fuse.json
 050d469995d60d4b12fbd43afea780b28bf4a9cf data/eln/recipe/20a_switch.json
+d161d987fc2eca45d713ee0452eba4bb6b477b9c data/eln/recipe/240_v_30_a_dryer_cord.json
+c7da7e78bb4e942c0f379d4a2161a029f203f4c4 data/eln/recipe/240_v_30_a_dryer_outlet.json
 3c94ced07d7007deb8221da1afb19177042a9d5f data/eln/recipe/240_v_appliance_cord.json
 68282dfad3f24dd997bc0b6c240d7a3ecf293b7c data/eln/recipe/240_v_wall_outlet.json
 13756c58ffc138c75dd6445d9b19cb6aaadf148c data/eln/recipe/240v_active_thermal_dissipator.json
@@ -872,6 +879,7 @@ c87035949c1929e2609945d1842c3297af2ae174 data/eln/recipe/direct_utility_pole.jso
 cc8fdeed74a3e1046721d0911ef06dabfd6342cf data/eln/recipe/e-coal_helmet.json
 11d12377713838857c88d353183670920e046c16 data/eln/recipe/e-coal_leggings.json
 f58e1d022f1af2f3ee641ad23ecc7da22db5f243 data/eln/recipe/electric_coffee_maker.json
+d728c8f6351615baec216c1033979de280c93551 data/eln/recipe/electric_dryer.json
 925191ab1bcc49b23d2d2aebc8bb73f7f8886d03 data/eln/recipe/electric_kettle.json
 1e5f1728133b9d7d1e125c6b4663166ebd68b8cd data/eln/recipe/electric_microwave.json
 e6f91419302fad1afb4dd73784bb64f9506c7b4e data/eln/recipe/electric_mini_fridge.json
@@ -881,6 +889,7 @@ e6f91419302fad1afb4dd73784bb64f9506c7b4e data/eln/recipe/electric_mini_fridge.js
 8bdd58d8a4dad72eb55d3dff22f7db7af32b49c0 data/eln/recipe/electric_refrigerator.json
 41199cda7c1390bd6f6b88b3f89a7e71e32d8570 data/eln/recipe/electric_rice_cooker.json
 e5495f4ce1c90075c4a5ed01461f6ac3e7ad9887 data/eln/recipe/electric_toaster.json
+835b2ead83dfb967583fd866abfcfd87715f2729 data/eln/recipe/electric_washing_machine.json
 80307b2896f98f8c3e5aa1c3eb08d05f7b666880 data/eln/recipe/electrical_anemometer_sensor.json
 086f3f794af9ed90dfc7cecd93b1c6fa86d4ca40 data/eln/recipe/electrical_daylight_sensor.json
 75856b650c14dd218f5812794f09c73854fd5462 data/eln/recipe/electrical_entity_sensor.json
@@ -910,6 +919,7 @@ f9c7f69a0774c96a185cc16b62ad17ca3b5a4f68 data/eln/recipe/flexible_appliance_cord
 6e2dc99c90881b64e43589d1fae69fbd89d84f94 data/eln/recipe/fluorescent_lamp_socket.json
 2739d2d1eaff46652ae1070fdae6ee966d92a112 data/eln/recipe/flywheel.json
 85d4bca6191ea49b74711c65d5adf7e4081424ac data/eln/recipe/fuel_heat_furnace.json
+4a404557b44c17d8114a650e6e773c1395048b0a data/eln/recipe/fusion_matter_reactor.json
 d0e4045b9e8d588c14c5894d8c35b3d54d786f23 data/eln/recipe/garden_bollard_light.json
 2be830dfe3bf7ed2206b5f89c0463401b43bb7b4 data/eln/recipe/gas_turbine.json
 950cc4656c703287c7d230d4a33f27329cb26e6a data/eln/recipe/gasoline_construction_work_light.json

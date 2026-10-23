@@ -1,4 +1,4 @@
-// 1.21.1	2026-10-21T22:30:38.901904521	Item Models: eln
+// 1.21.1	2026-10-23T19:24:43.662861354	Item Models: eln
 c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/100_a_pole_fuse.json
 a5ac578ee8f459ff5057195ce2b630f75ac6edbb assets/eln/models/item/100_kw_pole_transformer.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/100a_electrical_breaker.json
@@ -44,6 +44,8 @@ c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/20_a_pole_fuse.j
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/20a_electrical_breaker.json
 545dc1ad8561074077d4e11ed76e1d2a30d05598 assets/eln/models/item/20a_lead_fuse.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/20a_switch.json
+f93030a66344007a6cbf214aea03c88a6e9fb436 assets/eln/models/item/240_v_30_a_dryer_cord.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/240_v_30_a_dryer_outlet.json
 f93030a66344007a6cbf214aea03c88a6e9fb436 assets/eln/models/item/240_v_appliance_cord.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/240_v_wall_outlet.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/240v_active_thermal_dissipator.json
@@ -398,6 +400,7 @@ c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/digital_watch.js
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/direct_utility_pole.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/double_candle_wall_sconce.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_coffee_maker.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_dryer.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_kettle.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_microwave.json
 e3c160d8996f205794fce647f1b79865110378a8 assets/eln/models/item/electric_minecart.json
@@ -408,6 +411,7 @@ a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_poolsid
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_refrigerator.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_rice_cooker.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_toaster.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_washing_machine.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/electrical_anemometer_sensor.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/electrical_daylight_sensor.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/electrical_entity_sensor.json
@@ -442,6 +446,7 @@ a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/flexible_neon_le
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/fluorescent_lamp_socket.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/flywheel.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/fuel_heat_furnace.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/fusion_matter_reactor.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/garden_bollard_light.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/gas_turbine.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/gasoline_construction_work_light.json

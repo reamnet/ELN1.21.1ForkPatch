@@ -1,0 +1,26 @@
+{
+  "values": {
+    "minecraft:stone": 1, "minecraft:cobblestone": 1, "minecraft:dirt": 1,
+    "minecraft:sand": 1, "minecraft:red_sand": 1, "minecraft:gravel": 4,
+    "minecraft:netherrack": 1, "minecraft:end_stone": 1, "minecraft:deepslate": 1,
+    "minecraft:cobbled_deepslate": 1, "minecraft:clay_ball": 16,
+    "minecraft:oak_log": 32, "minecraft:spruce_log": 32, "minecraft:birch_log": 32,
+    "minecraft:jungle_log": 32, "minecraft:acacia_log": 32, "minecraft:dark_oak_log": 32,
+    "minecraft:mangrove_log": 32, "minecraft:cherry_log": 32,
+    "minecraft:crimson_stem": 32, "minecraft:warped_stem": 32, "minecraft:bamboo": 1,
+    "minecraft:coal": 128, "minecraft:charcoal": 32, "minecraft:redstone": 64,
+    "minecraft:iron_ingot": 256, "minecraft:copper_ingot": 128, "minecraft:gold_ingot": 2048,
+    "minecraft:diamond": 8192, "minecraft:emerald": 16384,
+    "minecraft:lapis_lazuli": 864, "minecraft:quartz": 256,
+    "minecraft:netherite_scrap": 16384, "minecraft:ancient_debris": 16384,
+    "minecraft:obsidian": 64, "minecraft:glowstone_dust": 384,
+    "minecraft:slime_ball": 32, "minecraft:string": 12, "minecraft:leather": 64,
+    "minecraft:bone": 144, "minecraft:rotten_flesh": 32, "minecraft:gunpowder": 192,
+    "minecraft:ender_pearl": 1024, "minecraft:blaze_rod": 1536,
+    "minecraft:nether_star": 139264, "minecraft:amethyst_shard": 64,
+    "minecraft:prismarine_shard": 256, "minecraft:prismarine_crystals": 512,
+    "minecraft:white_wool": 48, "minecraft:snowball": 1, "minecraft:ice": 1,
+    "minecraft:terracotta": 64, "minecraft:glass": 1, "minecraft:flint": 4
+  },
+  "blacklist": ["minecraft:bedrock", "minecraft:barrier", "minecraft:command_block", "minecraft:chain_command_block", "minecraft:repeating_command_block", "minecraft:structure_block", "minecraft:jigsaw", "minecraft:light", "minecraft:reinforced_deepslate", "minecraft:spawner", "minecraft:trial_spawner", "minecraft:vault"]
+}

@@ -145,7 +145,7 @@ object NemaPlug {
         drawLocal(rating)
     }
     fun drawLocal(rating: CordRating)=preserveMatrix {
-        val model=mods.eln.Eln.obj.getObj(if(rating.industrial)"industrialmachineplug" else if(rating==CordRating.V120)"nema520plug" else "nema620plug")
+        val model=mods.eln.Eln.obj.getObj(if(rating==CordRating.V240_30)"nema630plug" else if(rating.industrial)"industrialmachineplug" else if(rating==CordRating.V120)"nema520plug" else "nema620plug")
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
             GL11.glDisable(GL11.GL_TEXTURE_2D)

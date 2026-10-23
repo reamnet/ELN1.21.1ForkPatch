@@ -175,7 +175,7 @@ object TerrainModels {
     private fun clear() { bodies.clear();nodeBodies.clear();lastUpdate.clear();sections.clear();pool.clear();unsupported.clear();world=null }
     private fun explicit(render: Any): Boolean = if(render is mods.eln.sixnode.lampsocket.LampSocketRender)
         render.descriptor.fixture!=null else render.javaClass.simpleName in SUPPORTED || render is mods.eln.transparentnode.festive.FairyLightsRender
-    private val SUPPORTED=setOf("KitchenRender","FanRender","RenewableRender","IndustrialPumpRender","UpsRender",
+    private val SUPPORTED=setOf("MatterMachineRender","KitchenRender","FanRender","RenewableRender","IndustrialPumpRender","UpsRender",
         "ClimateRender","BackupRender","OutletRender","DistributionPoleRender","HouseServiceRender","BreakerPanelRender",
         "WorkLightRender","StepDownUnitRender","UtilityStreetLightRender","HolidayCandleRender","StringLightsRender","ChristmasTreeRender","WallWirelessRender")
     @SubscribeEvent fun unload(event: LevelEvent.Unload) { if(event.level===world)clear() }

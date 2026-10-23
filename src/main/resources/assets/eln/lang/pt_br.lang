@@ -138,6 +138,7 @@ Out\:_%1$_/_%2$=Out: %1$ / %2$
 Output=Saída
 Output_power=Output power
 Output_voltage=Tensão de saída
+Overvoltage_protection=Overvoltage protection
 P\:_%1$_S\:_%2$=P: %1$ S: %2$
 Pan_left=Pan left
 Pan_right=Pan right
@@ -159,6 +160,7 @@ Powered_by_cord=Powered by cord
 Primary=Primary
 Primary_%1$_ohm;_secondary_%2$_ohm=Primary %1$ ohm; secondary %2$ ohm
 Primary_winding=Primary winding
+Processing=Processing
 Produced_power=Potência produzida
 Range\:_%1$_blocks=Alcance: %1$ blocos
 Rated_supply\:_%1$_V_/_%2$_W=Rated supply: %1$ V / %2$ W
@@ -186,6 +188,7 @@ Speed=Velocidade
 State=Estado
 Stored_energy\:_%1$J_(%2$%)=Energia armazenada: %1$J (%2$%)
 Subsystem_Matrix_Size=Tamanho da Matriz do Subsistema
+Supply=Supply
 Switched_off=Switched off
 Temperature=Temperatura
 Temperature\:_%1$_C=Temperature: %1$ C
@@ -214,6 +217,7 @@ Voltage=Tensão
 Voltage\:_%1$V=Tensão: %1$V
 Voltage_drop=Queda de tensão
 Voltages=Tensões
+Waiting_for_electrical_power=Waiting for electrical power
 Winding_ratio=Winding ratio
 Winding_resistance=Winding resistance
 Wireless_lamp_supply=Wireless lamp supply
@@ -2490,6 +2494,8 @@ Use_on_a_matching_wall_outlet,_then_on_a_lamp_or_appliance=Use on a matching wal
 # src/main/kotlin/mods/eln/transparentnode/cord/CordRating.kt
 200_V_Workshop_Cord.name=200 V Workshop Cord
 200_V_Workshop_Outlet.name=200 V Workshop Outlet
+240_V_30_A_Dryer_Cord.name=240 V 30 A Dryer Cord
+240_V_30_A_Dryer_Outlet.name=240 V 30 A Dryer Outlet
 240_V_Wall_Outlet.name=240 V Wall Outlet
 24_V_Machine_Cord.name=24 V Machine Cord
 24_V_Machine_Outlet.name=24 V Machine Outlet
@@ -2655,6 +2661,7 @@ Blends_an_apple,_melon_slice_or_sweet_berries_with_a_water_bottle=Blends an appl
 Bread_makes_toasted_bread=Bread makes toasted bread
 Brews_fresh_coffee_from_cocoa_beans_and_a_water_bottle=Brews fresh coffee from cocoa beans and a water bottle
 Cocoa_beans_+_water_bottle=Cocoa beans + water bottle
+Cold_food_storage_pauses_supported_spoilage_timers_at_5_C_or_below=Cold food storage pauses supported spoilage timers at 5 C or below
 Connect_a_floor_cable_to_any_horizontal_side=Connect a floor cable to any horizontal side
 Cooks_food_using_the_world's_smelting_recipes=Cooks food using the world's smelting recipes
 Cooling_the_refrigerator=Cooling the refrigerator
@@ -2665,7 +2672,6 @@ Heating_battery=Heating battery
 Heats_a_water_bottle_into_drinkable_hot_water=Heats a water bottle into drinkable hot water
 Needs_a_supporting_surface=Needs a supporting surface
 Needs_water_or_output_space=Needs water or output space
-Processing=Processing
 Returned_container=Returned container
 Steams_wheat_or_tagged_rice_with_a_water_bottle;_returns_the_empty_bottle=Steams wheat or tagged rice with a water bottle; returns the empty bottle
 Turns_bread_into_edible_toasted_bread=Turns bread into edible toasted bread
@@ -2696,6 +2702,44 @@ Electric_Toaster.name=Electric Toaster
 Flat_Electric_Cooktop.name=Flat Electric Cooktop
 Patio_Electric_Grill.name=Patio Electric Grill
 
+# src/main/kotlin/mods/eln/transparentnode/laundry/MatterMachineClient.kt
+100-500_kW_for_10-30_minutes_per_block,_based_on_material_value=100-500 kW for 10-30 minutes per block, based on material value
+120_V_/_800_W;_60-second_wash;_1_bucket_of_water_per_item=120 V / 800 W; 60-second wash; 1 bucket of water per item
+240_V_/_6000_W;_120-second_drying_cycle=240 V / 6000 W; 120-second drying cycle
+6_x_2_x_2_fusion_matter_reactor;_3.2_kV_input=6 x 2 x 2 fusion matter reactor; 3.2 kV input
+Accepts_standard_fluid_pipes_on_all_sides;_10-bucket_water_tank=Accepts standard fluid pipes on all sides; 10-bucket water tank
+Block_sample_(retained)=Block sample (retained)
+Energy\:_%1$_/_%2$_MJ=Energy: %1$ / %2$ MJ
+Insert_a_block_sample;_the_sample_is_retained=Insert a block sample; the sample is retained
+Insert_an_item_to_begin=Insert an item to begin
+Machine_chunk_unloaded=Machine chunk unloaded
+No_supported_recipe_for_this_item=No supported recipe for this item
+Nominal_cycle\:_%1$_minutes=Nominal cycle: %1$ minutes
+Output_full=Output full
+Pauses_on_power_loss;_no_production_while_unloaded=Pauses on power loss; no production while unloaded
+Power\:_%1$_/_%2$_W=Power: %1$ / %2$ W
+Progress\:_%1$%=Progress: %1$%
+Recipe_values_calculated_internally_using_ProjectE's_MIT-licensed_mapper=Recipe values calculated internally using ProjectE's MIT-licensed mapper
+Repairs_damaged_equipment;_wet_equipment_must_be_dried_before_use=Repairs damaged equipment; wet equipment must be dried before use
+Restores_usable_tools_and_armor_from_wet_equipment=Restores usable tools and armor from wet equipment
+Sample=Sample
+Supply\:_%1$_V=Supply: %1$ V
+Use_a_120_V_appliance_cord_or_fixed_cables=Use a 120 V appliance cord or fixed cables
+Use_a_240_V_30_A_dryer_cord_or_fixed_cables=Use a 240 V 30 A dryer cord or fixed cables
+Waiting_for_water=Waiting for water
+Water\:_%1$_/_10000_mB=Water: %1$ / 10000 mB
+Wet_equipment_becomes_usable=Wet equipment becomes usable
+
+# src/main/kotlin/mods/eln/transparentnode/laundry/MatterMachineKind.kt
+Electric_Dryer.name=Electric Dryer
+Electric_Washing_Machine.name=Electric Washing Machine
+Fusion_Matter_Reactor.name=Fusion Matter Reactor
+
+# src/main/kotlin/mods/eln/transparentnode/laundry/WetEquipment.kt
+Unusable_while_wet;_put_it_in_an_Electric_Dryer=Unusable while wet; put it in an Electric Dryer
+Wet\:_%1$=Wet: %1$
+Wet_Equipment.name=Wet Equipment
+
 # src/main/kotlin/mods/eln/transparentnode/pump/IndustrialPumpClient.kt
 40-bucket_input_and_output_buffers;_compatible_with_standard_NeoForge_fluid_pipes=40-bucket input and output buffers; compatible with standard NeoForge fluid pipes
 480_V_/_4000_W;_nominal_flow_40_buckets_per_second=480 V / 4000 W; nominal flow 40 buckets per second
@@ -2714,20 +2758,17 @@ Nominal\:_40_B/s_at_480_V=Nominal: 40 B/s at 480 V
 North=North
 Output_buffer\:_%1$_/_40_B=Output buffer: %1$ / 40 B
 Output_full_or_another_liquid_remains=Output full or another liquid remains
-Overvoltage_protection=Overvoltage protection
 Place_this_blue_intake_against_water_or_a_tank;_all_other_faces_are_outputs=Place this blue intake against water or a tank; all other faces are outputs
 Power_with_fixed_cables_or_a_480_V_Industrial_Cord=Power with fixed cables or a 480 V Industrial Cord
 Pump_chunk_unloaded=Pump chunk unloaded
 Pumping=Pumping
 South=South
 Supply\:_%1$_V_/_%2$_W=Supply: %1$ V / %2$ W
-Waiting_for_electrical_power=Waiting for electrical power
 West=West
 
 # src/main/kotlin/mods/eln/transparentnode/pump/IndustrialPumpElement.kt
 %1$_B/s=%1$ B/s
 Flow=Flow
-Supply=Supply
 
 # src/main/kotlin/mods/eln/transparentnode/renewable/LargeRenewables.kt
 3200_V=3200 V

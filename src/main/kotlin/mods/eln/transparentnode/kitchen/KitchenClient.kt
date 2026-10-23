@@ -71,6 +71,7 @@ class KitchenDescriptor(val type: KitchenType) : TransparentNodeDescriptor(type.
     override fun addInformation(itemStack: ItemStack?,entityPlayer: Player?,list: MutableList<String>,par4: Boolean) {
         list.add(tr("Rated supply: %1$ V / %2$ W",type.volts.toInt(),type.watts.toInt()))
         list.add(tr("Connect a floor cable to any horizontal side"))
+        if(type.refrigerator)list.add(tr("Cold food storage pauses supported spoilage timers at 5 C or below"))
         if(type==KitchenType.MICROWAVE)list.add(tr("Batteries hiss and explode when microwaved"))
         list.add(when(type) {
             KitchenType.MICROWAVE,KitchenType.STOVE,KitchenType.MINI_OVEN,KitchenType.GRILL -> tr("Cooks food using the world's smelting recipes")

@@ -1,0 +1,8 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "mods.eln.compat.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": ["SpoiledRefrigeratorMixin", "FreshnessRefrigeratorMixin", "FfSpoilageRefrigeratorMixin"],
+  "injectors": {"defaultRequire": 0}
+}

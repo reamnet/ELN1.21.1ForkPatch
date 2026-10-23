@@ -46,6 +46,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.40` | — | Cache exact ambient climate samples and biome discovery; prevent thermal monitoring from waiting on chunk loads while retaining live thermal protection |
 | `v3.0.41` | — | Bake stationary new model bodies into section meshes, keeping moving parts live and preserving cross-section geometry, textures, lamp updates and shader lighting |
 | `v3.0.42` | — | Bake remaining eligible legacy device bodies and static item previews; retain live mechanisms, screens, halos and labels |
+| `v3.0.43` | — | Water-fed repair washer, 240 V dryer and 30 A connectors; cold-fridge spoilage integrations; six-block fusion matter reactor with an embedded ProjectE value calculator and baked models |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`

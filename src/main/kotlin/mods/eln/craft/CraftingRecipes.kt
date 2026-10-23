@@ -402,6 +402,15 @@ object CraftingRecipes {
             'I',ItemStack(Items.IRON_BARS),'R',ItemStack(Items.REDSTONE),'C',findItemStack("Copper Cable"),'P',findItemStack("Iron Plate"))
         addRecipe(findItemStack("Electric Mini Fridge"),"PP","CR","PP",
             'P',findItemStack("Iron Plate"),'C',ItemStack(Blocks.CHEST),'R',findItemStack("Copper Cable"))
+        addRecipe(findItemStack("Electric Washing Machine"),"PBP","MCM","PPP",
+            'P',findItemStack("Iron Plate"),'B',ItemStack(Items.BUCKET),'M',findItemStack("Electrical Motor"),'C',findItemStack("Copper Cable"))
+        addRecipe(findItemStack("Electric Dryer"),"PPP","MHM","PCP",
+            'P',findItemStack("Iron Plate"),'M',findItemStack("Electrical Motor"),'H',ItemStack(Items.BLAZE_ROD),'C',findItemStack("Copper Cable"))
+        addRecipe(findItemStack("Fusion Matter Reactor"),"NDN","MCM","NDN",
+            'N',ItemStack(Items.NETHERITE_INGOT),'D',ItemStack(Blocks.DIAMOND_BLOCK),'M',findItemStack("Electrical Motor"),
+            'C',ItemStack(Items.NETHER_STAR))
+        addShapelessRecipe(findItemStack("240 V 30 A Dryer Cord"),findItemStack("240 V Appliance Cord"),findItemStack("Copper Cable"),findItemStack("Rubber"))
+        addShapelessRecipe(findItemStack("240 V 30 A Dryer Outlet"),findItemStack("240 V Wall Outlet"),findItemStack("Copper Cable"),findItemStack("Iron Plate"))
         addRecipe(findItemStack("Electric Refrigerator"), "PPP", "GCG", "PRP",
             'P',findItemStack("Iron Plate"),'G',ItemStack(Blocks.GLASS_PANE),'C',ItemStack(Blocks.CHEST),'R',findItemStack("Copper Cable"))
         addRecipe(findItemStack("Electric Coffee Maker"), " I ", "GBG", "PCP",

@@ -26,8 +26,8 @@ class MachineCordTest {
         assertTrue(descriptors.size>=9)
         for(d in descriptors) {
             val e=element(d);val device=assertNotNull(CordDevices.get(e));assertSame(device,CordDevices.get(e))
-            val r=CordRating.entries.single { it.accepts(d.nominalU) }
-            assertTrue(device.acceptsCord(r));CordRating.entries.filter { it!=r }.forEach { assertFalse(device.acceptsCord(it)) }
+            val matching=CordRating.entries.filter { it.accepts(d.nominalU) };val r=matching.first()
+            matching.forEach { assertTrue(device.acceptsCord(it)) };CordRating.entries.filter { it !in matching }.forEach { assertFalse(device.acceptsCord(it)) }
             val inlet=e.getElectricalLoad(e.front,LRDU.Down)
             assertSame(inlet,e.machineCord!!.input)
             val side=Direction.values().first { e.getConnectionMask(it,LRDU.Down)!=0 }
@@ -42,10 +42,10 @@ class MachineCordTest {
     @Test fun chargersAndBothMotorTiersAcceptOnlyTheirOwnRatedConnector() {
         for(d in Eln.sixNodeItem.subItemList.values.filterIsInstance<BatteryChargerDescriptor>()) {
             val e=BatteryChargerElement(SixNode(),Direction.YN,d);val c=assertNotNull(CordDevices.get(e))
-            assertSame(e.powerLoad,c.cord.input);assertTrue(c.acceptsCord(CordRating.entries.single { it.accepts(d.nominalVoltage) }))
+            assertSame(e.powerLoad,c.cord.input);CordRating.entries.filter { it.accepts(d.nominalVoltage) }.also { assertTrue(it.isNotEmpty()) }.forEach { assertTrue(c.acceptsCord(it)) }
         }
         for(d in Eln.transparentNodeItem.subItemList.values.filterIsInstance<MotorDescriptor>()) {
-            val e=element(d);val c=assertNotNull(CordDevices.get(e));assertTrue(c.acceptsCord(CordRating.entries.single { it.accepts(d.nominalU.toDouble()) }))
+            val e=element(d);val c=assertNotNull(CordDevices.get(e));CordRating.entries.filter { it.accepts(d.nominalU.toDouble()) }.also { assertTrue(it.isNotEmpty()) }.forEach { assertTrue(c.acceptsCord(it)) }
             assertSame(e.getElectricalLoad(e.front,LRDU.Down),c.cord.input)
         }
     }
@@ -55,8 +55,8 @@ class MachineCordTest {
         assertTrue(CordRating.entries.none(c::acceptsCord))
         for(heater in Eln.sharedItem.subItemList.values.filterIsInstance<HeatingCorpElement>()) {
             e.inventory!!.setItem(ElectricalFurnaceElement.heatingCorpSlotId,heater.newItemStack(1))
-            val matching=CordRating.entries.single { it.accepts(heater.electricalNominalU) }
-            assertTrue(c.acceptsCord(matching));assertEquals(heater.electricalNominalU,c.cordVoltage)
+            val matching=CordRating.entries.filter { it.accepts(heater.electricalNominalU) }.also { assertTrue(it.isNotEmpty()) }
+            matching.forEach { assertTrue(c.acceptsCord(it)) };assertEquals(heater.electricalNominalU,c.cordVoltage)
         }
     }
     @Test fun thickCopperCableStopsOutsideTheBreakerCaseInEveryOrientation() {
