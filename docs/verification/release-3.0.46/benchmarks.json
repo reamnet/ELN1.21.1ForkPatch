@@ -1,0 +1,43 @@
+{
+  "version": "3.0.46",
+  "baseline": "3.0.45 direct division arithmetic; affine probes remain enabled independently.",
+  "method": "Alternating warmed full-solve benchmark; synthetic electrical-core test, not whole-server timing.",
+  "results": [
+    {
+      "voltage_nodes": 80,
+      "matrix_states": 81,
+      "solves_per_round": 2000,
+      "baseline_ms": [
+        49.683415,
+        28.024948,
+        37.561302,
+        26.002193
+      ],
+      "optimized_ms": [
+        17.892983,
+        18.685494,
+        16.004247,
+        14.487565
+      ],
+      "median_speedup": 1.9348557389497605
+    },
+    {
+      "voltage_nodes": 240,
+      "matrix_states": 241,
+      "solves_per_round": 2000,
+      "baseline_ms": [
+        51.238612,
+        52.921446,
+        47.983727,
+        75.447732
+      ],
+      "optimized_ms": [
+        24.101155,
+        21.382464,
+        23.863734,
+        22.634652
+      ],
+      "median_speedup": 2.2400789997313026
+    }
+  ]
+}

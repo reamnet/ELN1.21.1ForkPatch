@@ -13,6 +13,11 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
     private val permutation = IntArray(size) { it }
     private val columns = IntArray(size) { it }
     private val rowScale = DoubleArray(size) { row -> matrix[row].maxOf { it.abs().toDouble() }.takeIf { it > 0.0 } ?: 1.0 }
+    private val cachedDivisors = !java.lang.Boolean.getBoolean("eln.disableCachedMnaDivisors")
+    private val scaleReciprocals = Array(size) { row ->
+        if(rowScale[row]==1.0)null else safeReciprocal(DD.of(rowScale[row]))
+    }
+    private val diagonalReciprocals: Array<DD?>
     private val inverseRows = arrayOfNulls<Array<DD>>(size)
     private val lower: Array<IntArray>
     private val upper: Array<IntArray>
@@ -105,7 +110,32 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
         }
         upperTranspose = Array(size) { upperColumns[it].toIntArray() }
         lowerTranspose = Array(size) { lowerColumns[it].toIntArray() }
+        // Factorization arithmetic and ordering are unchanged. Only repeated
+        // triangular/RHS solves reuse these fixed divisors in DD precision.
+        diagonalReciprocals = Array(size) { row ->
+            if(lu[row][row]==DD.ONE)null else safeReciprocal(lu[row][row])
+        }
     }
+
+    private fun safeReciprocal(divisor: DD): DD? {
+        // At extreme exponents a reciprocal loses its DD low part through
+        // underflow, even when division itself has a normal, precise result.
+        if(!cachedDivisors || kotlin.math.abs(divisor.toDouble()) !in 1e-200..1e200)return null
+        return divisor.reciprocal().takeIf { it.isFinite && !it.isZero }
+    }
+
+    private fun quotient(value: DD,divisor: DD,reciprocal: DD?): DD {
+        if(reciprocal==null)return value.divide(divisor)
+        val result=value.multiply(reciprocal)
+        return if(result.isFinite)result else value.divide(divisor)
+    }
+
+    private fun scale(value: DD,row: Int): DD {
+        val reciprocal=scaleReciprocals[row] ?: return value.divide(rowScale[row])
+        val result=value.multiply(reciprocal)
+        return if(result.isFinite)result else value.divide(rowScale[row])
+    }
+    private fun pivot(value: DD,row: Int)=quotient(value,lu[row][row],diagonalReciprocals[row])
 
     private fun indices(entries: BitSet, start: Int, end: Int): IntArray {
         val result = IntArray(entries.cardinality())
@@ -122,13 +152,13 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
         val value = Array(size) {
             val input = rhs[permutation[it]]
             if (input == 0.0) DD.ZERO else if (rowScale[permutation[it]] == 1.0) DD.of(input)
-            else DD.of(input).divide(rowScale[permutation[it]])
+            else scale(DD.of(input),permutation[it])
         }
         for (row in 0 until size) for (j in lower[row]) if (!value[j].isZero)
             value[row] = value[row].subtract(lu[row][j].multiply(value[j]))
         for (row in size - 1 downTo 0) {
             for (j in upper[row]) if (!value[j].isZero) value[row] = value[row].subtract(lu[row][j].multiply(value[j]))
-            if (!value[row].isZero && lu[row][row] != DD.ONE) value[row] = value[row].divide(lu[row][row])
+            if (!value[row].isZero && lu[row][row] != DD.ONE) value[row] = pivot(value[row],row)
         }
         val result = Array(size) { DD.ZERO }
         for (row in 0 until size) result[columns[row]] = value[row]
@@ -140,13 +170,13 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
         val value = Array(size) { if (columns[it] == index) DD.ONE else DD.ZERO }
         for (row in 0 until size) {
             for (j in upperTranspose[row]) if (!value[j].isZero) value[row] = value[row].subtract(lu[j][row].multiply(value[j]))
-            if (!value[row].isZero && lu[row][row] != DD.ONE) value[row] = value[row].divide(lu[row][row])
+            if (!value[row].isZero && lu[row][row] != DD.ONE) value[row] = pivot(value[row],row)
         }
         for (row in size - 1 downTo 0) for (j in lowerTranspose[row]) if (!value[j].isZero)
             value[row] = value[row].subtract(lu[j][row].multiply(value[j]))
         val result = Array(size) { DD.ZERO }
         for (row in 0 until size) result[permutation[row]] = if (value[row].isZero || rowScale[permutation[row]] == 1.0) value[row]
-            else value[row].divide(rowScale[permutation[row]])
+            else scale(value[row],permutation[row])
         inverseRows[index] = result
         result
     }

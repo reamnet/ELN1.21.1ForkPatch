@@ -1,0 +1,80 @@
+{
+  "tests": 866,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "version": "3.0.46",
+  "suites": 212,
+  "target_suites": [
+    {
+      "name": "mods.eln.transparentnode.utilitylight.JoinedPoleGridsTest",
+      "tests": "5",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T03:52:14.790Z",
+      "hostname": "67293bf35eff",
+      "time": "111.444"
+    },
+    {
+      "name": "mods.eln.sim.mna.AffineProbeTest",
+      "tests": "5",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T03:51:53.017Z",
+      "hostname": "67293bf35eff",
+      "time": "1.039"
+    },
+    {
+      "name": "mods.eln.sim.power.WindBankGeneratorGridTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T03:51:55.506Z",
+      "hostname": "67293bf35eff",
+      "time": "15.416"
+    },
+    {
+      "name": "mods.eln.sim.mna.MnaDivisorTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T03:51:54.228Z",
+      "hostname": "67293bf35eff",
+      "time": "0.6"
+    },
+    {
+      "name": "mods.eln.transparentnode.ups.UpsStandbyTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T03:52:14.426Z",
+      "hostname": "67293bf35eff",
+      "time": "0.324"
+    },
+    {
+      "name": "mods.eln.sim.mna.MnaFactorizationTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T03:51:54.828Z",
+      "hostname": "67293bf35eff",
+      "time": "0.02"
+    },
+    {
+      "name": "mods.eln.sim.power.ConverterControlRuntimeRegressionTest",
+      "tests": "15",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T03:51:54.961Z",
+      "hostname": "67293bf35eff",
+      "time": "0.018"
+    }
+  ]
+}
