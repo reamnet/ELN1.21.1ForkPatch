@@ -30,7 +30,7 @@ class MnaRebuildTest {
         }
     }
 
-    private class Feeder(nodes: Int,sparse: Boolean,controlled: Boolean=false) {
+    internal class Feeder(nodes: Int,sparse: Boolean,controlled: Boolean=false,worksets: Boolean=true,gaugeCopies: Boolean=true) {
         val system: SubSystem
         val pins=List(nodes) { VoltageState() }
         val reference=pins.last()
@@ -46,9 +46,15 @@ class MnaRebuildTest {
             }
         }
         init {
-            val key="eln.disableSparseMnaRebuild";val saved=System.getProperty(key)
-            try { System.setProperty(key,(!sparse).toString());system=SubSystem(null,.01) }
-            finally { if(saved==null)System.clearProperty(key) else System.setProperty(key,saved) }
+            val settings = mapOf("eln.disableSparseMnaRebuild" to !sparse, "eln.disableMnaColumnWorksets" to !worksets,
+                "eln.disableMnaGaugeCopyReduction" to !gaugeCopies)
+            val saved = settings.mapValues { System.getProperty(it.key) }
+            try {
+                settings.forEach { (key, disabled) -> System.setProperty(key, disabled.toString()) }
+                system=SubSystem(null,.01)
+            } finally {
+                saved.forEach { (key, value) -> if(value==null)System.clearProperty(key) else System.setProperty(key,value) }
+            }
             pins.forEach(system::addState);system.addComponent(source);system.addComponent(probe)
             for(i in 1 until nodes-1) {
                 val wire=Resistor(pins[(i-1)/2],pins[i]).apply { resistance=.01+i*.00001 }

@@ -1,0 +1,73 @@
+{
+  "version": "3.0.48",
+  "baseline": "Scanning LU row traversal and full-copy voltage-reference setup, selected by eln.disableMnaColumnWorksets=true and eln.disableMnaGaugeCopyReduction=true. Both paths retain 3.0.47 initialization, affine probes and cached divisors.",
+  "method": "Alternating six warmed rounds per path, each containing eight complete dirty-matrix-to-Thevenin-probe rebuilds of floating branching feeders. Resistance and source command change every rebuild. Synthetic electrical-core timing, not whole-server timing. Individual rounds are noisy and all are retained.",
+  "results": [
+    {
+      "voltage_nodes": 80,
+      "matrix_states": 82,
+      "rebuilds_per_round": 8,
+      "baseline_ms": [
+        4.771096,
+        4.227909,
+        5.043601,
+        4.624634,
+        4.261721,
+        4.45125
+      ],
+      "optimized_ms": [
+        4.260991,
+        3.866515,
+        4.271822,
+        3.74073,
+        3.830862,
+        3.793597
+      ],
+      "median_speedup": 1.179087889290079
+    },
+    {
+      "voltage_nodes": 240,
+      "matrix_states": 242,
+      "rebuilds_per_round": 8,
+      "baseline_ms": [
+        26.765959,
+        26.248012,
+        25.224507,
+        26.80972,
+        26.747251,
+        23.222499
+      ],
+      "optimized_ms": [
+        23.526568,
+        20.261994,
+        22.441511,
+        20.284269,
+        18.269081,
+        20.862284
+      ],
+      "median_speedup": 1.2879636114354462
+    },
+    {
+      "voltage_nodes": 720,
+      "matrix_states": 722,
+      "rebuilds_per_round": 8,
+      "baseline_ms": [
+        172.607278,
+        132.870754,
+        127.611996,
+        168.647877,
+        86.589489,
+        86.039
+      ],
+      "optimized_ms": [
+        73.554724,
+        86.672031,
+        85.363103,
+        74.009503,
+        56.157358,
+        61.332468
+      ],
+      "median_speedup": 1.7652161048490433
+    }
+  ]
+}

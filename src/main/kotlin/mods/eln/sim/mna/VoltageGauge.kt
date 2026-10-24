@@ -11,16 +11,20 @@ import java.util.function.Function
  * Each discarded KCL equation is checked after solving; an unbalanced current source into
  * a floating island is therefore rejected rather than absorbed by a fictitious ground.
  */
-class VoltageGauge(matrix: Array<DoubleArray>, states: List<State>) {
-    private val original = matrix.map { it.copyOf() }
+class VoltageGauge @JvmOverloads constructor(matrix: Array<DoubleArray>, states: List<State>,
+    preservePhysicalMatrix: Boolean = false) {
+    // The legacy in-place constructor takes a full snapshot for comparisons.
+    // A read-only physical matrix needs only the discarded KCL rows saved below.
+    private val discardedRows = ArrayList<DoubleArray>()
     private val rows: IntArray
-    private val referenceRows: BooleanArray
+    private val referenceRows = BooleanArray(states.size)
     private val savedRhs: DoubleArray
     private var lastProbeRhs: DoubleArray? = null
     private var lastProbeValid = false
     private val supportedExcitations = HashMap<Long, Boolean>()
 
     init {
+        val original = if (preservePhysicalMatrix) null else matrix.map { it.copyOf() }
         val references = mutableListOf<Int>()
         val voltages = states.indices.filter { states[it] is VoltageState }
         val parent = IntArray(states.size) { it }
@@ -35,21 +39,29 @@ class VoltageGauge(matrix: Array<DoubleArray>, states: List<State>) {
             if (pins.size > 1) for (pin in pins.drop(1)) parent[root(pin)] = root(pins[0])
         }
         for (group in voltages.groupBy { root(it) }.values) {
-            val floating = matrix.all { row ->
-                val sum = group.sumOf { row[it] }
-                val scale = group.sumOf { abs(row[it]) }
-                abs(sum) <= scale * 1e-12
+            val floating = matrix.indices.all { index ->
+                // Earlier reference rows are unit rows on disjoint, already
+                // processed groups. Their contribution to this group is zero,
+                // including when inspecting an unmodified physical matrix.
+                if (referenceRows[index]) true else {
+                    val row = matrix[index]
+                    val sum = group.sumOf { row[it] }
+                    val scale = group.sumOf { abs(row[it]) }
+                    abs(sum) <= scale * 1e-12
+                }
             }
             if (floating) {
                 val pin = group.first()
                 references += pin
-                matrix[pin].fill(0.0)
-                matrix[pin][pin] = 1.0
+                referenceRows[pin] = true
+                discardedRows += original?.get(pin) ?: matrix[pin].copyOf()
+                if (!preservePhysicalMatrix) {
+                    matrix[pin].fill(0.0)
+                    matrix[pin][pin] = 1.0
+                }
             }
         }
         rows = references.toIntArray()
-        referenceRows = BooleanArray(states.size)
-        for(row in rows)referenceRows[row]=true
         savedRhs = DoubleArray(rows.size)
     }
 
@@ -62,6 +74,19 @@ class VoltageGauge(matrix: Array<DoubleArray>, states: List<State>) {
             matrix[row].fill(DD.ZERO)
             matrix[row][row] = DD.ONE
         }
+    }
+
+    /** Unchanged precision rows are shared read-only for this matrix generation.
+     * Only discarded KCL rows are replaced. Neither input nor shared rows may be
+     * mutated by a solve; stamping the next generation uses new physical arrays.
+     */
+    fun referenceCopy(matrix: Array<Array<DD>>): Array<Array<DD>> {
+        val result = matrix.copyOf()
+        for (row in rows) {
+            result[row] = Array(matrix.size) { DD.ZERO }
+            result[row][row] = DD.ONE
+        }
+        return result
     }
 
     fun applyRhs(rhs: DoubleArray) {
@@ -112,7 +137,7 @@ class VoltageGauge(matrix: Array<DoubleArray>, states: List<State>) {
         if (solution.any { !it.isFinite() }) return false
         for (i in rows.indices) {
             val rhs = savedRhs[i]
-            val coefficients = original[rows[i]]
+            val coefficients = discardedRows[i]
             var sum = 0.0
             var magnitude = 0.0
             for (column in coefficients.indices) {

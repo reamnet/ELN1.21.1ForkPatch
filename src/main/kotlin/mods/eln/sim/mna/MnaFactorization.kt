@@ -8,7 +8,8 @@ import java.util.BitSet
  * inverse rows actually requested by port probes. Never form the full dense inverse.
  */
 class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previous: MnaFactorization? = null,
-    private val sparseWorkspace: Boolean = !java.lang.Boolean.getBoolean("eln.disableSparseMnaRebuild")) {
+    private val sparseWorkspace: Boolean = !java.lang.Boolean.getBoolean("eln.disableSparseMnaRebuild"),
+    private val columnWorksets: Boolean = !java.lang.Boolean.getBoolean("eln.disableMnaColumnWorksets")) {
     private val size = matrix.size
     // Null is an unstored zero. Lower/upper patterns still track every actual fill entry.
     private val lu: Array<Array<DD?>>
@@ -70,6 +71,17 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
             lu[row][column]=scaled
             if(!scaled.isZero)entries[row].set(column)
         }
+        // A column workset tracks the same nonzeros as the row patterns, including
+        // fill and cancellation. Ascending iteration preserves pivot ties and the
+        // elimination order while avoiding scans through unrelated cable branches.
+        val rowsByColumn = if (columnWorksets) Array(size) { BitSet(size) } else null
+        if (rowsByColumn != null) for (row in 0 until size) {
+            var column = entries[row].nextSetBit(0)
+            while (column >= 0) {
+                rowsByColumn[column].set(row)
+                column = entries[row].nextSetBit(column + 1)
+            }
+        }
         for (column in 0 until size) {
             // Markowitz ordering eliminates voltage constraints and leaf branches first.
             // Ordinary largest-column pivoting fills a cable tree into a dense current block.
@@ -78,9 +90,11 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
                 // Temperature/source-mask changes keep the same variable identities. Reuse
                 // their sparse column ordering; numerical row pivoting is still performed.
                 var magnitude = 0.0
-                for (r in column until size) {
+                var r = rowsByColumn?.get(column)?.nextSetBit(column) ?: column
+                while (r >= 0 && r < size) {
                     val candidate = lu[r][column]?.abs()?.toDouble() ?: 0.0
                     if (candidate > magnitude) { magnitude = candidate; pivot = r }
+                    r = if (rowsByColumn != null) rowsByColumn[column].nextSetBit(r + 1) else r + 1
                 }
             } else {
                 val rowCount = IntArray(size); val columnCount = IntArray(size); val maximum = DoubleArray(size)
@@ -108,11 +122,26 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
             }
             check(pivot >= 0 && lu[pivot][pivotColumn]?.isFinite==true) { "Matrix is singular" }
             if (pivot != column) {
+                if (rowsByColumn != null) {
+                    // Only differing memberships change when two rows trade places.
+                    val changed = entries[column].clone() as BitSet
+                    changed.xor(entries[pivot])
+                    var c = changed.nextSetBit(0)
+                    while (c >= 0) {
+                        rowsByColumn[c].flip(column); rowsByColumn[c].flip(pivot)
+                        c = changed.nextSetBit(c + 1)
+                    }
+                }
                 val row = lu[column]; lu[column] = lu[pivot]; lu[pivot] = row
                 val pattern = entries[column]; entries[column] = entries[pivot]; entries[pivot] = pattern
                 val index = permutation[column]; permutation[column] = permutation[pivot]; permutation[pivot] = index
             }
             if (pivotColumn != column) {
+                if (rowsByColumn != null) {
+                    val pattern = rowsByColumn[column]
+                    rowsByColumn[column] = rowsByColumn[pivotColumn]
+                    rowsByColumn[pivotColumn] = pattern
+                }
                 for (row in 0 until size) {
                     val value = lu[row][column]; lu[row][column] = lu[row][pivotColumn]; lu[row][pivotColumn] = value
                     if (entries[row][column] != entries[row][pivotColumn]) {
@@ -122,17 +151,22 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
                 val index = columns[column]; columns[column] = columns[pivotColumn]; columns[pivotColumn] = index
             }
             val active = indices(entries[column], column + 1, size)
-            for (row in column + 1 until size) {
-                val entry=lu[row][column]
-                if (entry==null || entry.isZero) continue
-                val factor = entry.divide(lu[column][column]!!)
-                lu[row][column] = if(sparseWorkspace && factor.isZero)null else factor
-                entries[row].set(column, !factor.isZero)
-                for (j in active) {
-                    val value=(lu[row][j] ?: DD.ZERO).subtract(factor.multiply(lu[column][j]!!))
-                    lu[row][j] = if(sparseWorkspace && value.isZero)null else value
-                    entries[row].set(j, !value.isZero)
+            var row = rowsByColumn?.get(column)?.nextSetBit(column + 1) ?: (column + 1)
+            while (row >= 0 && row < size) {
+                val entry = lu[row][column]
+                if (entry != null && !entry.isZero) {
+                    val factor = entry.divide(lu[column][column]!!)
+                    lu[row][column] = if(sparseWorkspace && factor.isZero)null else factor
+                    entries[row].set(column, !factor.isZero)
+                    rowsByColumn?.get(column)?.set(row, !factor.isZero)
+                    for (j in active) {
+                        val value=(lu[row][j] ?: DD.ZERO).subtract(factor.multiply(lu[column][j]!!))
+                        lu[row][j] = if(sparseWorkspace && value.isZero)null else value
+                        entries[row].set(j, !value.isZero)
+                        rowsByColumn?.get(j)?.set(row, !value.isZero)
+                    }
                 }
+                row = if (rowsByColumn != null) rowsByColumn[column].nextSetBit(row + 1) else row + 1
             }
         }
         lower = Array(size) { row -> indices(entries[row], 0, row) }

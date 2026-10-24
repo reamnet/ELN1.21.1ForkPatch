@@ -52,6 +52,8 @@ public class SubSystem {
     // Diagnostic opt-out is sampled once, so baseline/optimized circuits can be compared.
     private final boolean affineProbes = !Boolean.getBoolean("eln.disableAffineProbeUpdates");
     private final boolean sparseRebuild = !Boolean.getBoolean("eln.disableSparseMnaRebuild");
+    private final boolean columnWorksets = !Boolean.getBoolean("eln.disableMnaColumnWorksets");
+    private final boolean gaugeCopyReduction = !Boolean.getBoolean("eln.disableMnaGaugeCopyReduction");
     private java.util.BitSet[] symmetryCandidates;
     private boolean symmetricProbeMatrix;
     private double[] probeRhs;
@@ -178,11 +180,17 @@ public class SubSystem {
         //	org.apache.commons.math3.linear.
 
         // Keep A as the physical stamp matrix for diagnostics and component contracts.
-        double[][] solveMatrix = copyMatrix(A);
-        voltageGauge = new VoltageGauge(solveMatrix, states);
-        DD[][] preciseSolveMatrix = new DD[stateCount][];
-        for (int row = 0; row < stateCount; row++) preciseSolveMatrix[row] = preciseA[row].clone();
-        voltageGauge.applyMatrix(preciseSolveMatrix);
+        DD[][] preciseSolveMatrix;
+        if (gaugeCopyReduction) {
+            voltageGauge = new VoltageGauge(A, states, true);
+            preciseSolveMatrix = voltageGauge.referenceCopy(preciseA);
+        } else {
+            double[][] solveMatrix = copyMatrix(A);
+            voltageGauge = new VoltageGauge(solveMatrix, states);
+            preciseSolveMatrix = new DD[stateCount][];
+            for (int row = 0; row < stateCount; row++) preciseSolveMatrix[row] = preciseA[row].clone();
+            voltageGauge.applyMatrix(preciseSolveMatrix);
+        }
 
         boolean captureMetrics = MetricsSubsystem.isSimulatorMetricsActive();
         long inversionStartNanoseconds = captureMetrics ? System.nanoTime() : 0L;
@@ -190,7 +198,7 @@ public class SubSystem {
             boolean sameStates = statesTab != null && statesTab.length == stateCount;
             if (sameStates) for (int i=0;i<stateCount;i++) if (statesTab[i] != states.get(i)) { sameStates=false; break; }
             if (stateCount >= 64) {
-                factorization = new MnaFactorization(preciseSolveMatrix, sameStates ? factorization : null, sparseRebuild);
+                factorization = new MnaFactorization(preciseSolveMatrix, sameStates ? factorization : null, sparseRebuild, columnWorksets);
                 AInvdata = null; lastSolveMatrix = null; incrementalInversions = 0;
                 fullFactorizations++;
             } else {

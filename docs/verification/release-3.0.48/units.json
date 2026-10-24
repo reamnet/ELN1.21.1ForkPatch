@@ -1,0 +1,110 @@
+{
+  "tests": 878,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "version": "3.0.48",
+  "suites": 214,
+  "target_suites": [
+    {
+      "name": "mods.eln.sim.mna.AffineProbeTest",
+      "tests": "5",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T06:42:58.646Z",
+      "hostname": "67293bf35eff",
+      "time": "1.015"
+    },
+    {
+      "name": "mods.eln.sim.mna.MatrixInverseUpdateTest",
+      "tests": "2",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T06:42:59.665Z",
+      "hostname": "67293bf35eff",
+      "time": "0.181"
+    },
+    {
+      "name": "mods.eln.sim.mna.MnaColumnWorksetTest",
+      "tests": "5",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T06:42:59.847Z",
+      "hostname": "67293bf35eff",
+      "time": "3.788"
+    },
+    {
+      "name": "mods.eln.sim.mna.MnaDivisorTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T06:43:03.636Z",
+      "hostname": "67293bf35eff",
+      "time": "0.603"
+    },
+    {
+      "name": "mods.eln.sim.mna.MnaFactorizationTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T06:43:04.240Z",
+      "hostname": "67293bf35eff",
+      "time": "0.014"
+    },
+    {
+      "name": "mods.eln.sim.mna.MnaRebuildTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T06:43:04.254Z",
+      "hostname": "67293bf35eff",
+      "time": "2.827"
+    },
+    {
+      "name": "mods.eln.sim.mna.VoltageGaugeTest",
+      "tests": "6",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T06:43:07.116Z",
+      "hostname": "67293bf35eff",
+      "time": "0.005"
+    },
+    {
+      "name": "mods.eln.sim.power.WindBankGeneratorGridTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T06:43:07.755Z",
+      "hostname": "67293bf35eff",
+      "time": "8.007"
+    },
+    {
+      "name": "mods.eln.transparentnode.ups.UpsStandbyTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T06:43:18.654Z",
+      "hostname": "67293bf35eff",
+      "time": "0.348"
+    },
+    {
+      "name": "mods.eln.transparentnode.utilitylight.JoinedPoleGridsTest",
+      "tests": "5",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T06:43:19.040Z",
+      "hostname": "67293bf35eff",
+      "time": "83.514"
+    }
+  ]
+}
