@@ -1,0 +1,73 @@
+{
+  "version": "3.0.47",
+  "baseline": "3.0.46 dense workspace initialization and full symmetry scan; affine probes and cached divisors stay enabled in both paths.",
+  "method": "Alternating six warmed rounds per path, each containing eight complete dirty-matrix-to-Thevenin-probe rebuilds of floating branching feeders. Resistance and source command change every rebuild. Synthetic electrical-core timing, not whole-server timing.",
+  "results": [
+    {
+      "voltage_nodes": 80,
+      "matrix_states": 82,
+      "rebuilds_per_round": 8,
+      "baseline_ms": [
+        5.467892,
+        5.297811,
+        5.619606,
+        8.003279,
+        6.034967,
+        5.78924
+      ],
+      "optimized_ms": [
+        3.605044,
+        4.205783,
+        5.350962,
+        3.971854,
+        4.50249,
+        4.539478
+      ],
+      "median_speedup": 1.3101157944864614
+    },
+    {
+      "voltage_nodes": 240,
+      "matrix_states": 242,
+      "rebuilds_per_round": 8,
+      "baseline_ms": [
+        27.641328,
+        39.959639,
+        24.834783,
+        32.803484,
+        25.03946,
+        23.479836
+      ],
+      "optimized_ms": [
+        16.886114,
+        15.363586,
+        14.836634,
+        15.222423,
+        14.037086,
+        15.518309
+      ],
+      "median_speedup": 1.7223818903603934
+    },
+    {
+      "voltage_nodes": 720,
+      "matrix_states": 722,
+      "rebuilds_per_round": 8,
+      "baseline_ms": [
+        322.986673,
+        388.539643,
+        208.925746,
+        196.604145,
+        175.485315,
+        200.331389
+      ],
+      "optimized_ms": [
+        97.372014,
+        103.561927,
+        88.895073,
+        91.228624,
+        85.469401,
+        74.384899
+      ],
+      "median_speedup": 2.272089357570759
+    }
+  ]
+}

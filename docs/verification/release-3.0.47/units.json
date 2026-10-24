@@ -1,0 +1,90 @@
+{
+  "tests": 870,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "version": "3.0.47",
+  "suites": 213,
+  "target_suites": [
+    {
+      "name": "mods.eln.sim.mna.AffineProbeTest",
+      "tests": "5",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T05:51:13.423Z",
+      "hostname": "67293bf35eff",
+      "time": "0.9"
+    },
+    {
+      "name": "mods.eln.sim.mna.MnaDivisorTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T05:51:14.485Z",
+      "hostname": "67293bf35eff",
+      "time": "0.519"
+    },
+    {
+      "name": "mods.eln.sim.mna.MnaFactorizationTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T05:51:15.005Z",
+      "hostname": "67293bf35eff",
+      "time": "0.017"
+    },
+    {
+      "name": "mods.eln.sim.mna.MnaRebuildTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T05:51:15.022Z",
+      "hostname": "67293bf35eff",
+      "time": "3.28"
+    },
+    {
+      "name": "mods.eln.sim.power.ConverterControlRuntimeRegressionTest",
+      "tests": "15",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T05:51:18.401Z",
+      "hostname": "67293bf35eff",
+      "time": "0.014"
+    },
+    {
+      "name": "mods.eln.sim.power.WindBankGeneratorGridTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T05:51:18.902Z",
+      "hostname": "67293bf35eff",
+      "time": "7.341"
+    },
+    {
+      "name": "mods.eln.transparentnode.ups.UpsStandbyTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T05:51:30.014Z",
+      "hostname": "67293bf35eff",
+      "time": "0.494"
+    },
+    {
+      "name": "mods.eln.transparentnode.utilitylight.JoinedPoleGridsTest",
+      "tests": "5",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T05:51:30.551Z",
+      "hostname": "67293bf35eff",
+      "time": "85.604"
+    }
+  ]
+}

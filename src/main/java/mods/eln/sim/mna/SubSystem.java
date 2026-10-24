@@ -51,6 +51,8 @@ public class SubSystem {
     private MnaFactorization factorization;
     // Diagnostic opt-out is sampled once, so baseline/optimized circuits can be compared.
     private final boolean affineProbes = !Boolean.getBoolean("eln.disableAffineProbeUpdates");
+    private final boolean sparseRebuild = !Boolean.getBoolean("eln.disableSparseMnaRebuild");
+    private java.util.BitSet[] symmetryCandidates;
     private boolean symmetricProbeMatrix;
     private double[] probeRhs;
     private DD[] probeSolution;
@@ -133,6 +135,7 @@ public class SubSystem {
         A = new double[stateCount][stateCount];
         preciseA = new DD[stateCount][stateCount];
         for (DD[] row : preciseA) java.util.Arrays.fill(row, DD.ZERO);
+        symmetryCandidates = sparseRebuild ? new java.util.BitSet[stateCount] : null;
         Idata = new double[stateCount];
         XtempData = new double[stateCount];
         {
@@ -149,13 +152,28 @@ public class SubSystem {
         // Test the physical stamp, before reference rows make the solve matrix
         // asymmetric. Dependent-source/nonreciprocal networks retain full solves.
         symmetricProbeMatrix = true;
-        for (int row = 0; row < stateCount && symmetricProbeMatrix; row++) {
-            for (int col = 0; col < row; col++) {
-                if (!preciseA[row][col].equals(preciseA[col][row])) {
-                    symmetricProbeMatrix = false; break;
+        if (sparseRebuild) {
+            // Untouched pairs are both exactly ZERO. Check every stamped pair,
+            // including one-sided and cancelled stamps, without scanning empty cells.
+            for (int row = 0; row < stateCount && symmetricProbeMatrix; row++) {
+                java.util.BitSet candidates = symmetryCandidates[row];
+                if (candidates == null) continue;
+                for (int col = candidates.nextSetBit(0); col >= 0; col = candidates.nextSetBit(col + 1)) {
+                    if (!preciseA[row][col].equals(preciseA[col][row])) {
+                        symmetricProbeMatrix = false; break;
+                    }
+                }
+            }
+        } else {
+            for (int row = 0; row < stateCount && symmetricProbeMatrix; row++) {
+                for (int col = 0; col < row; col++) {
+                    if (!preciseA[row][col].equals(preciseA[col][row])) {
+                        symmetricProbeMatrix = false; break;
+                    }
                 }
             }
         }
+        symmetryCandidates = null;
 
         //	org.apache.commons.math3.linear.
 
@@ -172,7 +190,7 @@ public class SubSystem {
             boolean sameStates = statesTab != null && statesTab.length == stateCount;
             if (sameStates) for (int i=0;i<stateCount;i++) if (statesTab[i] != states.get(i)) { sameStates=false; break; }
             if (stateCount >= 64) {
-                factorization = new MnaFactorization(preciseSolveMatrix, sameStates ? factorization : null);
+                factorization = new MnaFactorization(preciseSolveMatrix, sameStates ? factorization : null, sparseRebuild);
                 AInvdata = null; lastSolveMatrix = null; incrementalInversions = 0;
                 fullFactorizations++;
             } else {
@@ -301,6 +319,12 @@ public class SubSystem {
         if (a == null || b == null)
             return;
         int row = a.getId(), column = b.getId();
+        if (symmetryCandidates != null && row != column) {
+            int high = Math.max(row, column), low = Math.min(row, column);
+            java.util.BitSet pairs = symmetryCandidates[high];
+            if (pairs == null) symmetryCandidates[high] = pairs = new java.util.BitSet();
+            pairs.set(low);
+        }
         preciseA[row][column] = preciseA[row][column].add(v);
         A[row][column] = preciseA[row][column].doubleValue();
     }

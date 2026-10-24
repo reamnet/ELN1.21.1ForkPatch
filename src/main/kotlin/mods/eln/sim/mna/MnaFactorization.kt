@@ -7,16 +7,16 @@ import java.util.BitSet
  * Large cable networks are sparse: factor once, solve triangular systems, and cache only
  * inverse rows actually requested by port probes. Never form the full dense inverse.
  */
-class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previous: MnaFactorization? = null) {
+class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previous: MnaFactorization? = null,
+    private val sparseWorkspace: Boolean = !java.lang.Boolean.getBoolean("eln.disableSparseMnaRebuild")) {
     private val size = matrix.size
-    private val lu = Array(size) { matrix[it].clone() }
+    // Null is an unstored zero. Lower/upper patterns still track every actual fill entry.
+    private val lu: Array<Array<DD?>>
     private val permutation = IntArray(size) { it }
     private val columns = IntArray(size) { it }
-    private val rowScale = DoubleArray(size) { row -> matrix[row].maxOf { it.abs().toDouble() }.takeIf { it > 0.0 } ?: 1.0 }
+    private val rowScale = DoubleArray(size)
     private val cachedDivisors = !java.lang.Boolean.getBoolean("eln.disableCachedMnaDivisors")
-    private val scaleReciprocals = Array(size) { row ->
-        if(rowScale[row]==1.0)null else safeReciprocal(DD.of(rowScale[row]))
-    }
+    private val scaleReciprocals: Array<DD?>
     private val diagonalReciprocals: Array<DD?>
     private val inverseRows = arrayOfNulls<Array<DD>>(size)
     private val lower: Array<IntArray>
@@ -32,10 +32,43 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
         if (reusedOrdering) {
             previous!!.permutation.copyInto(permutation); previous.columns.copyInto(columns)
         }
-        for (row in 0 until size) for (column in 0 until size) {
-            val value = matrix[permutation[row]][columns[column]]
-            lu[row][column] = if (value.isZero) DD.ZERO else value.divide(rowScale[permutation[row]])
-            if (!lu[row][column].isZero) entries[row].set(column)
+        // Discover row scale and input sparsity in one pass. Only nonzero entries
+        // need normalization/stores; cloning the dense input first was discarded work.
+        val inputColumns=if(sparseWorkspace)Array(size) { row ->
+            var indices=IntArray(minOf(8,size));var count=0;var maximum=0.0
+            for(column in 0 until size) {
+                val value=matrix[row][column]
+                if(!value.isZero) {
+                    if(count==indices.size)indices=indices.copyOf(maxOf(8,count*2))
+                    indices[count++]=column
+                    maximum=maxOf(maximum,value.abs().toDouble())
+                }
+            }
+            rowScale[row]=maximum.takeIf { it>0.0 } ?: 1.0
+            indices.copyOf(count)
+        } else {
+            for(row in 0 until size)rowScale[row]=matrix[row].maxOf { it.abs().toDouble() }.takeIf { it>0.0 } ?: 1.0
+            null
+        }
+        @Suppress("UNCHECKED_CAST")
+        lu=Array(size) { row -> if(sparseWorkspace)arrayOfNulls(size) else matrix[row].clone() as Array<DD?> }
+        scaleReciprocals=Array(size) { row -> if(rowScale[row]==1.0)null else safeReciprocal(DD.of(rowScale[row])) }
+        if(sparseWorkspace) {
+            val inverseColumns=IntArray(size)
+            for(column in 0 until size)inverseColumns[columns[column]]=column
+            for(row in 0 until size) {
+                val originalRow=permutation[row]
+                for(originalColumn in inputColumns!![originalRow]) {
+                    val column=inverseColumns[originalColumn]
+                    val value=matrix[originalRow][originalColumn].divide(rowScale[originalRow])
+                    if(!value.isZero) { lu[row][column]=value;entries[row].set(column) }
+                }
+            }
+        } else for(row in 0 until size)for(column in 0 until size) {
+            val value=matrix[permutation[row]][columns[column]]
+            val scaled=if(value.isZero)DD.ZERO else value.divide(rowScale[permutation[row]])
+            lu[row][column]=scaled
+            if(!scaled.isZero)entries[row].set(column)
         }
         for (column in 0 until size) {
             // Markowitz ordering eliminates voltage constraints and leaf branches first.
@@ -46,7 +79,7 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
                 // their sparse column ordering; numerical row pivoting is still performed.
                 var magnitude = 0.0
                 for (r in column until size) {
-                    val candidate = lu[r][column].abs().toDouble()
+                    val candidate = lu[r][column]?.abs()?.toDouble() ?: 0.0
                     if (candidate > magnitude) { magnitude = candidate; pivot = r }
                 }
             } else {
@@ -55,7 +88,7 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
                     var c = entries[r].nextSetBit(column)
                     while (c >= 0) {
                         rowCount[r]++; columnCount[c]++
-                        maximum[c] = maxOf(maximum[c], lu[r][c].abs().toDouble())
+                        maximum[c] = maxOf(maximum[c], lu[r][c]!!.abs().toDouble())
                         c = entries[r].nextSetBit(c + 1)
                     }
                 }
@@ -63,7 +96,7 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
                 for (r in column until size) {
                     var c = entries[r].nextSetBit(column)
                     while (c >= 0) {
-                        if (lu[r][c].abs().toDouble() >= maximum[c] * .1) {
+                        if (lu[r][c]!!.abs().toDouble() >= maximum[c] * .1) {
                             val fill = (rowCount[r] - 1).toLong() * (columnCount[c] - 1)
                             if (fill < cost || (fill == cost && rowCount[r] < width)) {
                                 pivot = r; pivotColumn = c; cost = fill; width = rowCount[r]
@@ -73,7 +106,7 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
                     }
                 }
             }
-            check(pivot >= 0 && lu[pivot][pivotColumn].isFinite) { "Matrix is singular" }
+            check(pivot >= 0 && lu[pivot][pivotColumn]?.isFinite==true) { "Matrix is singular" }
             if (pivot != column) {
                 val row = lu[column]; lu[column] = lu[pivot]; lu[pivot] = row
                 val pattern = entries[column]; entries[column] = entries[pivot]; entries[pivot] = pattern
@@ -90,13 +123,15 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
             }
             val active = indices(entries[column], column + 1, size)
             for (row in column + 1 until size) {
-                if (lu[row][column].isZero) continue
-                val factor = lu[row][column].divide(lu[column][column])
-                lu[row][column] = factor
+                val entry=lu[row][column]
+                if (entry==null || entry.isZero) continue
+                val factor = entry.divide(lu[column][column]!!)
+                lu[row][column] = if(sparseWorkspace && factor.isZero)null else factor
                 entries[row].set(column, !factor.isZero)
                 for (j in active) {
-                    lu[row][j] = lu[row][j].subtract(factor.multiply(lu[column][j]))
-                    entries[row].set(j, !lu[row][j].isZero)
+                    val value=(lu[row][j] ?: DD.ZERO).subtract(factor.multiply(lu[column][j]!!))
+                    lu[row][j] = if(sparseWorkspace && value.isZero)null else value
+                    entries[row].set(j, !value.isZero)
                 }
             }
         }
@@ -113,7 +148,7 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
         // Factorization arithmetic and ordering are unchanged. Only repeated
         // triangular/RHS solves reuse these fixed divisors in DD precision.
         diagonalReciprocals = Array(size) { row ->
-            if(lu[row][row]==DD.ONE)null else safeReciprocal(lu[row][row])
+            if(lu[row][row]==DD.ONE)null else safeReciprocal(lu[row][row]!!)
         }
     }
 
@@ -135,7 +170,7 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
         val result=value.multiply(reciprocal)
         return if(result.isFinite)result else value.divide(rowScale[row])
     }
-    private fun pivot(value: DD,row: Int)=quotient(value,lu[row][row],diagonalReciprocals[row])
+    private fun pivot(value: DD,row: Int)=quotient(value,lu[row][row]!!,diagonalReciprocals[row])
 
     private fun indices(entries: BitSet, start: Int, end: Int): IntArray {
         val result = IntArray(entries.cardinality())
@@ -155,9 +190,9 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
             else scale(DD.of(input),permutation[it])
         }
         for (row in 0 until size) for (j in lower[row]) if (!value[j].isZero)
-            value[row] = value[row].subtract(lu[row][j].multiply(value[j]))
+            value[row] = value[row].subtract(lu[row][j]!!.multiply(value[j]))
         for (row in size - 1 downTo 0) {
-            for (j in upper[row]) if (!value[j].isZero) value[row] = value[row].subtract(lu[row][j].multiply(value[j]))
+            for (j in upper[row]) if (!value[j].isZero) value[row] = value[row].subtract(lu[row][j]!!.multiply(value[j]))
             if (!value[row].isZero && lu[row][row] != DD.ONE) value[row] = pivot(value[row],row)
         }
         val result = Array(size) { DD.ZERO }
@@ -169,11 +204,11 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
     fun inverseRow(index: Int): Array<DD> = inverseRows[index] ?: run {
         val value = Array(size) { if (columns[it] == index) DD.ONE else DD.ZERO }
         for (row in 0 until size) {
-            for (j in upperTranspose[row]) if (!value[j].isZero) value[row] = value[row].subtract(lu[j][row].multiply(value[j]))
+            for (j in upperTranspose[row]) if (!value[j].isZero) value[row] = value[row].subtract(lu[j][row]!!.multiply(value[j]))
             if (!value[row].isZero && lu[row][row] != DD.ONE) value[row] = pivot(value[row],row)
         }
         for (row in size - 1 downTo 0) for (j in lowerTranspose[row]) if (!value[j].isZero)
-            value[row] = value[row].subtract(lu[j][row].multiply(value[j]))
+            value[row] = value[row].subtract(lu[j][row]!!.multiply(value[j]))
         val result = Array(size) { DD.ZERO }
         for (row in 0 until size) result[permutation[row]] = if (value[row].isZero || rowScale[permutation[row]] == 1.0) value[row]
             else scale(value[row],permutation[row])
