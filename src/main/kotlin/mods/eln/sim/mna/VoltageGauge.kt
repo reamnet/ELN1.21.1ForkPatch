@@ -14,6 +14,7 @@ import java.util.function.Function
 class VoltageGauge(matrix: Array<DoubleArray>, states: List<State>) {
     private val original = matrix.map { it.copyOf() }
     private val rows: IntArray
+    private val referenceRows: BooleanArray
     private val savedRhs: DoubleArray
     private var lastProbeRhs: DoubleArray? = null
     private var lastProbeValid = false
@@ -47,10 +48,13 @@ class VoltageGauge(matrix: Array<DoubleArray>, states: List<State>) {
             }
         }
         rows = references.toIntArray()
+        referenceRows = BooleanArray(states.size)
+        for(row in rows)referenceRows[row]=true
         savedRhs = DoubleArray(rows.size)
     }
 
     val active: Boolean get() = rows.isNotEmpty()
+    fun isReference(index: Int)=referenceRows[index]
 
     /** Apply the same reference choice to the precision-preserving solve matrix. */
     fun applyMatrix(matrix: Array<Array<DD>>) {

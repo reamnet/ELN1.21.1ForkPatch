@@ -1,0 +1,80 @@
+{
+  "tests": 863,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "version": "3.0.45",
+  "suites": 211,
+  "target_suites": [
+    {
+      "name": "mods.eln.transparentnode.utilitylight.JoinedPoleGridsTest",
+      "tests": "5",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T03:37:22.295Z",
+      "hostname": "67293bf35eff",
+      "time": "131.234"
+    },
+    {
+      "name": "mods.eln.sim.mna.AffineProbeTest",
+      "tests": "5",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T03:37:02.701Z",
+      "hostname": "67293bf35eff",
+      "time": "1.713"
+    },
+    {
+      "name": "mods.eln.transparentnode.renewable.RenewableTest",
+      "tests": "16",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T03:37:16.168Z",
+      "hostname": "67293bf35eff",
+      "time": "4.223"
+    },
+    {
+      "name": "mods.eln.sim.power.WindBankGeneratorGridTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T03:37:05.579Z",
+      "hostname": "67293bf35eff",
+      "time": "10.254"
+    },
+    {
+      "name": "mods.eln.transparentnode.ups.UpsStandbyTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T03:37:21.836Z",
+      "hostname": "67293bf35eff",
+      "time": "0.405"
+    },
+    {
+      "name": "mods.eln.sim.mna.MnaFactorizationTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T03:37:04.655Z",
+      "hostname": "67293bf35eff",
+      "time": "0.026"
+    },
+    {
+      "name": "mods.eln.sim.mna.VoltageGaugeTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T03:37:04.710Z",
+      "hostname": "67293bf35eff",
+      "time": "0.002"
+    }
+  ]
+}

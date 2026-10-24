@@ -49,6 +49,14 @@ public class SubSystem {
 
     DD[][] AInvdata;
     private MnaFactorization factorization;
+    // Diagnostic opt-out is sampled once, so baseline/optimized circuits can be compared.
+    private final boolean affineProbes = !Boolean.getBoolean("eln.disableAffineProbeUpdates");
+    private boolean symmetricProbeMatrix;
+    private double[] probeRhs;
+    private DD[] probeSolution;
+    private int probeUpdates;
+    private final int[] probeChangedColumns = new int[4];
+    private long fullProbeSolves, affineProbeUpdates;
     double[] Idata;
 
     double[] XtempData;
@@ -116,6 +124,7 @@ public class SubSystem {
     }
 
     public void generateMatrix() {
+        probeRhs = null; probeSolution = null; probeUpdates = 0;
         stateCount = states.size();
 
         Profiler p = new Profiler();
@@ -135,6 +144,17 @@ public class SubSystem {
 
         for (Component c : component) {
             c.applyToSubsystem(this);
+        }
+
+        // Test the physical stamp, before reference rows make the solve matrix
+        // asymmetric. Dependent-source/nonreciprocal networks retain full solves.
+        symmetricProbeMatrix = true;
+        for (int row = 0; row < stateCount && symmetricProbeMatrix; row++) {
+            for (int col = 0; col < row; col++) {
+                if (!preciseA[row][col].equals(preciseA[col][row])) {
+                    symmetricProbeMatrix = false; break;
+                }
+            }
         }
 
         //	org.apache.commons.math3.linear.
@@ -197,6 +217,8 @@ public class SubSystem {
     /** Diagnostic counters include speculative probes; they never advance circuit time. */
     public long getFullFactorizations() { return fullFactorizations; }
     public long getUpdatedFactorizations() { return updatedFactorizations; }
+    public long getFullProbeSolves() { return fullProbeSolves; }
+    public long getAffineProbeUpdates() { return affineProbeUpdates; }
 
     public synchronized SubSystemDebugSnapshot captureDebugSnapshot() {
         if (!matrixValid || A == null) {
@@ -369,6 +391,58 @@ public class SubSystem {
         return value;
     }
 
+    /** Changing only a few RHS entries does not require another triangular solve.
+     * The reciprocal physical matrix has a symmetric inverse on non-reference
+     * variables. Reference rows fix V=0: their response is zero, NOT the inverse
+     * row's reference-column coefficient. Reuse already cached port rows with
+     * those entries removed. All original gauge validation still runs afterward.
+     */
+    private DD[] solveProbePrecise(double[] rhs) {
+        if (affineProbes && symmetricProbeMatrix && probeSolution != null && probeUpdates < 16) {
+            int changes = 0;
+            boolean finite = true;
+            for (int col = 0; col < stateCount; col++) {
+                if (!Double.isFinite(rhs[col])) { finite = false; break; }
+                if (rhs[col] != probeRhs[col]) {
+                    if (changes == probeChangedColumns.length || voltageGauge.isReference(col)) {
+                        changes = -1; break;
+                    }
+                    probeChangedColumns[changes++] = col;
+                }
+            }
+            if (finite && changes >= 0) {
+                if (changes == 0) return probeSolution;
+                DD[] next = probeSolution.clone();
+                for (int i = 0; i < changes; i++) {
+                    int col = probeChangedColumns[i];
+                    DD delta = DD.of(rhs[col]).subtract(probeRhs[col]);
+                    DD[] response = responseRow(col);
+                    for (int row = 0; row < stateCount; row++) {
+                        if (!voltageGauge.isReference(row) && !response[row].isZero())
+                            next[row] = next[row].add(response[row].multiply(delta));
+                    }
+                }
+                boolean reusable = true;
+                for (DD value : next) if (!value.isFinite()) { reusable = false; break; }
+                if (reusable) {
+                    probeSolution = next;
+                    System.arraycopy(rhs, 0, probeRhs, 0, stateCount);
+                    probeUpdates++; affineProbeUpdates++;
+                    return next;
+                }
+            }
+        }
+        DD[] solved = solvePrecise(rhs);
+        fullProbeSolves++;
+        // Periodically rebase in DD, and never reuse a nonfinite solution.
+        boolean reusable = affineProbes && symmetricProbeMatrix;
+        if (reusable) for (DD value : solved) if (!value.isFinite()) { reusable = false; break; }
+        probeSolution = reusable ? solved : null;
+        probeRhs = reusable ? rhs.clone() : null;
+        probeUpdates = 0;
+        return solved;
+    }
+
     /** Speculative solve; legacy callers retain zero on failure. New power adapters use solveChecked. */
     public double solve(State pin) {
         double value = solveChecked(pin);
@@ -420,7 +494,7 @@ public class SubSystem {
         DD[] portRow = responseRow(index);
         DD current = dot(portRow, rhs);
         if (voltageGauge.getActive()) {
-            if (!voltageGauge.validProbe(Idata, values -> asDoubles(solvePrecise(values)))) return result;
+            if (!voltageGauge.validProbe(Idata, values -> asDoubles(solveProbePrecise(values)))) return result;
         }
         DD conductance = portRow[index].negate();
         DD intercept = current.add(conductance.multiply(source.getVoltage()));
@@ -450,9 +524,9 @@ public class SubSystem {
         DD[] bRow = b == null ? null : responseRow(b.getId());
         if (voltageGauge.getActive()) {
             // Reject an already unbalanced floating network before classifying a port as open.
-            if (!voltageGauge.validProbe(Idata, values -> asDoubles(solvePrecise(values)))) return result;
+            if (!voltageGauge.validProbe(Idata, values -> asDoubles(solveProbePrecise(values)))) return result;
             boolean supported = voltageGauge.supportsProbe(a == null ? -1 : a.getId(), b == null ? -1 : b.getId(),
-                    Idata, values -> asDoubles(solvePrecise(values)));
+                    Idata, values -> asDoubles(solveProbePrecise(values)));
             if (!supported) {
                 result.voltage = 0.0; result.resistance = Double.POSITIVE_INFINITY;
                 return result;

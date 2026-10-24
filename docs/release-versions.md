@@ -48,6 +48,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.42` | — | Bake remaining eligible legacy device bodies and static item previews; retain live mechanisms, screens, halos and labels |
 | `v3.0.43` | — | Water-fed repair washer, 240 V dryer and 30 A connectors; cold-fridge spoilage integrations; six-block fusion matter reactor with an embedded ProjectE value calculator and baked models |
 | `v3.0.44` | — | Stabilize shared wind-bank and generator grids through target-voltage converters; coordinate parallel limiter transitions, retain renewable operating guesses separate overlapping pole GUI readouts and add a water-fed climate-controlled growing bed |
+| `v3.0.45` | — | Reuse precise floating-network probe responses during convergence and UPS control; retain KCL validation, matrix invalidation and full-solve fallbacks |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`
@@ -60,7 +61,7 @@ release assets remain available with their original filenames.
 `modVersion` in `gradle.properties` is the version source for the jar filename,
 NeoForge metadata and the in-game version. Increment it when preparing the next
 update and create the matching `vX.Y.Z` source tag. For unpublished experiments,
-use an explicit override such as `-PmodVersion=3.0.44-local.1`.
+use an explicit override such as `-PmodVersion=3.0.45-local.1`.
 
 Build with `./gradlew build` to retain previous versioned jars in `build/libs/`.
 `./gradlew clean` removes that directory, and recompiling the same version

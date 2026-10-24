@@ -1,0 +1,48 @@
+{
+  "version": "3.0.45",
+  "method": "Alternating baseline/optimized rounds in the same JVM after warmup; synthetic floating feeders, not a Minecraft world benchmark.",
+  "results": [
+    {
+      "voltage_nodes": 80,
+      "ports": 8,
+      "matrix_states": 89,
+      "probes_per_round": 4000,
+      "baseline_ms": [
+        114.670436,
+        106.787682,
+        116.735158,
+        82.811111
+      ],
+      "optimized_ms": [
+        32.965487,
+        34.323668,
+        18.617111,
+        17.731368
+      ],
+      "median_speedup": 4.293271889872627,
+      "full_solves": 989,
+      "affine_updates": 15811
+    },
+    {
+      "voltage_nodes": 240,
+      "ports": 8,
+      "matrix_states": 249,
+      "probes_per_round": 4000,
+      "baseline_ms": [
+        150.052865,
+        157.929045,
+        143.382405,
+        181.0325
+      ],
+      "optimized_ms": [
+        84.013758,
+        71.780395,
+        23.360532,
+        21.217079
+      ],
+      "median_speedup": 3.2371127727187265,
+      "full_solves": 989,
+      "affine_updates": 15811
+    }
+  ]
+}
