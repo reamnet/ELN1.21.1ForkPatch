@@ -3,26 +3,27 @@ package mods.eln.client.terrain
 /** Part and dynamic-region selection is thread-local: integrated-server bounds lookups stay independent. */
 object MeshPartSelection {
     private data class Selection(val names: Set<String>,val only: Boolean,val automatic: Boolean=false)
+    private val distant=ThreadLocal.withInitial { false }
     private val current=ThreadLocal<Selection>()
     private val partDepth=ThreadLocal.withInitial { 0 }
     private val dynamicDepth=ThreadLocal.withInitial { 0 }
-    @JvmStatic fun allows(name: String): Boolean = current.get()?.let {
+    @JvmStatic fun allows(name: String): Boolean = if(distant.get())true else current.get()?.let {
         if(it.automatic && dynamicDepth.get()>0)true
         else ((name in it.names) || (it.automatic && name.startsWith("led",ignoreCase=true)))==it.only
     } ?: true
-    @JvmStatic fun staticPass()=current.get()?.only==false
-    @JvmStatic fun suppressDirectGeometry()=current.get()?.let { it.automatic && it.only && partDepth.get()==0 && dynamicDepth.get()==0 }==true
+    @JvmStatic fun staticPass()=!distant.get() && current.get()?.only==false
+    @JvmStatic fun suppressDirectGeometry()=!distant.get() && current.get()?.let { it.automatic && it.only && partDepth.get()==0 && dynamicDepth.get()==0 }==true
     @JvmStatic fun beginPart(name: String): Boolean {
         if(!allows(name))return false
         partDepth.set(partDepth.get()+1);return true
     }
     @JvmStatic fun endPart() { partDepth.set(partDepth.get()-1) }
     @JvmStatic fun beginAnimated(): Boolean {
-        if(current.get()?.let { it.automatic && !it.only }==true)return false
+        if(!distant.get() && current.get()?.let { it.automatic && !it.only }==true)return false
         dynamicDepth.set(dynamicDepth.get()+1);return true
     }
     @JvmStatic fun beginDynamic(): Boolean {
-        if(staticPass())return false
+        if(distant.get() || staticPass())return false
         dynamicDepth.set(dynamicDepth.get()+1);return true
     }
     @JvmStatic fun endDynamic() { dynamicDepth.set(dynamicDepth.get()-1) }
@@ -38,6 +39,10 @@ object MeshPartSelection {
     fun <T> dynamic(draw:()->T): T? {
         if(!beginDynamic())return null
         return try { draw() } finally { endDynamic() }
+    }
+    fun <T> forDistant(draw: ()->T): T {
+        val previous=distant.get();distant.set(true)
+        return try { draw() } finally { distant.set(previous) }
     }
     fun <T> with(names: Set<String>,only: Boolean,draw:()->T)=select(Selection(names,only),draw)
     fun <T> automatic(names: Set<String>,only: Boolean,draw:()->T)=select(Selection(names,only,true),draw)

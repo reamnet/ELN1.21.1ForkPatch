@@ -67,6 +67,7 @@ class FloodlightElement(transparentNode: TransparentNode, transparentNodeDescrip
     val electricalLoad = NbtElectricalLoad("electricalLoad")
     override val cord=mods.eln.transparentnode.cord.ApplianceCord(this,electricalLoad)
     override val cordVoltage get()=(0..1).mapNotNull { (getItemObject(inventory.getItem(it)) as? LampDescriptor)?.lampData?.nominalU }.let { values -> if(values.distinct().size>1)Double.NaN else values.firstOrNull() ?: if(motorized)240.0 else 120.0 }
+    override fun acceptsCord(rating: mods.eln.transparentnode.cord.CordRating)=mods.eln.sixnode.lampsocket.LampCordCompatibility.accepts(rating,cordVoltage)
     private val lamp1Resistor = Resistor(electricalLoad, null)
     private val lamp2Resistor = Resistor(electricalLoad, null)
 

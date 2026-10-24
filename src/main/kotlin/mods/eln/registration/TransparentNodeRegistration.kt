@@ -1523,8 +1523,12 @@ object TransparentNodeRegistration {
         transparentNodeItem.addDescriptor(51+(124 shl 6),mods.eln.utility.HouseServiceDescriptor(true))
         transparentNodeItem.addDescriptor(52+(124 shl 6),mods.eln.utility.BreakerPanelDescriptor())
         transparentNodeItem.addDescriptor(56+(124 shl 6),mods.eln.utility.HouseServiceDescriptor(false,disconnect=true))
-        // 55/56 are the strip/disconnect; 58/59 are fairy strings. New enum entries need an explicit free ID.
-        val poleSubIds=intArrayOf(34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,53,54,57)
+        mods.eln.utility.TransmissionKind.entries.forEach { kind ->
+            transparentNodeItem.addDescriptor(kind.subId+(125 shl 6),mods.eln.utility.TransmissionDescriptor(kind))
+        }
+        // 55/56 are the strip/disconnect; 58/59 are fairy strings; 60 is the mini fridge.
+        // Appended tap/light variants use 125:22/23 (124-relative offsets 86/87).
+        val poleSubIds=intArrayOf(34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,53,54,57,86,87)
         require(poleSubIds.size==mods.eln.utility.DistributionKind.entries.size)
         mods.eln.utility.DistributionKind.entries.forEachIndexed { i,kind -> transparentNodeItem.addDescriptor(poleSubIds[i]+(124 shl 6),mods.eln.utility.DistributionPoleDescriptor(kind)) }
         transparentNodeItem.addDescriptor(58+(124 shl 6),mods.eln.transparentnode.festive.FairyLightsDescriptor(TR_NAME(I18N.Type.NONE,"White Fairy Lights on Green Wire"),false))

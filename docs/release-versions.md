@@ -52,6 +52,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.46` | — | Cache precise fixed divisors in large-system MNA solves and transpose responses; retain direct division for extreme values |
 | `v3.0.47` | — | Reduce sparse-network matrix rebuild work with implicit-zero LU workspace initialization and stamp-based symmetry checks |
 | `v3.0.48` | — | Track nonzero rows per LU column during rebuilds and avoid full voltage-reference matrix copies; retain exact pivot order and discarded KCL validation |
+| `v3.0.49` | — | Add 69/230 kV transmission and riser equipment, substation transformers/disconnects, fused-tap light poles, adjustable warehouse suspension, 240 V lamp cords, 10-30 dryer connectors, covered-cable rain blocking, optional DH distant objects and remove external analytics |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`
@@ -64,7 +65,7 @@ release assets remain available with their original filenames.
 `modVersion` in `gradle.properties` is the version source for the jar filename,
 NeoForge metadata and the in-game version. Increment it when preparing the next
 update and create the matching `vX.Y.Z` source tag. For unpublished experiments,
-use an explicit override such as `-PmodVersion=3.0.48-local.1`.
+use an explicit override such as `-PmodVersion=3.0.49-local.1`.
 
 Build with `./gradlew build` to retain previous versioned jars in `build/libs/`.
 `./gradlew clean` removes that directory, and recompiling the same version

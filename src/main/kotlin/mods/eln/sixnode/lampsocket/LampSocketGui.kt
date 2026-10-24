@@ -22,17 +22,25 @@ class LampSocketGui(player: Player, val render: LampSocketRender) :
     private var motionButton: GuiButtonEln? = null
     private var fanButton: GuiButtonEln?=null
     private var aiming: LightAimControls?=null
+    private var raise: GuiButtonEln?=null
+    private var lower: GuiButtonEln?=null
+    private var dropLabel: GuiButtonEln?=null
     private lateinit var buttonGrounded: GuiButtonEln
     private lateinit var buttonPowerSource: GuiButtonEln
     private lateinit var textboxLampSupplyChannel: GuiTextFieldEln
     private lateinit var trackbarRotationAngle: GuiVerticalTrackBar
 
     override fun newHelper(): GuiHelperContainer {
-        return if(render.aim.heads>0)GuiHelperContainer(this,176,242,8,160) else HelperStdContainer(this)
+        return if(render.descriptor.fixture?.hangingWarehouse==true)GuiHelperContainer(this,176,198,8,116) else if(render.aim.heads>0)GuiHelperContainer(this,176,242,8,160) else HelperStdContainer(this)
     }
 
     override fun initGui() {
         super.initGui()
+        if(render.descriptor.fixture?.hangingWarehouse==true) {
+            raise=newGuiButton(8,82,28,"-").apply { setComment(0,I18N.tr("Raise warehouse light")) }
+            dropLabel=newGuiButton(40,82,92,"").apply { enabled=false }
+            lower=newGuiButton(136,82,32,"+").apply { setComment(0,I18N.tr("Lower warehouse light")) }
+        }
         if(render.aim.heads>0)aiming=LightAimControls(this,82,render.aim) { head,axis,value ->
             render.clientSetDouble((32+head*2+axis).toByte(),value)
         }
@@ -40,7 +48,7 @@ class LampSocketGui(player: Player, val render: LampSocketRender) :
 
         buttonPowerSource = newGuiButton(16, 7, 144, "")
         buttonPowerSource.enabled = !render.descriptor.wirelessOnly
-        if (render.descriptor.wirelessOnly) buttonPowerSource.setComment(0,I18N.tr("This light uses a wireless lamp supply"))
+        if (render.descriptor.wirelessOnly) buttonPowerSource.setComment(0,I18N.tr("This light uses a wireless lamp supply or appliance cord"))
 
         buttonGrounded = newGuiButton(16, 33, 144, "")
         buttonGrounded.setComment(0, "Toggle the internal ground connection")
@@ -69,6 +77,9 @@ class LampSocketGui(player: Player, val render: LampSocketRender) :
     override fun preDraw(f: Float, x: Int, y: Int) {
         super.preDraw(f, x, y)
         aiming?.refresh()
+        dropLabel?.displayString=I18N.tr("Drop: %1$ m",render.suspension.drop)
+        raise?.enabled=render.suspension.drop>0.0
+        lower?.enabled=render.suspension.drop<7.0
         fanButton?.displayString=if(render.fanEnabled)I18N.tr("Fan: On") else I18N.tr("Fan: Off")
 
         if (render.grounded) buttonGrounded.displayString = I18N.tr("Grounded")
@@ -114,6 +125,8 @@ class LampSocketGui(player: Player, val render: LampSocketRender) :
         aiming?.event(obj)
 
         when (obj) {
+            raise -> render.clientSetDouble(10,render.suspension.drop-.25)
+            lower -> render.clientSetDouble(10,render.suspension.drop+.25)
             fanButton -> render.clientSend(9)
             motionButton -> render.clientSend(MOTION_MODE_EVENT.toInt())
             buttonGrounded -> render.clientSend(TOGGLE_GROUNDED_EVENT.toInt())

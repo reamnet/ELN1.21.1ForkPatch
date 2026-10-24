@@ -1,0 +1,22 @@
+{
+  "version": "3.0.49",
+  "method": "Source audit of ELN production Java/Kotlin reporting implementations and startup hooks; legacy-config sanitization exercised by JsonConfigTest.",
+  "startup_analytics_calls": 0,
+  "automatic_update_handler_registrations": 0,
+  "old_analytics_domain_references": 0,
+  "reporting_implementations": [
+    {
+      "file": "src/main/kotlin/mods/eln/misc/AnalyticsHandler.kt",
+      "http_or_mqtt_reporting_client_references": 0
+    },
+    {
+      "file": "src/main/java/mods/eln/client/VersionCheckerHandler.java",
+      "http_or_mqtt_reporting_client_references": 0
+    },
+    {
+      "file": "src/main/kotlin/mods/eln/metrics/MetricsSubsystem.kt",
+      "http_or_mqtt_reporting_client_references": 0
+    }
+  ],
+  "retained": "Local diagnostic logs and opt-in user-configured MQTT/Modbus device automation. Minecraft and other mods are outside this audit."
+}

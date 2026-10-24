@@ -1,8 +1,6 @@
 package mods.eln.metrics
 
 import mods.eln.Eln
-import mods.eln.mqtt.MqttManager
-import mods.eln.mqtt.SimpleMqttClient
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
@@ -41,62 +39,13 @@ private interface MetricsSink {
     fun publishRuntime(payload: SimRuntimeMetricsPayload)
 }
 
-private class MqttSimMetricsSink(
-    private val serverName: String,
-    private val streamId: String
-) : MetricsSink {
-    private var sourceInfoPublished = false
-
+/** Optional diagnostics stay in the local log; there is no network sink. */
+private class LocalLogMetricsSink: MetricsSink {
     override fun publishMna(payload: SimMnaMetricsPayload) {
-        val server = MqttManager.getServerByName(serverName) ?: return
-        val client = MqttManager.getClient(server.name) ?: return
-        val baseTopic = topicFor(server.prefix.orEmpty(), streamId)
-        publishText(client, "$baseTopic/stat/subsystems", payload.subSystemCount)
-        publishText(client, "$baseTopic/stat/inversions", payload.inversionCount)
-        publishText(client, "$baseTopic/stat/singular_matrices", payload.singularMatrixCount)
-        publishText(client, "$baseTopic/stat/inversion_avg_ns", payload.inversionAverageNanoseconds)
-        publishText(client, "$baseTopic/stat/inversion_max_ns", payload.inversionMaximumNanoseconds)
-        if (!sourceInfoPublished) {
-            sourceInfoPublished = true
-            publishText(client, "$baseTopic/info/source", "simulator", retain = true)
-            publishText(client, "$baseTopic/info/id", streamId, retain = true)
-        }
+        Eln.logger.info("[Simulator local] MNA {}",payload)
     }
-
     override fun publishRuntime(payload: SimRuntimeMetricsPayload) {
-        val server = MqttManager.getServerByName(serverName) ?: return
-        val client = MqttManager.getClient(server.name) ?: return
-        val baseTopic = topicFor(server.prefix.orEmpty(), streamId)
-        publishText(client, "$baseTopic/stat/tick_us", payload.avgTickMicroseconds)
-        publishText(client, "$baseTopic/stat/electrical_us", payload.electricalMicroseconds)
-        publishText(client, "$baseTopic/stat/thermal_fast_us", payload.thermalFastMicroseconds)
-        publishText(client, "$baseTopic/stat/thermal_slow_us", payload.thermalSlowMicroseconds)
-        publishText(client, "$baseTopic/stat/slow_us", payload.slowMicroseconds)
-
-        publishText(client, "$baseTopic/stat/electrical_processes", payload.electricalProcessCount)
-        publishText(client, "$baseTopic/stat/thermal_fast_loads", payload.thermalFastLoadCount)
-        publishText(client, "$baseTopic/stat/thermal_fast_connections", payload.thermalFastConnectionCount)
-        publishText(client, "$baseTopic/stat/thermal_fast_processes", payload.thermalFastProcessCount)
-        publishText(client, "$baseTopic/stat/thermal_slow_loads", payload.thermalSlowLoadCount)
-        publishText(client, "$baseTopic/stat/thermal_slow_connections", payload.thermalSlowConnectionCount)
-        publishText(client, "$baseTopic/stat/thermal_slow_processes", payload.thermalSlowProcessCount)
-        publishText(client, "$baseTopic/stat/slow_processes", payload.slowProcessCount)
-        publishText(client, "$baseTopic/stat/subsystems_current", payload.subSystemCount)
-    }
-
-    private fun publishText(client: SimpleMqttClient, topic: String, value: Any, retain: Boolean = false) {
-        client.publish(topic, value.toString().toByteArray(), retain)
-    }
-
-    private fun topicFor(prefix: String, streamId: String): String {
-        val builder = StringBuilder()
-        if (prefix.isNotBlank()) {
-            builder.append(prefix.trimEnd('/'))
-            builder.append('/')
-        }
-        builder.append("eln/sim/")
-        builder.append(streamId)
-        return builder.toString()
+        Eln.logger.info("[Simulator local] Runtime {}",payload)
     }
 }
 
@@ -124,7 +73,6 @@ object MetricsSubsystem {
         dummyInversionCount.set(0)
         dummySingularCount.set(0)
         val serverName = Eln.simMetricsMqttServer
-        val streamId = Eln.simMetricsId.ifBlank { "server" }
         if (!Eln.mqttEnabled || !Eln.simMetricsEnabled) {
             stopWorker()
             return
@@ -147,12 +95,7 @@ object MetricsSubsystem {
             startWorkerIfNeeded()
             return
         }
-        if (serverName.isBlank()) {
-            Eln.logger.warn("[Metrics] integrations.mqtt.simMetrics.enabled is true but integrations.mqtt.simMetrics.server is blank")
-            stopWorker()
-            return
-        }
-        sinks.add(MqttSimMetricsSink(serverName, streamId))
+        sinks.add(LocalLogMetricsSink())
         simulatorMetricsActive.set(true)
         if (!running.get()) startWorkerIfNeeded()
     }

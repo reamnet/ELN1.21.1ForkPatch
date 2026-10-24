@@ -60,6 +60,19 @@ class SixNode : Node() {
         return sideElementList[side.int]
     }
 
+    /** A real state transition refreshes vanilla weather heightmaps and persists
+     * roof coverage even when no block entity is available to chunk workers. */
+    fun syncCoverState() {
+        val world=coordinate.world() ?: return
+        val pos=coordinate.pos
+        if(world.isClientSide || !world.hasChunkAt(pos))return
+        val state=world.getBlockState(pos)
+        if(state.block !is SixNodeBlock)return
+        val covered=sixNodeCacheBlock!==Blocks.AIR
+        if(state.getValue(SixNodeBlock.COVERED)!=covered)
+            world.setBlock(pos,state.setValue(SixNodeBlock.COVERED,covered),Block.UPDATE_ALL)
+    }
+
     override fun canConnectRedstone(): Boolean {
         for (element in sideElementList) {
             if (element != null && element.canConnectRedstone()) {
@@ -278,6 +291,7 @@ class SixNode : Node() {
     }
 
     override fun publishSerialize(stream: DataOutputStream) {
+        syncCoverState()
         super.publishSerialize(stream)
         try {
             var idx = 0
@@ -460,6 +474,7 @@ class SixNode : Node() {
             }
 
             if (isWrenchReplacingBlock) {
+                syncCoverState()
                 needPublish = true
                 if (!isCreative((entityPlayer as ServerPlayer))) entityPlayer.inventory.removeItem(entityPlayer.inventory.selected, 1)
 

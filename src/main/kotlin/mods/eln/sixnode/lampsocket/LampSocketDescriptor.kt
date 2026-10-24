@@ -93,8 +93,9 @@ class LampSocketDescriptor(itemName: String, val renderType: ILampSocketObjRende
             list.add(I18N.tr("Fan motor: %1$ W; use a bulb matching the supply voltage",fixture!!.fanWatts.toInt()))
             list.add(I18N.tr("Without a bulb the motor is rated for 120 V; the GUI switches the fan separately"))
         }
+        if(fixture?.hangingWarehouse==true)list.add(I18N.tr("Ceiling mount; adjustable drop from 0 to 7 blocks in the GUI"))
         if (fixture != null) {
-            list.add(if (wirelessOnly) I18N.tr("Wireless lamp supply power only") else I18N.tr("Wireless lamp supply or wired power"))
+            list.add(if (wirelessOnly) I18N.tr("Wireless lamp supply or appliance cord") else I18N.tr("Wireless lamp supply or wired power"))
             list.add(I18N.tr("Holds up to %1$ matching bulbs",bulbCapacity))
             list.add(I18N.tr("Insert matching bulbs together; power draw scales with bulb count"))
         }

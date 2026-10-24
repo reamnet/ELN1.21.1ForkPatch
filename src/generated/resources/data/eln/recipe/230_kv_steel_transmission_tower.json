@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "minecraft:iron_bars"
+    },
+    "I": {
+      "item": "minecraft:iron_block"
+    },
+    "P": {
+      "item": "eln:69_kv_steel_transmission_pole"
+    }
+  },
+  "pattern": [
+    "IPI",
+    "PBP",
+    "I I"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:230_kv_steel_transmission_tower"
+  }
+}

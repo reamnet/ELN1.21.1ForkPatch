@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "eln:69_kv_steel_transmission_pole"
+    },
+    "C": {
+      "item": "eln:copper_cable"
+    },
+    "I": {
+      "item": "minecraft:iron_bars"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    "CCC",
+    "IBI",
+    "PPP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:69_kv_three_phase_substation_disconnect"
+  }
+}

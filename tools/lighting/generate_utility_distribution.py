@@ -123,6 +123,9 @@ def pole():
  for i in range(3):
   lead(m,'TransformerSecondary',(-.60,4.65+i*.24,.20),(.39,4.65+i*.32,.20),.009)
   lead(m,'TransformerSecondary',(.39,4.65+i*.32,.20),(.39,4.65+i*.32,0),.009)
+ m.cyl('TopPin',1,(0,6.87,0),.55,.045,n=16)
+ for k in range(5):m.cyl('TopPin',1,(0,6.92+k*.09,0),.035,.13,n=24)
+ m.cyl('TopPin',1,(0,7.40,0),.025,.07,n=16)
  m.save('distributionpole')
 
 def cabinets():

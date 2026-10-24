@@ -56,6 +56,7 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, sixNodeDescri
     var activeLampSupplyConnection = false
     var projectionRotationAngle = 0.0
     val aim=descriptor.fixture?.newAim() ?: LightAim(0)
+    val suspension=WarehouseSuspension()
     var fanEnabled=true
     var fanPower=0.0
     val operatingSound=if(descriptor.fixture?.fan==true)object : LoopedSound("eln:appliance_ceiling_fan",
@@ -123,6 +124,7 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, sixNodeDescri
             if (descriptor.fixture != null) bulbCount = stream.readUnsignedByte().coerceIn(0,descriptor.bulbCapacity)
             if (descriptor.fixture == DecorativeLampStyle.MOTION) motionMode = stream.readUnsignedByte().coerceIn(0,3)
             aim.read(stream)
+            if(descriptor.fixture?.hangingWarehouse==true)suspension.set(stream.readDouble())
             if(descriptor.fixture?.fan==true) { fanEnabled=stream.readBoolean();fanPower=stream.readDouble().coerceIn(0.0,1.0) }
         } catch (e: IOException) {
             e.printStackTrace()
@@ -147,7 +149,7 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, sixNodeDescri
         GL11.glTranslated(-inset,0.0,0.0)
         GL11.glRotated(descriptor.initialRenderAngleOffset, 1.0, 0.0, 0.0)
         if(descriptor.fixture!=null) mods.eln.client.terrain.TerrainModels.body(this,
-            listOf(front,inset,bulbCount,lightValue>=MIN_LIGHT_ON_VALUE,lampDescriptor?.lampData?.technology?.lampType,
+            listOf(front,inset,suspension.drop,bulbCount,lightValue>=MIN_LIGHT_ON_VALUE,lampDescriptor?.lampData?.technology?.lampType,
                 (0 until aim.heads).map { listOf(aim.pan(it),aim.tilt(it)) }),
             if(descriptor.fixture?.fan==true)setOf("Rotor") else emptySet()) {
                 descriptor.renderType.draw(this,0.0)
@@ -234,7 +236,7 @@ class LampSocketRender(tileEntity: SixNodeEntity, side: Direction, sixNodeDescri
 
         return AABB(
             (tileEntity.xCoord - 1).toDouble(),
-            (tileEntity.yCoord - 2).toDouble(),
+            (tileEntity.yCoord - if(descriptor.fixture?.hangingWarehouse==true)9 else 2).toDouble(),
             (tileEntity.zCoord - 1).toDouble(),
             (tileEntity.xCoord + 2).toDouble(),
             (tileEntity.yCoord + if (descriptor.fixture == DecorativeLampStyle.PARKING) 6 else 4).toDouble(),

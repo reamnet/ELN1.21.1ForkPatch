@@ -61,6 +61,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     val electricalLoad = NbtElectricalLoad("electricalLoad")
     override val cord=mods.eln.transparentnode.cord.ApplianceCord(this,electricalLoad)
     override val cordVoltage get()=fanNominal
+    override fun acceptsCord(rating: mods.eln.transparentnode.cord.CordRating)=mods.eln.sixnode.lampsocket.LampCordCompatibility.accepts(rating,cordVoltage)
     override val cordPortable get()=descriptor.fixture?.tableLamp==true
     val wirelessPower get()=poweredByLampSupply && !cord.plugged
     val hasPowerLead get()=cord.plugged || !inventory.getItem(LampSocketContainer.CABLE_SLOT_ID).isEmpty
@@ -79,6 +80,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
     var activeLampSupplyConnection = false
     var projectionRotationAngle = 0.0
     val aim=descriptor.fixture?.newAim() ?: LightAim(0)
+    val suspension=WarehouseSuspension()
     var fanEnabled=true
     val rotor=mods.eln.transparentnode.fan.FanDynamics()
     val fanPower get()=rotor.speed
@@ -219,6 +221,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
         motionMode = nbt.getInt("motionMode").coerceIn(0,3)
         projectionRotationAngle = nbt.getDouble("projectionRotationAngle")
         aim.read(nbt)
+        if(descriptor.fixture?.hangingWarehouse==true)suspension.read(nbt)
         fanEnabled=!nbt.contains("fanEnabled") || nbt.getBoolean("fanEnabled");rotor.read(nbt)
         lampSocketProcess.stableLightProbability = nbt.getDouble("stableLightProbability")
     }
@@ -233,6 +236,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
         nbt.putInt("motionMode",motionMode)
         nbt.putDouble("projectionRotationAngle", projectionRotationAngle)
         aim.write(nbt)
+        if(descriptor.fixture?.hangingWarehouse==true)suspension.write(nbt)
         if(descriptor.fixture?.fan==true) { nbt.putBoolean("fanEnabled",fanEnabled);rotor.write(nbt) }
         nbt.putDouble("stableLightProbability", lampSocketProcess.stableLightProbability)
     }
@@ -343,6 +347,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
             if (descriptor.fixture != null) stream.writeByte(installedBulbs)
             if (descriptor.fixture == DecorativeLampStyle.MOTION) stream.writeByte(motionMode)
             aim.write(stream)
+            if(descriptor.fixture?.hangingWarehouse==true)stream.writeDouble(suspension.drop)
             if(descriptor.fixture?.fan==true) { stream.writeBoolean(fanEnabled);stream.writeDouble(fanPower) }
         } catch (e: IOException) {
             e.printStackTrace()
@@ -357,6 +362,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
         try {
             val event=stream.readByte()
             when (event) {
+                10.toByte() -> if(descriptor.fixture?.hangingWarehouse==true)suspension.set(stream.readDouble())
                 9.toByte() -> if(descriptor.fixture?.fan==true) { fanEnabled=!fanEnabled;computeInventory() }
                 in 32..63 -> aim.set((event.toInt()-32)/2,(event.toInt()-32)%2,stream.readDouble())
                 in 5..8 -> {
@@ -424,6 +430,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
         var publishChanges = false
         var inventoryChanged = false
         if(aim.heads>0) { aim.read(compound);publishChanges=true }
+        if(descriptor.fixture?.hangingWarehouse==true) { suspension.read(compound);publishChanges=true }
         if(descriptor.fixture?.fan==true && compound.contains("fanEnabled")) {
             fanEnabled=compound.getBoolean("fanEnabled");inventoryChanged=true
         }
@@ -470,6 +477,7 @@ class LampSocketElement(sixNode: SixNode, side: Direction, sixNodeDescriptor: Si
 
     override fun writeConfigTool(compound: CompoundTag, invoker: Player) {
         aim.write(compound)
+        if(descriptor.fixture?.hangingWarehouse==true)suspension.write(compound)
         if(descriptor.fixture?.fan==true)compound.putBoolean("fanEnabled",fanEnabled)
         compound.putBoolean("poweredByLampSupply", poweredByLampSupply)
         compound.putString("lampSupplyChannel", lampSupplyChannel)

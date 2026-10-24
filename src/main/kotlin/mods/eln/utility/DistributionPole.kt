@@ -48,7 +48,11 @@ enum class DistributionKind(val title: String,val phases: Int=3,val transformer:
     STREET_THREE(I18N.TR_NAME(I18N.Type.NONE,"Three Phase Transformer Street Light Pole"),3,true,true),
     SECONDARY_FED_SINGLE(I18N.TR_NAME(I18N.Type.NONE,"Single Phase Secondary Fed Street Light Pole"),1,light=true),
     SECONDARY_FED_THREE(I18N.TR_NAME(I18N.Type.NONE,"Three Phase Secondary Fed Street Light Pole"),3,light=true),
-    FUSED_TAP_THREE(I18N.TR_NAME(I18N.Type.NONE,"Three Phase Pole with Fused Single Phase Tap"),singlePhaseTap=true);
+    FUSED_TAP_THREE(I18N.TR_NAME(I18N.Type.NONE,"Three Phase Pole with Fused Single Phase Tap"),singlePhaseTap=true),
+    FUSED_TAP_LIGHT_THREE(I18N.TR_NAME(I18N.Type.NONE,"Three Phase Fused Tap Secondary Fed Street Light Pole"),light=true,singlePhaseTap=true),
+    FUSED_TAP_TRANSFORMER_LIGHT_THREE(I18N.TR_NAME(I18N.Type.NONE,"Three Phase Transformer Street Light Pole with Fused Single Phase Tap"),transformer=true,light=true,singlePhaseTap=true);
+    val fuseCount get()=if(transformer && singlePhaseTap)2 else if(transformer || singlePhaseTap)1 else if(cutout || regulator)phases else 0
+    val tapFuseIndex get()=if(transformer)1 else 0
     val protectedLine get()=cutout || recloser || this==AIR_BREAK_THREE || regulator || singlePhaseTap
     val outputPhases get()=if(singlePhaseTap)1 else phases
     val capacitor get()=this==CAPACITOR_THREE
@@ -67,7 +71,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     val installed get()=kind.transformer && isStepDownUnit(inventory.getItem(0))
     val lines=List(kind.phases) { NbtElectricalLoad("phase$it").apply { serialResistance=.00001 } }
     val outs=if(kind.protectedLine)List(kind.outputPhases) { NbtElectricalLoad("phaseOut$it").apply { serialResistance=.00001 } } else lines
-    val fuses=List(if(kind.transformer || kind.singlePhaseTap)1 else if(kind.cutout || kind.regulator)kind.phases else 0) { CutoutFuse() }
+    val fuses=List(kind.fuseCount) { CutoutFuse() }
     val recloser=RecloserControl()
     var selectedTerminal=if(kind.lvOnly)ServiceTerminals.BUNDLE else 32
         private set
@@ -86,12 +90,16 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     val services: List<NbtElectricalLoad> = secondary?.loads ?: List(3) { NbtElectricalLoad("secondaryBus$it").apply { serialResistance=.00001 } }
     private val regulatorInputs=if(kind.regulator)List(kind.phases) { NbtElectricalLoad("regulatorInput$it").apply { serialResistance=.00001 } } else emptyList()
     private val contacts=when {
-        kind.transformer -> lines.map { TransferContact(it,unit!!.primary) }
         kind.singlePhaseTap -> lines.map { TransferContact(it,outs[0]) }
+        kind.transformer -> lines.map { TransferContact(it,unit!!.primary) }
         kind.regulator -> lines.indices.map { TransferContact(lines[it],regulatorInputs[it]) }
         kind.protectedLine && !kind.regulator -> lines.indices.map { TransferContact(lines[it],outs[it]) }
         else -> emptyList()
     }
+    private val transformerContacts=if(kind.transformer && kind.singlePhaseTap)lines.map { TransferContact(it,unit!!.primary) } else emptyList()
+    private val transformerFeed get()=if(transformerContacts.isNotEmpty())transformerContacts else contacts
+    private fun fuseCurrent(index: Int)=if(kind.transformer && index==0)transformerFeed.getOrNull(transformerPhase)?.current ?: 0.0
+        else contacts.getOrNull(if(kind.singlePhaseTap)transformerPhase else index)?.current ?: 0.0
     private val regulatorTaps=if(kind.regulator)lines.indices.map { i ->
         val pin=NbtElectricalLoad("regulatorTap$i")
         electricalLoadList.add(pin)
@@ -126,7 +134,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         electricalLoadList.addAll(lines);electricalLoadList.addAll(regulatorInputs)
         if(outs!==lines)electricalLoadList.addAll(outs)
         if(secondary==null)electricalLoadList.addAll(services)
-        electricalComponentList.addAll(contacts)
+        electricalComponentList.addAll(contacts);electricalComponentList.addAll(transformerContacts)
         if(kind.capacitor)lines.forEachIndexed { i,line ->
             val pin=NbtElectricalLoad("capacitor$i");electricalLoadList.add(pin)
             electricalComponentList.add(Resistor(line,pin).apply { resistance=100.0 })
@@ -141,27 +149,28 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     }
     private fun applyContacts() {
         contacts.forEachIndexed { i,c -> c.closed=when {
+            kind.singlePhaseTap -> transformerPhase==i && fuses[kind.tapFuseIndex].closed
             kind.transformer -> installed && transformerPhase==i && fuses[0].closed
-            kind.singlePhaseTap -> transformerPhase==i && fuses[0].closed
             kind.cutout || kind.regulator -> fuses[i].closed
             kind.recloser -> recloser.closed
             else -> gangClosed
         } }
+        transformerContacts.forEachIndexed { i,c -> c.closed=installed && transformerPhase==i && fuses[0].closed }
     }
     private fun step(dt: Double) {
         secondary?.update()
         if(kind.transformer) {
             val limited=unit!!.outputOverloaded
-            val amps=contacts.getOrNull(transformerPhase)?.current ?: 0.0
+            val amps=fuseCurrent(0)
             val rating=unit.ratedWatts/MainsStepDown.NOMINAL_POLE_VOLTS
             if(fuses[0].step(dt,amps,rating,limited)) { sound("utility_fuse_blow",.8);applyContacts();needPublish() }
         }
         fuses.forEachIndexed { i,fuse ->
-            val amps=contacts.getOrNull(if(kind.transformer || kind.singlePhaseTap)transformerPhase else i)?.current ?: 0.0
+            val amps=fuseCurrent(i)
             if(fuse.pickup(dt,amps))sound("utility_arc_close",.20)
         }
         if(kind.cutout || kind.regulator)fuses.forEachIndexed { i,fuse -> if(fuse.step(dt,contacts[i].current,fuseAmps)) { sound("utility_fuse_blow",.8);applyContacts();needPublish() } }
-        if(kind.singlePhaseTap && fuses[0].step(dt,contacts[transformerPhase].current,fuseAmps)) { sound("utility_fuse_blow",.8);applyContacts();needPublish() }
+        if(kind.singlePhaseTap && fuses[kind.tapFuseIndex].step(dt,fuseCurrent(kind.tapFuseIndex),fuseAmps)) { sound("utility_fuse_blow",.8);applyContacts();needPublish() }
         if(kind.recloser && recloser.step(dt,contacts.map { it.current })) { applyContacts();sound("utility_recloser_bump",.7);needPublish() }
         if(kind.regulator && regulatorAutomatic) {
             regulatorClock+=dt
@@ -191,7 +200,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     private fun sound(name: String,volume: Double) { if(node?.coordinate?.let { mods.eln.misc.DimensionIds.serverLevel(it.dimension) }!=null)play(SoundCommand("eln:$name").smallRange().mulVolume(volume)) }
     fun operateFuse(index: Int) {
         val fuse=fuses.getOrNull(index) ?: return
-        val loaded=if(kind.transformer || kind.singlePhaseTap)abs(contacts.getOrNull(transformerPhase)?.current ?: 0.0)>.02 else abs(contacts[index].current)>.02
+        val loaded=abs(fuseCurrent(index))>.02
         if(fuse.operate()) {
             if(loaded && !fuse.closed)sound("utility_arc_open",.55)
             applyContacts();needPublish()
@@ -267,7 +276,8 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         terminal==ServiceTerminals.HV_LOAD_BUNDLE -> gridCablePoint(36+wire,0)
         terminal==50 -> Vec3(.405,4.65+wire*.32,0.0)
         terminal in 40..42 -> Vec3(.405,4.65+(terminal-40)*.32,0.0)
-        terminal==36 && kind.singlePhaseTap -> Vec3(-.68,5.85,0.0)
+        terminal==32 && kind.phases==1 -> Vec3(0.0,7.425,0.0)
+        terminal==36 && kind.singlePhaseTap -> Vec3(-.68,5.85,if(kind.transformer).65 else 0.0)
         terminal in 36..38 && kind.cutout -> Vec3(-.68,5.85,phaseZ(terminal-36))
         terminal in 36..38 && kind.regulator -> Vec3(.65,5.50,phaseZ(terminal-36)*.73)
         terminal in 36..38 -> Vec3(.35,6.53,phaseZ(terminal-36))

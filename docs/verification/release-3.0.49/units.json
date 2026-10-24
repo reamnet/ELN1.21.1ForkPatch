@@ -1,0 +1,51 @@
+{
+  "tests": 891,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "version": "3.0.49",
+  "suites": 217,
+  "command": "./gradlew --no-daemon --max-workers=2 test",
+  "target_suites": [
+    {
+      "name": "mods.eln.client.terrain.DistantGeometryTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "time": "0.01"
+    },
+    {
+      "name": "mods.eln.lighting.TransmissionAndLightingTest",
+      "tests": "7",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "time": "0.096"
+    },
+    {
+      "name": "mods.eln.config.JsonConfigTest",
+      "tests": "10",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "time": "0.125"
+    },
+    {
+      "name": "mods.eln.gridnode.GridCableCompatibilityTest",
+      "tests": "9",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "time": "0.553"
+    },
+    {
+      "name": "mods.eln.utility.FusedTapLightTest",
+      "tests": "2",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "time": "0.002"
+    }
+  ]
+}

@@ -95,8 +95,7 @@ public final class ClientSetup {
         uuidManager = new UuidManager();
         soundClientEventListener = new SoundClientEventListener(uuidManager);
 
-        if (Eln.config.getBooleanOrElse("updates.versionCheck.enabled", true))
-            NeoForge.EVENT_BUS.register(VersionCheckerHandler.getInstance());
+        // Automatic upstream version requests are disabled in this fork.
 
         new FrameTime();
         new ConnectionListener();

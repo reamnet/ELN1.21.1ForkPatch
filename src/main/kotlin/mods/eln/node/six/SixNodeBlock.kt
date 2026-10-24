@@ -48,10 +48,10 @@ import mods.eln.misc.getBlockState
  */
 class SixNodeBlock : NodeBlock(Properties.of().strength(0.3f, 1.0f).dynamicShape()
     .isViewBlocking { _,world,pos -> coverState(world,pos)?.isViewBlocking(world,pos) ?: false }, 0), net.minecraft.world.level.block.SimpleWaterloggedBlock {
-    init { registerDefaultState(stateDefinition.any().setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED, false)) }
+    init { registerDefaultState(stateDefinition.any().setValue(COVERED,false).setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED, false)) }
     override fun createBlockStateDefinition(builder: net.minecraft.world.level.block.state.StateDefinition.Builder<Block, BlockState>) {
         super.createBlockStateDefinition(builder)
-        builder.add(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED)
+        builder.add(COVERED,net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED)
     }
     override fun getFluidState(state: BlockState): FluidState =
         if(state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED))net.minecraft.world.level.material.Fluids.WATER.getSource(false) else super.getFluidState(state)
@@ -218,6 +218,7 @@ class SixNodeBlock : NodeBlock(Properties.of().strength(0.3f, 1.0f).dynamicShape
                 sixNode.dropItem(stack)
             }
             sixNode.sixNodeCacheBlock = Blocks.AIR
+            sixNode.syncCoverState()
             updateAllLightTypes(world, x, y, z)
             sixNode.needPublish = true
             return false
@@ -432,6 +433,7 @@ class SixNodeBlock : NodeBlock(Properties.of().strength(0.3f, 1.0f).dynamicShape
         get() = NODE_UUID
 
     companion object {
+        @JvmField val COVERED=net.minecraft.world.level.block.state.properties.BooleanProperty.create("covered")
         private fun coverState(world: BlockGetter,pos: BlockPos): BlockState? {
             world.getModelData(pos).get(SixNodeCoverData.COVER)?.let { return it.takeUnless { cover -> cover.isAir } }
             val tile=LoadedBlockEntities.get(world,pos) as? SixNodeEntity ?: return null

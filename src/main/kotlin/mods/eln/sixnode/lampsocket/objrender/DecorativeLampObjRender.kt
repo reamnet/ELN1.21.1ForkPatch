@@ -22,7 +22,7 @@ class DecorativeLampObjRender(val style: DecorativeLampStyle) : ILampSocketObjRe
     override fun draw(render: LampSocketRender, distanceToPlayer: Double) = preserveMatrix {
         render.front!!.glRotateOnX()
         GL11.glRotatef(-90f,1f,0f,0f)
-        drawModel(render.lightValue,render.bulbCount,render.lampDescriptor?.lampData?.technology?.lampType ?: "led",render.aim,render.fanAngle)
+        drawModel(render.lightValue,render.bulbCount,render.lampDescriptor?.lampData?.technology?.lampType ?: "led",render.aim,render.fanAngle,render.suspension.drop)
     }
     private fun swivel(aim: LightAim,head: Int,draw: ()->Unit)=preserveMatrix {
         val p=style.aimPivot(head)
@@ -35,7 +35,7 @@ class DecorativeLampObjRender(val style: DecorativeLampStyle) : ILampSocketObjRe
         if(style.aimHeadCount>0)swivel(aim,style.aimHead(index)) { model.getPart("Light$index")?.drawNoBind() }
         else model.getPart("Light$index")?.drawNoBind()
     }
-    private fun drawModel(light: Int, count: Int, technology: String,aim: LightAim,fanAngle: Float=0f) {
+    private fun drawModel(light: Int, count: Int, technology: String,aim: LightAim,fanAngle: Float=0f,drop: Double=1.0) {
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
             GL11.glDisable(GL11.GL_TEXTURE_2D)
@@ -45,11 +45,18 @@ class DecorativeLampObjRender(val style: DecorativeLampStyle) : ILampSocketObjRe
                 else -> GL11.glColor3f(.20f,.23f,.26f)
             }
             model.getPart("Base")?.drawNoBind()
+            if(style.hangingWarehouse && drop>0.0)preserveMatrix {
+                GL11.glColor3f(.22f,.23f,.24f)
+                GL11.glTranslated(.06,0.0,0.0);GL11.glScaled(drop,1.0,1.0)
+                model.getPart("Suspension")?.drawNoBind()
+            }
+            preserveMatrix {
+            if(style.hangingWarehouse)GL11.glTranslated(drop,0.0,0.0)
             when(style) {
                 DecorativeLampStyle.PORCH -> GL11.glColor3f(.28f,.20f,.12f)
                 DecorativeLampStyle.CANDLE, DecorativeLampStyle.CRYSTAL, DecorativeLampStyle.SPUTNIK -> GL11.glColor3f(.66f,.45f,.16f)
                 DecorativeLampStyle.WAGON, DecorativeLampStyle.LANTERN -> GL11.glColor3f(.12f,.13f,.14f)
-                DecorativeLampStyle.SHOP, DecorativeLampStyle.FACTORY -> GL11.glColor3f(.75f,.77f,.78f)
+                DecorativeLampStyle.SHOP, DecorativeLampStyle.FACTORY, DecorativeLampStyle.WAREHOUSE_HIGH_BAY -> GL11.glColor3f(.75f,.77f,.78f)
                 else -> GL11.glColor3f(.26f,.29f,.32f)
             }
             if(style.luxury)GL11.glColor3f(.77f,.58f,.28f)
@@ -110,6 +117,7 @@ class DecorativeLampObjRender(val style: DecorativeLampStyle) : ILampSocketObjRe
                 GL11.glDepthMask(false)
                 GL11.glColor4f(.70f,.84f,.91f,.16f)
                 it.drawNoBind()
+            }
             }
         } finally { GL11.glPopAttrib() }
     }

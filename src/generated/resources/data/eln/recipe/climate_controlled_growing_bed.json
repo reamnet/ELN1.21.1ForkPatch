@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "minecraft:bucket"
+    },
+    "C": {
+      "item": "eln:copper_cable"
+    },
+    "I": {
+      "item": "minecraft:iron_bars"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    },
+    "S": {
+      "item": "minecraft:dirt"
+    }
+  },
+  "pattern": [
+    "IPI",
+    "SCS",
+    "IBI"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:climate_controlled_growing_bed"
+  }
+}

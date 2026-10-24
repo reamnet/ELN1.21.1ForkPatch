@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "eln:three_phase_transformer_street_light_pole"
+    },
+    {
+      "item": "eln:three_phase_pole_with_fused_single_phase_tap"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:three_phase_transformer_street_light_pole_with_fused_single_phase_tap"
+  }
+}

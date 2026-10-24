@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "eln:three_phase_pole_with_fused_single_phase_tap"
+    },
+    {
+      "item": "eln:flat_lamp_socket"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:three_phase_fused_tap_secondary_fed_street_light_pole"
+  }
+}

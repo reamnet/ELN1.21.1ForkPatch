@@ -1,0 +1,34 @@
+{
+  "passed": [
+    "Covered cable updates the real motion-blocking weather heightmap",
+    "Dryer attaches through the real 30 A outlet and cord lifecycle",
+    "Actual DH wrapper ignores invisible ELN placeholder volumes",
+    "Placed warehouse light publishes its 6.75-block drop and four bulbs",
+    "DH 3.3 custom objects remain active after the normal chunks unload"
+  ],
+  "distant": {
+    "available": true,
+    "failed": false,
+    "bound": true,
+    "cached": 18,
+    "groups": 17,
+    "active": 12,
+    "pending": 0
+  },
+  "version": "3.0.49",
+  "minecraft": "1.21.1",
+  "neoforge": "21.1.249",
+  "distant_horizons": "3.3.3",
+  "sodium": "0.8.13",
+  "iris": "1.8.14-beta.1",
+  "shaderpack": "BSL v10.1.8",
+  "renderer": "Mesa llvmpipe on Xorg :99; native client integration check, not an FPS benchmark",
+  "command": "JAVA_TOOL_OPTIONS=\"$JAVA_TOOL_OPTIONS -Deln.transmissionChecks=true\" ./gradlew --no-daemon --max-workers=2 runClient",
+  "screenshots": [
+    "near.png",
+    "distant.png",
+    "warehouse.png",
+    "dryer-plug.png",
+    "wind-turbines.png"
+  ]
+}

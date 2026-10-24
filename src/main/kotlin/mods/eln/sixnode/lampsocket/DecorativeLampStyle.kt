@@ -183,8 +183,11 @@ enum class DecorativeLampStyle(val model: String, val itemName: String, val bulb
     DECK_STEP("decksteplight",I18N.TR_NAME(I18N.Type.NONE,"Deck Step Riser Light"),1,.12,3,
         listOf(Vec3(.07,-.02,0.0)),Vec3(.5,-.866,0.0)),
     FAN_PATIO("patiotropicalfan",I18N.TR_NAME(I18N.Type.NONE,"Tropical Patio Ceiling Fan"),1,.7,1,
-        listOf(Vec3(.62,0.0,0.0)),Vec3(1.0,0.0,0.0));
+        listOf(Vec3(.62,0.0,0.0)),Vec3(1.0,0.0,0.0)),
+    WAREHOUSE_HIGH_BAY("adjustablewarehousehighbay",I18N.TR_NAME(I18N.Type.NONE,"Adjustable Suspended Warehouse Light"),4,2.5,12,
+        (0..3).map { Vec3(.50,if(it<2)-.20 else .20,if(it%2==0)-.55 else .55) },Vec3(1.0,0.0,0.0));
 
+    val hangingWarehouse get()=this==WAREHOUSE_HIGH_BAY
     val fan get()=this==FAN_CLASSIC || this==FAN_MODERN || this==FAN_INDUSTRIAL || this==FAN_AURA || this==FAN_PATIO
     val fanWatts get()=if(this==FAN_CLASSIC)55.0 else if(this==FAN_MODERN)28.0 else if(this==FAN_INDUSTRIAL)300.0 else if(this==FAN_AURA)45.0 else if(this==FAN_PATIO)38.0 else 0.0
 
@@ -211,7 +214,7 @@ enum class DecorativeLampStyle(val model: String, val itemName: String, val bulb
     val parking get()=this==PARKING || this in PARKING_QUAD..PARKING_OFFSET
     val pool get()=this in POOL_ROUND..POOL_STEP
     val partyString get()=this==PARTY_FESTOON || this==PARTY_GLOBE
-    val wideBeam get()=parking || street || pool || this==AREA_FLOOD || this==PARTY_WASH
+    val wideBeam get()=hangingWarehouse || parking || street || pool || this==AREA_FLOOD || this==PARTY_WASH
     val wallLamp get() = this==DECK_STEP || pool || partyString || this==AREA_FLOOD || this==PARTY_WASH || when(this) {
         CHRISTMAS_FAIRY,CHRISTMAS_COLOR,CHRISTMAS_ICICLE,CHRISTMAS_STAR,HALLOWEEN_PUMPKIN,HALLOWEEN_GHOST,HALLOWEEN_BAT,HEAVY_FLOOD,HEAVY_BULKHEAD,HEAVY_WALLPACK,HEAVY_YARD,RIG_FLOOD,WAREHOUSE,PORCH,MOTION,SCONCE_CYLINDER,SCONCE_FABRIC,SCONCE_GLOBE,SCONCE_CAGE,SCONCE_CANDLE,OUTDOOR_BARN -> true
         else -> false
@@ -224,7 +227,7 @@ enum class DecorativeLampStyle(val model: String, val itemName: String, val bulb
     val seasonalString get() = this == CHRISTMAS_FAIRY || this == CHRISTMAS_COLOR || this == CHRISTMAS_ICICLE || this == HALLOWEEN_PUMPKIN || this == HALLOWEEN_GHOST
     val strip get() = this in STRIP_CABINET..STRIP_NEON
     val street get() = this == STREET_LED || this == STREET_BOULEVARD
-    val ceiling get() = fan || miniDot || this==EAVE_TWIN || luxury || this == HEAVY_CANOPY || this == RIG_CAGE || this == RIG_LINEAR || this == STRIP_RECESSED || this == RECESSED || this == CHANDELIER || this == SHOP || this == FACTORY || foyer || this == POT_BAFFLE || this == POT_TRIMLESS || this == POT_GIMBAL
+    val ceiling get() = hangingWarehouse || fan || miniDot || this==EAVE_TWIN || luxury || this == HEAVY_CANOPY || this == RIG_CAGE || this == RIG_LINEAR || this == STRIP_RECESSED || this == RECESSED || this == CHANDELIER || this == SHOP || this == FACTORY || foyer || this == POT_BAFFLE || this == POT_TRIMLESS || this == POT_GIMBAL
     val uprightItem get() = this == FLOOR_DRUM || street || parking || tableLamp || this == OUTDOOR_BOLLARD || this == OUTDOOR_POST || this==PARTY_TIKI || this==PARTY_LANTERN || ceiling
     val exposedBulbs get() = partyString || this==PARTY_TIKI || this==PARTY_LANTERN || luxury || this == FLOOR_DRUM || this == WINDOW_CANDLE || this == HALLOWEEN_JACK || this == STREET_BOULEVARD || foyer || tableLamp || this == SCONCE_CANDLE || this == SCONCE_CAGE || this == SCONCE_GLOBE || this == OUTDOOR_POST || this == DESK || this == CHANDELIER || this == PORCH || this == HOLDER
 

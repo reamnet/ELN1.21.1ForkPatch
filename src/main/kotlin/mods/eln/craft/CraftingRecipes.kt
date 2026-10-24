@@ -412,6 +412,22 @@ object CraftingRecipes {
         addRecipe(findItemStack("Fusion Matter Reactor"),"NDN","MCM","NDN",
             'N',ItemStack(Items.NETHERITE_INGOT),'D',ItemStack(Blocks.DIAMOND_BLOCK),'M',findItemStack("Electrical Motor"),
             'C',ItemStack(Items.NETHER_STAR))
+        addRecipe(findItemStack("69 kV Steel Transmission Pole"), "I I", "IPI", "I I",
+            'I',ItemStack(Blocks.IRON_BARS),'P',findItemStack("Three Phase Utility Pole"))
+        addRecipe(findItemStack("230 kV Steel Transmission Tower"), "IPI", "PBP", "I I",
+            'I',ItemStack(Blocks.IRON_BLOCK),'P',findItemStack("69 kV Steel Transmission Pole"),'B',ItemStack(Blocks.IRON_BARS))
+        for(kind in mods.eln.utility.TransmissionKind.entries.filter { it.riser || it.station }) {
+            val pole=findItemStack(if(kind.inputVolts>100_000)"230 kV Steel Transmission Tower" else "69 kV Steel Transmission Pole")
+            when {
+                kind.riser->addShapelessRecipe(findItemStack(kind.title),pole,findItemStack("Copper Cable"),findItemStack("Copper Cable"),findItemStack("Copper Cable"))
+                kind.transformer->addRecipe(findItemStack(kind.title),"III","CTC","PBP",'I',ItemStack(Blocks.IRON_BLOCK),
+                    'C',findItemStack("Copper Cable"),'T',findItemStack("Grid DC-DC Converter"),'P',findItemStack("Iron Plate"),'B',pole)
+                else->addRecipe(findItemStack(kind.title),"CCC","IBI","PPP",'C',findItemStack("Copper Cable"),'I',ItemStack(Blocks.IRON_BARS),
+                    'B',pole,'P',findItemStack("Iron Plate"))
+            }
+        }
+        addShapelessRecipe(findItemStack("Three Phase Fused Tap Secondary Fed Street Light Pole"),findItemStack("Three Phase Pole with Fused Single Phase Tap"),findItemStack("Flat Lamp Socket"))
+        addShapelessRecipe(findItemStack("Three Phase Transformer Street Light Pole with Fused Single Phase Tap"),findItemStack("Three Phase Transformer Street Light Pole"),findItemStack("Three Phase Pole with Fused Single Phase Tap"))
         addShapelessRecipe(findItemStack("240 V 30 A Dryer Cord"),findItemStack("240 V Appliance Cord"),findItemStack("Copper Cable"),findItemStack("Rubber"))
         addShapelessRecipe(findItemStack("240 V 30 A Dryer Outlet"),findItemStack("240 V Wall Outlet"),findItemStack("Copper Cable"),findItemStack("Iron Plate"))
         addRecipe(findItemStack("Electric Refrigerator"), "PPP", "GCG", "PRP",
@@ -423,6 +439,8 @@ object CraftingRecipes {
             'P',findItemStack("Iron Plate"),'L',findItemStack("Flat Lamp Socket"))
         addRecipe(findItemStack("Suspended Factory Fluorescent Light"), "C C", "PPP", "LLL",
             'C',ItemStack(Items.CHAIN),'P',findItemStack("Iron Plate"),'L',findItemStack("Thin Fluorescent Shop Light"))
+        addRecipe(findItemStack("Adjustable Suspended Warehouse Light"), "CCC", "PFP", " C ",
+            'C',ItemStack(Items.CHAIN),'P',findItemStack("Iron Plate"),'F',findItemStack("Suspended Factory Fluorescent Light"))
         addRecipe(findItemStack("Outdoor Motion Floodlight"), "L L", " S ", " P ",
             'L',findItemStack("Spot Lamp Socket"),'S',findItemStack("Electrical Entity Sensor"),'P',findItemStack("Iron Plate"))
         addRecipe(findItemStack("Candle Arm Foyer Chandelier"), " C ", "GLG", "LLL",

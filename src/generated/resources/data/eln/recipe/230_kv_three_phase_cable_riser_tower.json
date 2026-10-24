@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "eln:230_kv_steel_transmission_tower"
+    },
+    {
+      "item": "eln:copper_cable"
+    },
+    {
+      "item": "eln:copper_cable"
+    },
+    {
+      "item": "eln:copper_cable"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:230_kv_three_phase_cable_riser_tower"
+  }
+}

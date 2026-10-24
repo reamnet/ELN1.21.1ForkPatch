@@ -48,20 +48,31 @@ for z in [-.27,-.07,.13,.33]:m.cyl('Trim',0,(-.535,.77,z),.024,.025,n=12)
 for x in [-.25,1.20]:m.cyl('Trim',2,(x,1.19,-2.22),5.44,.045,n=12)
 for z in [-1.1,.75]:m.box('Glass',-.27,.36,z,.026,.35,.48)
 m.save('fusionmatterreactor')
-# A heavier 240 V 30 A NEMA 6-30 connector, retaining the normal two-socket placement.
-m=Mesh();m.box('Case',-.17,-.31,-.49,.34,.62,.035);m.box('Case',-.135,-.23,-.455,.27,.46,.09)
-for y in [-.11,.07]:
- m.box('Black',-.065,y-.025,-.362,.022,.070,.005)
- m.box('Black',.035,y-.025,-.362,.022,.070,.005)
- m.cyl('Black',2,(0,y-.055,-.362),.005,.019,n=16)
-for y in [-.27,.26]:m.cyl('Trim',2,(0,y,-.453),.006,.014,n=12)
+# Legacy three-prong NEMA 10-30: two slanted hots and an L neutral.
+# Match the same lower socket origin and +0.26 upper socket offset as the plugs.
+def slanted_box(mesh,part,x,y,z,w,h,d,angle):
+ tmp=Mesh();tmp.box(part,-w/2,-h/2,z,w,h,d)
+ for face in tmp.p[part]:
+  mesh.poly(part,[(x+cos(angle)*a-sin(angle)*b,y+sin(angle)*a+cos(angle)*b,c) for a,b,c in face])
+m=Mesh();m.box('Case',-.17,-.31,-.49,.34,.62,.035)
+for offset in [0,.26]:
+ m.cyl('Case',2,(0,-.10+offset,-.455),.09,.123,n=32)
+ for x,angle in [(-.047,.52),(.047,-.52)]:
+  slanted_box(m,'Black',x,-.048+offset,-.362,.018,.066,.005,angle)
+ m.box('Black',-.006,-.172+offset,-.362,.012,.043,.005)
+ m.box('Black',-.006,-.172+offset,-.362,.036,.012,.005)
+for y in [-.277,.278]:m.cyl('Trim',2,(0,y,-.453),.006,.012,n=12)
 m.save('dryeroutlet30')
-# The plug is drawn centered at the existing socket anchor.
-m=Mesh();m.box('Case',-.075,-.07,-.37,.15,.14,.11)
-m.box('Grip',-.060,-.055,-.26,.12,.11,.05)
-for x in [-.05,.04]:m.box('Blades',x,-.012,-.405,.01,.045,.035)
-m.cyl('Blades',2,(0,-.045,-.405),.035,.012,n=10)
-m.box('Badge',-.025,.015,-.208,.05,.025,.002);m.save('nema630plug')
+m=Mesh();m.cyl('Case',2,(0,-.10,-.352),.11,.108,n=32)
+m.cyl('Grip',2,(0,-.10,-.242),.024,.092,n=24)
+for x in [-.070,.070]:m.box('Grip',x-.008,-.155,-.250,.016,.11,.017)
+for x,angle in [(-.047,.52),(.047,-.52)]:
+ slanted_box(m,'Blades',x,-.048,-.410,.012,.056,.058,angle)
+m.box('Blades',-.004,-.168,-.410,.008,.035,.058)
+m.box('Blades',-.004,-.168,-.410,.028,.008,.058)
+m.box('Badge',-.025,-.085,-.216,.05,.025,.002)
+m.cyl('Grip',2,(0,-.10,-.218),.013,.027,n=16)
+m.save('nema1030plug')
 # Wet carrier item uses a standard baked generated item model.
 from PIL import Image, ImageDraw
 root=Path(__file__).resolve().parents[2]/'src/main/resources/assets/eln'

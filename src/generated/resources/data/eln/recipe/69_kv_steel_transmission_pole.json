@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "item": "minecraft:iron_bars"
+    },
+    "P": {
+      "item": "eln:three_phase_utility_pole"
+    }
+  },
+  "pattern": [
+    "I I",
+    "IPI",
+    "I I"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:69_kv_steel_transmission_pole"
+  }
+}

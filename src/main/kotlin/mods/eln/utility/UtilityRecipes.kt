@@ -11,7 +11,7 @@ object UtilityRecipes {
         fun addShapelessRecipe(output: ItemStack,vararg params: Any)=shapeless(output,params)
         fun findItemStack(name: String,stackSize: Int=1)=Eln.findItemStack(name,stackSize)
         // Conversion recipes distinguish every variant and leave all old recipes/IDs intact.
-        for(kind in DistributionKind.entries) {
+        for(kind in DistributionKind.entries.filterNot { it.light && it.singlePhaseTap }) {
             val base=if(kind.lvOnly)"Direct Utility Pole" else if(kind.phases==3 && kind!=DistributionKind.THREE)"Three Phase Utility Pole" else "Utility Pole"
             val detail=when {
                 kind.transformer->findItemStack("Pole Fuse Link")

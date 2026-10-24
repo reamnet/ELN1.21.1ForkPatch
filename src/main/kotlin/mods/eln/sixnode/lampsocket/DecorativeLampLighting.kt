@@ -14,7 +14,8 @@ object DecorativeLampLighting {
             val aimHead=style.aimHead(index)
             val adjusted=if(style.aimHeadCount>0)element.aim.point(head,style.aimPivot(aimHead),aimHead) else head
             val inset=LampMounting.inset(world,coordinate.pos,element.side,element.descriptor)
-            val source = style.worldPoint(coordinate.toVec3(),element.side,element.front,adjusted.add(-inset,0.0,0.0))
+            val dropped=if(style.hangingWarehouse)adjusted.add(element.suspension.drop,0.0,0.0) else adjusted
+            val source = style.worldPoint(coordinate.toVec3(),element.side,element.front,dropped.add(-inset,0.0,0.0))
             val sourceCell = BlockPos.containing(source)
             if (world.chunkSource.getChunkNow(sourceCell.x shr 4,sourceCell.z shr 4) != null) cells.add(sourceCell)
             if (style.range == 0) continue

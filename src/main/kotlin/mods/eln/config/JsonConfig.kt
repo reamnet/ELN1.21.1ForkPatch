@@ -18,7 +18,6 @@ import java.io.FileWriter
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.Locale
-import java.util.UUID
 import java.util.regex.PatternSyntaxException
 import kotlin.math.max
 import kotlin.math.min
@@ -64,7 +63,7 @@ class JsonConfig @JvmOverloads constructor(
         groupComments["debug"] = "Debug logging and audio diagnostics."
         groupComments["gameplay"] = "Gameplay toggles and seasonal behavior."
         groupComments["updates"] = "Version check behavior."
-        groupComments["analytics"] = "Anonymous usage telemetry settings."
+        groupComments["analytics"] = "Deprecated analytics settings; external reporting is disabled."
         groupComments["world"] = "World interaction toggles and pole placement behavior."
         groupComments["balance"] = "Balance multipliers used across machines and recipes."
         groupComments["items"] = "Item-specific tuning values."
@@ -83,10 +82,10 @@ class JsonConfig @JvmOverloads constructor(
         spec(path = "integrations.modbus.enabled", defaultValue = false, comment = "Enable Modbus RTU."),
         spec(path = "integrations.modbus.port", defaultValue = 1502, comment = "TCP port for Modbus RTU."),
         spec(path = "integrations.mqtt.enabled", defaultValue = false, comment = "Enable MQTT devices. Server endpoints live in config/eln/mqtt.json."),
-        spec(path = "integrations.mqtt.simMetrics.enabled", defaultValue = false, comment = "Publish simulator MNA metrics to MQTT."),
-        spec(path = "integrations.mqtt.simMetrics.server", defaultValue = "", comment = "MQTT server name in config/eln/mqtt.json used for simulator metrics."),
-        spec(path = "integrations.mqtt.simMetrics.id", defaultValue = "server", comment = "Topic ID used under eln/sim/<id>/... for simulator metrics."),
-        spec(path = "integrations.mqtt.simMetrics.publishIntervalTicks", defaultValue = 20, comment = "Simulator ticks to aggregate before MQTT publish. Higher values reduce overhead."),
+        spec(path = "integrations.mqtt.simMetrics.enabled", defaultValue = false, comment = "Write simulator MNA metrics to the local log only. External export is disabled."),
+        spec(path = "integrations.mqtt.simMetrics.server", defaultValue = "", comment = "Deprecated: simulator metrics are local only."),
+        spec(path = "integrations.mqtt.simMetrics.id", defaultValue = "server", comment = "Deprecated: simulator metrics are not published to a broker."),
+        spec(path = "integrations.mqtt.simMetrics.publishIntervalTicks", defaultValue = 20, comment = "Simulator ticks to aggregate before local diagnostic logging. Higher values reduce overhead."),
         spec(path = "integrations.computerProbe.enabled", defaultValue = true, comment = "Enable the OC/CC to Eln computer probe."),
         spec(path = "integrations.energyExporter.enabled", defaultValue = true, comment = "Enable the Eln energy exporter."),
         spec(path = "integrations.oredict.tungstenEnabled", defaultValue = false, comment = "Use shared ore dictionary entries for tungsten."),
@@ -108,11 +107,11 @@ class JsonConfig @JvmOverloads constructor(
         spec(path = "simulation.watchdog.destruction.voltage", defaultValue = true, comment = "Allow voltage watchdogs to destroy blocks."),
         spec(path = "simulation.watchdog.destruction.shaftSpeed", defaultValue = true, comment = "Allow shaft speed watchdogs to destroy blocks."),
         spec(path = "simulation.watchdog.destruction.other", defaultValue = true, comment = "Allow all other watchdog types to destroy blocks."),
-        spec(path = "updates.versionCheck.enabled", defaultValue = true, comment = "Enable the version checker."),
-        spec(path = "analytics.enabled", defaultValue = true, comment = "Enable Electrical Age analytics."),
-        spec(path = "analytics.endpointUrl", defaultValue = "http://eln.ja13.org/stat", comment = "Analytics endpoint URL."),
-        spec(path = "analytics.playerUuidOptIn", defaultValue = false, comment = "Opt into sending the player UUID with analytics."),
-        spec(path = "analytics.playerUuid", defaultValue = "", comment = "Locally generated UUID used when analytics.playerUuidOptIn is enabled."),
+        spec(path = "updates.versionCheck.enabled", defaultValue = false, comment = "Deprecated: automatic external version requests are disabled."),
+        spec(path = "analytics.enabled", defaultValue = false, comment = "Deprecated: analytics are permanently disabled in this fork."),
+        spec(path = "analytics.endpointUrl", defaultValue = "", comment = "Deprecated: no analytics endpoints are used."),
+        spec(path = "analytics.playerUuidOptIn", defaultValue = false, comment = "Deprecated: player identifiers are never submitted."),
+        spec(path = "analytics.playerUuid", defaultValue = "", comment = "Deprecated: no analytics identifier is generated; old values are cleared."),
         spec(path = "world.poles.directPlacementEnabled", defaultValue = true, comment = "Enable direct air-to-ground pole placement."),
         spec(path = "balance.generators.heatTurbinePowerFactor", defaultValue = 1.0),
         spec(path = "balance.generators.solarPanelPowerFactor", defaultValue = 1.0),
@@ -220,6 +219,7 @@ class JsonConfig @JvmOverloads constructor(
             }
             legacyCfgFile.exists() -> {
                 loadFromLegacyCfg()
+                disableAnalytics()
                 save()
                 archiveLegacyCfg()
                 return
@@ -227,6 +227,16 @@ class JsonConfig @JvmOverloads constructor(
         }
 
         populateDefaults()
+        if(disableAnalytics())save()
+    }
+
+    private fun disableAnalytics(): Boolean {
+        if(!includeDefaultSpecs)return false
+        val changed=getBooleanOrElse("analytics.enabled",false) || getBooleanOrElse("analytics.playerUuidOptIn",false) ||
+            getStringOrElse("analytics.playerUuid","").isNotEmpty() || getStringOrElse("analytics.endpointUrl","").isNotEmpty()
+        setBoolean("analytics.enabled",false);setBoolean("analytics.playerUuidOptIn",false)
+        setString("analytics.playerUuid","");setString("analytics.endpointUrl","")
+        return changed
     }
 
     fun save() {
@@ -254,14 +264,6 @@ class JsonConfig @JvmOverloads constructor(
         LampLists.loadAllLampConfigs()
         for (bladeData in TurbineBladeLists.bladeConfigList) bladeData.loadConfig()
         ClutchPlateItem.infiniteLifeEnabled = getBooleanOrElse("items.clutchPlates.infiniteLifeEnabled", false)
-
-        val analyticsEnabled = getBooleanOrElse("analytics.enabled", true)
-        if (analyticsEnabled) {
-            val path = "analytics.playerUuid"
-            if (getStringOrElse(path, "").isEmpty()) {
-                setString(path, UUID.randomUUID().toString())
-            }
-        }
 
         Other.wattsToEu = getDoubleOrElse("balance.integrationConversion.wattsToEu", 1.0 / 3.0)
         Other.wattsToOC = getDoubleOrElse("balance.integrationConversion.wattsToOc", 1.0 / 3.0 / 2.5)

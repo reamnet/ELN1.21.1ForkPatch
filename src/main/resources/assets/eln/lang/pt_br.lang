@@ -2099,6 +2099,7 @@ Precipitation=Precipitação
 
 # src/main/kotlin/mods/eln/sixnode/lampsocket/DecorativeLampStyle.kt
 Adjustable_Gimbal_Recessed_Light.name=Adjustable Gimbal Recessed Light
+Adjustable_Suspended_Warehouse_Light.name=Adjustable Suspended Warehouse Light
 Armored_Oval_Bulkhead_Light.name=Armored Oval Bulkhead Light
 Articulated_Task_Table_Lamp.name=Articulated Task Table Lamp
 Aura_Five_Blade_Ceiling_Fan.name=Aura Five Blade Ceiling Fan
@@ -2188,13 +2189,14 @@ Window_Candle_Light.name=Window Candle Light
 
 # src/main/kotlin/mods/eln/sixnode/lampsocket/LampSocketDescriptor.kt
 Angle\:_%1$°_to_%2$°=Ângulo: %1$° a %2$°
+Ceiling_mount;_adjustable_drop_from_0_to_7_blocks_in_the_GUI=Ceiling mount; adjustable drop from 0 to 7 blocks in the GUI
 Fan_motor\:_%1$_W;_use_a_bulb_matching_the_supply_voltage=Fan motor: %1$ W; use a bulb matching the supply voltage
 Five_block_blade_span;_blade_contact_deals_5_damage_per_second_at_full_speed=Five block blade span; blade contact deals 5 damage per second at full speed
 Holds_up_to_%1$_matching_bulbs=Holds up to %1$ matching bulbs
 Insert_matching_bulbs_together;_power_draw_scales_with_bulb_count=Insert matching bulbs together; power draw scales with bulb count
 Spot_range\:_%1$_blocks=Alcance do foco: %1$ blocos
+Wireless_lamp_supply_or_appliance_cord=Wireless lamp supply or appliance cord
 Wireless_lamp_supply_or_wired_power=Wireless lamp supply or wired power
-Wireless_lamp_supply_power_only=Wireless lamp supply power only
 Wireless_mode_of_lights_is_intended_\nto_pretend_wires_are_in_the_walls.=O modo sem fio das luzes é destinado\na fingir que há fios nas paredes.
 Without_a_bulb_the_motor_is_rated_for_120_V;_the_GUI_switches_the_fan_separately=Without a bulb the motor is rated for 120 V; the GUI switches the fan separately
 
@@ -2210,17 +2212,20 @@ Bulbs\:_%1$/%2$=Bulbs: %1$/%2$
 Cable_slot_empty=Espaço de cabo vazio
 Connected_to_%1$=Conectado a %1$
 Detects_living_entities_within_8_blocks_in_front_of_the_light=Detects living entities within 8 blocks in front of the light
+Drop\:_%1$_m=Drop: %1$ m
 Fan\:_Off=Fan: Off
 Fan\:_On=Fan: On
 Grounded=Aterrado
 Lamp_slot_empty=Espaço de lâmpada vazio
+Lower_warehouse_light=Lower warehouse light
 Motion\:_all_day=Motion: all day
 Motion\:_night=Motion: night
 Powered_by_lamp_supply=Alimentado por fonte de lâmpadas
+Raise_warehouse_light=Raise warehouse light
 Specify_the_lamp_supply_channel=Especifique o canal da fonte de lâmpadas
 Stays_on_for_30_seconds_after_movement;_walls_block_detection=Stays on for 30 seconds after movement; walls block detection
 This_currently_does_nothing.=Isso atualmente não faz nada.
-This_light_uses_a_wireless_lamp_supply=This light uses a wireless lamp supply
+This_light_uses_a_wireless_lamp_supply_or_appliance_cord=This light uses a wireless lamp supply or appliance cord
 Ungrounded=Não aterrado
 
 # src/main/kotlin/mods/eln/sixnode/mqttmeter/MqttEnergyMeterContainer.kt
@@ -3088,12 +3093,14 @@ Set_fuse_current=Set fuse current
 Set_retry_delay=Set retry delay
 Set_trip_current=Set trip current
 Single-phase_branches_use_the_A,_B_or_C_insulator_you_aim_at=Single-phase branches use the A, B or C insulator you aim at
+Single_phase_tap_fuse=Single phase tap fuse
 Step-down_unit_installed=Step-down unit installed
 Street_light_draws_from_the_LV_rack_only;_feed_it_from_an_upstream_transformer=Street light draws from the LV rack only; feed it from an upstream transformer
 Tap\:_%1$_%%=Tap: %1$ %%
 Three_independent_charge_storage_branches_smooth_DC-equivalent_voltage_changes=Three independent charge storage branches smooth DC-equivalent voltage changes
 Transformer\:_Off=Transformer: Off
 Transformer\:_On=Transformer: On
+Transformer_fuse=Transformer fuse
 Transformer_phase_is_selectable;_a_blown_fuse_needs_a_Pole_Fuse_Link=Transformer phase is selectable; a blown fuse needs a Pole Fuse Link
 Trip_current_in_amperes\:_1_to_2000_A=Trip current in amperes: 1 to 2000 A
 Voltage_control\:_Auto=Voltage control: Auto
@@ -3114,6 +3121,7 @@ Single_Phase_Utility_Pole.name=Single Phase Utility Pole
 Tap_phase=Tap phase
 Three_Phase_Automatic_Voltage_Regulator_Pole.name=Three Phase Automatic Voltage Regulator Pole
 Three_Phase_Fused_Cutout_Pole.name=Three Phase Fused Cutout Pole
+Three_Phase_Fused_Tap_Secondary_Fed_Street_Light_Pole.name=Three Phase Fused Tap Secondary Fed Street Light Pole
 Three_Phase_Gang_Operated_Air_Break_Switch_Pole.name=Three Phase Gang Operated Air Break Switch Pole
 Three_Phase_Pole_Mounted_Capacitor_Bank.name=Three Phase Pole Mounted Capacitor Bank
 Three_Phase_Pole_with_Fused_Single_Phase_Tap.name=Three Phase Pole with Fused Single Phase Tap
@@ -3121,6 +3129,7 @@ Three_Phase_Recloser_Pole.name=Three Phase Recloser Pole
 Three_Phase_Secondary_Fed_Street_Light_Pole.name=Three Phase Secondary Fed Street Light Pole
 Three_Phase_Transformer_Pole.name=Three Phase Transformer Pole
 Three_Phase_Transformer_Street_Light_Pole.name=Three Phase Transformer Street Light Pole
+Three_Phase_Transformer_Street_Light_Pole_with_Fused_Single_Phase_Tap.name=Three Phase Transformer Street Light Pole with Fused Single Phase Tap
 Three_Phase_Underground_Feeder_Pole.name=Three Phase Underground Feeder Pole
 Three_Phase_Utility_Pole.name=Three Phase Utility Pole
 Transformer_phase=Transformer phase
@@ -3202,6 +3211,31 @@ LV_L1_(120_V)=LV L1 (120 V)
 LV_L2_(120_V)=LV L2 (120 V)
 LV_service_(240_V)=LV service (240 V)
 Load_%1$\:_%2$=Load %1$: %2$
+
+# src/main/kotlin/mods/eln/utility/TransmissionClient.kt
+%1$\:_%2$_/_%3$=%1$: %2$ / %3$
+Base_cables\:_left_A,_right_B,_rear_C;_overhead_links_connect_all_three_phases=Base cables: left A, right B, rear C; overhead links connect all three phases
+Design_loading_per_phase\:_%1$_MW=Design loading per phase: %1$ MW
+Nominal_output\:_%1$_kV;_fixed_ratio_follows_grid_fluctuations=Nominal output: %1$ kV; fixed ratio follows grid fluctuations
+Primary_disconnect\:_Closed=Primary disconnect: Closed
+Primary_disconnect\:_Open=Primary disconnect: Open
+Secondary_disconnect\:_Closed=Secondary disconnect: Closed
+Secondary_disconnect\:_Open=Secondary disconnect: Open
+Separate_gang-operated_primary_and_secondary_disconnects=Separate gang-operated primary and secondary disconnects
+Steel_structure\:_%1$_blocks_tall=Steel structure: %1$ blocks tall
+Terminal\:_%1$=Terminal: %1$
+Three_independent_phase_circuits;_nominal_input\:_%1$_kV=Three independent phase circuits; nominal input: %1$ kV
+Use_bare_overhead_conductors_or_cables_rated_for_the_applied_voltage=Use bare overhead conductors or cables rated for the applied voltage
+
+# src/main/kotlin/mods/eln/utility/TransmissionEquipment.kt
+230_kV_Steel_Transmission_Tower.name=230 kV Steel Transmission Tower
+230_kV_Three_Phase_Cable_Riser_Tower.name=230 kV Three Phase Cable Riser Tower
+230_kV_Three_Phase_Substation_Disconnect.name=230 kV Three Phase Substation Disconnect
+230_kV_to_69_kV_Substation_Transformer.name=230 kV to 69 kV Substation Transformer
+69_kV_Steel_Transmission_Pole.name=69 kV Steel Transmission Pole
+69_kV_Three_Phase_Cable_Riser_Pole.name=69 kV Three Phase Cable Riser Pole
+69_kV_Three_Phase_Substation_Disconnect.name=69 kV Three Phase Substation Disconnect
+69_kV_to_12.5_kV_Substation_Transformer.name=69 kV to 12.5 kV Substation Transformer
 
 # src/main/kotlin/mods/eln/utility/UtilityItems.kt
 Analog_Glass_Service_Meter.name=Analog Glass Service Meter

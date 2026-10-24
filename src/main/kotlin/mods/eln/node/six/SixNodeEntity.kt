@@ -47,6 +47,7 @@ class SixNodeEntity(pos: BlockPos, state: BlockState) : NodeBlockEntity(TYPE.get
     override fun onLoad() {
         super.onLoad()
         if(level?.isClientSide==true)requestModelDataUpdate()
+        else (node as? SixNode)?.syncCoverState()
     }
     override fun serverPublishUnserialize(stream: DataInputStream) {
         val sixNodeCacheBlockOld = sixNodeCacheBlock
@@ -103,6 +104,7 @@ class SixNodeEntity(pos: BlockPos, state: BlockState) : NodeBlockEntity(TYPE.get
             // 1.14+: the light engine tracks itself; a block check is all the camouflage change needs.
             updateAllLightTypes(world, xCoord, yCoord, zCoord)
             requestModelDataUpdate()
+            mods.eln.client.terrain.DistantModels.cover(this,sixNodeCacheBlock.defaultBlockState())
             // A cover changes both this chunk's terrain and the shading of adjacent faces.
             world.sendBlockUpdated(blockPos,blockState,blockState,Block.UPDATE_CLIENTS)
         }

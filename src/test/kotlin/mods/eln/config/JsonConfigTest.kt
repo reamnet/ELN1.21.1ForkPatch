@@ -11,6 +11,24 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class JsonConfigTest {
+    @Test fun analyticsIdentifiersAndEndpointsAreClearedFromLegacyEnabledConfigs() {
+        val dir=Files.createTempDirectory("eln-no-analytics").toFile()
+        val config=JsonConfig(dir.resolve("Eln.cfg"))
+        config.load()
+        config.setBoolean("analytics.enabled",true)
+        config.setBoolean("analytics.playerUuidOptIn",true)
+        config.setString("analytics.playerUuid","old-identifier")
+        config.setString("analytics.endpointUrl","http://127.0.0.1/unused")
+        config.save();config.load()
+        assertFalse(config.getBooleanOrElse("analytics.enabled",true))
+        assertFalse(config.getBooleanOrElse("analytics.playerUuidOptIn",true))
+        assertEquals("",config.getStringOrElse("analytics.playerUuid","missing"))
+        assertEquals("",config.getStringOrElse("analytics.endpointUrl","missing"))
+        mods.eln.misc.AnalyticsHandler.submitUpstreamAnalytics()
+        mods.eln.misc.AnalyticsHandler.submitAgeSeriesAnalytics()
+        val restored=JsonConfig(dir.resolve("Eln.cfg")).also { it.load() }
+        assertEquals("",restored.getStringOrElse("analytics.playerUuid","missing"))
+    }
     @Test
     fun migratesLegacyCfgIntoNestedJson() {
         val dir = Files.createTempDirectory("eln-json-config-test").toFile()

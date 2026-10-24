@@ -88,6 +88,17 @@ object TerrainModels {
         capture=TerrainCapture(); FixedFunction.setMeshSink(capture)
         removeBody(owner)
         val split=TerrainPartition.split(mesh,node.blockPos)
+        if(DistantModels.available) {
+            // Freeze rotating geometry at the last observed angle for the distant
+            // silhouette; don't animate or retain sounds/cables in this snapshot.
+            val lod=TerrainCapture().apply { enabled=true }
+            val previousCapture=capture
+            FixedFunction.setMeshSink(lod)
+            GL11.glPushMatrix();GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
+            try { MeshPartSelection.forDistant(draw) }
+            finally { GL11.glPopAttrib();GL11.glPopMatrix();FixedFunction.setMeshSink(previousCapture) }
+            DistantModels.capture(owner,node,if(lod.supported)lod.finish() else mesh)
+        }
         val body=Body(node,key,mesh,split,NodeRenderSupport.neighbourLight(node))
         bodies[owner]=body
         nodeBodies.getOrPut(node) { java.util.Collections.newSetFromMap(IdentityHashMap()) }.add(owner)
@@ -126,7 +137,7 @@ object TerrainModels {
         val revision=TerrainAtlas.revision.get()
         if(atlasRevision!=revision) {
             sections.keys.toList().forEach(::dirty)
-            clear();world=node.level as ClientLevel;atlasRevision=revision
+            clear();DistantModels.invalidatePalette();world=node.level as ClientLevel;atlasRevision=revision
         }
         if (lastUpdate[node]==node.level!!.gameTime) return
         lastUpdate[node]=node.level!!.gameTime
@@ -135,7 +146,7 @@ object TerrainModels {
             is TransparentNodeEntity -> listOfNotNull(node.elementRender)
             else -> emptyList()
         }
-        if (renders.isEmpty()) { nodeBodies[node]?.toList()?.forEach(::removeBody);return }
+        if (renders.isEmpty()) { nodeBodies[node]?.toList()?.forEach { DistantModels.forget(it,node);removeBody(it) };return }
         if (discovering!=null || FixedFunction.inWorld()) return
         discovering=node;visited.clear();capture=TerrainCapture()
         FixedFunction.setMeshSink(capture)
@@ -154,7 +165,7 @@ object TerrainModels {
                 is TransparentNodeEntity -> node.elementRender?.let { render->drawElement(render) { render.draw() } }
             }
             val owners=nodeBodies[node]?.toList() ?: emptyList()
-            owners.filter { it !in visited }.forEach(::removeBody)
+            owners.filter { it !in visited }.forEach { DistantModels.forget(it,node);removeBody(it) }
             val light=NodeRenderSupport.neighbourLight(node)
             for (owner in owners) bodies[owner]?.let { body -> if(body.light!=light) {
                 body.light=light;body.sections.keys.forEach(::dirty)
@@ -175,7 +186,7 @@ object TerrainModels {
     private fun clear() { bodies.clear();nodeBodies.clear();lastUpdate.clear();sections.clear();pool.clear();unsupported.clear();world=null }
     private fun explicit(render: Any): Boolean = if(render is mods.eln.sixnode.lampsocket.LampSocketRender)
         render.descriptor.fixture!=null else render.javaClass.simpleName in SUPPORTED || render is mods.eln.transparentnode.festive.FairyLightsRender
-    private val SUPPORTED=setOf("GrowingBedRender","MatterMachineRender","KitchenRender","FanRender","RenewableRender","IndustrialPumpRender","UpsRender",
+    private val SUPPORTED=setOf("TransmissionRender","GrowingBedRender","MatterMachineRender","KitchenRender","FanRender","RenewableRender","IndustrialPumpRender","UpsRender",
         "ClimateRender","BackupRender","OutletRender","DistributionPoleRender","HouseServiceRender","BreakerPanelRender",
         "WorkLightRender","StepDownUnitRender","UtilityStreetLightRender","HolidayCandleRender","StringLightsRender","ChristmasTreeRender","WallWirelessRender")
     @SubscribeEvent fun unload(event: LevelEvent.Unload) { if(event.level===world)clear() }

@@ -52,6 +52,7 @@ class WorkLightElement(node: TransparentNode,descriptor: TransparentNodeDescript
     override val inventory=TransparentNodeElementInventory(1,2,this)
     override val cord=mods.eln.transparentnode.cord.ApplianceCord(this,positiveLoad)
     override val cordVoltage get()=operatingVoltage
+    override fun acceptsCord(rating: mods.eln.transparentnode.cord.CordRating)=mods.eln.sixnode.lampsocket.LampCordCompatibility.accepts(rating,cordVoltage)
     override fun cordChanged() { if(cord.plugged)on=false;configureBulbs() }
     override fun getElectricalLoad(side: Direction,lrdu: LRDU)=if(cord.plugged)null else super.getElectricalLoad(side,lrdu)
     override fun getConnectionMask(side: Direction,lrdu: LRDU)=if(cord.plugged)0 else super.getConnectionMask(side,lrdu)

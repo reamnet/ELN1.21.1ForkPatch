@@ -426,8 +426,7 @@ public class Eln {
         ElnRegistry.registerOre("blockAluminum", () -> new ItemStack(arcClayBlock));
         ElnRegistry.registerOre("blockSteel", () -> new ItemStack(arcMetalBlock));
 
-        AnalyticsHandler.INSTANCE.submitUpstreamAnalytics();
-        AnalyticsHandler.INSTANCE.submitAgeSeriesAnalytics();
+        // This fork does not submit upstream analytics or usage reports.
     }
 
     private void configureElnLogFile() {

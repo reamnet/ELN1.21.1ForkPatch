@@ -71,6 +71,7 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
                 require(wires in 1..3)
                 repeat(wires) { catenaries.add(Catenary(readVec(stream),readVec(stream))) }
             }
+            mods.eln.client.terrain.DistantModels.cables(tileEntity,catenaries.map { it.distantPoints })
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -90,9 +91,11 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
 
     internal class Catenary(start: Vec3, end: Vec3) {
         val bounds: AABB
+        val distantPoints: List<Vec3>
         private val list = glGenLists(1)
         init {
             val sections = OverheadCableMesh.sections(start, end)
+            distantPoints=sections.map { ring -> ring.reduce(Vec3::add).scale(1.0/ring.size) }
             val vertices = sections.flatten()
             bounds = AABB(vertices.minOf { it.x }, vertices.minOf { it.y }, vertices.minOf { it.z },
                 vertices.maxOf { it.x }, vertices.maxOf { it.y }, vertices.maxOf { it.z }).inflate(.05)
