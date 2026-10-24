@@ -148,7 +148,7 @@ class RenewableTest {
         c.run(100);assertTrue(c.unit.outputWatts>4990)
         c.load.resistance=120.0*120/40_000;c.run(150)
         repeat(20) { c.tick();assertTrue(source.power<=10_000.01);assertTrue(c.unit.outputWatts<=9700.01) }
-        c.load.resistance=120.0*120/5000;c.run(80);assertTrue(c.unit.outputWatts>4990)
+        c.load.resistance=120.0*120/5000;c.run(80);assertTrue(c.unit.outputWatts>4990,"${c.unit.outputWatts} W; source ${source.voltage} V / ${source.current} A; ${c.unit.status}")
     }
     @Test fun standaloneMpptCanFeedTheHybridSolarInputWithoutCreatingEnergy() {
         val c=Circuit(watts=1000.0);c.pv.setLightFactor(0.0);c.grid.enabled=false;c.unit.priority=SolarPriority.SOLAR_ONLY

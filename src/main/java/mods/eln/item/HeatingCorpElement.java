@@ -23,6 +23,8 @@ public class HeatingCorpElement extends GenericItemUsingDamageDescriptorUpgrade 
 
     double Umax;
 
+    public double getNominalPower() { return electricalNominalP; }
+
     public HeatingCorpElement(String name,
                               double electricalNominalU, double electricalNominalP,
                               double electricalMaximalP,

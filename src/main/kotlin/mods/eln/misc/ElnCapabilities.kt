@@ -15,6 +15,8 @@ import net.neoforged.neoforge.fluids.FluidStack
 import net.neoforged.neoforge.fluids.capability.IFluidHandler
 import net.neoforged.neoforge.items.wrapper.InvWrapper
 import net.neoforged.neoforge.items.wrapper.SidedInvWrapper
+import net.neoforged.neoforge.items.IItemHandlerModifiable
+import net.minecraft.world.item.ItemStack
 
 /**
  * What other mods (hoppers, pipes, cables) can reach on the mod's blocks. 1.7.10 exposed this by
@@ -27,7 +29,7 @@ object ElnCapabilities {
     fun register(event: RegisterCapabilitiesEvent) {
         for (type in listOf(TransparentNodeEntity.TYPE.get(), TransparentNodeEntityWithFluid.TYPE.get())) {
             event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, type) { entity, side ->
-                if (side != null) SidedInvWrapper(entity as WorldlyContainer, side) else InvWrapper(entity)
+                if (side != null) SidedInvWrapper(entity as WorldlyContainer, side) else NodeItemHandler(entity)
             }
         }
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, TransparentNodeEntityWithFluid.TYPE.get()) { entity, side ->
@@ -41,6 +43,22 @@ object ElnCapabilities {
             ComputerCraftIntegration.register(event)
         }
     }
+}
+
+/** Pipes may cache an unsided capability before the node finishes loading.
+ * Resolve service-slot protection at use time, retaining other machines' existing access. */
+private class NodeItemHandler(private val entity: TransparentNodeEntity): IItemHandlerModifiable {
+    private val ordinary=InvWrapper(entity)
+    private val service=SidedInvWrapper(entity,Direction.DOWN)
+    private fun handler(): IItemHandlerModifiable=
+        if((entity.node as? mods.eln.node.transparent.TransparentNode)?.element is mods.eln.transparentnode.growing.GrowingBedElement)service else ordinary
+    override fun getSlots()=handler().slots
+    override fun getStackInSlot(slot: Int)=handler().getStackInSlot(slot)
+    override fun insertItem(slot: Int,stack: ItemStack,simulate: Boolean)=handler().insertItem(slot,stack,simulate)
+    override fun extractItem(slot: Int,amount: Int,simulate: Boolean)=handler().extractItem(slot,amount,simulate)
+    override fun getSlotLimit(slot: Int)=handler().getSlotLimit(slot)
+    override fun isItemValid(slot: Int,stack: ItemStack)=handler().isItemValid(slot,stack)
+    override fun setStackInSlot(slot: Int,stack: ItemStack)=handler().setStackInSlot(slot,stack)
 }
 
 /** One side of the mod's side-aware fluid handler, in the shape the capability wants (no side on the calls). */

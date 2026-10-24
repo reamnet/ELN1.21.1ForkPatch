@@ -24,6 +24,8 @@ class RenewableConvergenceAuditTest {
         assertTrue(!source.enabled, "A genuinely higher-voltage grid must not backfeed the renewable")
         // Coupled solver probes change commands without advancing physical time.
         other.voltage = 3100.0
+        root.systems.forEach { it.stepCalc() }
+        assertTrue(!controller.acceptsCandidate(), "An obsolete open decision hid available generation")
         controller.rootSystemPreStepProcess()
         assertTrue(source.enabled, "A temporary trial disabled a valid renewable supply")
         root.systems.forEach { it.stepCalc() }
@@ -33,7 +35,7 @@ class RenewableConvergenceAuditTest {
     }
 
     @Test fun parallelWindAndWaterSuppliesShareFinitePowerAndRecoverAcrossLoadChanges() {
-        for (count in listOf(1, 2, 4)) for (reverse in listOf(false, true)) {
+        for (count in listOf(1, 2, 4, 10)) for (reverse in listOf(false, true)) {
             val root = RootSystem(.01, 1)
             val bus = VoltageState(); root.addState(bus)
             val budgets = List(count) { if (it % 2 == 0) 1000.0 else 20000.0 }
@@ -57,7 +59,7 @@ class RenewableConvergenceAuditTest {
                     }
                 }
                 val available = budgets.sum()
-                if (demand < available * .9) assertTrue(bus.voltage > 3190.0,
+                if (demand < available) assertTrue(bus.voltage > 3190.0,
                     "count=$count reverse=$reverse demand=$demand bus=${bus.voltage}")
                 else assertEquals(available, sources.sumOf { it.power }, .1,
                     "An overloaded bus must use the available renewable power before shedding voltage")

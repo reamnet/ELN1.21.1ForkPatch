@@ -1,0 +1,72 @@
+{
+  "tests": 858,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "version": "3.0.44",
+  "suites": 210,
+  "target_suites": [
+    {
+      "name": "mods.eln.transparentnode.utilitylight.JoinedPoleGridsTest",
+      "tests": "5",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T00:28:56.382Z",
+      "hostname": "67293bf35eff",
+      "time": "80.03"
+    },
+    {
+      "name": "mods.eln.transparentnode.growing.GrowingBedTest",
+      "tests": "7",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T00:28:51.074Z",
+      "hostname": "67293bf35eff",
+      "time": "0.014"
+    },
+    {
+      "name": "mods.eln.transparentnode.renewable.RenewableTest",
+      "tests": "16",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T00:28:51.133Z",
+      "hostname": "67293bf35eff",
+      "time": "2.546"
+    },
+    {
+      "name": "mods.eln.sim.power.WindBankGeneratorGridTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T00:28:39.118Z",
+      "hostname": "67293bf35eff",
+      "time": "11.732"
+    },
+    {
+      "name": "mods.eln.sim.power.TransformerIdleInputTest",
+      "tests": "1",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T00:28:39.117Z",
+      "hostname": "67293bf35eff",
+      "time": "0.001"
+    },
+    {
+      "name": "mods.eln.sim.power.ConverterControlRuntimeRegressionTest",
+      "tests": "15",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-24T00:28:05.307Z",
+      "hostname": "67293bf35eff",
+      "time": "0.049"
+    }
+  ],
+  "wind_circuits": 16,
+  "wind_physical_steps": 12800
+}

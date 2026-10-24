@@ -404,6 +404,9 @@ object CraftingRecipes {
             'P',findItemStack("Iron Plate"),'C',ItemStack(Blocks.CHEST),'R',findItemStack("Copper Cable"))
         addRecipe(findItemStack("Electric Washing Machine"),"PBP","MCM","PPP",
             'P',findItemStack("Iron Plate"),'B',ItemStack(Items.BUCKET),'M',findItemStack("Electrical Motor"),'C',findItemStack("Copper Cable"))
+        addRecipe(findItemStack("Climate Controlled Growing Bed"),"IPI","SCS","IBI",
+            'I',ItemStack(Items.IRON_BARS),'P',findItemStack("Iron Plate"),'S',ItemStack(Blocks.DIRT),
+            'C',findItemStack("Copper Cable"),'B',ItemStack(Items.BUCKET))
         addRecipe(findItemStack("Electric Dryer"),"PPP","MHM","PCP",
             'P',findItemStack("Iron Plate"),'M',findItemStack("Electrical Motor"),'H',ItemStack(Items.BLAZE_ROD),'C',findItemStack("Copper Cable"))
         addRecipe(findItemStack("Fusion Matter Reactor"),"NDN","MCM","NDN",

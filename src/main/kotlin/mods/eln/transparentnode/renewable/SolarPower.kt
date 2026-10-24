@@ -157,6 +157,8 @@ class SolarPowerUnit(owner: TransparentNodeElement,val hybrid: Boolean) {
         override fun isolatesLoadOnFailure()=true
         override fun connectedSystems(): Set<SubSystem> = setOfNotNull(solar.subSystem,negative.subSystem,gridPin.subSystem,outputPin.subSystem)
         override fun trialSources()=listOf(inputSource,outputSource)
+        override fun startupInputSources()=if(gridAllowed)listOf(inputSource) else emptyList()
+        override fun startupOutputTargets()=if(enabled)mapOf(outputSource to target) else emptyMap()
         override fun iterationRegion()=status
     }
     private fun open(reason: String) { inputSource.enabled=false;outputSource.enabled=false;solarUsed=0.0;status=reason }

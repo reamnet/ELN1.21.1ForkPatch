@@ -17,8 +17,14 @@ interface ConservativePowerProcess : IRootSystemPreStepProcess {
     fun startupVoltageTargets(): Map<SwitchableVoltageSource, Double> = emptyMap()
     /** Target-voltage input clamps that need to follow a starting source's bus guess. */
     fun startupInputSources(): List<SwitchableVoltageSource> = emptyList()
+    /** Target outputs reached from an energizing input, for coherent cascaded guesses only. */
+    fun startupOutputTargets(): Map<SwitchableVoltageSource, Double> = emptyMap()
     /** Voltage commands eligible for a bounded algebraic convergence correction. */
     fun trialSources(): List<SwitchableVoltageSource> = emptyList()
+    /** All mutable source commands, including outputs eliminated from the free trial vector. */
+    fun controlledSources(): List<SwitchableVoltageSource> = trialSources()
+    /** Hard source-command domains for numerical trials, never a change to device ratings. */
+    fun trialVoltageBounds(): Map<SwitchableVoltageSource, ClosedFloatingPointRange<Double>> = emptyMap()
     /** Piecewise operating region for a one-sided numerical derivative only. */
     fun iterationRegion(): String = ""
     /** Source I-V breakpoints for restarting a stalled algebraic solve; never bypass acceptance. */

@@ -1,0 +1,26 @@
+{
+  "world": "utility-distribution-1792801570352",
+  "passed": [
+    "Native pole screen: 120/240V Secondary Street Light Pole",
+    "Native pole screen: Single Phase Transformer Street Light Pole",
+    "Native pole screen: Three Phase Transformer Street Light Pole",
+    "Native pole screen: Single Phase Secondary Fed Street Light Pole",
+    "Native pole screen: Three Phase Secondary Fed Street Light Pole",
+    "Growing rack compiles nonempty baked geometry across its two occupied terrain sections",
+    "Real 240 V placed cable powers 48 bulb drivers; standard fluid capability fills the tank and reserves 1000 mB for 20 plants",
+    "Growing-bed GUI progress packets retain the same stationary baked mesh",
+    "Mature wheat loot yields 20 wheat; planting stock survives, and sided/unsided pipe capabilities extract only harvest",
+    "Power loss pauses crop work; completing the paid cycle with an empty tank then stops the next cycle without free water or growth"
+  ],
+  "sounds": {},
+  "phase": 120,
+  "version": "3.0.44",
+  "environment": {
+    "minecraft": "1.21.1",
+    "neoforge": "21.1.249",
+    "sodium": "0.8.13",
+    "iris": "1.8.14-beta.1",
+    "shader_pack_enabled": false,
+    "renderer": "Mesa llvmpipe software rendering"
+  }
+}

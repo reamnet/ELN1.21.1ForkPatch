@@ -41,6 +41,13 @@ class SafeTransformerProcess(
         val b = probePort(secondary, null, output)
         if (!a.volts.isFinite() || !b.volts.isFinite() || a.ohms.isNaN() || b.ohms.isNaN() ||
             a.ohms < 0.0 || b.ohms < 0.0) { open("INVALID_NETWORK"); return }
+        // Target regulation needs a driven input. An idle primary must not retain
+        // a speculative reverse ratio and backfeed its renewable bank above nominal,
+        // keeping every alternator permanently open. Fixed-ratio induction remains
+        // reversible, including into an unloaded primary.
+        if (target != null && (a.volts <= 0.0 || a.ohms >= RegulatedConverter.OPEN_OHMS)) {
+            open("NO_INPUT"); return
+        }
         if (target != null && a.volts > 0.0) ratio = (target / a.volts).coerceIn(1.0 / 256, 256.0)
         if (!ratio.isFinite() || ratio <= 0) { open("INVALID_CONTROL"); return }
         val induced = a.volts * ratio
@@ -88,7 +95,12 @@ class SafeTransformerProcess(
     }
 
     override fun acceptsCandidate(): Boolean {
-        if (!input.enabled && !output.enabled) return true
+        if (!input.enabled && !output.enabled) {
+            return when (status) {
+                "NO_INPUT" -> (primary.subSystem?.pendingValue(primary) ?: Double.NaN).let { it.isFinite() && it <= 0.0 }
+                else -> true
+            }
+        }
         if ((input.enabled && !commandMatches(input.voltage, commandedInput)) ||
             (output.enabled && !commandMatches(output.voltage, commandedOutput))) return false
         val vp = primary.subSystem?.pendingValue(primary) ?: return false
@@ -103,8 +115,13 @@ class SafeTransformerProcess(
         return balancedPower(pin, pout, roundoffWatts = powerRoundoff)
     }
 
+    override fun startupOutputTargets() = voltageTarget?.takeIf { it.isFinite() && it > 0.0 && enabled && populated() }
+        ?.let { mapOf(output to it) } ?: emptyMap()
+
     override fun startupInputSources(): List<SwitchableVoltageSource> =
         if (voltageTarget != null) listOf(input) else emptyList()
+
+    override fun controlledSources() = listOf(input, output)
 
     override fun trialSources(): List<SwitchableVoltageSource> =
         // An unloaded target output is already fixed by its control law. Probing

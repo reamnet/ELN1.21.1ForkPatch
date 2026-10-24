@@ -250,7 +250,10 @@ class DistributionGui(player: Player,private val render: DistributionPoleRender)
         drawString(8,8,font.plainSubstrByWidth(tr(kind.title),224))
         if(kind.transformer)drawString(32,35,if(d.installed)tr("Step-down unit installed") else tr("Insert step-down unit"))
         else drawString(8,30,tr("Line: %1$",Utils.plotVolt("",d.input).trim()))
-        if(kind.light)drawString(8,30,tr("Aim: %1$° / %2$°; height: %3$ m",d.yaw,d.pitch,String.format(Locale.ROOT,"%.2f",5.2+StreetLightMount.offset(d.heightStep))))
+        if(kind.light) {
+            val aimX=if(kind.transformer)32 else 8
+            drawString(aimX,47,font.plainSubstrByWidth(tr("Aim: %1$° / %2$°; height: %3$ m",d.yaw,d.pitch,String.format(Locale.ROOT,"%.2f",5.2+StreetLightMount.offset(d.heightStep))),232-aimX))
+        }
         if(kind.recloser)drawString(8,184,if(d.locked)tr("Locked out; inspect fault and reset") else if(!d.closed)tr("Retry in %1$ s",String.format(Locale.ROOT,"%.1f",d.remaining)) else tr("All three phases closed"))
         else if(kind.regulator)drawString(8,if(kind.light)262 else 190,tr("Tap: %1$ %%",String.format(Locale.ROOT,"%.1f",100*(d.ratios.firstOrNull() ?: 1.0))))
         else drawString(8,if(kind.light)262 else 190,tr("Load: %1$",Utils.plotVolt("",d.output).trim()))

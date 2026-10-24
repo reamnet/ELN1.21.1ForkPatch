@@ -24,11 +24,31 @@ class RenewableSupply(val source: SwitchableVoltageSource,private val available:
     private var command=0.0
     private var blocked=false
     private var region="OPEN"
-    override fun beginStep(seconds: Double) { blocked=false;watts=available().takeIf { it.isFinite() }?.coerceIn(0.0,20_000.0) ?: 0.0 }
-    override fun prepareStep() { source.enabled=watts>.01;if(source.enabled) { command=3200.0;source.voltage=command } }
+    private var powerIncreasing=false
+    private var portResistance=0.0
+    override fun beginStep(seconds: Double) {
+        blocked=false
+        val next=available().takeIf { it.isFinite() }?.coerceIn(0.0,20_000.0) ?: 0.0
+        powerIncreasing=next>watts+1e-6
+        watts=next
+    }
+    override fun prepareStep() {
+        if(watts<=.01) { source.enabled=false;return }
+        if(!source.enabled) {
+            // A converter may already be backfeeding this idle winding. Start at
+            // that bus guess so the coupled startup seed can move its clamp too.
+            val bus=source.aPin?.state ?: 0.0
+            source.voltage=if(bus.isFinite() && bus>0.0)bus else 3200.0
+        }
+        source.enabled=true
+    }
+    override fun startupVoltageTargets()=
+        if((powerIncreasing || region=="CURRENT") && source.enabled && source.voltage>0.0)
+            mapOf(source to 3200.0) else emptyMap()
     override fun rootSystemPreStepProcess() {
         if(blocked || watts<=.01) { source.enabled=false;region="OPEN";return }
         val t=source.subSystem?.sourceThevenin(source) ?: return
+        portResistance=t.resistance
         // A speculative coupled voltage can temporarily backfeed this port. Open
         // for that trial, then re-probe if another controller changes the network.
         if(!t.voltage.isFinite() || t.resistance.isNaN() || t.resistance<=0 || t.voltage>3200.0) { source.enabled=false;region="OPEN";return }
@@ -39,7 +59,15 @@ class RenewableSupply(val source: SwitchableVoltageSource,private val available:
         region=when(command) { 3200.0 -> "VOLTAGE";currentVoltage -> "CURRENT";else -> "POWER" }
     }
     override fun acceptsCandidate(): Boolean {
-        if(!source.enabled)return true
+        if(!source.enabled) {
+            if(blocked || watts<=.01)return true
+            val system=source.subSystem ?: return false
+            val volts=(source.aPin?.let { system.pendingValue(it) } ?: 0.0)-
+                (source.bPin?.let { system.pendingValue(it) } ?: 0.0)
+            // Another controller may remove the backfeed after this supply opens.
+            // An open candidate is valid only while that solved backfeed remains.
+            return volts.isFinite() && volts>=3200.0-1e-7
+        }
         val power=pendingSourcePower(source)
         val amps=-(source.subSystem?.pendingValue(source.currentState) ?: Double.NaN)
         return commandMatches(source.voltage,command) && power.isFinite() && power in -1e-6..(watts*1.000001+1e-5) && amps in -1e-7..50.00005 &&
@@ -48,8 +76,19 @@ class RenewableSupply(val source: SwitchableVoltageSource,private val available:
     override fun failClosed() { blocked=true;source.enabled=false }
     override fun iterationRegion()=region
     override fun trialSources()=listOf(source)
+    override fun trialVoltageBounds()=mapOf(source to (0.0..3200.0))
     override fun connectedSystems()=setOfNotNull(source.subSystem)
-    override fun voltageSearchHints()=mapOf(source to doubleArrayOf(3200.0))
+    // Bracket the limited branch between the voltage ceiling and power/current
+    // knee, including the last probed load resistance without an extra port solve.
+    override fun voltageSearchHints(): Map<SwitchableVoltageSource, DoubleArray> {
+        val knee=(watts/50.0).coerceAtMost(3200.0)
+        val middle=sqrt(3200.0*knee)
+        // The downstream port can also fold back at its maximum-power
+        // point while this source is current-limited. Include that Thevenin
+        // boundary; a power/current knee alone cannot bracket a weak-input load.
+        val loadKnee=(100.0*portResistance).takeIf { it.isFinite() && it>0.0 }?.coerceAtMost(3200.0) ?: knee
+        return mapOf(source to doubleArrayOf(3200.0,sqrt(3200.0*middle),middle,knee,loadKnee))
+    }
 }
 
 class LargeRenewableElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) : TransparentNodeElement(node,descriptor) {
@@ -66,7 +105,7 @@ class LargeRenewableElement(node: TransparentNode,descriptor: TransparentNodeDes
     override val inventory=TransparentNodeElementInventory(0,1,this)
     init {
         electricalLoadList.addAll(listOf(output,internal))
-        electricalComponentList.addAll(listOf(source,Resistor(internal,output).apply { resistance=.02 },Resistor(output,null).pullDown()))
+        electricalComponentList.addAll(listOf(source,Resistor(internal,output).apply { resistance=OUTPUT_RESISTANCE },Resistor(output,null).pullDown()))
         slowProcessList.add(NodePeriodicPublishProcess(node,.5,0.0))
         slowProcessList.add(IProcess { seconds -> timeout-=seconds;if(timeout<=0) { timeout=2.0;sampleEnvironment() } })
     }
@@ -116,6 +155,9 @@ class LargeRenewableElement(node: TransparentNode,descriptor: TransparentNodeDes
     override fun readFromNBT(nbt: CompoundTag) { super.readFromNBT(nbt);availableWatts=0.0;timeout=0.0;source.enabled=false }
     override fun getWaila()=linkedMapOf(tr("Rated voltage") to tr("3200 V"),tr("Available power") to Utils.plotPower("",availableWatts),tr("Produced power") to Utils.plotPower("",source.power.coerceAtLeast(0.0)))
     companion object {
+        // One percent winding drop at the 20 kW / 3.2 kV module rating.
+        // This keeps limited export away from the nearly shorted input branch.
+        const val OUTPUT_RESISTANCE=5.12
         fun windPower(speed: Double,exposure: Double)=if(!speed.isFinite() || speed<3 || speed>=25)0.0 else
             (20_000.0*(speed/12).pow(3)*exposure.coerceIn(0.0,1.0)).coerceIn(0.0,20_000.0)
     }

@@ -42,6 +42,11 @@ import kotlin.math.ceil
 object UtilityDistributionChecks {
     private val mc get()=Minecraft.getInstance()
     private val coversOnly=java.lang.Boolean.getBoolean("eln.coverRenderingChecks")
+    private val poleGuiOnly=java.lang.Boolean.getBoolean("eln.poleGuiChecks")
+    private val growingOnly=java.lang.Boolean.getBoolean("eln.growingBedChecks")
+    private val growingPos=BlockPos(256,80,268)
+    private var growingPaused=0.0
+    private var growingMesh: Any?=null
     private val panelOnly=java.lang.Boolean.getBoolean("eln.panelFeederChecks")
     private val coverBlocks=listOf(Blocks.STONE,Blocks.GRASS_BLOCK,Blocks.OAK_PLANKS,Blocks.QUARTZ_BLOCK)
     private val worldName="utility-distribution-${System.currentTimeMillis()}"
@@ -166,7 +171,7 @@ object UtilityDistributionChecks {
     }
     private fun finish(error: Throwable?) {
         done=true
-        Files.writeString(mc.gameDirectory.toPath().resolve(if(panelOnly)"panel-feeder-checks.json" else if(coversOnly)"cover-rendering-checks.json" else if(java.lang.Boolean.getBoolean("eln.utilityLightingOnly"))"utility-lighting-checks.json" else "utility-distribution-checks.json"),GsonBuilder().setPrettyPrinting().create().toJson(mapOf("world" to worldName,"passed" to passed,"sounds" to sounds,"phase" to phase,"failure" to error?.stackTraceToString())))
+        Files.writeString(mc.gameDirectory.toPath().resolve(if(growingOnly)"growing-bed-checks.json" else if(poleGuiOnly)"pole-gui-checks.json" else if(panelOnly)"panel-feeder-checks.json" else if(coversOnly)"cover-rendering-checks.json" else if(java.lang.Boolean.getBoolean("eln.utilityLightingOnly"))"utility-lighting-checks.json" else "utility-distribution-checks.json"),GsonBuilder().setPrettyPrinting().create().toJson(mapOf("world" to worldName,"passed" to passed,"sounds" to sounds,"phase" to phase,"failure" to error?.stackTraceToString())))
         if(error!=null)Eln.logger.error("UTILITY_NATIVE FAIL phase $phase",error) else Eln.logger.info("UTILITY_NATIVE COMPLETE {} checks",passed.size)
         mc.execute { mc.stop();kotlin.concurrent.thread { Thread.sleep(1500);kotlin.system.exitProcess(if(error==null)0 else 1) } }
     }
@@ -180,11 +185,17 @@ object UtilityDistributionChecks {
         if(java.lang.Boolean.getBoolean("eln.utilityDistributionChecks"))event.sound?.location?.toString()?.takeIf { it.startsWith("eln:utility_") }?.let { sounds[it]=(sounds[it] ?: 0)+1 }
     }
     @SubscribeEvent fun tick(event: ClientTickEvent.Post) {
-        if((!java.lang.Boolean.getBoolean("eln.utilityDistributionChecks") && !coversOnly && !panelOnly) || done)return
+        if((!java.lang.Boolean.getBoolean("eln.utilityDistributionChecks") && !coversOnly && !panelOnly && !poleGuiOnly && !growingOnly) || done)return
         try {
             check(++total<18000) { "Timeout at phase $phase" };ticks++
             mc.player?.let {
                 it.setNoGravity(true);it.abilities.flying=true
+                if(growingOnly && phase==113) {
+                    val dx=growingPos.x+.5-it.x;val dz=growingPos.z+.5-it.z;val dy=growingPos.y+2.0-it.eyeY
+                    it.yRot=Math.toDegrees(kotlin.math.atan2(-dx,dz)).toFloat()
+                    it.xRot=Math.toDegrees(kotlin.math.atan2(-dy,kotlin.math.sqrt(dx*dx+dz*dz))).toFloat()
+                    it.yRotO=it.yRot;it.xRotO=it.xRot
+                }
                 if(coversOnly && phase in 90..92) {
                     val dx=coverTest.x+1.5-it.x;val dz=coverTest.z+6.0-it.z;val dy=coverTest.y+.5-it.eyeY
                     it.yRot=Math.toDegrees(kotlin.math.atan2(-dx,dz)).toFloat()
@@ -193,12 +204,119 @@ object UtilityDistributionChecks {
                 }
             }
             when(phase) {
+                109->if(settled() && (mc.level?.getBlockEntity(gallery.values.first()) as? TransparentNodeEntity)?.elementRender is DistributionPoleRender) {
+                    server { p ->gui(p,gallery.values.first()) };next(110,40)
+                }
+                110->if(settled() && mc.screen is DistributionGui && ticks>30) {
+                    capture("pole-gui-${gallery.keys.elementAt(passed.size).name.lowercase()}")
+                    pass("Native pole screen: ${gallery.keys.elementAt(passed.size).title}")
+                    next(111,5)
+                }
+                111->if(settled()) {
+                    mc.setScreen(null)
+                    if(passed.size==gallery.size) { if(growingOnly)next(112,5) else finish(null) }
+                    else { server { p ->gui(p,gallery.values.elementAt(passed.size)) };next(110,35) }
+                }
+                112->if(settled()) {
+                    server { p ->
+                        val e=place(p,"Climate Controlled Growing Bed",growingPos) as mods.eln.transparentnode.growing.GrowingBedElement
+                        e.inventory.setItem(0,ItemStack(net.minecraft.world.item.Items.WHEAT_SEEDS,20))
+                        e.inventory.setItem(1,Eln.findItemStack("120V LED Light Bulb",48))
+                        e.inventory.setItem(2,Eln.findItemStack("240V Copper Heating Element",1))
+                        val fluid=p.serverLevel().getCapability(net.neoforged.neoforge.capabilities.Capabilities.FluidHandler.BLOCK,growingPos,net.minecraft.core.Direction.WEST)!!
+                        check(fluid.fill(net.neoforged.neoforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.WATER,6000),net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE)==6000)
+                        e.inventory.setChanged()
+                        for(pos in listOf(growingPos.south(),growingPos.south(2)))p.serverLevel().setBlockAndUpdate(pos.below(),Blocks.STONE.defaultBlockState())
+                        f(p).wire(growingPos.south());f(p).source(growingPos.south(2),240.0)
+                        p.teleportTo(p.serverLevel(),growingPos.x+6.0,growingPos.y+2.5,growingPos.z+8.0,145f,8f)
+                    };next(113,80)
+                }
+                113->if(settled() && (mc.level?.getBlockEntity(growingPos) as? TransparentNodeEntity)?.elementRender is mods.eln.transparentnode.growing.GrowingBedRender) {
+                    val entity=mc.level!!.getBlockEntity(growingPos) as TransparentNodeEntity
+                    mods.eln.client.terrain.TerrainModels.refreshNow(entity)
+                    val mesh=checkNotNull(mods.eln.client.terrain.TerrainModels.meshFor(entity.elementRender!!))
+                    check(mesh.batches.sumOf { it.vertices.size }>10_000) { "Growing rack compiled an empty/incomplete terrain mesh" }
+                    check(mods.eln.client.terrain.TerrainModels.sectionsFor(entity.elementRender!!).size>=2) { "Growing rack did not span both occupied sections" }
+                    growingMesh=mesh
+                    pass("Growing rack compiles nonempty baked geometry across its two occupied terrain sections")
+                    capture("growing-bed")
+                    server { p ->
+                        val e=f(p).machine(growingPos) as mods.eln.transparentnode.growing.GrowingBedElement
+                        check(e.supply.voltage>230 && e.lights.power>10 && e.cycle.progress>0) { "${e.status}: ${e.supply.voltage} V / ${e.lights.power} W / ${e.cycle.progress} s" }
+                        check(e.installedBulbs==48 && e.planted==20 && e.water.tank.fluidAmount==5000)
+                        pass("Real 240 V placed cable powers 48 bulb drivers; standard fluid capability fills the tank and reserves 1000 mB for 20 plants")
+                    };next(121,5)
+                }
+                121->if(settled()) { server { p ->gui(p,growingPos) };next(114,35) }
+                114->if(settled() && mc.screen is mods.eln.transparentnode.growing.GrowingBedGui) {
+                    val entity=mc.level!!.getBlockEntity(growingPos) as TransparentNodeEntity
+                    check(mods.eln.client.terrain.TerrainModels.meshFor(entity.elementRender!!)===growingMesh) { "GUI progress packets rebuilt the rack mesh" }
+                    pass("Growing-bed GUI progress packets retain the same stationary baked mesh")
+                    capture("growing-bed-gui");next(115,5)
+                }
+                115->if(settled()) {
+                    mc.setScreen(null)
+                    server { p ->
+                        val e=f(p).machine(growingPos) as mods.eln.transparentnode.growing.GrowingBedElement
+                        // Shorten the native waiting period only. Unit tests account the
+                        // full duration; finishing still uses production mature-crop loot.
+                        e.cycle.restore(mods.eln.transparentnode.growing.GrowingCycle.SECONDS-.05,23.0)
+                    };next(116,40)
+                }
+                116->if(settled()) {
+                    server { p ->
+                        val e=f(p).machine(growingPos) as mods.eln.transparentnode.growing.GrowingBedElement
+                        check((3..11).sumOf { if(e.inventory.getItem(it).item===net.minecraft.world.item.Items.WHEAT)e.inventory.getItem(it).count else 0 }==20)
+                        check(e.inventory.getItem(0).count==20)
+                        for(side in listOf<net.minecraft.core.Direction?>(null,net.minecraft.core.Direction.EAST)) {
+                            val items=p.serverLevel().getCapability(net.neoforged.neoforge.capabilities.Capabilities.ItemHandler.BLOCK,growingPos,side)!!
+                            check(items.extractItem(0,64,false).isEmpty)
+                            for(i in 1 until items.slots)items.extractItem(i,64,false)
+                        }
+                        check((3..11).all { e.inventory.getItem(it).isEmpty })
+                        pass("Mature wheat loot yields 20 wheat; planting stock survives, and sided/unsided pipe capabilities extract only harvest")
+                        f(p).voltage(growingPos.south(2),0.0)
+                    };next(117,35)
+                }
+                117->if(settled()) {
+                    server { p ->
+                        val e=f(p).machine(growingPos) as mods.eln.transparentnode.growing.GrowingBedElement
+                        check(e.supply.voltage<1);growingPaused=e.cycle.progress
+                    };next(118,40)
+                }
+                118->if(settled()) {
+                    server { p ->
+                        val e=f(p).machine(growingPos) as mods.eln.transparentnode.growing.GrowingBedElement
+                        check(e.cycle.progress==growingPaused)
+                        e.water.tank.drain(10_000,net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE)
+                        e.cycle.restore(mods.eln.transparentnode.growing.GrowingCycle.SECONDS,23.0)
+                        f(p).voltage(growingPos.south(2),240.0)
+                    };next(119,50)
+                }
+                119->if(settled()) {
+                    server { p ->
+                        val e=f(p).machine(growingPos) as mods.eln.transparentnode.growing.GrowingBedElement
+                        check(e.status=="WATER" && e.cycle.progress==0.0 && e.lights.power<.01)
+                        pass("Power loss pauses crop work; completing the paid cycle with an empty tank then stops the next cycle without free water or growth")
+                    };next(120,5)
+                }
+                120->if(settled())finish(null)
                 0->if(mc.screen is TitleScreen && mc.overlay==null && ticks>20) {
                     mc.options.guiScale().set(2);mc.window.setWindowed(1440,1000);mc.resizeDisplay()
                     mc.createWorldOpenFlows().createFreshLevel(worldName,LevelSettings(worldName,GameType.CREATIVE,false,Difficulty.PEACEFUL,true,GameRules(),WorldDataConfiguration.DEFAULT),WorldOptions(25250L,false,false),
                         { it.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.FLAT).value().createWorldDimensions() },mc.screen!!);phase=1;ticks=0
                 }
                 1->if(mc.player!=null && mc.level!=null && mc.screen==null) {
+                    if(poleGuiOnly || growingOnly) {
+                        server { p ->
+                            val kinds=DistributionKind.entries.filter { poleGuiOnly && it.light }
+                            kinds.forEachIndexed { i,kind ->
+                                val pos=base.east(i*16);gallery[kind]=pos
+                                place(p,kind.title,pos)
+                            }
+                            p.teleportTo(p.serverLevel(),base.x+2.0,base.y+1.0,base.z+4.0,150f,15f)
+                        };next(if(poleGuiOnly)109 else 112,80);return
+                    }
                     if(panelOnly) { server(::setupBottomPanel);next(98,60);return }
                     if(coversOnly) {
                         server { p ->

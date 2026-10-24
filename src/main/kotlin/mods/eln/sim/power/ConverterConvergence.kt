@@ -13,29 +13,46 @@ import kotlin.math.max
  */
 class ConverterConvergence {
     private data class Derivative(val sources: List<mods.eln.sim.mna.component.SwitchableVoltageSource>,
-        val scales: DoubleArray, val regions: List<String>, val matrix: Array<DoubleArray>)
+        val scales: DoubleArray, val weights: DoubleArray, val regions: List<String>, val matrix: Array<DoubleArray>)
     private val derivatives = mutableMapOf<List<ConservativePowerProcess>, Derivative>()
     fun clear() = derivatives.clear()
 
-    /** Move stiff source and converter-input guesses together while a generator
-     * builds its field. Otherwise a valid constant-current / constant-power low
+    /** Move stiff source and converter-input guesses together while a source
+     * starts. This may also lower a backfed idle renewable winding to its nominal
+     * startup guess. Otherwise a valid constant-current / constant-power low
      * branch can latch startup even though a normal-voltage solution exists. */
     fun seedStartupVoltages(processes: List<ConservativePowerProcess>) {
-        val inputSystems = processes.flatMap { it.startupInputSources() }
-            .filter { it.enabled }.mapNotNull { it.subSystem }.toSet()
-        if (inputSystems.isEmpty()) return
-        val targets = processes.flatMap { it.startupVoltageTargets().entries }
-            .filter { (source, target) -> source.enabled && source.subSystem in inputSystems && source.voltage > 0 &&
-                target.isFinite() && target > source.voltage }
-        if (targets.isEmpty()) return
-        val sources = processes.flatMap { it.trialSources() }.distinct()
-        for ((system, requests) in targets.groupBy { it.key.subSystem }) {
-            if (system == null) continue
-            val request = requests.maxBy { it.value }
-            val scale = request.value / request.key.voltage
-            val bus = sources.filter { it.enabled && it.subSystem === system }
-            if (!scale.isFinite() || bus.any { !(it.voltage * scale).isFinite() }) continue
-            for (source in bus) source.voltage *= scale
+        val requests = processes.flatMap { it.startupVoltageTargets().entries }
+            .filter { (source, target) -> source.enabled && source.voltage > 0.0 &&
+                target.isFinite() && target > 0.0 }
+        if (requests.isEmpty()) return
+        val sources = processes.flatMap { it.controlledSources() }.distinct()
+        val touched = mutableSetOf<SubSystem>()
+        val propagated = mutableSetOf<ConservativePowerProcess>()
+        var pending = requests
+        while (pending.isNotEmpty()) {
+            for ((system, busRequests) in pending.groupBy { it.key.subSystem }) {
+                if (system == null || !touched.add(system)) continue
+                val request = busRequests.maxWith(compareBy<Map.Entry<mods.eln.sim.mna.component.SwitchableVoltageSource, Double>> { it.value }
+                    .thenBy { it.key.voltage })
+                val bus = sources.filter { it.enabled && it.subSystem === system }
+                val anchor = if (request.key.enabled) request.key else bus.filter { it.voltage > 0.0 && it.voltage.isFinite() }
+                    .maxByOrNull { it.voltage }
+                if (anchor != null && anchor.voltage > 0.0 && anchor.voltage.isFinite()) {
+                    val scale = request.value / anchor.voltage
+                    if (!scale.isFinite() || bus.any { !(it.voltage * scale).isFinite() }) continue
+                    for (source in bus) source.voltage *= scale
+                }
+                // A disabled converter output has no electrical effect; initialize
+                // its command without enabling it or bypassing its power check.
+                request.key.voltage = request.value
+            }
+            pending = processes.filter { it !in propagated &&
+                it.startupInputSources().any { source -> source.subSystem in touched } }
+                .flatMap { process ->
+                    propagated.add(process)
+                    process.startupOutputTargets().entries.filter { it.value.isFinite() && it.value > 0.0 }
+                }
         }
     }
 
@@ -52,26 +69,33 @@ class ConverterConvergence {
     }
 
     private fun restartGroupAtSourceBoundary(processes: List<ConservativePowerProcess>): Boolean {
-        val all = processes.flatMap { it.trialSources() }.distinct()
+        val all = processes.flatMap { it.controlledSources() }.distinct()
         val saved = all.map { it.voltage }
         val enabled = all.map { it.enabled }
         val systems = processes.flatMap { it.connectedSystems() }.distinct()
         fun restore() {
             all.indices.forEach { all[it].voltage = saved[it]; all[it].enabled = enabled[it] }
         }
-        val candidates = processes.flatMap { it.voltageSearchHints().entries }.flatMap { (source, hints) ->
-            hints.filter { it.isFinite() && it > 0.0 && source.voltage.isFinite() && source.voltage > 0.0 }
+        val hints = processes.flatMap { it.voltageSearchHints().entries }.flatMap { (source, hints) ->
+            hints.filter { source.enabled && it.isFinite() && it > 0.0 && source.voltage.isFinite() && source.voltage > 0.0 }
                 .map { source to it }
-        }.distinctBy { (source, hint) -> source.subSystem to hint }
-            .sortedBy { (source, hint) -> abs(kotlin.math.ln(hint / source.voltage)) }
-        for ((source, hint) in candidates.take(8)) {
-            val sourceIndex = all.indexOf(source)
-            if (sourceIndex < 0 || !enabled[sourceIndex] || saved[sourceIndex] <= 0.0) continue
-            val network = source.subSystem ?: continue
+        }.sortedBy { (source, hint) -> abs(kotlin.math.ln(hint / source.voltage)) }
+            .distinctBy { (source, hint) -> source.subSystem to hint }
+        // Several isolated wind inputs can reach the same limiter together while
+        // their converters share an output bus. Restart those input guesses together;
+        // trying one at a time leaves the other stiff clamps on the rejected branch.
+        val coordinated = hints.groupBy { it.second }.values.filter { it.size > 1 }
+        val candidates = coordinated + hints.map { listOf(it) }
+        for (candidate in candidates.take(8)) {
             restore()
-            val scale = hint / saved[sourceIndex]
-            for (i in all.indices) if (enabled[i] && all[i].subSystem === network) {
-                all[i].voltage = saved[i] * scale
+            for ((source, hint) in candidate) {
+                val sourceIndex = all.indexOf(source)
+                if (sourceIndex < 0 || !enabled[sourceIndex] || saved[sourceIndex] <= 0.0) continue
+                val network = source.subSystem ?: continue
+                val scale = hint / saved[sourceIndex]
+                for (i in all.indices) if (enabled[i] && all[i].subSystem === network) {
+                    all[i].voltage = saved[i] * scale
+                }
             }
             derivatives.remove(processes.toList())
             repeat(2) {
@@ -114,22 +138,77 @@ class ConverterConvergence {
     }
 
     private fun correctGroup(group: List<ConservativePowerProcess>) {
-        val all = group.flatMap { it.trialSources() }.distinct()
-        val active = all.filter { it.enabled }
+        // Retain the serial correction for asymmetric active sets (for example,
+        // parallel regulators with different targets). Use the simultaneous
+        // response when bounded renewable clamps stall that correction. Ordinary
+        // shaft/pole grids keep the existing first-order serial path.
+        correctGroup(group, simultaneous = false)
+        group.flatMap { it.connectedSystems() }.distinct().forEach { it.stepCalc() }
+        if (group.any { !it.acceptsCandidate() } && group.any { it.trialVoltageBounds().isNotEmpty() })
+            correctGroup(group, simultaneous = true)
+    }
+
+    private fun correctGroup(group: List<ConservativePowerProcess>, simultaneous: Boolean) {
+        val all = group.flatMap { it.controlledSources() }.distinct()
+        val active = group.flatMap { it.trialSources() }.distinct().filter { it.enabled }
         if (active.isEmpty()) return
         val savedVolts = all.map { it.voltage }
         val savedEnabled = all.map { it.enabled }
         val key = group.toList()
+        // The two response maps have different derivatives.
+        if (simultaneous) derivatives.remove(key)
         var cached = derivatives[key]?.takeIf { it.sources == active && it.regions == group.map { it.iterationRegion() } }
         val scales = cached?.scales ?: DoubleArray(active.size) { max(1.0, abs(active[it].voltage)) }
         var x = DoubleArray(active.size) { active[it].voltage / scales[it] }
+        val preciseDerivative = group.any { it.trialVoltageBounds().isNotEmpty() }
+        // A microvolt error on a stiff HV port can mean kilowatts of current
+        // imbalance. Use a power-scaled merit function so line search does not
+        // ignore those ports in favour of larger voltage errors on weak inputs.
+        val weights = cached?.weights ?: DoubleArray(active.size) { i ->
+            val resistance = if (preciseDerivative) active[i].subSystem?.sourceThevenin(active[i])?.resistance else null
+            if (resistance != null && resistance.isFinite() && resistance > 0.0)
+                max(1.0, scales[i] * scales[i] / (1000.0 * resistance)).takeIf { it.isFinite() } ?: 1.0
+            else 1.0
+        }
 
+        val indexes = all.withIndex().associate { it.value to it.index }
+        val activeIndexes = active.map { indexes.getValue(it) }
+        val owners = group.map { process -> process.controlledSources().map { indexes.getValue(it) } }
+        val bounds = group.flatMap { it.trialVoltageBounds().entries }.associate { it.key to it.value }
+        fun trialVoltage(i: Int, normalized: Double): Double {
+            val volts = normalized * scales[i]
+            val range = bounds[active[i]] ?: return volts
+            return volts.coerceIn(range.start, range.endInclusive)
+        }
         fun evaluate(candidate: DoubleArray): DoubleArray? {
-            for (i in all.indices) { all[i].voltage = savedVolts[i]; all[i].enabled = savedEnabled[i] }
-            for (i in active.indices) active[i].voltage = candidate[i] * scales[i]
-            group.forEach { it.rootSystemPreStepProcess() }
-            if (all.indices.any { all[it].enabled != savedEnabled[it] }) return null
-            val residual = DoubleArray(active.size) { active[it].voltage / scales[it] - candidate[it] }
+            if (!simultaneous) {
+                for (i in all.indices) { all[i].voltage = savedVolts[i]; all[i].enabled = savedEnabled[i] }
+                for (i in active.indices) active[i].voltage = trialVoltage(i, candidate[i])
+                group.forEach { it.rootSystemPreStepProcess() }
+                if (all.indices.any { all[it].enabled != savedEnabled[it] }) return null
+                return DoubleArray(active.size) { (active[it].voltage / scales[it] - candidate[it]) * weights[it] }
+                    .takeIf { it.all(Double::isFinite) }
+            }
+            val trialVolts = savedVolts.toDoubleArray()
+            for (i in active.indices) trialVolts[activeIndexes[i]] = trialVoltage(i, candidate[i])
+            val nextVolts = trialVolts.clone()
+            val nextEnabled = savedEnabled.toBooleanArray()
+            // Differentiate a simultaneous controller response. Sequential updates
+            // let each later controller see an already perturbed/clamped neighbour;
+            // near parallel source limits that erases the useful bus derivative.
+            for (p in group.indices) {
+                for (i in all.indices) { all[i].voltage = trialVolts[i]; all[i].enabled = savedEnabled[i] }
+                group[p].rootSystemPreStepProcess()
+                for (i in owners[p]) { nextVolts[i] = all[i].voltage; nextEnabled[i] = all[i].enabled }
+            }
+            for (i in all.indices) { all[i].voltage = nextVolts[i]; all[i].enabled = nextEnabled[i] }
+            if (all.indices.any { all[it].enabled != savedEnabled[it] }) {
+                // Simultaneously opening neighbours invalidates an OUTPUT_ALREADY_HIGH
+                // decision. Reconcile the new mask before RootSystem can accept it.
+                group.forEach { it.rootSystemPreStepProcess() }
+                return null
+            }
+            val residual = DoubleArray(active.size) { (active[it].voltage / scales[it] - candidate[it]) * weights[it] }
             return residual.takeIf { it.all(Double::isFinite) }
         }
         fun norm(r: DoubleArray) = r.maxOf { abs(it) }
@@ -139,7 +218,7 @@ class ConverterConvergence {
         }
 
         repeat(8) { iteration ->
-            val residual = evaluate(x) ?: return // Let ordinary iteration handle an active-set change.
+            val residual = evaluate(x) ?: return // Reconcile an active-set change in the outer iteration.
             if (accepted()) return
             val regions = group.map { it.iterationRegion() }
             // Reuse a previous derivative for nearby operating points (e.g. wind speed or
@@ -149,6 +228,34 @@ class ConverterConvergence {
             val jacobian = reuse?.matrix?.map { it.clone() }?.toTypedArray()
                 ?: Array(x.size) { DoubleArray(x.size) }
             if (reuse == null) for (column in x.indices) {
+                if (preciseDerivative) {
+                    // A source bus can have a common-mode derivative far smaller
+                    // than the entries of its command map. First-order truncation
+                    // can swamp that derivative even with a precise MNA solve.
+                    var derivative: DoubleArray? = null
+                    var h = 1e-5 * max(1.0, abs(x[column]))
+                    fun sample(shift: Double): DoubleArray? = evaluate(x.copyOf().apply { this[column] += shift })
+                        ?.takeIf { group.map { it.iterationRegion() } == regions }
+                    repeat(5) {
+                        if (derivative == null) {
+                            val plus = sample(h); val minus = sample(-h)
+                            if (plus != null && minus != null) {
+                                derivative = DoubleArray(x.size) { (plus[it] - minus[it]) / (2 * h) }
+                            } else {
+                                val sign = if (plus != null) 1.0 else -1.0
+                                val first = plus ?: minus
+                                val second = if (first != null) sample(2 * sign * h) else null
+                                if (first != null && second != null) derivative = DoubleArray(x.size) {
+                                    (-3 * residual[it] + 4 * first[it] - second[it]) / (2 * sign * h)
+                                }
+                            }
+                            h *= .1
+                        }
+                    }
+                    val columnValues = derivative ?: run { evaluate(x); return }
+                    for (row in x.indices) jacobian[row][column] = columnValues[row]
+                    continue
+                }
                 // Stay on the same limiter branch when differentiating. Near the
                 // transition from voltage regulation to current limit, a forward
                 // stencil may cross the target clamp and erase the bus's common-mode
@@ -173,9 +280,9 @@ class ConverterConvergence {
                 for (row in x.indices) jacobian[row][column] = (response!![row] - residual[row]) / difference
             }
             if (reuse == null) {
-                cached = Derivative(active.toList(), scales.clone(), regions,
+                cached = Derivative(active.toList(), scales.clone(), weights.clone(), regions,
                     jacobian.map { it.clone() }.toTypedArray())
-                derivatives[key] = cached!!
+                if (!simultaneous) derivatives[key] = cached!!
             }
             val delta = solve(jacobian, DoubleArray(x.size) { -residual[it] })
             if (delta == null) { evaluate(x); return }
@@ -187,8 +294,10 @@ class ConverterConvergence {
                 if (!improved) {
                     val candidate = DoubleArray(x.size) { x[it] + alpha * delta[it] }
                     val next = evaluate(candidate)
-                    if (next == null) return // Preserve the new active set for the outer iteration.
-                    if (norm(next) < norm(residual) || accepted()) { x = candidate; improved = true }
+                    if (next == null) {
+                        if (!preciseDerivative) return
+                        alpha *= .5
+                    } else if (norm(next) < norm(residual) || accepted()) { x = candidate; improved = true }
                     else alpha *= .5
                 }
             }

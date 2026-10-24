@@ -726,6 +726,8 @@ class OneWayDcDcProcess(private val element: OneWayDcDcElement) : ConservativePo
         return balancedPower(-pendingSourcePower(element.inputSink), pendingSourcePower(element.outputSource), efficiency, powerRoundoff)
     }
 
+    override fun controlledSources() = listOf(element.inputSink, element.outputSource)
+
     override fun trialSources(): List<SwitchableVoltageSource> =
         if (modernRegulated) regulated.trialSources() else listOf(element.inputSink, element.outputSource)
     override fun isolatesLoadOnFailure() = true
