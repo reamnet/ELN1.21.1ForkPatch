@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_12.5kv_single_phase_fused_underground_feeder": {
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:12.5kv_single_phase_fused_underground_feeder"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "eln:12.5kv_single_phase_fused_underground_feeder_with_street_light"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_12.5kv_single_phase_fused_underground_feeder"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "eln:12.5kv_single_phase_fused_underground_feeder_with_street_light"
+    ]
+  }
+}

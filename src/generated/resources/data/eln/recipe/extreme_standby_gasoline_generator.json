@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "eln:copper_cable"
+    },
+    "G": {
+      "item": "eln:extra_large_standby_gasoline_generator"
+    },
+    "M": {
+      "item": "eln:electrical_motor"
+    },
+    "P": {
+      "item": "minecraft:iron_block"
+    }
+  },
+  "pattern": [
+    "GGG",
+    "PMP",
+    "CCC"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:extreme_standby_gasoline_generator"
+  }
+}

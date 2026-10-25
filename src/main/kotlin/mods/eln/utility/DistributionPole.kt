@@ -50,7 +50,14 @@ enum class DistributionKind(val title: String,val phases: Int=3,val transformer:
     SECONDARY_FED_THREE(I18N.TR_NAME(I18N.Type.NONE,"Three Phase Secondary Fed Street Light Pole"),3,light=true),
     FUSED_TAP_THREE(I18N.TR_NAME(I18N.Type.NONE,"Three Phase Pole with Fused Single Phase Tap"),singlePhaseTap=true),
     FUSED_TAP_LIGHT_THREE(I18N.TR_NAME(I18N.Type.NONE,"Three Phase Fused Tap Secondary Fed Street Light Pole"),light=true,singlePhaseTap=true),
-    FUSED_TAP_TRANSFORMER_LIGHT_THREE(I18N.TR_NAME(I18N.Type.NONE,"Three Phase Transformer Street Light Pole with Fused Single Phase Tap"),transformer=true,light=true,singlePhaseTap=true);
+    FUSED_TAP_TRANSFORMER_LIGHT_THREE(I18N.TR_NAME(I18N.Type.NONE,"Three Phase Transformer Street Light Pole with Fused Single Phase Tap"),transformer=true,light=true,singlePhaseTap=true),
+    SERVICE_PEDESTAL(I18N.TR_NAME(I18N.Type.NONE,"Fused Underground 120/240V Service Pedestal"),1,cutout=true,lvOnly=true),
+    UNDERGROUND_SINGLE(I18N.TR_NAME(I18N.Type.NONE,"12.5kV Single Phase Fused Underground Feeder"),1,cutout=true),
+    UNDERGROUND_THREE(I18N.TR_NAME(I18N.Type.NONE,"12.5kV Three Phase Fused Underground Feeder"),cutout=true),
+    UNDERGROUND_LIGHT_SINGLE(I18N.TR_NAME(I18N.Type.NONE,"12.5kV Single Phase Fused Underground Feeder with Street Light"),1,light=true,cutout=true),
+    UNDERGROUND_LIGHT_THREE(I18N.TR_NAME(I18N.Type.NONE,"12.5kV Three Phase Fused Underground Feeder with Street Light"),light=true,cutout=true);
+    val underground get()=this>=SERVICE_PEDESTAL
+    val pedestal get()=this==SERVICE_PEDESTAL
     val fuseCount get()=if(transformer && singlePhaseTap)2 else if(transformer || singlePhaseTap)1 else if(cutout || regulator)phases else 0
     val tapFuseIndex get()=if(transformer)1 else 0
     val protectedLine get()=cutout || recloser || this==AIR_BREAK_THREE || regulator || singlePhaseTap
@@ -60,7 +67,8 @@ enum class DistributionKind(val title: String,val phases: Int=3,val transformer:
 
 class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeDescriptor):
     GridElement(node,descriptor,(descriptor as GridDescriptor).connectRange) {
-    override val alignsPoleSpans=true
+    override val alignsPoleSpans get()=!kind.underground
+    override val allowsNewGridLinks get()=!kind.underground
     override val alignsPrimaryPhaseOrder get()=kind.phases==3 && !kind.lvOnly
     override fun contributesToPoleAlignment(terminal: Int)=!kind.singlePhaseTap || terminal!=36
     val kind=(descriptor as DistributionPoleDescriptor).kind
@@ -88,8 +96,11 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     val unit=if(kind.transformer)MainsStepDown(this, poleTransformer = true) { installed && fuses[0].closed } else null
     val secondary=unit?.let { ServiceSecondary(this,it.secondary) { it.outputVoltage.toDouble() } }
     val services: List<NbtElectricalLoad> = secondary?.loads ?: List(3) { NbtElectricalLoad("secondaryBus$it").apply { serialResistance=.00001 } }
+    val undergroundInput=if(kind.pedestal)List(3) { NbtElectricalLoad("undergroundServiceIn$it").apply { serialResistance=.00001 } } else emptyList()
+    private val undergroundSplit=if(kind.pedestal)WiredServiceSplit(this,undergroundInput) else null
     private val regulatorInputs=if(kind.regulator)List(kind.phases) { NbtElectricalLoad("regulatorInput$it").apply { serialResistance=.00001 } } else emptyList()
     private val contacts=when {
+        kind.pedestal -> undergroundInput.indices.map { TransferContact(undergroundInput[it],services[it]) }
         kind.singlePhaseTap -> lines.map { TransferContact(it,outs[0]) }
         kind.transformer -> lines.map { TransferContact(it,unit!!.primary) }
         kind.regulator -> lines.indices.map { TransferContact(lines[it],regulatorInputs[it]) }
@@ -98,7 +109,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     }
     private val transformerContacts=if(kind.transformer && kind.singlePhaseTap)lines.map { TransferContact(it,unit!!.primary) } else emptyList()
     private val transformerFeed get()=if(transformerContacts.isNotEmpty())transformerContacts else contacts
-    private fun fuseCurrent(index: Int)=if(kind.transformer && index==0)transformerFeed.getOrNull(transformerPhase)?.current ?: 0.0
+    private fun fuseCurrent(index: Int)=if(kind.pedestal)abs(contacts[2].current)+.5*(abs(contacts[0].current)+abs(contacts[1].current)) else if(kind.transformer && index==0)transformerFeed.getOrNull(transformerPhase)?.current ?: 0.0
         else contacts.getOrNull(if(kind.singlePhaseTap)transformerPhase else index)?.current ?: 0.0
     private val regulatorTaps=if(kind.regulator)lines.indices.map { i ->
         val pin=NbtElectricalLoad("regulatorTap$i")
@@ -131,8 +142,9 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         add(ServiceTerminals.BUNDLE);addAll(40..42)
     }
     init {
-        electricalLoadList.addAll(lines);electricalLoadList.addAll(regulatorInputs)
-        if(outs!==lines)electricalLoadList.addAll(outs)
+        electricalLoadList.addAll(undergroundInput)
+        if(!kind.pedestal)electricalLoadList.addAll(lines);electricalLoadList.addAll(regulatorInputs)
+        if(outs!==lines && !kind.pedestal)electricalLoadList.addAll(outs)
         if(secondary==null)electricalLoadList.addAll(services)
         electricalComponentList.addAll(contacts);electricalComponentList.addAll(transformerContacts)
         if(kind.capacitor)lines.forEachIndexed { i,line ->
@@ -149,6 +161,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     }
     private fun applyContacts() {
         contacts.forEachIndexed { i,c -> c.closed=when {
+            kind.pedestal -> fuses[0].closed
             kind.singlePhaseTap -> transformerPhase==i && fuses[kind.tapFuseIndex].closed
             kind.transformer -> installed && transformerPhase==i && fuses[0].closed
             kind.cutout || kind.regulator -> fuses[i].closed
@@ -158,7 +171,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         transformerContacts.forEachIndexed { i,c -> c.closed=installed && transformerPhase==i && fuses[0].closed }
     }
     private fun step(dt: Double) {
-        secondary?.update()
+        secondary?.update();undergroundSplit?.update()
         if(kind.transformer) {
             val limited=unit!!.outputOverloaded
             val amps=fuseCurrent(0)
@@ -169,7 +182,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
             val amps=fuseCurrent(i)
             if(fuse.pickup(dt,amps))sound("utility_arc_close",.20)
         }
-        if(kind.cutout || kind.regulator)fuses.forEachIndexed { i,fuse -> if(fuse.step(dt,contacts[i].current,fuseAmps)) { sound("utility_fuse_blow",.8);applyContacts();needPublish() } }
+        if(kind.cutout || kind.regulator)fuses.forEachIndexed { i,fuse -> if(fuse.step(dt,fuseCurrent(i),fuseAmps)) { sound("utility_fuse_blow",.8);applyContacts();needPublish() } }
         if(kind.singlePhaseTap && fuses[kind.tapFuseIndex].step(dt,fuseCurrent(kind.tapFuseIndex),fuseAmps)) { sound("utility_fuse_blow",.8);applyContacts();needPublish() }
         if(kind.recloser && recloser.step(dt,contacts.map { it.current })) { applyContacts();sound("utility_recloser_bump",.7);needPublish() }
         if(kind.regulator && regulatorAutomatic) {
@@ -249,7 +262,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     override fun gridLoads(terminal: Int): List<ElectricalLoad> = when {
         terminal in 0..5 -> listOf(getGridElectricalLoad(Direction.XN))
         terminal in 32 until 32+kind.phases && !kind.lvOnly -> listOf(lines[terminal-32])
-        terminal in 36 until 36+kind.outputPhases && kind.protectedLine -> listOf(outs[terminal-36])
+        terminal in 36 until 36+kind.outputPhases && kind.protectedLine && !kind.lvOnly -> listOf(outs[terminal-36])
         terminal in 40..42 -> listOf(services[terminal-40])
         terminal==50 -> services
         terminal==ServiceTerminals.HV_LINE_BUNDLE && kind.phases==3 && !kind.lvOnly -> lines
@@ -276,7 +289,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         terminal==ServiceTerminals.HV_LOAD_BUNDLE -> gridCablePoint(36+wire,0)
         terminal==50 -> Vec3(.405,4.65+wire*.32,0.0)
         terminal in 40..42 -> Vec3(.405,4.65+(terminal-40)*.32,0.0)
-        terminal==32 && kind.phases==1 -> Vec3(0.0,7.425,0.0)
+        (terminal==32 && kind.phases==1 || terminal==33 && kind.phases==3) -> Vec3(0.0,7.425,0.0)
         terminal==36 && kind.singlePhaseTap -> Vec3(-.68,5.85,if(kind.transformer).65 else 0.0)
         terminal in 36..38 && kind.cutout -> Vec3(-.68,5.85,phaseZ(terminal-36))
         terminal in 36..38 && kind.regulator -> Vec3(.65,5.50,phaseZ(terminal-36)*.73)
@@ -285,6 +298,13 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     }
     private fun phaseZ(index: Int)=if(kind.phases==1)0.0 else (index-1)*.95
     override fun getElectricalLoad(side: Direction,lrdu: LRDU): ElectricalLoad? {
+        if(side==Direction.YN)return (if(kind.pedestal)undergroundInput else services)[UndergroundService.circuit(lrdu)]
+        if(kind.underground && !kind.pedestal) {
+            if(side==front)return when(lrdu) { LRDU.Left->services[0];LRDU.Right->services[1];else->services[2] }
+            val phase=when(side) { front.left()->0;front.right()->1;front.inverse->2;else->return null }
+            if(phase>=kind.phases)return null
+            return if(lrdu==LRDU.Up)outs[phase] else if(lrdu==LRDU.Down)lines[phase] else null
+        }
         if(lrdu!=LRDU.Down || side.isY)return null
         val i=when(side) { front.left()->0;front.right()->1;front.inverse->2;else->return null }
         return if(kind==DistributionKind.FEEDER_THREE)lines[i] else services[i]
@@ -294,7 +314,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     override fun hasGui()=true
     override fun newContainer(side: Direction,player: Player)=DistributionContainer(player,inventory,kind.transformer)
     override fun multiMeterString(side: Direction)=PoleMeter.readings(if(kind.lvOnly)emptyList() else lines,services,
-        if(kind.protectedLine)outs else emptyList(),if(kind.singlePhaseTap)transformerPhase else 0).joinToString("\n")
+        if(kind.protectedLine && !kind.pedestal)outs else emptyList(),if(kind.singlePhaseTap)transformerPhase else 0).joinToString("\n")
     override fun thermoMeterString(side: Direction)=unit?.let { plotAmbientCelsius("T",it.thermal.temperatureCelsius) } ?: ""
     override fun getWaila()=linkedMapOf(tr("Cable terminal") to ServiceTerminals.label(selectedTerminal),(if(kind.singlePhaseTap)tr("Tap phase") else tr("Transformer phase")) to listOf("A","B","C")[transformerPhase],tr("Protection") to when { recloser.locked->tr("Recloser locked out");fuses.any { it.blown }->tr("Fuse blown");else->tr("Ready") })
     private fun writeSettings(nbt: CompoundTag) {
@@ -328,7 +348,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
             locked=recloser.locked;closed=recloser.closed;failures=recloser.failures;remaining=recloser.remaining;pickup=recloser.pickupAmps;delay=recloser.retrySeconds;maxFailures=recloser.maxFailures
             target=regulatorTarget;automatic=regulatorAutomatic;ratios=regulatorTaps.map { it.ratio };light=lightLevel;lampOn=unit?.lampEnabled ?: lampEnabled;dusk=unit?.lampAutomatic ?: lampAutomatic
             yaw=this@DistributionPoleElement.yaw;heightStep=this@DistributionPoleElement.heightStep;pitch=this@DistributionPoleElement.pitch
-            input=if(kind.lvOnly)services[0].voltage else lines[transformerPhase].voltage;output=unit?.secondary?.voltage ?: outs[0].voltage;watts=unit?.output?.power ?: 0.0
+            input=if(kind.pedestal)undergroundInput[2].voltage else if(kind.lvOnly)services[0].voltage else lines[transformerPhase].voltage;output=if(kind.pedestal)services[2].voltage else unit?.secondary?.voltage ?: outs[0].voltage;watts=if(kind.pedestal)contacts.indices.sumOf { undergroundInput[it].voltage*contacts[it].current } else unit?.output?.power ?: 0.0
         }.write(stream)
         node!!.lrduCubeMask.getTranslate(Direction.YN).serialize(stream)
     }

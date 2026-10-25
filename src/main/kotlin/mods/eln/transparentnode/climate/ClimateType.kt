@@ -14,6 +14,8 @@ enum class ClimateType(val model: String,val title: String,val watts: Double,val
     PATIO("deckpatioheater",I18N.TR_NAME(I18N.Type.NONE,"Electric Patio Heater"),1500.0);
     val subId get()=if(this==PATIO)62 else 21+ordinal
     val volts get()=120.0
+    val tvStand get()=this in MODERN..CORNER
+    val soundVolume get()=if(this==WINDOW).06f else if(this==MINI_SPLIT).04f else .20f
     val sound get()=when(this) {
         WINDOW -> "appliance_window_ac"
         MINI_SPLIT -> "appliance_minisplit"

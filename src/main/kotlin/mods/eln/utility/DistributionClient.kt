@@ -27,13 +27,14 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
     init {
         creativeTab=Eln.creativeTabPowerElectronics
         ghostGroup=GhostGroup().apply {
-            for(y in 1..7)addElement(0,y,0,GhostBlock.tClearance)
-            if(!kind.lvOnly)for(y in 6..7)for(x in -1..1)for(z in -1..1)
+            for(y in 1..if(kind.underground) { if(kind.light)5 else 1 } else 7)addElement(0,y,0,if(kind.underground && y==1)GhostBlock.tCube else GhostBlock.tClearance)
+            if(!kind.lvOnly && !kind.underground)for(y in 6..7)for(x in -1..1)for(z in -1..1)
                 if(x!=0 || z!=0)addElement(x,y,z,GhostBlock.tClearance)
         }
     }
     override fun rotationIsFixed()=true
     fun drawEquipment(front: Direction,display: DistributionDisplay?=null,hvAngle: Float=mods.eln.gridnode.PoleSpanAlignment.frontAngle(front),lvAngle: Float=mods.eln.gridnode.PoleSpanAlignment.frontAngle(front))=preserveMatrix {
+        if(kind.underground) { UndergroundCabinetVisual.draw(kind,front,display);return@preserveMatrix }
         front.glRotateXnRef();GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
             GL11.glDisable(GL11.GL_TEXTURE_2D)
@@ -44,8 +45,8 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
             GL11.glRotatef(hvAngle-base,0f,1f,0f)
             if(!kind.lvOnly) {
                 part(if(kind.phases==1)"SingleArm" else "Crossarm",.36f,.25f,.13f)
-                repeat(kind.phases) { i -> part("Pin${if(kind.phases==1)1 else i}",.57f,.66f,.68f) }
-                if(kind.phases==1)part("TopPin",.65f,.73f,.73f)
+                repeat(kind.phases) { i -> if(kind.phases==1 || i!=1)part("Pin${if(kind.phases==1)1 else i}",.57f,.66f,.68f) }
+                part("TopPin",.65f,.73f,.73f)
             }
             if(kind.transformer && display?.installed!=false) {
                 part("Transformer",.53f,.55f,.54f);part("TransformerPin",.32f,.43f,.44f)
@@ -66,7 +67,7 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
                 }
                 }
             }
-            if(kind.singlePhaseTap)PoleLeadVisual.draw(net.minecraft.world.phys.Vec3(0.0,6.63,((display?.phase ?: 0)-1)*.95),net.minecraft.world.phys.Vec3(-.68,6.4,if(kind.transformer).65 else 0.0))
+            if(kind.singlePhaseTap)PoleLeadVisual.draw(net.minecraft.world.phys.Vec3(0.0,if(display?.phase==1)7.425 else 6.63,((display?.phase ?: 0)-1)*.95),net.minecraft.world.phys.Vec3(-.68,6.4,if(kind.transformer).65 else 0.0))
             if(kind==DistributionKind.FEEDER_THREE)repeat(3) { part("Riser$it",.28f,.31f,.32f);part("RiserJumper$it",.13f,.15f,.16f) }
             if(kind.regulator)repeat(kind.phases) { val i=if(kind.phases==1)1 else it;part("Regulator$i",.64f,.66f,.63f);part("RegulatorPin$i",.44f,.48f,.38f);part("RegulatorLoadPin$i",.44f,.48f,.38f);part("RegulatorFeed$i",.13f,.15f,.16f) }
             if(kind.capacitor) { part("CapacitorRack",.35f,.38f,.40f);repeat(3) { part("Capacitor$it",.76f,.77f,.72f);part("CapacitorPin$it",.4f,.45f,.35f);part("CapacitorFeed$it",.13f,.15f,.16f) } }
@@ -109,6 +110,13 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
         GL11.glScaled(.20,.20,.20);GL11.glTranslated(0.0,-2.8,0.0);drawEquipment(Direction.XN)
     }
     override fun addInformation(itemStack: ItemStack?,entityPlayer: Player?,list: MutableList<String>,par4: Boolean) {
+        if(kind.underground) {
+            list.add(tr("Underground LV service: bottom left L1, right L2, other bottom terminals 240 V"))
+            if(!kind.pedestal)list.add(tr("HV: left A, right B, rear C; lower cable is line, upper cable is fused load"))
+            if(kind.light)list.add(tr("Street light requires an upstream 120 V secondary supply"))
+            list.add(tr("Use physical Pole Fuse Links; opening or blowing a fuse isolates its load"))
+            return
+        }
         list.add(tr("Aim at HV tie points or the LV rack; three-phase poles link all three phases"))
         list.add(tr("A, B and C are independent electrical circuits"))
         list.add(tr("Hold Shift to use the individual terminal selected in the menu"))
@@ -184,7 +192,7 @@ class DistributionGui(player: Player,private val render: DistributionPoleRender)
     override fun newHelper()=GuiHelperContainer(this,240,if(kind.light)382 else 310,8,if(kind.light)300 else 228)
     private fun terminals()=buildList { if(!kind.lvOnly) { repeat(kind.phases) { add(32+it) };if(kind.protectedLine)repeat(kind.outputPhases) { add(36+it) } };add(50);addAll(40..42) }
     override fun initGui() {
-        super.initGui();terminal=newGuiButton(8,58,224,"")
+        super.initGui();terminal=newGuiButton(8,58,224,"").apply { enabled=!kind.underground }
         if(kind.transformer) {
             phase=newGuiButton(8,82,106,"");rating=newGuiButton(118,82,114,"");voltage=newGuiButton(8,106,106,"").apply { setComment(0,tr("Nominal output at 12.47 kV; follows grid voltage proportionally")) }
             operate=newGuiButton(118,106,114,"")
@@ -204,7 +212,7 @@ class DistributionGui(player: Player,private val render: DistributionPoleRender)
             current=newGuiTextField(8,170,85).apply { text=d.fuseRating.toString();setComment(0,tr("Fuse trip current: 1 to 2000 A")) };applyCurrent=newGuiButton(98,166,134,tr("Set fuse current"))
         }
         if(kind==DistributionKind.AIR_BREAK_THREE)operate=newGuiButton(8,84,224,"")
-        if(!kind.recloser) { applyCurrent?.enabled=false;current?.enabled=false }
+
         if(kind.light) {
             lamp=newGuiButton(8,162,106,"");dusk=newGuiButton(118,162,114,"")
             left=newGuiButton(8,186,106,tr("Pan left"));right=newGuiButton(118,186,114,tr("Pan right"))

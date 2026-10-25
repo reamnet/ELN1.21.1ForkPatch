@@ -1,0 +1,65 @@
+{
+  "version": "3.0.50",
+  "method": "Same-JVM baseline vs optimized; warmup 1000 commands, seven timed rounds, median. Warm rounds: 4000 commands / 16000 probes. Cold rounds: eight fresh networks, 40 commands / 160 probes each.",
+  "eligibility": "LU system with at least 128 states, at least 256 changed physical-RHS probe validations on the same matrix, at most eight referenced gauge variables, conservative finite-solve bound.",
+  "limitations": "Targeted probe microbenchmark only; not whole-server TPS/FPS or chunk-reload timing. 80-node and cold cases leave sparse validation inactive; their timing differences reflect JVM/scheduling noise.",
+  "measurements": [
+    {
+      "kind": "GAUGE_ROWS_BENCH",
+      "nodes": 80,
+      "ports": 4,
+      "probes": 16000,
+      "baseline_ms": 40.256243,
+      "optimized_ms": 34.934048,
+      "sparse_validations": 0,
+      "full_solves": 6824
+    },
+    {
+      "kind": "GAUGE_RELOAD_BENCH",
+      "nodes": 80,
+      "networks": 8,
+      "commands_per_network": 40,
+      "ports": 4,
+      "baseline_ms": 11.467439,
+      "optimized_ms": 7.128012
+    },
+    {
+      "kind": "GAUGE_ROWS_BENCH",
+      "nodes": 160,
+      "ports": 4,
+      "probes": 16000,
+      "baseline_ms": 66.117547,
+      "optimized_ms": 29.252108,
+      "sparse_validations": 115744,
+      "full_solves": 16
+    },
+    {
+      "kind": "GAUGE_RELOAD_BENCH",
+      "nodes": 160,
+      "networks": 8,
+      "commands_per_network": 40,
+      "ports": 4,
+      "baseline_ms": 19.338627,
+      "optimized_ms": 19.760793
+    },
+    {
+      "kind": "GAUGE_ROWS_BENCH",
+      "nodes": 320,
+      "ports": 4,
+      "probes": 16000,
+      "baseline_ms": 120.117252,
+      "optimized_ms": 52.511131,
+      "sparse_validations": 115744,
+      "full_solves": 16
+    },
+    {
+      "kind": "GAUGE_RELOAD_BENCH",
+      "nodes": 320,
+      "networks": 8,
+      "commands_per_network": 40,
+      "ports": 4,
+      "baseline_ms": 66.392191,
+      "optimized_ms": 62.725535
+    }
+  ]
+}

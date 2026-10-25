@@ -32,14 +32,14 @@ object StandbyFuel {
 }
 
 /** Standard fluid capability supports pipes and arbitrary modded fluid containers. */
-class StandbyTank(private val changed: ()->Unit) : ISidedFluidHandler {
+class StandbyTank(val capacity: Int=CAPACITY,private val changed: ()->Unit) : ISidedFluidHandler {
     companion object { const val CAPACITY=20_000;const val EFFICIENCY=.25 }
     // Pay for a whole mB before using it; its fractional remainder stays in the engine.
     // Pipes can never extract fuel that has already produced electricity.
     var reserveJoules=0.0
         private set
     private var reserveCost=2173.5*EFFICIENCY
-    val tank=object : FluidTank(CAPACITY,{ StandbyFuel.accepts(it.fluid) }) {
+    val tank=object : FluidTank(capacity,{ StandbyFuel.accepts(it.fluid) }) {
         override fun onContentsChanged() { changed() }
     }
     private val lookup get()=RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY)
@@ -60,7 +60,7 @@ class StandbyTank(private val changed: ()->Unit) : ISidedFluidHandler {
     fun read(nbt: CompoundTag) {
         tank.readFromNBT(lookup,nbt.getCompound("standbyTank"))
         if(!tank.isEmpty && !StandbyFuel.accepts(tank.fluid.fluid))tank.fluid=FluidStack.EMPTY
-        if(tank.fluidAmount>CAPACITY)tank.fluid.amount=CAPACITY
+        if(tank.fluidAmount>capacity)tank.fluid.amount=capacity
         reserveCost=nbt.getDouble("standbyReserveCost").takeIf { it.isFinite() && it>0 } ?: 2173.5*EFFICIENCY
         reserveJoules=nbt.getDouble("standbyReserveJoules").takeIf { it.isFinite() && it>=0 && it<=reserveCost } ?: 0.0
     }
@@ -72,5 +72,5 @@ class StandbyTank(private val changed: ()->Unit) : ISidedFluidHandler {
     override fun drain(from: Direction?,maxDrain: Int,doDrain: Boolean)=tank.drain(maxDrain,if(doDrain)FluidAction.EXECUTE else FluidAction.SIMULATE)
     override fun canFill(from: Direction?,fluid: Fluid?)=fluid!=null && StandbyFuel.accepts(fluid)
     override fun canDrain(from: Direction?,fluid: Fluid?)=!tank.isEmpty && tank.fluid.fluid===fluid
-    override fun getTankInfo(from: Direction?)=arrayOf(FluidTankInfo(tank.fluid.copy(),CAPACITY))
+    override fun getTankInfo(from: Direction?)=arrayOf(FluidTankInfo(tank.fluid.copy(),capacity))
 }

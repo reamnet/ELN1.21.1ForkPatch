@@ -28,6 +28,7 @@ class GridCableCompatibilityTest {
         "Utility Pole Street Light", "Utility Pole Cobrahead Street Light", "Utility Pole Twin LED Street Light") +
         mods.eln.utility.DistributionKind.entries.map { it.title } +
         mods.eln.utility.TransmissionKind.entries.map { it.title } +
+        mods.eln.utility.ServiceMastStyle.entries.drop(1).map { it.title } +
         setOf("120/240V Service Weatherhead","North American Meter Base","Twelve Circuit American Breaker Panel","Red Handle Service Disconnect")
 
     private fun devices(): List<GridDescriptor> = Eln.transparentNodeItem.subItemList.values

@@ -131,7 +131,7 @@ class HouseServiceElement(node: TransparentNode,descriptor: TransparentNodeDescr
     override fun gridCablePoint(terminal: Int,wire: Int): Vec3 {
         val i=if(terminal in 50..51)wire else (terminal-40).coerceIn(0,2)
         // Grid uses XN-reference; the cabinet model uses a separate Z-facing reference.
-        return Vec3(.36,if(!meter).82 else if(terminal==50).38 else -.40,(i-1)*.17)
+        return Vec3(if(!meter)desc.mast.headX else .36,if(!meter)desc.mast.headY else if(terminal==50).38 else -.40,if(!meter)desc.mast.headZ+(i-1)*desc.mast.spacing else (i-1)*.17)
     }
     override fun getElectricalLoad(side: Direction,lrdu: LRDU): ElectricalLoad? {
         if(!desc.acceptsCable(front,side,lrdu))return null

@@ -57,7 +57,7 @@ class WallWirelessDescriptor(name: String,val paddle: Boolean,val momentary: Boo
 
 class WallWirelessElement(node: SixNode,side: Direction,descriptor: SixNodeDescriptor) : WirelessSignalSourceElement(node,side,descriptor) {
     override fun onStateChanged() {
-        play(SoundCommand("eln:click").verySmallRange().mulVolume(.18f,if(isOn)1.15f else .95f))
+        play(SoundCommand("eln:click").smallRange().apply { blockFactor=0f }.mulVolume(.28f,if(isOn)1.15f else .95f))
     }
 }
 

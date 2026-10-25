@@ -45,11 +45,17 @@ class BackupDisplay {
     }
 }
 
-class BackupDescriptor(name: String,val generator: Boolean,wallMounted: Boolean=false) : PowerCabinetDescriptor(name,
+class BackupDescriptor(name: String,val generator: Boolean,wallMounted: Boolean=false,val tier: GeneratorTier=GeneratorTier.SMALL) : PowerCabinetDescriptor(name,
     if(generator)StandbyGeneratorElement::class.java else AtsElement::class.java,BackupRender::class.java,
     wallMounted,if(generator)EntityMetaTag.Fluid else EntityMetaTag.Basic) {
-    init { require(!generator || !wallMounted) }
-    private val model=Eln.obj.getObj(if(generator)"standbygenerator" else if(wallMounted)"wallats" else "automatictransferswitch")
+    init {
+        require(!generator || !wallMounted)
+        if(generator && tier!=GeneratorTier.SMALL)ghostGroup=mods.eln.ghost.GhostGroup().apply {
+            for(x in -(tier.width/2)..((tier.width-1)/2))for(y in 0 until tier.height)for(z in 0 until tier.depth)
+                if(x!=0 || y!=0 || z!=0)addElement(-z,y,x,mods.eln.ghost.GhostBlock.tCube)
+        }
+    }
+    private val model=Eln.obj.getObj(if(generator)tier.model else if(wallMounted)"wallats" else "automatictransferswitch")
     fun draw(front: Direction,display: BackupDisplay?=null)=preserveMatrix {
         front.inverse.glRotateZnRef()
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
@@ -70,11 +76,11 @@ class BackupDescriptor(name: String,val generator: Boolean,wallMounted: Boolean=
     }
     override fun handleRenderType(item: ItemStack,type: IItemRenderer.ItemRenderType)=true
     override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType,item: ItemStack,helper: IItemRenderer.ItemRendererHelper)=true
-    override fun renderItem(type: IItemRenderer.ItemRenderType,item: ItemStack,vararg data: Any) { draw(Direction.ZP) }
+    override fun renderItem(type: IItemRenderer.ItemRenderType,item: ItemStack,vararg data: Any) { val d=maxOf(tier.width,tier.height,tier.depth).toDouble();preserveMatrix { GL11.glScaled(1/d,1/d,1/d);GL11.glTranslated(if(tier.width%2==0).5 else 0.0,-(tier.height-1)/2.0,-(tier.depth-1)/2.0);draw(Direction.ZP) } }
     override fun addInformation(itemStack: ItemStack?,entityPlayer: Player?,list: MutableList<String>,par4: Boolean) {
         if(generator) {
-            list.add(tr("10000 W gasoline standby generator; 20-bucket tank"))
-            list.add(tr("Programmable output: 12 to 51200 V (200 A maximum)"))
+            list.add(tr("%1$ W gasoline standby generator; %2$-bucket tank",tier.watts.toInt(),tier.tankMb/1000))
+            list.add(tr("Programmable output: 12 to 51200 V (%1$ A maximum)",tier.amps.toInt()))
             list.add(tr("Auto, manual and off modes; three-second engine start"))
             list.add(tr("Accepts tagged/configured gasoline from other mods; pipes and containers supported"))
             list.add(tr("Orange side terminals: power output"))
@@ -97,8 +103,8 @@ class BackupRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDesc
     private var cable: CableRenderType?=null
     init {
         if((descriptor as BackupDescriptor).generator)addLoopedSound(object : LoopedSound("eln:fuelgenerator",coordinate(),SoundInstance.Attenuation.LINEAR) {
-            override fun getVolume()=GeneratorEffects.volume(display.status,display.watts)
-            override fun getPitch()=(.84+.10*(display.watts/10_000).coerceIn(0.0,1.0)).toFloat()
+            override fun getVolume()=GeneratorEffects.volume(display.status,display.watts/(descriptor as BackupDescriptor).tier.factor)
+            override fun getPitch()=(.84+.10*(display.watts/(descriptor as BackupDescriptor).tier.watts).coerceIn(0.0,1.0)).toFloat()
         })
     }
     override fun draw() {
@@ -118,7 +124,7 @@ class BackupRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDesc
         if(smokeClock<.15f)return
         smokeClock%=.15f
         val world=tileEntity.level ?: return
-        val pipe=GeneratorEffects.exhaust(front ?: Direction.ZP)
+        val pipe=GeneratorEffects.exhaust(front ?: Direction.ZP,(transparentNodeDescriptor as BackupDescriptor).tier)
         val pos=tileEntity.blockPos
         world.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE,pos.x+.5+pipe.x,pos.y+.5+pipe.y,pos.z+.5+pipe.z,0.0,.045,0.0)
         emittedSmoke++
@@ -128,7 +134,8 @@ class BackupRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDesc
 }
 
 class BackupGui(player: Player,private val render: BackupRender) : GuiContainerEln(BasicContainer(player,render.inventory,emptyArray())) {
-    private val generator=(render.transparentNodeDescriptor as BackupDescriptor).generator
+    private val descriptor=render.transparentNodeDescriptor as BackupDescriptor
+    private val generator=descriptor.generator
     private val display get()=render.display
     private lateinit var voltage: GuiTextFieldEln
     private lateinit var channel: GuiTextFieldEln
@@ -157,11 +164,11 @@ class BackupGui(player: Player,private val render: BackupRender) : GuiContainerE
     }
     override fun postDraw(f: Float,x: Int,y: Int) {
         super.postDraw(f,x,y)
-        drawString(8,8,if(generator)tr("Standby Gasoline Generator") else tr("Automatic Transfer Switch"))
+        drawString(8,8,if(generator)font.plainSubstrByWidth(tr(descriptor.tier.title),160) else tr("Automatic Transfer Switch"))
         drawString(8,22,font.plainSubstrByWidth(backupStatus(display.status),160))
         if(generator) {
-            drawString(8,34,tr("Gasoline: %1$ / 20000 mB",display.fuel.toInt()))
-            drawString(8,46,tr("Rated: %1$ V / %2$ W",display.target.toInt(),minOf(10_000.0,200*display.target).toInt()))
+            drawString(8,34,tr("Gasoline: %1$ / %2$ mB",display.fuel.toInt(),descriptor.tier.tankMb))
+            drawString(8,46,tr("Rated: %1$ V / %2$ W",display.target.toInt(),minOf(descriptor.tier.watts,descriptor.tier.amps*display.target).toInt()))
         } else {
             drawString(8,34,tr("Mains: %1$",Utils.plotVolt("",display.mains).trim()))
             drawString(8,46,tr("Generator: %1$",Utils.plotVolt("",display.backup).trim()))

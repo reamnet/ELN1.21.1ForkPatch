@@ -81,7 +81,7 @@ class AtsElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) : 
 }
 
 class StandbyGeneratorElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) : BackupElement(node,descriptor) {
-    val unit=StandbyGeneratorUnit(this)
+    val unit=StandbyGeneratorUnit(this,(descriptor as BackupDescriptor).tier)
     init {
         slowProcessList.add(IProcess {
             val world=node?.coordinate?.world() as? ServerLevel
@@ -129,5 +129,5 @@ class StandbyGeneratorElement(node: TransparentNode,descriptor: TransparentNodeD
         }.write(stream)
     }
     override fun multiMeterString(side: Direction)=Utils.plotVolt("U:",unit.output.voltage)+Utils.plotPower("P:",unit.watts)
-    override fun getWaila()=linkedMapOf(tr("Generator") to backupStatus(unit.status),tr("Fuel") to tr("%1$ / 20000 mB",unit.fuel.availableMb.toInt()),tr("Output power") to Utils.plotPower("",unit.watts))
+    override fun getWaila()=linkedMapOf(tr("Generator") to backupStatus(unit.status),tr("Fuel") to tr("%1$ / %2$ mB",unit.fuel.availableMb.toInt(),unit.fuel.capacity),tr("Output power") to Utils.plotPower("",unit.watts))
 }

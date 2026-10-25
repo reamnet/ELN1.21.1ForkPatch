@@ -164,7 +164,7 @@ class CurrentRelayElement(sixNode: SixNode, side: Direction, descriptor: SixNode
             if (value == switchState) return
             field = value
             refreshSwitchResistor()
-            play(SoundCommand("random.click").mulVolume(0.1f, 2.0f).smallRange())
+            play(SoundCommand("eln:click").mulVolume(0.1f, 2.0f).smallRange().mulBlockAttenuation(0.0))
             needPublish()
         }
 

@@ -16,7 +16,7 @@ class StandbyAlternator(private val source: SwitchableVoltageSource,private val 
     private var region="VOLTAGE"
     override fun beginStep(seconds: Double) {
         problem=""
-        budget=if(seconds.isFinite() && seconds>0)minOf(StandbyGeneratorUnit.MAX_WATTS,unit.nominal*200,unit.fuel.availableJoules/seconds) else 0.0
+        budget=if(seconds.isFinite() && seconds>0)minOf(unit.maxWatts,unit.nominal*unit.maxAmps,unit.fuel.availableJoules/seconds) else 0.0
     }
     override fun prepareStep() { if(source.enabled) { command=unit.nominal;source.voltage=command } }
     override fun rootSystemPreStepProcess() {
@@ -31,7 +31,7 @@ class StandbyAlternator(private val source: SwitchableVoltageSource,private val 
         val discriminant=sqrt(t.voltage*t.voltage+4*budget*t.resistance)
         val powerVoltage=if(t.voltage>=0)(t.voltage+discriminant)*.5 else
             2*budget*t.resistance/(discriminant-t.voltage)
-        val currentVoltage=t.voltage+200*t.resistance
+        val currentVoltage=t.voltage+unit.maxAmps*t.resistance
         command=minOf(unit.nominal,powerVoltage,currentVoltage).coerceAtLeast(0.0)
         source.voltage=command
         region=when(command) { unit.nominal -> "VOLTAGE";currentVoltage -> "CURRENT";else -> "POWER" }
@@ -41,8 +41,8 @@ class StandbyAlternator(private val source: SwitchableVoltageSource,private val 
         val power=pendingSourcePower(source)
         val current=-(source.subSystem?.pendingValue(source.currentState) ?: Double.NaN)
         return power.isFinite() && commandMatches(source.voltage,command) && power>=-1e-6 &&
-            power<=budget*(1+1e-6)+1e-5 && current in -1e-6..200.0002 &&
-            supplyLimitReached(source.voltage,current,unit.nominal,budget,200.0)
+            power<=budget*(1+1e-6)+1e-5 && current in -1e-6..(unit.maxAmps*1.000001) &&
+            supplyLimitReached(source.voltage,current,unit.nominal,budget,unit.maxAmps)
     }
     override fun failClosed() { problem=if(pendingSourcePower(source) < -1e-6)"BACKFEED" else "OVERLOAD";source.enabled=false }
     override fun trialSources()=if(source.enabled)listOf(source) else emptyList()

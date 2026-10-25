@@ -11,7 +11,7 @@ object UtilityRecipes {
         fun addShapelessRecipe(output: ItemStack,vararg params: Any)=shapeless(output,params)
         fun findItemStack(name: String,stackSize: Int=1)=Eln.findItemStack(name,stackSize)
         // Conversion recipes distinguish every variant and leave all old recipes/IDs intact.
-        for(kind in DistributionKind.entries.filterNot { it.light && it.singlePhaseTap }) {
+        for(kind in DistributionKind.entries.filterNot { it.underground || it.light && it.singlePhaseTap }) {
             val base=if(kind.lvOnly)"Direct Utility Pole" else if(kind.phases==3 && kind!=DistributionKind.THREE)"Three Phase Utility Pole" else "Utility Pole"
             val detail=when {
                 kind.transformer->findItemStack("Pole Fuse Link")
@@ -33,6 +33,30 @@ object UtilityRecipes {
             val fuses=if(kind.cutout || kind.regulator)kind.phases else if(kind.transformer)1 else 0
             val extra=if(kind.cutout)fuses-1 else if(kind.transformer)0 else fuses
             addShapelessRecipe(findItemStack(kind.title),findItemStack(base),detail,marker,*Array(extra.coerceAtLeast(0)) { findItemStack("Pole Fuse Link") })
+        }
+        mods.eln.transparentnode.standby.GeneratorTier.entries.drop(1).forEachIndexed { i,tier ->
+            val previous=mods.eln.transparentnode.standby.GeneratorTier.entries[i].title
+            if(tier==mods.eln.transparentnode.standby.GeneratorTier.EXTREME)
+                addRecipe(findItemStack(tier.title),"GGG","PMP","CCC",'G',findItemStack(previous),'P',ItemStack(Blocks.IRON_BLOCK),'M',findItemStack("Electrical Motor"),'C',findItemStack("Copper Cable"))
+            else addRecipe(findItemStack(tier.title),"GPG","CMC","PPP",'G',findItemStack(previous),'P',findItemStack("Iron Plate"),'M',findItemStack("Electrical Motor"),'C',findItemStack("Copper Cable"))
+        }
+        for(kind in DistributionKind.entries.filter { it.underground }) {
+            val base=when {
+                kind.light->findItemStack(if(kind.phases==1)DistributionKind.UNDERGROUND_SINGLE.title else DistributionKind.UNDERGROUND_THREE.title)
+                kind.pedestal->findItemStack("120/240V Service Weatherhead")
+                else->findItemStack(if(kind.phases==1)DistributionKind.CUTOUT_SINGLE.title else DistributionKind.CUTOUT_THREE.title)
+            }
+            if(kind.light)addShapelessRecipe(findItemStack(kind.title),base,findItemStack("Basic Lamp Holder"),ItemStack(Items.IRON_INGOT))
+            else addRecipe(findItemStack(kind.title),"PFP","CBC","PPP",'P',findItemStack("Iron Plate"),'F',findItemStack("Pole Fuse Link"),'C',findItemStack("Copper Cable"),'B',base)
+        }
+        ServiceMastStyle.entries.drop(1).forEachIndexed { i,mast ->
+            addShapelessRecipe(findItemStack(mast.title),findItemStack("120/240V Service Weatherhead"),*Array(i+1) { ItemStack(Items.IRON_INGOT) })
+        }
+        addRecipe(findItemStack("Ceiling Color Segregated Cable Tray",4),"C C","BBB","PPP",'C',ItemStack(Items.CHAIN),'B',ItemStack(Blocks.IRON_BARS),'P',findItemStack("Iron Plate"))
+        // Each style has a distinct dye marker; no ambiguous identical recipes.
+        val dyes=listOf(Items.WHITE_DYE,Items.ORANGE_DYE,Items.MAGENTA_DYE,Items.LIGHT_BLUE_DYE,Items.YELLOW_DYE,Items.LIME_DYE,Items.PINK_DYE,Items.GRAY_DYE,Items.LIGHT_GRAY_DYE,Items.CYAN_DYE,Items.PURPLE_DYE,Items.BLUE_DYE,Items.BROWN_DYE,Items.GREEN_DYE,Items.RED_DYE)
+        mods.eln.sixnode.lampsocket.DecorativeLampStyle.entries.drop(88).forEachIndexed { i,lamp ->
+            addRecipe(findItemStack(lamp.itemName)," D ","GLG"," P ",'D',ItemStack(dyes[i]),'G',ItemStack(Blocks.GLASS_PANE),'L',findItemStack("Basic Lamp Holder"),'P',ItemStack(if(lamp.stoneWall)Blocks.STONE_BRICKS else Blocks.IRON_BLOCK))
         }
         addShapelessRecipe(findItemStack("Six Socket Power Strip"),findItemStack("Experimental Wall Outlet"),findItemStack("Experimental Wall Outlet"),findItemStack("Experimental Wall Outlet"),findItemStack("Iron Plate"))
         PoleHardware.transformerNames.forEachIndexed { i,name ->

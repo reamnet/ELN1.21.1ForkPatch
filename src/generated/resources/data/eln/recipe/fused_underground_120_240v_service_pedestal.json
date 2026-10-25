@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "eln:120_240v_service_weatherhead"
+    },
+    "C": {
+      "item": "eln:copper_cable"
+    },
+    "F": {
+      "item": "eln:pole_fuse_link"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    "PFP",
+    "CBC",
+    "PPP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:fused_underground_120_240v_service_pedestal"
+  }
+}

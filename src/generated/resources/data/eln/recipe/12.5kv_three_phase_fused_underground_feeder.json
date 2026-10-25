@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "eln:three_phase_fused_cutout_pole"
+    },
+    "C": {
+      "item": "eln:copper_cable"
+    },
+    "F": {
+      "item": "eln:pole_fuse_link"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    "PFP",
+    "CBC",
+    "PPP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:12.5kv_three_phase_fused_underground_feeder"
+  }
+}

@@ -265,6 +265,8 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
             return itemStack
         }
 
+    open fun newConnectionAt(connection: mods.eln.node.NodeConnection,isA: Boolean) {}
+
     open fun getElectricalLoad(side: Direction, lrdu: LRDU): ElectricalLoad? = null
     open fun getElectricalLoad(side: Direction, lrdu: LRDU, remoteEndpoint: NodeConnectionEndpoint): ElectricalLoad? {
         return getElectricalLoad(side, lrdu)

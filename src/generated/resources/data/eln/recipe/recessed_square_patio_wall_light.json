@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": {
+      "item": "minecraft:green_dye"
+    },
+    "G": {
+      "item": "minecraft:glass_pane"
+    },
+    "L": {
+      "item": "eln:basic_lamp_holder"
+    },
+    "P": {
+      "item": "minecraft:stone_bricks"
+    }
+  },
+  "pattern": [
+    " D ",
+    "GLG",
+    " P "
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:recessed_square_patio_wall_light"
+  }
+}

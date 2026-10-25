@@ -174,7 +174,7 @@ public class ElectricalRelayElement extends SixNodeElement implements IConfigura
         if (state == switchState) return;
         switchState = state;
         refreshSwitchResistor();
-        play(new SoundCommand("random.click").mulVolume(0.1F, 2.0F).smallRange());
+        play(new SoundCommand("eln:click").mulVolume(0.1F, 2.0F).smallRange().mulBlockAttenuation(0.0));
         needPublish();
     }
 

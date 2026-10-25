@@ -404,6 +404,27 @@ public class SubSystem {
         }
     }
 
+    private final boolean sparseGaugeRows = !Boolean.getBoolean("eln.disableSparseGaugeProbeRows");
+    private long sparseGaugeValidations;
+    public long getSparseGaugeValidations() { return sparseGaugeValidations; }
+
+    private boolean validProbeRhs() {
+        // Tiny systems are already cheap; sparse-row setup can cost more than
+        // their original affine/full validation. Newly rebuilt matrices also keep
+        // that path until repeated changing-RHS probes amortize inverse-row setup.
+        if (sparseGaugeRows && stateCount >= 128 && factorization != null
+                && voltageGauge.getProbeRhsChanges() >= 256 && voltageGauge.getSparseProbeEligible()) {
+            double limit = factorization.getSafeProbeRhsLimit();
+            double maximum = 0.0;
+            for (double value : Idata) maximum = Math.max(maximum, Math.abs(value));
+            if (Double.isFinite(maximum) && maximum < limit) {
+                Boolean valid = voltageGauge.validProbeRows(Idata, this::responseRow);
+                if (valid != null) { sparseGaugeValidations++; return valid; }
+            }
+        }
+        return voltageGauge.validProbe(Idata, values -> asDoubles(solveProbePrecise(values)));
+    }
+
     private DD[] responseRow(int index) {
         return factorization != null ? factorization.inverseRow(index) : AInvdata[index];
     }
@@ -526,7 +547,7 @@ public class SubSystem {
         DD[] portRow = responseRow(index);
         DD current = dot(portRow, rhs);
         if (voltageGauge.getActive()) {
-            if (!voltageGauge.validProbe(Idata, values -> asDoubles(solveProbePrecise(values)))) return result;
+            if (!validProbeRhs()) return result;
         }
         DD conductance = portRow[index].negate();
         DD intercept = current.add(conductance.multiply(source.getVoltage()));
@@ -556,7 +577,7 @@ public class SubSystem {
         DD[] bRow = b == null ? null : responseRow(b.getId());
         if (voltageGauge.getActive()) {
             // Reject an already unbalanced floating network before classifying a port as open.
-            if (!voltageGauge.validProbe(Idata, values -> asDoubles(solveProbePrecise(values)))) return result;
+            if (!validProbeRhs()) return result;
             boolean supported = voltageGauge.supportsProbe(a == null ? -1 : a.getId(), b == null ? -1 : b.getId(),
                     Idata, values -> asDoubles(solveProbePrecise(values)));
             if (!supported) {

@@ -91,7 +91,7 @@ def pole():
   m.box('FuseDoor%d'%i,-.72,5.99,z-.055,.08,.045,.11)
   m.cyl('Riser%d'%i,1,(.26,-.48,z*.30),6.70,.040,n=12)
   m.cyl('Riser%d'%i,1,(.26,6.22,z*.30),.12,.075,n=16)
-  lead(m,'RiserJumper%d'%i,(.26,6.34,z*.30),(0,6.63,z))
+  lead(m,'RiserJumper%d'%i,(.26,6.34,z*.30),(0,7.425 if i==1 else 6.63,z))
   m.cyl('Regulator%d'%i,1,(.45,4.0,z*.73),1.2,.25,n=24)
   m.cyl('Regulator%d'%i,1,(.45,5.2,z*.73),.06,.28,n=24)
   m.cyl('RegulatorPin%d'%i,1,(.45,5.26,z*.73),.22,.05,n=16)
@@ -113,13 +113,13 @@ def pole():
  for name,faces in list(m.p.items()):
   if name.startswith(('Cutout','FuseDoor')):m.p[name]=[[(x,y+.4,z) for x,y,z in face] for face in faces]
  for i,z in enumerate([-.95,0,.95]):
-  lead(m,'FuseJumper%d'%i,(0,6.63,z),(-.68,6.40,z))
-  lead(m,'TransformerFeed%d'%i,(0,6.63,z),(-.68,6.40,0))
+  lead(m,'FuseJumper%d'%i,(0,7.425 if i==1 else 6.63,z),(-.68,6.40,z))
+  lead(m,'TransformerFeed%d'%i,(0,7.425 if i==1 else 6.63,z),(-.68,6.40,0))
   lead(m,'TransformerFeed%d'%i,(-.68,5.85,0),(-.33,5.715,0))
   lead(m,'RegulatorFeed%d'%i,(-.68,5.85,z),(.30,5.48,z*.73))
   m.cyl('RegulatorLoadPin%d'%i,1,(.65,5.26,z*.73),.22,.05,n=16)
-  lead(m,'CapacitorFeed%d'%i,(0,6.63,z),(.34,5.30,z*.7))
-  lead(m,'SwitchFeed%d'%i,(0,6.63,z),(-.35,6.51,z))
+  lead(m,'CapacitorFeed%d'%i,(0,7.425 if i==1 else 6.63,z),(.34,5.30,z*.7))
+  lead(m,'SwitchFeed%d'%i,(0,7.425 if i==1 else 6.63,z),(-.35,6.51,z))
  for i in range(3):
   lead(m,'TransformerSecondary',(-.60,4.65+i*.24,.20),(.39,4.65+i*.32,.20),.009)
   lead(m,'TransformerSecondary',(.39,4.65+i*.32,.20),(.39,4.65+i*.32,0),.009)
@@ -139,6 +139,11 @@ def cabinets():
  m.cyl('Socket',2,(0,.05,-.31),.04,.235,n=48)
  m.cyl('MeterFace',2,(0,.05,-.27),.13,.205,n=48)
  m.cyl('Glass',2,(0,.05,-.14),.09,.213,.195,48)
+ # An optically clear front has no opaque cap. Retain the curved glass shell
+ # and narrow lip; shader alpha handling cannot hide the meter face.
+ m.p['Glass']=[face for face in m.p['Glass'] if max(v[2] for v in face)-min(v[2] for v in face)>1e-6]
+ from generate_fans_and_outlet import ring
+ ring(m,'Glass',0,.05,-.052,.191,.195,.003,48)
  m.box('Readout',-.135,.075,-.133,.27,.085,.006)
  # Meter revolutions visibly move a marked aluminium disk inside the glass.
  m.cyl('Disk',1,(0,-.065,-.18),.014,.155,n=40)

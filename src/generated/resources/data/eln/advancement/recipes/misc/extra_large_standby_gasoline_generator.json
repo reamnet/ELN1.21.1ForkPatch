@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_large_standby_gasoline_generator": {
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:large_standby_gasoline_generator"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "eln:extra_large_standby_gasoline_generator"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_large_standby_gasoline_generator"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "eln:extra_large_standby_gasoline_generator"
+    ]
+  }
+}

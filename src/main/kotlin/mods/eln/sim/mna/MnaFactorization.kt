@@ -186,6 +186,31 @@ class MnaFactorization @JvmOverloads constructor(matrix: Array<Array<DD>>, previ
         }
     }
 
+    /** Conservative absolute triangular-solve bound for a unit infinity-norm RHS.
+     * Rounded upward at every operation. Both intermediate and final values must
+     * stay comfortably below overflow before a sparse gauge validation is used. */
+    val safeProbeRhsLimit: Double by lazy {
+        val value=DoubleArray(size)
+        var maximum=0.0
+        fun add(a: Double,b: Double)=Math.nextUp(a+b)
+        fun product(a: Double,b: Double)=Math.nextUp(a*b)
+        fun magnitude(v: DD)=Math.nextUp(kotlin.math.abs(v.toDouble()))
+        for(row in 0 until size) {
+            var bound=Math.nextUp(1.0/rowScale[permutation[row]])
+            for(j in lower[row])bound=add(bound,product(magnitude(lu[row][j]!!),value[j]))
+            value[row]=bound;maximum=maxOf(maximum,bound)
+        }
+        for(row in size-1 downTo 0) {
+            var bound=value[row]
+            for(j in upper[row])bound=add(bound,product(magnitude(lu[row][j]!!),value[j]))
+            maximum=maxOf(maximum,bound)
+            val diagonal=Math.nextDown(kotlin.math.abs(lu[row][row]!!.toDouble()))
+            value[row]=if(diagonal>0)Math.nextUp(bound/diagonal) else Double.POSITIVE_INFINITY
+            maximum=maxOf(maximum,value[row])
+        }
+        if(maximum.isFinite() && maximum>0)1e280/maximum else 0.0
+    }
+
     private fun safeReciprocal(divisor: DD): DD? {
         // At extreme exponents a reciprocal loses its DD low part through
         // underflow, even when division itself has a normal, precise result.

@@ -28,9 +28,10 @@ fun climateStatus(status: String)=when(status) {
 }
 class ClimateDescriptor(val type: ClimateType) : PowerCabinetDescriptor(type.title,ClimateElement::class.java,ClimateRender::class.java,type.cooling) {
     private val model=Eln.obj.getObj(type.model)
-    init { if(type==ClimateType.PATIO)ghostGroup=mods.eln.ghost.GhostGroup().apply { addElement(0,1,0,mods.eln.ghost.GhostBlock.tClearance) } }
+    init { if(type.tvStand)ghostGroup=mods.eln.ghost.GhostGroup().apply { addElement(0,0,1,mods.eln.ghost.GhostBlock.tCube) };if(type==ClimateType.PATIO)ghostGroup=mods.eln.ghost.GhostGroup().apply { addElement(0,1,0,mods.eln.ghost.GhostBlock.tClearance) } }
     fun draw(front: Direction,active: Boolean)=preserveMatrix {
         front.inverse.glRotateZnRef()
+        if(type.tvStand) { GL11.glTranslated(.5,0.0,0.0);GL11.glScaled(2.0,1.0,1.0) }
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
             GL11.glDisable(GL11.GL_TEXTURE_2D)
@@ -49,7 +50,7 @@ class ClimateDescriptor(val type: ClimateType) : PowerCabinetDescriptor(type.tit
     }
     override fun handleRenderType(item: ItemStack,type: IItemRenderer.ItemRenderType)=true
     override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType,item: ItemStack,helper: IItemRenderer.ItemRendererHelper)=true
-    override fun renderItem(type: IItemRenderer.ItemRenderType,item: ItemStack,vararg data: Any)=draw(Direction.ZP,false)
+    override fun renderItem(type: IItemRenderer.ItemRenderType,item: ItemStack,vararg data: Any)=preserveMatrix { if(this.type.tvStand) { GL11.glScaled(.65,.65,.65);GL11.glTranslated(-.5,0.0,0.0) };draw(Direction.ZP,false) }
     override fun addInformation(itemStack: ItemStack?,entityPlayer: Player?,list: MutableList<String>,par4: Boolean) {
         list.add(tr("Rated supply: %1$ V / %2$ W",type.volts.toInt(),type.watts.toInt()))
         list.add(tr("Thermostat: 16 to 32 C; uses simulated room temperature"))
@@ -63,7 +64,9 @@ class ClimateDescriptor(val type: ClimateType) : PowerCabinetDescriptor(type.tit
         val front=(world?.getBlockEntity(BlockPos(x,y,z)) as? TransparentNodeEntity)?.let { it.elementRender?.front ?: (it.node as? TransparentNode)?.element?.front } ?: Direction.ZP
         val portable=type==ClimateType.PORTABLE
         val w=if(portable).27 else .48
-        val points=listOf(Vec3(-w,-.5,-.31),Vec3(w,if(type==ClimateType.PATIO)1.40 else if(portable).25 else .50,if(portable).04 else .33))
+        val offset=if(type.tvStand).5 else 0.0
+        val width=if(type.tvStand)w*2 else w
+        val points=listOf(Vec3(offset-width,-.5,-.31),Vec3(offset+width,if(type==ClimateType.PATIO)1.40 else if(portable).25 else .50,if(portable).04 else .33))
         val a=mods.eln.transparentnode.worklight.WorkLightOptics.world(front,points[0]);val b=mods.eln.transparentnode.worklight.WorkLightOptics.world(front,points[1])
         val box=AABB(kotlin.math.min(a.x,b.x)+x+.5,kotlin.math.min(a.y,b.y)+y+.5,kotlin.math.min(a.z,b.z)+z+.5,
             kotlin.math.max(a.x,b.x)+x+.5,kotlin.math.max(a.y,b.y)+y+.5,kotlin.math.max(a.z,b.z)+z+.5)
@@ -82,7 +85,7 @@ class ClimateRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDes
     override val inventory=TransparentNodeElementInventory(0,1,this)
     val display=ClimateDisplay()
     val operatingSound=object : LoopedSound("eln:${(descriptor as ClimateDescriptor).type.sound}",Coordinate(entity.blockPos.x,entity.blockPos.y,entity.blockPos.z,0)) {
-        override fun getVolume()=if(display.enabled && display.active && display.watts>1).20f else 0f
+        override fun getVolume()=if(display.enabled && display.active && display.watts>1)(descriptor as ClimateDescriptor).type.soundVolume else 0f
     }
     init { addLoopedSound(operatingSound) }
     private var cable: CableRenderType?=null

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "minecraft:iron_bars"
+    },
+    "C": {
+      "item": "minecraft:chain"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    "C C",
+    "BBB",
+    "PPP"
+  ],
+  "result": {
+    "count": 4,
+    "id": "eln:ceiling_color_segregated_cable_tray"
+  }
+}

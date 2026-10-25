@@ -267,7 +267,7 @@ class MqttEnergyMeterElement(sixNode: SixNode, side: Direction, descriptor: SixN
     private fun toggleState() {
         val newState = !meterInfo.enabled
         setEnabledState(newState)
-        play(SoundCommand("random.click").mulVolume(0.3f, 0.6f).smallRange())
+        play(SoundCommand("eln:click").mulVolume(0.3f, 0.6f).smallRange().mulBlockAttenuation(0.0))
     }
 
     private fun ensureMeterId() {

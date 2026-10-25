@@ -194,7 +194,7 @@ public class ElectricalSwitchElement extends SixNodeElement {
         } else {
             setSwitchState(!switchState);
             //playSoundEffect("random.click", 0.3F, 0.6F);
-            play(new SoundCommand("random.click").mulVolume(0.3F, 0.6f).smallRange());
+            play(new SoundCommand("eln:click").mulVolume(0.3F, 0.6f).smallRange().mulBlockAttenuation(0.0));
             return true;
         }
         //front = LRDU.fromInt((front.toInt()+1)&3);

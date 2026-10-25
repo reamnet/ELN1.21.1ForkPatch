@@ -7,7 +7,7 @@ import org.junit.Test
 import kotlin.math.sin
 import kotlin.test.*
 
-internal class ProbeCircuit(size: Int,optimized: Boolean,asymmetric: Boolean=false,ports: Int=1) {
+internal class ProbeCircuit(size: Int,optimized: Boolean,asymmetric: Boolean=false,ports: Int=1,gaugeRows: Boolean=false) {
     val system: SubSystem
     val pins=List(size) { VoltageState() }
     val feed=VoltageSource("floating feed",pins[0],pins.last()).apply { voltage=14_000.0 }
@@ -17,8 +17,10 @@ internal class ProbeCircuit(size: Int,optimized: Boolean,asymmetric: Boolean=fal
     val wire=Resistor(pins[0],pins[1]).apply { resistance=.0001 }
     init {
         val key="eln.disableAffineProbeUpdates";val saved=System.getProperty(key)
+        val rowsKey="eln.disableSparseGaugeProbeRows";val savedRows=System.getProperty(rowsKey)
+        System.setProperty(rowsKey,(!gaugeRows).toString())
         try { System.setProperty(key,(!optimized).toString());system=SubSystem(null,.01) }
-        finally { if(saved==null)System.clearProperty(key) else System.setProperty(key,saved) }
+        finally { if(savedRows==null)System.clearProperty(rowsKey) else System.setProperty(rowsKey,savedRows);if(saved==null)System.clearProperty(key) else System.setProperty(key,saved) }
         pins.forEach(system::addState);system.addComponent(feed);system.addComponent(wire)
         for(i in 2 until size-1)system.addComponent(Resistor(pins[i-1],pins[i]).apply { resistance=.0001 })
         system.addComponent(Resistor(pins[size-2],pins.last()).apply { resistance=1e6 })

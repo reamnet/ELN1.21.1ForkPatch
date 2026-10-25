@@ -136,7 +136,7 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
     override fun renderWireCount(terminal: Int)=if(terminal==50)3 else if(terminal<6)2 else 1
     override fun gridCablePoint(terminal: Int,wire: Int)=if(terminal<40)super.gridCablePoint(terminal,wire) else ports.point(terminal,wire)
     override fun getElectricalLoad(side: Direction, lrdu: LRDU) =
-        if (!cord.plugged && side != Direction.YN && side != Direction.YP && lrdu == LRDU.Down) unit.secondary else null
+        if(side==Direction.YN)ports.services[mods.eln.utility.UndergroundService.circuit(lrdu)] else if (!cord.plugged && side != Direction.YP && lrdu == LRDU.Down) unit.secondary else null
     override fun getConnectionMask(side: Direction, lrdu: LRDU) =
         if (getElectricalLoad(side, lrdu) != null) NodeBase.maskElectricalPower else 0
     override fun getThermalLoad(side: Direction, lrdu: LRDU) = if (getElectricalLoad(side, lrdu) != null) unit.thermal else null

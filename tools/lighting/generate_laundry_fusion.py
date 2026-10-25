@@ -5,7 +5,9 @@ from math import sin, cos, tau
 from pathlib import Path
 for name,washer in [('electricwasher',True),('electricdryer',False)]:
  m=Mesh()
- m.box('Case',-.46,-.45,-.43,.92,.91,.86)
+ # The top cap owns the roof surface. A coplanar white case roof at y=.46
+ # fought the gray trim roof under Sodium/Iris. Stop the case at its underside.
+ m.box('Case',-.46,-.45,-.43,.92,.84,.86)
  m.box('Trim',-.47,.39,-.45,.94,.07,.90)
  m.box('Black',-.43,.24,.431,.86,.13,.014)
  m.box('Display',-.13,.274,.447,.23,.052,.012)

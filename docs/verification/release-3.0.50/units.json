@@ -1,0 +1,84 @@
+{
+  "tests": 900,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "version": "3.0.50",
+  "suites": 219,
+  "command": "JAVA_TOOL_OPTIONS=\"$JAVA_TOOL_OPTIONS -Deln.benchGaugeProbeRows=true\" ./gradlew --no-daemon --max-workers=2 test",
+  "target_suites": [
+    {
+      "name": "mods.eln.sim.mna.AffineProbeTest",
+      "tests": "5",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-25T00:07:47.818Z",
+      "hostname": "67293bf35eff",
+      "time": "1.158"
+    },
+    {
+      "name": "mods.eln.sim.mna.MnaRebuildTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-25T00:07:53.559Z",
+      "hostname": "67293bf35eff",
+      "time": "3.066"
+    },
+    {
+      "name": "mods.eln.lighting.LightingExpansionTest",
+      "tests": "6",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-25T00:07:46.377Z",
+      "hostname": "67293bf35eff",
+      "time": "0.06"
+    },
+    {
+      "name": "mods.eln.utility.UtilityServiceInteractionTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-25T00:10:17.768Z",
+      "hostname": "67293bf35eff",
+      "time": "0.006"
+    },
+    {
+      "name": "mods.eln.utility.OutdoorExpansionTest",
+      "tests": "5",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-25T00:10:17.557Z",
+      "hostname": "67293bf35eff",
+      "time": "0.061"
+    },
+    {
+      "name": "mods.eln.sim.mna.SparseGaugeProbeTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-25T00:07:56.637Z",
+      "hostname": "67293bf35eff",
+      "time": "4.065"
+    }
+  ],
+  "final_asset_check": {
+    "command": "./gradlew --no-daemon --max-workers=2 test --tests '*OutdoorExpansionTest'",
+    "name": "mods.eln.utility.OutdoorExpansionTest",
+    "tests": "5",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "timestamp": "2026-10-25T00:12:51.909Z",
+    "hostname": "67293bf35eff",
+    "time": "0.152"
+  },
+  "data_generation": "./gradlew --no-daemon --max-workers=2 runData: successful",
+  "translations": "./gradlew --no-daemon --max-workers=2 generateLangFiles: successful"
+}

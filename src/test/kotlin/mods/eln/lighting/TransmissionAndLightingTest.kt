@@ -105,7 +105,7 @@ class TransmissionAndLightingTest {
     @Test fun singlePhasePoleWireEndsOnTheNewTopInsulator() {
         val model=Obj3D().apply { assertTrue(loadFile("distributionpole/distributionpole.obj")) }
         val top=model.getPart("TopPin").boundingBox()
-        for(kind in DistributionKind.entries.filter { it.phases==1 }) {
+        for(kind in DistributionKind.entries.filter { it.phases==1 && !it.underground }) {
             val descriptor=Eln.transparentNodeItem.subItemList.values.filterIsInstance<DistributionPoleDescriptor>().single { it.kind==kind }
             val e=DistributionPoleElement(TransparentNode().apply { coordinate=Coordinate(0,64,0,0) },descriptor)
             assertEquals(top.max.y,e.gridCablePoint(32,0).y,1e-5)

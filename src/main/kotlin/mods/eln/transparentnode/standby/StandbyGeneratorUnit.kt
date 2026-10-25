@@ -10,14 +10,16 @@ import net.minecraft.nbt.CompoundTag
 enum class StandbyMode { AUTO, MANUAL, OFF }
 
 /** Fuel and engine timers advance only after an accepted physical electrical step. */
-class StandbyGeneratorUnit(owner: TransparentNodeElement) {
+class StandbyGeneratorUnit(owner: TransparentNodeElement,val tier: GeneratorTier=GeneratorTier.SMALL) {
+    val maxWatts get()=tier.watts
+    val maxAmps get()=tier.amps
     companion object { const val MAX_WATTS=10_000.0;const val IDLE_WATTS=300.0 }
     val output=NbtElectricalLoad("standbyOutput").apply { serialResistance=.000001 }
     private val internal=NbtElectricalLoad("standbyAlternator").apply { serialResistance=.000001 }
     val source=SwitchableVoltageSource("standbyEngine").apply { connectTo(internal,null) }
-    private val wire=Resistor(internal,output).apply { resistance=.005 }
+    private val wire=Resistor(internal,output).apply { resistance=.005/tier.factor }
     private val leakage=Resistor(output,null).apply { resistance=1e10 }
-    val fuel=StandbyTank { owner.needPublish() }
+    val fuel=StandbyTank(tier.tankMb) { owner.needPublish() }
     val controller=StandbyAlternator(source,this)
     private var attachedRoot: mods.eln.sim.mna.RootSystem?=null
     var mode=StandbyMode.AUTO
@@ -57,20 +59,20 @@ class StandbyGeneratorUnit(owner: TransparentNodeElement) {
         if(!seconds.isFinite() || seconds<=0)return
         if(running) {
             // Account the last accepted electrical solve once, including idle fuel consumption.
-            if(!fuel.consume(maxOf(IDLE_WATTS,source.power.coerceAtLeast(0.0))*seconds)) { trip("EMPTY");return }
+            if(!fuel.consume(maxOf(IDLE_WATTS*tier.factor,source.power.coerceAtLeast(0.0))*seconds)) { trip("EMPTY");return }
             if(controller.problem.isNotEmpty()) { trip(controller.problem);return }
             if(output.voltage<nominal*.85) { trip("OVERLOAD");return }
-            val bad=source.power>MAX_WATTS*1.10 || source.current>200.0002 ||
-                source.power>=minOf(MAX_WATTS,nominal*200)*.995 && output.voltage<nominal*.98 || source.power < -50.0
+            val bad=source.power>maxWatts*1.10 || source.current>maxAmps*1.000001 ||
+                source.power>=minOf(maxWatts,nominal*maxAmps)*.995 && output.voltage<nominal*.98 || source.power < -50.0
             overload=if(bad)overload+seconds else 0.0
             if(overload>=.5) { trip(if(source.power < -50.0)"BACKFEED" else "OVERLOAD");return }
         }
         if(mode==StandbyMode.OFF) { stop();status="OFF";return }
-        if(fault=="EMPTY" && fuel.availableJoules>=MAX_WATTS*seconds)fault=""
+        if(fault=="EMPTY" && fuel.availableJoules>=maxWatts*seconds)fault=""
         if(fault.isNotEmpty()) { status=fault;source.enabled=false;return }
         val demand=mode==StandbyMode.MANUAL || requested
         if(!demand && !running) { starting=0.0;status="STANDBY";return }
-        if(fuel.availableJoules<MAX_WATTS*seconds) { trip("EMPTY");return }
+        if(fuel.availableJoules<maxWatts*seconds) { trip("EMPTY");return }
         if(demand)cooling=0.0
         if(!running) {
             starting+=seconds;status="STARTING"

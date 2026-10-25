@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "eln:12.5kv_single_phase_fused_underground_feeder"
+    },
+    {
+      "item": "eln:basic_lamp_holder"
+    },
+    {
+      "item": "minecraft:iron_ingot"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:12.5kv_single_phase_fused_underground_feeder_with_street_light"
+  }
+}

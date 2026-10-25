@@ -16,6 +16,10 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 
 /** Adds secondary pass-through without changing the meaning of saved legacy HV links. */
+object UndergroundService {
+    fun circuit(lrdu: LRDU)=when(lrdu) { LRDU.Left->0;LRDU.Right->1;else->2 }
+}
+
 class LegacyPolePorts(owner: GridElement,private val high: ElectricalLoad,suppliedServices: List<NbtElectricalLoad>?=null) {
     val services=suppliedServices ?: List(3) { NbtElectricalLoad("poleService$it").apply { serialResistance=.00001 } }
     var selected=32

@@ -25,7 +25,8 @@ class UtilityServiceInteractionTest {
         Eln.transparentNodeItem.subItemList.values.filterIsInstance<BreakerPanelDescriptor>().single())
 
     @Test fun aimingAtActualTiePointsSelectsVoltageAndBundlesThreeIndependentPhases() {
-        for(kind in DistributionKind.entries) {
+        // Underground cabinets use placed cables and deliberately have no overhead tie points.
+        for(kind in DistributionKind.entries.filterNot { it.underground }) {
             val p=pole(kind)
             assertEquals(50,p.aimedGridTerminal(Direction.ZP,p.gridCablePoint(50,1)),kind.name)
             fun clickable(terminal: Int) {

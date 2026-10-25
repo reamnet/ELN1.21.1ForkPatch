@@ -99,6 +99,8 @@ class TransparentNode : Node() {
         return if(element!!.machineCord?.blocks(element!!.getElectricalLoad(side,lrdu))==true) 0 else element!!.getConnectionMask(side, lrdu)
     }
 
+    override fun newConnectionAt(connection: mods.eln.node.NodeConnection?,isA: Boolean) { if(connection!=null)element?.newConnectionAt(connection,isA) }
+
     override fun getConnectionEndpoint(side: Direction, lrdu: LRDU): NodeConnectionEndpoint {
         return NodeConnectionEndpoint(this, side, lrdu, element, side, lrdu)
     }

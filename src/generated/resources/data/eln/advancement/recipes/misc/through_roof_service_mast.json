@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_120_240v_service_weatherhead": {
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:120_240v_service_weatherhead"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "eln:through_roof_service_mast"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_120_240v_service_weatherhead"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "eln:through_roof_service_mast"
+    ]
+  }
+}

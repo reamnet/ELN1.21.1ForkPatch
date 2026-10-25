@@ -15,22 +15,29 @@ def insulator(m,x,y,z,length):
 for voltage,height,spread in [(69,16,2.7),(230,24,4.8)]:
  for riser in [False,True]:
   m=Mesh();width=1.0 if voltage==69 else 1.7
-  def w(y):return width*(1-y/height)*.8+.20
+  inscale=2.5 if voltage==230 else 1.0
+  crossarm=height-.75-.8*inscale; masttop=crossarm-.10
+  def w(y):return width*(1-y/masttop)*.8+.20
   for x in [-1,1]:
    for z in [-1,1]:
-    tube(m,'main',(x*w(0),-.45,z*w(0)),(x*.20,height-.30,z*.20),.085 if voltage==230 else .065)
+    tube(m,'main',(x*w(0),-.45,z*w(0)),(x*.20,masttop,z*.20),.085 if voltage==230 else .065)
     m.box('main',x*w(0)-.17,-.49,z*w(0)-.17,.34,.12,.34)
-  for y in range(0,height-1,2):
-   hi=min(height-.3,y+2)
+  for y in range(0,int(masttop),2):
+   hi=min(masttop,y+2)
    for axis in [0,2]:
     for side in [-1,1]:
      def p(a,h):return(a*w(h),h,side*w(h)) if axis==0 else(side*w(h),h,a*w(h))
      tube(m,'main',p(-1,y),p(1,hi),.025);tube(m,'main',p(1,y),p(-1,hi),.025)
    for side in [-1,1]:tube(m,'main',(-w(y),y,side*w(y)),(w(y),y,side*w(y)),.035)
-  y=height-1.55
+  y=crossarm
   tube(m,'main',(0,y,-spread-.25),(0,y,spread+.25),.10)
   for z in [-spread,spread]:tube(m,'main',(0,y-1,0),(0,y,z),.045)
-  for z in [-spread,0,spread]:insulator(m,0,y,z,.80);tube(m,'Bus',(0,y+.8,z-.12),(0,y+.8,z+.12),.026)
+  for z in [-spread,0,spread]:
+   # Long 230 kV strings project completely above the lattice head.
+   temp=Mesh();insulator(temp,0,0,0,.80)
+   for part,faces in temp.p.items():
+    for face in faces:m.poly(part,[(x*inscale,y0*inscale+y,z0*inscale+z) for x,y0,z0 in face])
+   tube(m,'Bus',(0,height-.75,z-.12),(0,height-.75,z+.12),.026)
   if riser:
    for phase,z in enumerate([-spread,0,spread]):
     basez=(phase-1)*.30

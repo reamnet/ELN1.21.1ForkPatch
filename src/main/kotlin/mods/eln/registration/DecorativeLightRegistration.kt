@@ -11,6 +11,7 @@ object DecorativeLightRegistration {
     const val LEGACY_FIXTURES = 30
     fun idFor(style: DecorativeLampStyle): Int {
         val index=style.ordinal
+        if(index>=88)return (70 shl 6)+index-88 // Separate appended group; do not spill into occupied groups.
         return if(index<LEGACY_FIXTURES)(64 shl 6)+20+index else (68 shl 6)+index-LEGACY_FIXTURES
     }
     /** New styles use a separate group; group 65 already contains Lamp Supplies. */
@@ -69,6 +70,10 @@ object DecorativeLightRegistration {
                             style==DecorativeLampStyle.PARTY_TIKI || style==DecorativeLampStyle.PARTY_LANTERN -> {
                                 setPlaceDirection(Direction.YN)
                                 if(style==DecorativeLampStyle.PARTY_TIKI)ghostGroup=GhostGroup().apply { addElement(1,0,0) }
+                            }
+                            style.outdoorFloor -> {
+                                setPlaceDirection(Direction.YN)
+                                if(style.depth>1)ghostGroup=GhostGroup().apply { for(x in 1 until kotlin.math.ceil(style.depth).toInt())addElement(x,0,0) }
                             }
                             style.tableLamp -> setPlaceDirection(Direction.YN)
                             style == DecorativeLampStyle.FLOOR_DRUM -> {

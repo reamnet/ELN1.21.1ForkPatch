@@ -6,6 +6,7 @@ import mods.eln.sim.mna.state.VoltageState
 import kotlin.math.abs
 import kotlin.math.max
 import java.util.function.Function
+import java.util.function.IntFunction
 
 /** Removes only an additive voltage reference freedom. No leakage current is invented.
  * Each discarded KCL equation is checked after solving; an unbalanced current source into
@@ -21,6 +22,8 @@ class VoltageGauge @JvmOverloads constructor(matrix: Array<DoubleArray>, states:
     private val savedRhs: DoubleArray
     private var lastProbeRhs: DoubleArray? = null
     private var lastProbeValid = false
+    var probeRhsChanges=0
+        private set
     private val supportedExcitations = HashMap<Long, Boolean>()
 
     init {
@@ -104,11 +107,42 @@ class VoltageGauge @JvmOverloads constructor(matrix: Array<DoubleArray>, states:
     fun validProbe(physicalRhs: DoubleArray, solve: Function<DoubleArray, DoubleArray>): Boolean {
         for (i in rows.indices) savedRhs[i] = physicalRhs[rows[i]]
         if (lastProbeRhs?.contentEquals(physicalRhs) == true) return lastProbeValid
+        if(probeRhsChanges<Int.MAX_VALUE)probeRhsChanges++
         val rhs = physicalRhs.copyOf()
         applyRhs(rhs)
         val accepted = valid(solve.apply(rhs))
         lastProbeRhs = physicalRhs.copyOf()
         lastProbeValid = accepted
+        return accepted
+    }
+
+    private val probeColumns: IntArray by lazy {
+        discardedRows.flatMap { row->row.indices.filter { row[it]!=0.0 } }.distinct().toIntArray()
+    }
+
+    val sparseProbeEligible get()=probeColumns.size<=8
+
+    /** Validate exactly the discarded KCL equations, using only their referenced
+     * solution variables. The caller must first establish a finite bound for ALL
+     * variables/intermediates; otherwise the full validation remains mandatory.
+     * Dense discarded rows fall back instead of forming many inverse rows.
+     */
+    fun validProbeRows(physicalRhs: DoubleArray,response: IntFunction<Array<DD>>): Boolean? {
+        if(probeColumns.size>8)return null
+        for(i in rows.indices)savedRhs[i]=physicalRhs[rows[i]]
+        if(lastProbeRhs?.contentEquals(physicalRhs)==true)return lastProbeValid
+        if(probeRhsChanges<Int.MAX_VALUE)probeRhsChanges++
+        val solution=DoubleArray(physicalRhs.size)
+        for(column in probeColumns) {
+            val inverse=response.apply(column);var sum=DD.ZERO
+            for(i in physicalRhs.indices)if(!referenceRows[i] && physicalRhs[i]!=0.0 && !inverse[i].isZero)
+                sum=sum.add(inverse[i].multiply(physicalRhs[i]))
+            val value=sum.toDouble()
+            if(!value.isFinite())return null
+            solution[column]=value
+        }
+        val accepted=valid(solution)
+        lastProbeRhs=physicalRhs.copyOf();lastProbeValid=accepted
         return accepted
     }
 

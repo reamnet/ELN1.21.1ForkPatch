@@ -218,6 +218,7 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
     }
 
     override fun getElectricalLoad(side: Direction, lrdu: LRDU): ElectricalLoad? {
+        if(side==Direction.YN && (desc.kind==Kind.OVERHEAD || ports.selected>=40))return ports.services[mods.eln.utility.UndergroundService.circuit(lrdu)]
         return when(desc.kind) {
             Kind.OVERHEAD -> null
             Kind.TRANSFORMER_TO_GROUND -> trafo?.secondaryLoad
@@ -288,7 +289,7 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
         return thermalLoad
     }
 
-    override fun getConnectionMask(side: Direction, lrdu: LRDU): Int = if(desc.kind == Kind.OVERHEAD) {
+    override fun getConnectionMask(side: Direction, lrdu: LRDU): Int = if(desc.kind == Kind.OVERHEAD && side!=Direction.YN) {
         0
     } else {
         NodeBase.maskElectricalPower
