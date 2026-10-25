@@ -11,7 +11,7 @@ object UtilityRecipes {
         fun addShapelessRecipe(output: ItemStack,vararg params: Any)=shapeless(output,params)
         fun findItemStack(name: String,stackSize: Int=1)=Eln.findItemStack(name,stackSize)
         // Conversion recipes distinguish every variant and leave all old recipes/IDs intact.
-        for(kind in DistributionKind.entries.filterNot { it.underground || it.light && it.singlePhaseTap }) {
+        for(kind in DistributionKind.entries.filterNot { it.underground || it.twinLight || it.light && it.singlePhaseTap }) {
             val base=if(kind.lvOnly)"Direct Utility Pole" else if(kind.phases==3 && kind!=DistributionKind.THREE)"Three Phase Utility Pole" else "Utility Pole"
             val detail=when {
                 kind.transformer->findItemStack("Pole Fuse Link")
@@ -48,6 +48,21 @@ object UtilityRecipes {
             }
             if(kind.light)addShapelessRecipe(findItemStack(kind.title),base,findItemStack("Basic Lamp Holder"),ItemStack(Items.IRON_INGOT))
             else addRecipe(findItemStack(kind.title),"PFP","CBC","PPP",'P',findItemStack("Iron Plate"),'F',findItemStack("Pole Fuse Link"),'C',findItemStack("Copper Cable"),'B',base)
+        }
+        mods.eln.transparentnode.switchgear.SwitchgearKind.entries.forEach { kind->
+            val previous=when(kind) {
+                mods.eln.transparentnode.switchgear.SwitchgearKind.CONTACTOR_THREE->"Single Pole Contactor"
+                mods.eln.transparentnode.switchgear.SwitchgearKind.RELAY_FOUR->"Two Pole Changeover Relay"
+                mods.eln.transparentnode.switchgear.SwitchgearKind.SSR_THREE->"Solid State Relay"
+                else->null
+            }
+            if(previous!=null)addRecipe(findItemStack(kind.title),if(kind.poles==4)"R R" else "RRR","PWP",'R',findItemStack(previous),'P',findItemStack("Iron Plate"),'W',findItemStack("Copper Cable"))
+            else {
+                val core=if(kind.solidState)"Silicon Wafer" else "Cheap Ferromagnetic Core"
+                val relay=if(kind.changeover)"12V Control Relay 20A" else if(kind.solidState)"5V Control Relay 10A" else "12V Control Relay 100A"
+                addRecipe(findItemStack(kind.title)," C ","PRP","IWI",'C',findItemStack(core),'P',ItemStack(Items.IRON_NUGGET),
+                    'R',findItemStack(relay),'I',findItemStack("Iron Plate"),'W',findItemStack("Copper Cable"))
+            }
         }
         ServiceMastStyle.entries.drop(1).forEachIndexed { i,mast ->
             addShapelessRecipe(findItemStack(mast.title),findItemStack("120/240V Service Weatherhead"),*Array(i+1) { ItemStack(Items.IRON_INGOT) })

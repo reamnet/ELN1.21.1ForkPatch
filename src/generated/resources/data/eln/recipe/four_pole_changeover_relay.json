@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": {
+      "item": "eln:iron_plate"
+    },
+    "R": {
+      "item": "eln:two_pole_changeover_relay"
+    },
+    "W": {
+      "item": "eln:copper_cable"
+    }
+  },
+  "pattern": [
+    "R R",
+    "PWP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:four_pole_changeover_relay"
+  }
+}

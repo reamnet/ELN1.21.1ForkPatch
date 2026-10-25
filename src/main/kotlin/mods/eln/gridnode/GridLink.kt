@@ -79,6 +79,8 @@ class GridLink : INBTTReady {
             return false
         }
 
+        if(!a.acceptsSavedGridTerminal(aTerminal) || !b.acceptsSavedGridTerminal(bTerminal))return false
+
         // Both chunks save the span. Merge their records into one live link after reload.
         val canonical=(a.gridLinkList+b.gridLinkList).firstOrNull { other -> other!==this && sameTerminals(other) }
         if(canonical!=null) {

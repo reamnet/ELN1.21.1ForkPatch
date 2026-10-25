@@ -1,0 +1,91 @@
+{
+  "tests": 908,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "version": "3.0.51",
+  "suites": 221,
+  "command": "./gradlew --no-daemon --max-workers=2 test generateLangFiles runData",
+  "target_suites": [
+    {
+      "name": "mods.eln.transparentnode.switchgear.SwitchgearTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-25T07:43:49.013Z",
+      "hostname": "67293bf35eff",
+      "time": "0.039"
+    },
+    {
+      "name": "mods.eln.utility.PoleRefreshTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-25T07:45:37.129Z",
+      "hostname": "67293bf35eff",
+      "time": "0.036"
+    },
+    {
+      "name": "mods.eln.lighting.TransmissionAndLightingTest",
+      "tests": "7",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-25T07:43:25.915Z",
+      "hostname": "67293bf35eff",
+      "time": "0.162"
+    },
+    {
+      "name": "mods.eln.gridnode.GridCableCompatibilityTest",
+      "tests": "9",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-25T07:43:23.674Z",
+      "hostname": "67293bf35eff",
+      "time": "0.841"
+    },
+    {
+      "name": "mods.eln.utility.UtilityServiceInteractionTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-25T07:45:37.233Z",
+      "hostname": "67293bf35eff",
+      "time": "0.006"
+    }
+  ],
+  "final_focused_check": {
+    "command": "./gradlew --no-daemon --max-workers=2 test --tests '*PoleRefreshTest' --tests 'mods.eln.transparentnode.switchgear.*'",
+    "tests": 8,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suites": [
+      {
+        "name": "mods.eln.transparentnode.switchgear.SwitchgearTest",
+        "tests": "4",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-10-25T07:52:43.442Z",
+        "hostname": "67293bf35eff",
+        "time": "0.129"
+      },
+      {
+        "name": "mods.eln.utility.PoleRefreshTest",
+        "tests": "4",
+        "skipped": "0",
+        "failures": "0",
+        "errors": "0",
+        "timestamp": "2026-10-25T07:52:43.574Z",
+        "hostname": "67293bf35eff",
+        "time": "0.162"
+      }
+    ]
+  },
+  "final_translation_compile": "./gradlew --no-daemon --max-workers=2 generateLangFiles compileKotlin compileJava: successful"
+}

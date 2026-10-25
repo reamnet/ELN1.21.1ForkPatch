@@ -29,7 +29,7 @@ class StepDownUnitDescriptor(name: String) :
         list.add(tr("Selectable output: %1$ V or %2$ V", 120, 240))
         list.add(tr("Maximum input: %1$ V; maximum output: %2$ W", MainsStepDown.MAX_INPUT_VOLTS.toInt(), 100_000))
         list.add(tr("Step-down only; grid voltage must reach the selected output"))
-        list.add(tr("Place on its own or install in a Utility Pole Street Light"))
+        list.add(tr("Place on its own or install in a pole with a transformer slot"))
     }
 }
 

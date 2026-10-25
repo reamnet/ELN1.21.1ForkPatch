@@ -348,10 +348,8 @@ object CraftingRecipes {
             Triple("Wireless Toggle Button","Wireless Button",Items.IRON_NUGGET))) {
             addRecipe(findItemStack(name)," M ","MLM"," P ",'M',ItemStack(material),'L',findItemStack(base),'P',findItemStack("Iron Plate"))
         }
-        addRecipe(findItemStack("Utility Pole Cobrahead Street Light")," L "," P ",
-            'L',findItemStack("Modern LED Street Light"),'P',findItemStack("Utility Pole"))
         addRecipe(findItemStack("Utility Pole Twin LED Street Light"),"L L"," P ",
-            'L',findItemStack("Modern LED Street Light"),'P',findItemStack("Utility Pole"))
+            'L',findItemStack("Modern LED Street Light"),'P',findItemStack("120/240V Secondary Utility Pole"))
         // These recipes create empty cells; ingredient charge is intentionally not copied.
         addRecipe(findItemStack("UPS AGM Battery Cell"),"PPP","LBL","PPP",'P',findItemStack("Iron Plate"),
             'L',"ingotLead",'B',findItemStack("Portable Battery"))
@@ -1174,9 +1172,6 @@ object CraftingRecipes {
         addRecipe(findItemStack("Mains Step-down Unit"), "CFC", "MVM", "CCC",
             'C', findItemStack("Copper Cable"), 'F', findItemStack("Optimal Ferromagnetic Core"),
             'M', findItemStack("Machine Block"), 'V', findItemStack("Variable DC-DC Converter"))
-        addRecipe(findItemStack("Utility Pole Street Light"), " IL", " PB", " I ",
-            'I', "ingotIron", 'L', findItemStack("Streetlight"),
-            'P', findItemStack("Utility Pole"), 'B', findItemStack("120V LED Light Bulb"))
 
         // I don't care what you think, if your modpack lacks steel then you don't *need* this much power.
         // Or just use the new Arc furnace. Other mod's steel methods are slow and tedious and require huge multiblocks.

@@ -43,7 +43,7 @@ object OutdoorExpansionChecks {
     private var work: CompletableFuture<*>?=null
     private val positions=ArrayList<BlockPos>();private val items=ArrayList<ItemStack>()
     private val passed=ArrayList<String>();private val previews=ArrayList<Map<String,Any?>>()
-    private var clicks=0;private var clickVolume=0f
+    private var clicks=0;private var clickBaseline=0;private var clickVolume=0f
     private val output get()=mc.gameDirectory.toPath().resolve("outdoor-expansion-checks")
     @SubscribeEvent fun sound(event: net.neoforged.neoforge.client.event.sound.PlaySoundEvent) {
         if(!java.lang.Boolean.getBoolean("eln.outdoorChecks"))return
@@ -96,7 +96,27 @@ object OutdoorExpansionChecks {
             Eln.simulator.addElectricalComponent(mods.eln.sim.mna.component.Resistor(m.load[2],null).apply { resistance=240.0 })
         }
         machine(TransmissionKind.POLE_69.title,BlockPos(320,80,270));machine(TransmissionKind.POLE_230.title,BlockPos(332,80,270))
-        machine(DistributionKind.THREE.title,BlockPos(315,80,300))
+        val three=machine(DistributionKind.THREE.title,BlockPos(315,80,300)) as DistributionPoleElement
+        machine(DistributionKind.SINGLE.title,BlockPos(319,80,300))
+        val twin=machine(DistributionKind.TWIN_SECONDARY_LIGHT.title,BlockPos(296,80,300)) as DistributionPoleElement
+        twin.readItemStackNBT(net.minecraft.nbt.CompoundTag().apply { putInt("utilityLampVoltage",240) })
+        val feeder=machine(DistributionKind.SECONDARY.title,BlockPos(302,80,300)) as DistributionPoleElement
+        Eln.simulator.addElectricalComponent(mods.eln.sim.mna.component.VoltageSource("240 V secondary boundary",feeder.services[2],null).apply { voltage=240.0 })
+        val spool=f.spool(18.0);val cable=mods.eln.sixnode.electricalcable.ElectricalCableDescriptor.getDescriptor(spool) as mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
+        mods.eln.gridnode.GridLink.addLink(feeder,twin,50,50,cable,18,spool)
+        check(!mods.eln.gridnode.GridLink(three.coordinate(),twin.coordinate(),32,32,spool,cable.electricalRs).connect()) { "A retired HV span must not become an LV feed" }
+        passed+="The converted twin pole rejects retired HV spans while its LV bundle joins the new poles"
+        mods.eln.transparentnode.switchgear.SwitchgearKind.entries.forEachIndexed { i,kind->
+            val device=machine(kind.title,BlockPos(292+i*3,80,312)) as mods.eln.transparentnode.switchgear.SwitchgearElement
+            val mode=mods.eln.transparentnode.switchgear.RelayControl.entries[i%3];device.setControl(mode)
+            val a=if(mode==mods.eln.transparentnode.switchgear.RelayControl.SIGNAL)device.gate else device.coilA
+            val b=if(mode==mods.eln.transparentnode.switchgear.RelayControl.SIGNAL)null else device.coilB
+            Eln.simulator.addElectricalComponent(mods.eln.sim.mna.component.VoltageSource("switchgear control boundary",a,b).apply { voltage=if(mode.nominal==0.0)Eln.SVU else mode.nominal })
+            device.commons.forEachIndexed { n,pin->
+                Eln.simulator.addElectricalComponent(mods.eln.sim.mna.component.VoltageSource("contact boundary",pin,null).apply { voltage=120.0+n*12 })
+                Eln.simulator.addElectricalComponent(mods.eln.sim.mna.component.Resistor(device.normallyOpen[n],null).apply { resistance=120.0 })
+            }
+        }
         val trays=(0..2).map { i->
             val p=BlockPos(277+i,84,292);w.setBlockAndUpdate(p.above(),Blocks.STONE.defaultBlockState())
             machine("Ceiling Color Segregated Cable Tray",p) as ColorCableTrayElement
@@ -151,6 +171,17 @@ object OutdoorExpansionChecks {
                         tile.elementRenderList.filterIsInstance<LampSocketRender>().filter { it.descriptor.fixture?.ordinal?.let { n->n>=88 }==true }.forEach { check(it.lightValue>=LampSocketRender.MIN_LIGHT_ON_VALUE) { "New fixture did not illuminate" } }
                     }
                     passed+="All fifteen new fixtures illuminate from actual 240 V electrical boundary supplies"
+                    work=mc.singleplayerServer!!.submit<Unit> {
+                        val twin=NodeManager.instance!!.getTransparentNodeFromCoordinate(Coordinate(296,80,300,0)) as DistributionPoleElement
+                        check(twin.unit==null && twin.fuses.isEmpty() && twin.lightLevel>=14 && twin.lampPower>119.0)
+                        check(kotlin.math.abs(twin.services[0].voltage)<1e-6) { "240 V must not be silently converted to 120 V" }
+                        mods.eln.transparentnode.switchgear.SwitchgearKind.entries.forEachIndexed { i,kind->
+                            val relay=NodeManager.instance!!.getTransparentNodeFromCoordinate(Coordinate(292+i*3,80,312,0)) as mods.eln.transparentnode.switchgear.SwitchgearElement
+                            check(relay.energized && !relay.tripped && relay.noContacts.all { it.closed && it.current>.9 }) { "Native switchgear failed: $kind" }
+                        }
+                    };work!!.join()
+                    passed+="Both twin heads illuminate from a real 240 V LV span without a transformer or 120 V conversion"
+                    passed+="All six switchgear devices operate real independent loads using signal, 120 V and 240 V control"
                     check(TerrainModels.compiledSections>0);photo("equipment")
                     work=mc.singleplayerServer!!.submit<Unit> { camera(267.0,82.0,289.0,Vec3(264.0,80.6,279.0)) };phase=3;ticks=0
                 }
@@ -159,7 +190,7 @@ object OutdoorExpansionChecks {
                     work=mc.singleplayerServer!!.submit<Unit> { camera(305.0,81.0,294.0,Vec3(305.0,81.5,290.0)) };phase=4;ticks=0
                 }
                 4->if(work!!.isDone && ticks>80) {
-                    work!!.join();photo("meters")
+                    work!!.join();photo("meters");clickBaseline=clicks
                     work=mc.singleplayerServer!!.submit<Unit> {
                         val n=NodeManager.instance!!.getNodeFromCoordonate(Coordinate(303,82,289,0)) as SixNode
                         val e=n.sideElementList.filterIsInstance<WallWirelessElement>().single()
@@ -170,7 +201,7 @@ object OutdoorExpansionChecks {
                     };phase=5;ticks=0
                 }
                 5->if(work!!.isDone && ticks>50) {
-                    work!!.join();check(clicks>=2 && clickVolume>.05f) { "Switch click missing or inaudible: $clicks / $clickVolume" };passed+="Wireless paddle and legacy wired switch both emit audible registered clicks"
+                    work!!.join();check(clicks-clickBaseline>=2 && clickVolume>.05f) { "Switch click missing or inaudible: $clicks / $clickVolume" };passed+="Wireless paddle and legacy wired switch both emit audible registered clicks"
                     work=mc.singleplayerServer!!.submit<Unit> { camera(279.0,82.5,297.0,Vec3(278.0,84.0,292.0)) };phase=6;ticks=0
                 }
                 6->if(work!!.isDone && ticks>80) {
@@ -181,7 +212,19 @@ object OutdoorExpansionChecks {
                     work!!.join();photo("insulators")
                     work=mc.singleplayerServer!!.submit<Unit> { camera(298.0,83.0,291.0,Vec3(296.0,80.6,287.0)) };phase=8;ticks=0
                 }
-                8->if(work!!.isDone && ticks>80) { work!!.join();photo("laundry-tops");finish(null) }
+                8->if(work!!.isDone && ticks>80) {
+                    work!!.join();photo("laundry-tops")
+                    work=mc.singleplayerServer!!.submit<Unit> { camera(318.0,88.0,307.0,Vec3(317.0,87.0,300.0)) };phase=9;ticks=0
+                }
+                9->if(work!!.isDone && ticks>80) {
+                    work!!.join();photo("distribution-insulators")
+                    work=mc.singleplayerServer!!.submit<Unit> { camera(299.0,85.0,307.0,Vec3(296.0,84.8,300.0)) };phase=10;ticks=0
+                }
+                10->if(work!!.isDone && ticks>80) {
+                    work!!.join();photo("twin-secondary")
+                    work=mc.singleplayerServer!!.submit<Unit> { camera(301.0,82.0,316.0,Vec3(300.0,80.0,312.0)) };phase=11;ticks=0
+                }
+                11->if(work!!.isDone && ticks>80) { work!!.join();photo("switchgear");finish(null) }
             }
         } catch(error: Throwable) { finish(error) }
     }

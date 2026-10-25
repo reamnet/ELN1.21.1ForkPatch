@@ -147,11 +147,13 @@ object LightingExpansionChecks {
                         fixture.wire(ups.west());fixture.source(ups.west(2),3200.0);fixture.wire(ups.east());fixture.load(ups.east(2),120.0*120/500);fixture.ground(ups.east(3))
                         for((i,pos) in poles.withIndex()) {
                             val name=if(i==0)"Utility Pole Cobrahead Street Light" else "Utility Pole Twin LED Street Light"
-                            val pole=fixture.placeMachine(Eln.findItemStack(name,1),pos) as UtilityStreetLightElement
+                            val pole=fixture.placeMachine(Eln.findItemStack(name,1),pos)
                             pole.front=Direction.ZP;pole.reconnect()
-                            p.setItemInHand(InteractionHand.MAIN_HAND,Eln.findItemStack("Mains Step-down Unit",1));check(pole.onBlockActivated(p,Direction.ZP,.5f,.5f,.5f))
-                            // Test fixture injects the upstream overhead boundary at its real grid load.
-                            val source=mods.eln.sim.mna.component.VoltageSource("overhead",pole.unit.primary,null).apply { voltage=14_000.0 }
+                            val pin=if(pole is UtilityStreetLightElement) {
+                                p.setItemInHand(InteractionHand.MAIN_HAND,Eln.findItemStack("Mains Step-down Unit",1))
+                                check(pole.onBlockActivated(p,Direction.ZP,.5f,.5f,.5f));pole.unit.primary
+                            } else (pole as mods.eln.utility.DistributionPoleElement).services[0]
+                            val source=mods.eln.sim.mna.component.VoltageSource("pole supply",pin,null).apply { voltage=if(i==0)14_000.0 else 120.0 }
                             Eln.simulator.mna.addComponent(source)
                         }
                         fixture.placeMachine(Eln.findItemStack("Automatic Transfer Switch",1),ats).apply { front=Direction.ZP;reconnect() }
@@ -167,8 +169,12 @@ object LightingExpansionChecks {
                         record("All 30 new fixtures place with physical clearance, hand-inserted bulbs and cables, and run wirelessly on a real Lamp Supply")
                         check(battery(p).unit.outputWatts>499);check(battery(p).bank.activeCount==24)
                         check(gen(p).running);check(gen(p).watts>990)
-                        for(pos in poles) { val pole=f(p).machine(pos) as UtilityStreetLightElement;check(pole.installed);check(pole.lightLevel>=14) { "Pole ${pole.lightLevel}, ${pole.unit.secondary.voltage}" } }
-                        record("Both new pole fixtures accept the hand-installed step-down unit and light from their 14 kV grid input")
+                        for(pos in poles) {
+                            val pole=f(p).machine(pos)
+                            if(pole is UtilityStreetLightElement) { check(pole.installed);check(pole.lightLevel>=14) }
+                            else check((pole as mods.eln.utility.DistributionPoleElement).lightLevel>=14)
+                        }
+                        record("Legacy Cobrahead lights through its transformer; the twin fixture lights directly from its LV service circuit")
                         val s=six(p,supply,Direction.YN) as LampSupplyElement
                         s.networkUnserialize(packet { writeByte(LampSupplyElement.setWirelessName.toInt());writeByte(0);writeUTF("Gallery control") })
                         s.networkUnserialize(packet { writeByte(LampSupplyElement.setSelectedAggregator.toInt());writeByte(0);writeByte(0) })

@@ -6,7 +6,7 @@
       "item": "eln:modern_led_street_light"
     },
     "P": {
-      "item": "eln:utility_pole"
+      "item": "eln:120_240v_secondary_utility_pole"
     }
   },
   "pattern": [

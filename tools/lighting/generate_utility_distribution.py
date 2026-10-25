@@ -91,7 +91,7 @@ def pole():
   m.box('FuseDoor%d'%i,-.72,5.99,z-.055,.08,.045,.11)
   m.cyl('Riser%d'%i,1,(.26,-.48,z*.30),6.70,.040,n=12)
   m.cyl('Riser%d'%i,1,(.26,6.22,z*.30),.12,.075,n=16)
-  lead(m,'RiserJumper%d'%i,(.26,6.34,z*.30),(0,7.425 if i==1 else 6.63,z))
+  lead(m,'RiserJumper%d'%i,(.26,6.34,z*.30),(0,7.15 if i==1 else 6.63,z))
   m.cyl('Regulator%d'%i,1,(.45,4.0,z*.73),1.2,.25,n=24)
   m.cyl('Regulator%d'%i,1,(.45,5.2,z*.73),.06,.28,n=24)
   m.cyl('RegulatorPin%d'%i,1,(.45,5.26,z*.73),.22,.05,n=16)
@@ -113,19 +113,18 @@ def pole():
  for name,faces in list(m.p.items()):
   if name.startswith(('Cutout','FuseDoor')):m.p[name]=[[(x,y+.4,z) for x,y,z in face] for face in faces]
  for i,z in enumerate([-.95,0,.95]):
-  lead(m,'FuseJumper%d'%i,(0,7.425 if i==1 else 6.63,z),(-.68,6.40,z))
-  lead(m,'TransformerFeed%d'%i,(0,7.425 if i==1 else 6.63,z),(-.68,6.40,0))
+  lead(m,'FuseJumper%d'%i,(0,7.15 if i==1 else 6.63,z),(-.68,6.40,z))
+  lead(m,'TransformerFeed%d'%i,(0,7.15 if i==1 else 6.63,z),(-.68,6.40,0))
   lead(m,'TransformerFeed%d'%i,(-.68,5.85,0),(-.33,5.715,0))
   lead(m,'RegulatorFeed%d'%i,(-.68,5.85,z),(.30,5.48,z*.73))
   m.cyl('RegulatorLoadPin%d'%i,1,(.65,5.26,z*.73),.22,.05,n=16)
-  lead(m,'CapacitorFeed%d'%i,(0,7.425 if i==1 else 6.63,z),(.34,5.30,z*.7))
-  lead(m,'SwitchFeed%d'%i,(0,7.425 if i==1 else 6.63,z),(-.35,6.51,z))
+  lead(m,'CapacitorFeed%d'%i,(0,7.15 if i==1 else 6.63,z),(.34,5.30,z*.7))
+  lead(m,'SwitchFeed%d'%i,(0,7.15 if i==1 else 6.63,z),(-.35,6.51,z))
  for i in range(3):
   lead(m,'TransformerSecondary',(-.60,4.65+i*.24,.20),(.39,4.65+i*.32,.20),.009)
   lead(m,'TransformerSecondary',(.39,4.65+i*.32,.20),(.39,4.65+i*.32,0),.009)
- m.cyl('TopPin',1,(0,6.87,0),.55,.045,n=16)
- for k in range(5):m.cyl('TopPin',1,(0,6.92+k*.09,0),.035,.13,n=24)
- m.cyl('TopPin',1,(0,7.40,0),.025,.07,n=16)
+ # Reuse the A/C insulator verbatim, translated above the wooden pole.
+ m.p['TopPin']=[[(x,y+.56,z) for x,y,z in face] for face in m.p['Pin1']]
  m.save('distributionpole')
 
 def cabinets():

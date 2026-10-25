@@ -1,0 +1,848 @@
+{
+  "passed": [
+    "The converted twin pole rejects retired HV spans while its LV bundle joins the new poles",
+    "Three real adjacent trays join three independent installed colors",
+    "Every placed new fixture, generator, mast, cabinet, tray and widened TV stand has baked terrain geometry",
+    "All new item previews use baked quads in GUI and ground contexts",
+    "All fifteen new fixtures illuminate from actual 240 V electrical boundary supplies",
+    "Both twin heads illuminate from a real 240 V LV span without a transformer or 120 V conversion",
+    "All six switchgear devices operate real independent loads using signal, 120 V and 240 V control",
+    "Wireless paddle and legacy wired switch both emit audible registered clicks"
+  ],
+  "previews": [
+    {
+      "item": "eln:standby_gasoline_generator",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 210
+    },
+    {
+      "item": "eln:standby_gasoline_generator",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 210
+    },
+    {
+      "item": "eln:medium_standby_gasoline_generator",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 210
+    },
+    {
+      "item": "eln:medium_standby_gasoline_generator",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 210
+    },
+    {
+      "item": "eln:large_standby_gasoline_generator",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 210
+    },
+    {
+      "item": "eln:large_standby_gasoline_generator",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 210
+    },
+    {
+      "item": "eln:extra_large_standby_gasoline_generator",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 258
+    },
+    {
+      "item": "eln:extra_large_standby_gasoline_generator",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 258
+    },
+    {
+      "item": "eln:extreme_standby_gasoline_generator",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 354
+    },
+    {
+      "item": "eln:extreme_standby_gasoline_generator",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 354
+    },
+    {
+      "item": "eln:fused_underground_120_240v_service_pedestal",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 48
+    },
+    {
+      "item": "eln:fused_underground_120_240v_service_pedestal",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 48
+    },
+    {
+      "item": "eln:12.5kv_single_phase_fused_underground_feeder",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 48
+    },
+    {
+      "item": "eln:12.5kv_single_phase_fused_underground_feeder",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 48
+    },
+    {
+      "item": "eln:12.5kv_three_phase_fused_underground_feeder",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 72
+    },
+    {
+      "item": "eln:12.5kv_three_phase_fused_underground_feeder",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 72
+    },
+    {
+      "item": "eln:12.5kv_single_phase_fused_underground_feeder_with_street_light",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 102
+    },
+    {
+      "item": "eln:12.5kv_single_phase_fused_underground_feeder_with_street_light",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 102
+    },
+    {
+      "item": "eln:12.5kv_three_phase_fused_underground_feeder_with_street_light",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 126
+    },
+    {
+      "item": "eln:12.5kv_three_phase_fused_underground_feeder_with_street_light",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 126
+    },
+    {
+      "item": "eln:nautical_pier_bollard_light",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 438
+    },
+    {
+      "item": "eln:nautical_pier_bollard_light",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 438
+    },
+    {
+      "item": "eln:marine_pier_bulkhead_light",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 152
+    },
+    {
+      "item": "eln:marine_pier_bulkhead_light",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 152
+    },
+    {
+      "item": "eln:harbor_gooseneck_pier_light",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 190
+    },
+    {
+      "item": "eln:harbor_gooseneck_pier_light",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 190
+    },
+    {
+      "item": "eln:pier_lantern_post_light",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 396
+    },
+    {
+      "item": "eln:pier_lantern_post_light",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 396
+    },
+    {
+      "item": "eln:low_profile_dock_light",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 18
+    },
+    {
+      "item": "eln:low_profile_dock_light",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 18
+    },
+    {
+      "item": "eln:louvered_walkway_bollard",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 438
+    },
+    {
+      "item": "eln:louvered_walkway_bollard",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 438
+    },
+    {
+      "item": "eln:shielded_walkway_light",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 168
+    },
+    {
+      "item": "eln:shielded_walkway_light",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 168
+    },
+    {
+      "item": "eln:modern_blade_walkway_light",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 110
+    },
+    {
+      "item": "eln:modern_blade_walkway_light",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 110
+    },
+    {
+      "item": "eln:mushroom_walkway_light",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 232
+    },
+    {
+      "item": "eln:mushroom_walkway_light",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 232
+    },
+    {
+      "item": "eln:arched_walkway_light",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 189
+    },
+    {
+      "item": "eln:arched_walkway_light",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 189
+    },
+    {
+      "item": "eln:recessed_brick_patio_wall_light",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 18
+    },
+    {
+      "item": "eln:recessed_brick_patio_wall_light",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 18
+    },
+    {
+      "item": "eln:round_stone_wall_light",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 138
+    },
+    {
+      "item": "eln:round_stone_wall_light",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 138
+    },
+    {
+      "item": "eln:slotted_patio_wall_light",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 42
+    },
+    {
+      "item": "eln:slotted_patio_wall_light",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 42
+    },
+    {
+      "item": "eln:recessed_square_patio_wall_light",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 18
+    },
+    {
+      "item": "eln:recessed_square_patio_wall_light",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 18
+    },
+    {
+      "item": "eln:stone_wall_wash_light",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 42
+    },
+    {
+      "item": "eln:stone_wall_wash_light",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 42
+    },
+    {
+      "item": "eln:compact_side_entry_service_mast",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 156
+    },
+    {
+      "item": "eln:compact_side_entry_service_mast",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 156
+    },
+    {
+      "item": "eln:through_roof_service_mast",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 150
+    },
+    {
+      "item": "eln:through_roof_service_mast",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 150
+    },
+    {
+      "item": "eln:gooseneck_service_mast",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 156
+    },
+    {
+      "item": "eln:gooseneck_service_mast",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 156
+    },
+    {
+      "item": "eln:electric_washing_machine",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 1102
+    },
+    {
+      "item": "eln:electric_washing_machine",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 1102
+    },
+    {
+      "item": "eln:electric_dryer",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 1078
+    },
+    {
+      "item": "eln:electric_dryer",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 1078
+    },
+    {
+      "item": "eln:modern_fireplace_tv_stand",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 60
+    },
+    {
+      "item": "eln:modern_fireplace_tv_stand",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 60
+    },
+    {
+      "item": "eln:farmhouse_fireplace_tv_stand",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 72
+    },
+    {
+      "item": "eln:farmhouse_fireplace_tv_stand",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 72
+    },
+    {
+      "item": "eln:corner_fireplace_tv_stand",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 66
+    },
+    {
+      "item": "eln:corner_fireplace_tv_stand",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 66
+    },
+    {
+      "item": "eln:north_american_meter_base",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 1320
+    },
+    {
+      "item": "eln:north_american_meter_base",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 1320
+    },
+    {
+      "item": "eln:north_american_meter_base",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 1320
+    },
+    {
+      "item": "eln:north_american_meter_base",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 1320
+    },
+    {
+      "item": "eln:69_kv_steel_transmission_pole",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 3128
+    },
+    {
+      "item": "eln:69_kv_steel_transmission_pole",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 3128
+    },
+    {
+      "item": "eln:230_kv_steel_transmission_tower",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 4136
+    },
+    {
+      "item": "eln:230_kv_steel_transmission_tower",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 4136
+    },
+    {
+      "item": "eln:three_phase_utility_pole",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 1084
+    },
+    {
+      "item": "eln:three_phase_utility_pole",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 1084
+    },
+    {
+      "item": "eln:single_phase_utility_pole",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 628
+    },
+    {
+      "item": "eln:single_phase_utility_pole",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 628
+    },
+    {
+      "item": "eln:utility_pole_twin_led_street_light",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 509
+    },
+    {
+      "item": "eln:utility_pole_twin_led_street_light",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 509
+    },
+    {
+      "item": "eln:120_240v_secondary_utility_pole",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 394
+    },
+    {
+      "item": "eln:120_240v_secondary_utility_pole",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 394
+    },
+    {
+      "item": "eln:single_pole_contactor",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 234
+    },
+    {
+      "item": "eln:single_pole_contactor",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 234
+    },
+    {
+      "item": "eln:three_pole_contactor",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 378
+    },
+    {
+      "item": "eln:three_pole_contactor",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 378
+    },
+    {
+      "item": "eln:two_pole_changeover_relay",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 378
+    },
+    {
+      "item": "eln:two_pole_changeover_relay",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 378
+    },
+    {
+      "item": "eln:four_pole_changeover_relay",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 594
+    },
+    {
+      "item": "eln:four_pole_changeover_relay",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 594
+    },
+    {
+      "item": "eln:solid_state_relay",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 216
+    },
+    {
+      "item": "eln:solid_state_relay",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 216
+    },
+    {
+      "item": "eln:three_pole_solid_state_relay",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 360
+    },
+    {
+      "item": "eln:three_pole_solid_state_relay",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 360
+    },
+    {
+      "item": "eln:ceiling_color_segregated_cable_tray",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 180
+    },
+    {
+      "item": "eln:ceiling_color_segregated_cable_tray",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 180
+    },
+    {
+      "item": "eln:ceiling_color_segregated_cable_tray",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 180
+    },
+    {
+      "item": "eln:ceiling_color_segregated_cable_tray",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 180
+    },
+    {
+      "item": "eln:ceiling_color_segregated_cable_tray",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 180
+    },
+    {
+      "item": "eln:ceiling_color_segregated_cable_tray",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 180
+    },
+    {
+      "item": "eln:wireless_paddle_switch",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 46
+    },
+    {
+      "item": "eln:wireless_paddle_switch",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 46
+    }
+  ],
+  "clicks": 2,
+  "clickVolume": 0.15125315,
+  "terrainBodies": 58,
+  "sections": 25,
+  "version": "3.0.51",
+  "minecraft": "1.21.1",
+  "neoforge": "21.1.249",
+  "sodium": "0.8.13",
+  "iris": "1.8.14-beta.1",
+  "shaderpack": "BSL v10.1.8",
+  "distant_horizons": "3.3.3",
+  "renderer": "Mesa llvmpipe on Xorg :99; correctness check, not an FPS benchmark",
+  "command": "JAVA_TOOL_OPTIONS=\"$JAVA_TOOL_OPTIONS -Deln.outdoorChecks=true\" ./gradlew --no-daemon --max-workers=2 generateLangFiles runClient",
+  "screenshots": [
+    "distribution-insulators.png",
+    "twin-secondary.png",
+    "switchgear.png"
+  ]
+}

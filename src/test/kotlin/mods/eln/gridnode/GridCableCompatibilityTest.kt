@@ -125,9 +125,16 @@ class GridCableCompatibilityTest {
             val b = element(bDesc, 256 + j * 32)
             for (facing in listOf(Direction.XN, Direction.XP, Direction.ZN, Direction.ZP)) {
                 a.front = facing; b.front = facing.inverse
-                val aSides = Direction.values().filter { a.getGridElectricalLoad(it) != null }
-                val bSides = Direction.values().filter { b.getGridElectricalLoad(it) != null }
-                assertTrue(aSides.isNotEmpty() && bSides.isNotEmpty())
+                val aSides = Direction.values().filter { a.gridLoads(it.int).isNotEmpty() }
+                val bSides = Direction.values().filter { b.gridLoads(it.int).isNotEmpty() }
+                if(aSides.isEmpty() || bSides.isEmpty()) {
+                    // Modern LV-only equipment deliberately retires the legacy Direction/HV terminals.
+                    for(sa in Direction.values())for(sb in Direction.values()) {
+                        rejects { GridLink.validateNewLink(a,b,sa,sb,hv(),6) }
+                        rejects { GridLink.validateNewLink(b,a,sb,sa,hv(),6) }
+                    }
+                    continue
+                }
                 if(!a.allowsNewGridLinks || !b.allowsNewGridLinks) {
                     rejects { GridLink.validateNewLink(a,b,aSides.first(),bSides.first(),hv(),6) };continue
                 }
@@ -149,8 +156,8 @@ class GridCableCompatibilityTest {
     @Test fun directApiCannotBypassSignalDamageAndSpanValidation() {
         val a = element(devices().first(), 0)
         val b = element(devices().last(), 6)
-        val sa = Direction.values().first { a.getGridElectricalLoad(it) != null }
-        val sb = Direction.values().first { b.getGridElectricalLoad(it) != null }
+        val sa = Direction.values().first { a.gridLoads(it.int).isNotEmpty() }
+        val sb = Direction.values().first { b.gridLoads(it.int).isNotEmpty() }
         val signal = cables().first { it.signalWire }
         for (cable in listOf(signal, checkNotNull(hv().meltedDescriptor))) {
             rejects { GridLink.validateNewLink(a, b, sa, sb, cable, 6) }

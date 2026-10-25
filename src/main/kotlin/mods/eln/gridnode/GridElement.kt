@@ -219,6 +219,8 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
         }
     }
 
+    /** Device migrations may retire a saved terminal without wiring its old HV span into LV. */
+    open fun acceptsSavedGridTerminal(terminal: Int)=true
     abstract fun getGridElectricalLoad(side: Direction): ElectricalLoad?
 
     /** Terminals below 6 retain their legacy Direction encoding in existing saves. */

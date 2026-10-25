@@ -1530,12 +1530,15 @@ object TransparentNodeRegistration {
             transparentNodeItem.addDescriptor(28+i+(125 shl 6),mods.eln.utility.HouseServiceDescriptor(false,mast=style))
         }
         transparentNodeItem.addDescriptor(31+(125 shl 6),mods.eln.utility.ColorCableTrayDescriptor())
+        mods.eln.transparentnode.switchgear.SwitchgearKind.entries.forEach { kind->
+            transparentNodeItem.addDescriptor(kind.subId+(125 shl 6),mods.eln.transparentnode.switchgear.SwitchgearDescriptor(kind))
+        }
         mods.eln.utility.TransmissionKind.entries.forEach { kind ->
             transparentNodeItem.addDescriptor(kind.subId+(125 shl 6),mods.eln.utility.TransmissionDescriptor(kind))
         }
         // 55/56 are the strip/disconnect; 58/59 are fairy strings; 60 is the mini fridge.
         // Appended tap/light variants use 125:22/23 (124-relative offsets 86/87).
-        val poleSubIds=intArrayOf(34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,53,54,57,86,87,96,97,98,99,100)
+        val poleSubIds=intArrayOf(34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,53,54,57,86,87,96,97,98,99,100,13)
         require(poleSubIds.size==mods.eln.utility.DistributionKind.entries.size)
         mods.eln.utility.DistributionKind.entries.forEachIndexed { i,kind -> transparentNodeItem.addDescriptor(poleSubIds[i]+(124 shl 6),mods.eln.utility.DistributionPoleDescriptor(kind)) }
         transparentNodeItem.addDescriptor(58+(124 shl 6),mods.eln.transparentnode.festive.FairyLightsDescriptor(TR_NAME(I18N.Type.NONE,"White Fairy Lights on Green Wire"),false))
@@ -1665,9 +1668,7 @@ object TransparentNodeRegistration {
                 setCreativeTab(Eln.creativeTabMachines)
             })
         transparentNodeItem.addDescriptor(12+(124 shl 6),
-            UtilityStreetLightDescriptor(TR_NAME(I18N.Type.NONE,"Utility Pole Cobrahead Street Light"),mods.eln.transparentnode.utilitylight.PoleLampStyle.COBRAHEAD))
-        transparentNodeItem.addDescriptor(13+(124 shl 6),
-            UtilityStreetLightDescriptor(TR_NAME(I18N.Type.NONE,"Utility Pole Twin LED Street Light"),mods.eln.transparentnode.utilitylight.PoleLampStyle.TWIN_LED))
+            UtilityStreetLightDescriptor(TR_NAME(I18N.Type.NONE,"Utility Pole Cobrahead Street Light"),mods.eln.transparentnode.utilitylight.PoleLampStyle.COBRAHEAD).apply { hideFromCreative() })
         transparentNodeItem.addDescriptor(14+(124 shl 6),
             mods.eln.transparentnode.standby.BackupDescriptor(TR_NAME(I18N.Type.NONE,"Wall-mounted Automatic Transfer Switch"),false,true).apply {
                 setCreativeTab(Eln.creativeTabPowerElectronics)
@@ -1716,7 +1717,7 @@ object TransparentNodeRegistration {
         }
         // New sub-IDs only: existing poles, towers and switches retain their saved identities.
         transparentNodeItem.addDescriptor(9 + (id shl 6),
-            UtilityStreetLightDescriptor(TR_NAME(I18N.Type.NONE, "Utility Pole Street Light")))
+            UtilityStreetLightDescriptor(TR_NAME(I18N.Type.NONE, "Utility Pole Street Light")).apply { hideFromCreative() })
         transparentNodeItem.addDescriptor(10 + (id shl 6),
             StepDownUnitDescriptor(TR_NAME(I18N.Type.NONE, "Mains Step-down Unit")).apply {
                 setCreativeTab(Eln.creativeTabPowerElectronics)

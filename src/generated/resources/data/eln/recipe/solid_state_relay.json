@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "eln:silicon_wafer"
+    },
+    "I": {
+      "item": "eln:iron_plate"
+    },
+    "P": {
+      "item": "minecraft:iron_nugget"
+    },
+    "R": {
+      "item": "eln:5v_control_relay_10a"
+    },
+    "W": {
+      "item": "eln:copper_cable"
+    }
+  },
+  "pattern": [
+    " C ",
+    "PRP",
+    "IWI"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:solid_state_relay"
+  }
+}

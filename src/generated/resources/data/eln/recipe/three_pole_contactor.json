@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": {
+      "item": "eln:iron_plate"
+    },
+    "R": {
+      "item": "eln:single_pole_contactor"
+    },
+    "W": {
+      "item": "eln:copper_cable"
+    }
+  },
+  "pattern": [
+    "RRR",
+    "PWP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:three_pole_contactor"
+  }
+}
