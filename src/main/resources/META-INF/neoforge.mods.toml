@@ -52,5 +52,13 @@ versionRange="[${kffVersion},)"
 ordering="BEFORE"
 side="BOTH"
 
+# The power bridge uses CEE's supported FE boundary; no hard class dependency.
+[[dependencies.${modId}]]
+modId="electroenergetics"
+type="optional"
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
+
 [[mixins]]
 config="eln.compat.mixins.json"

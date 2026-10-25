@@ -1,0 +1,61 @@
+{
+  "tests": 921,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "version": "3.0.52",
+  "suites": 224,
+  "command": "./gradlew --no-daemon --max-workers=2 test generateLangFiles runData",
+  "target_suites": [
+    {
+      "name": "mods.eln.transparentnode.firealarm.AlarmStateTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-25T18:03:53.839Z",
+      "hostname": "67293bf35eff",
+      "time": "0.008"
+    },
+    {
+      "name": "mods.eln.utility.insulator.LineInsulatorTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-25T18:06:35.478Z",
+      "hostname": "67293bf35eff",
+      "time": "0.025"
+    },
+    {
+      "name": "mods.eln.integration.electroenergetics.CeeEnergyBudgetTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-25T18:03:30.387Z",
+      "hostname": "67293bf35eff",
+      "time": "0.002"
+    },
+    {
+      "name": "mods.eln.gridnode.GridCableCompatibilityTest",
+      "tests": "9",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-25T18:03:29.588Z",
+      "hostname": "67293bf35eff",
+      "time": "0.767"
+    },
+    {
+      "name": "mods.eln.utility.UtilityServiceInteractionTest",
+      "tests": "5",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-25T18:06:35.467Z",
+      "hostname": "67293bf35eff",
+      "time": "0.01"
+    }
+  ]
+}

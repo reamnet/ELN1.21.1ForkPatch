@@ -55,6 +55,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.49` | — | Add 69/230 kV transmission and riser equipment, substation transformers/disconnects, fused-tap light poles, adjustable warehouse suspension, 240 V lamp cords, 10-30 dryer connectors, covered-cable rain blocking, optional DH distant objects and remove external analytics |
 | `v3.0.50` | — | Add pier/walkway/stone-wall lighting, four larger standby generators, fused underground service equipment, ceiling color cable trays and mast styles; correct insulators, meter glass, washer/dryer roofs and sounds; reduce precise probe validation work |
 | `v3.0.51` | — | Match top-mounted 12.5 kV insulators to A/C; retire legacy lamp poles and convert the twin pole to LV-only; add contactors, multi-contact NO/NC relays and solid-state relays |
+| `v3.0.52` | — | Add six-face single-conductor insulators and cable-feed versions, a complete channel/wired fire alarm system, and an energy-accounted ELN to CEE bridge |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`
@@ -67,7 +68,7 @@ release assets remain available with their original filenames.
 `modVersion` in `gradle.properties` is the version source for the jar filename,
 NeoForge metadata and the in-game version. Increment it when preparing the next
 update and create the matching `vX.Y.Z` source tag. For unpublished experiments,
-use an explicit override such as `-PmodVersion=3.0.51-local.1`.
+use an explicit override such as `-PmodVersion=3.0.52-local.1`.
 
 Build with `./gradlew build` to retain previous versioned jars in `build/libs/`.
 `./gradlew clean` removes that directory, and recompiling the same version

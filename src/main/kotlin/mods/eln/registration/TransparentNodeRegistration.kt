@@ -1530,6 +1530,13 @@ object TransparentNodeRegistration {
             transparentNodeItem.addDescriptor(28+i+(125 shl 6),mods.eln.utility.HouseServiceDescriptor(false,mast=style))
         }
         transparentNodeItem.addDescriptor(31+(125 shl 6),mods.eln.utility.ColorCableTrayDescriptor())
+        transparentNodeItem.addDescriptor(60+(125 shl 6),mods.eln.integration.electroenergetics.CeeBridgeDescriptor())
+        mods.eln.transparentnode.firealarm.AlarmKind.entries.forEach { kind->
+            transparentNodeItem.addDescriptor(kind.subId+(125 shl 6),mods.eln.transparentnode.firealarm.AlarmDescriptor(kind))
+        }
+        mods.eln.utility.insulator.InsulatorVoltage.entries.forEachIndexed { i,voltage->
+            for(feed in listOf(false,true))transparentNodeItem.addDescriptor(43+i*2+(if(feed)1 else 0)+(125 shl 6),mods.eln.utility.insulator.LineInsulatorDescriptor(voltage,feed))
+        }
         mods.eln.transparentnode.switchgear.SwitchgearKind.entries.forEach { kind->
             transparentNodeItem.addDescriptor(kind.subId+(125 shl 6),mods.eln.transparentnode.switchgear.SwitchgearDescriptor(kind))
         }

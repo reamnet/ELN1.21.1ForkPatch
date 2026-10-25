@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_3.2_kv_line_insulator": {
+      "conditions": {
+        "items": [
+          {
+            "items": "eln:3.2_kv_line_insulator"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "eln:3.2_kv_cable_feed_insulator"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_3.2_kv_line_insulator"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "eln:3.2_kv_cable_feed_insulator"
+    ]
+  }
+}

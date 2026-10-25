@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "eln:12.5_kv_line_insulator"
+    },
+    "C": {
+      "item": "minecraft:quartz_block"
+    },
+    "I": {
+      "item": "eln:iron_plate"
+    },
+    "P": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "pattern": [
+    "ICI",
+    "PBP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:69_kv_line_insulator"
+  }
+}

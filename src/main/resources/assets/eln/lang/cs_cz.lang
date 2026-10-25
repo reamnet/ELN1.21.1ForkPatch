@@ -62,6 +62,7 @@ Dusk\:_Manual=Dusk: Manual
 East=East
 Efficiency=Účinnost
 Electrical_cable_slot=Slot pro elektrický kabel
+Enabled=Enabled
 End_of_life=Konec životnosti
 Energized=Energized
 Energy=Energie
@@ -207,9 +208,11 @@ Specify_the_channel=Určete kanál
 Speed=Rychlost
 Standby_Gasoline_Generator.name=Standby Gasoline Generator
 State=Stav
+Stored_energy=Stored energy
 Stored_energy\:_%1$J_(%2$%)=Uložená energie: %1$J (%2$%)
 Subsystem_Matrix_Size=Velikost matice subsystému
 Supply=Supply
+Supply\:_%1$;_draw\:_%2$=Supply: %1$; draw: %2$
 Supply\:_%1$_V_/_%2$_W=Supply: %1$ V / %2$ W
 Switched_off=Switched off
 Target\:_%1$_C=Target: %1$ C
@@ -976,6 +979,35 @@ Create_casing\:_input._Teal_bearing\:_ELN_output.=Create casing: input. Teal bea
 Four_side_terminals\:_redstone_or_signal_reset_pulse.=Four side terminals: redstone or signal reset pulse.
 Industrial_Create_Shaft_Adapter.name=Industrial Create Shaft Adapter
 Output_follows_the_clicked_face;_sneak_to_reverse.=Output follows the clicked face; sneak to reverse.
+
+# src/main/kotlin/mods/eln/integration/electroenergetics/CeeBridgeClient.kt
+95_percent_efficiency;_uses_CEE's_configured_watts_per_FE/tick=95 percent efficiency; uses CEE's configured watts per FE/tick
+Apply_input_settings=Apply input settings
+Buffer\:_%1$_kJ=Buffer: %1$ kJ
+Buffer_full;_waiting_for_CEE_load=Buffer full; waiting for CEE load
+CEE_Converter\:_source_mode;_wire_its_terminals=CEE Converter: source mode; wire its terminals
+CEE_configuration_unavailable=CEE configuration unavailable
+CEE_scale\:_%1$_W_per_FE/t=CEE scale: %1$ W per FE/t
+Converts_real_ELN_input_energy_for_Create_Electro_Energetics=Converts real ELN input energy for Create Electro Energetics
+Create_Electro_Energetics_is_not_installed=Create Electro Energetics is not installed
+ELN_to_CEE_Power_Bridge=ELN to CEE Power Bridge
+ELN_to_CEE_Power_Bridge.name=ELN to CEE Power Bridge
+Input\:_%1$_/_%2$=Input: %1$ / %2$
+Input_overvoltage;_check_nominal_setting=Input overvoltage; check nominal setting
+Input_watts=Input watts
+Nominal_V=Nominal V
+Nominal_amps=Nominal amps
+Optional_integration;_does_not_require_CEE_to_load_Electrical_Age=Optional integration; does not require CEE to load Electrical Age
+Orange_face_to_CEE_Converter's_back=Orange face to CEE Converter's back
+Output_limit\:_%1$=Output limit: %1$
+Place_a_CEE_Converter_against_the_orange_face,_set_it_to_source_mode,_and_point_its_terminals_outward=Place a CEE Converter against the orange face, set it to source mode, and point its terminals outward
+Ready_to_supply_CEE_converter=Ready to supply CEE converter
+Set_nominal_ELN_input_voltage_and_power_in_the_menu;_input_power_follows_voltage_squared=Set nominal ELN input voltage and power in the menu; input power follows voltage squared
+The_CEE_Converter_pulls_FE_from_its_back;_connect_its_native_CEE_terminals_to_the_destination_network=The CEE Converter pulls FE from its back; connect its native CEE terminals to the destination network
+Waiting_for_ELN_input_power=Waiting for ELN input power
+
+# src/main/kotlin/mods/eln/integration/electroenergetics/CeeBridgeElement.kt
+%1$_J=%1$ J
 
 # src/main/kotlin/mods/eln/item/BrushDescriptor.kt
 Brush_is_dry=Štětec je suchý
@@ -2601,7 +2633,6 @@ Cycle_ignored,_require_signal,_and_require_no_signal.=Cycle ignored, require sig
 Details=Details
 Disable_the_motor_and_pump._Passive_cooling_remains.=Disable the motor and pump. Passive cooling remains.
 Dry=Dry
-Enabled=Enabled
 Evaporative_Heat_Sink=Evaporative Heat Sink
 Fan_limit\:_%1$%=Fan limit: %1$%
 Heat\:_copper_sides_|_Power\:_front/rear_|_Water\:_top/bottom=Heat: copper sides | Power: front/rear | Water: top/bottom
@@ -2665,6 +2696,49 @@ Use_a_120_V_or_240_V_cord,_or_set_a_wireless_lamp_supply_channel=Use a 120 V or 
 # src/main/kotlin/mods/eln/transparentnode/festive/FestiveClient.kt
 Holiday_lighting=Holiday lighting
 Set_wireless_channel=Set wireless channel
+
+# src/main/kotlin/mods/eln/transparentnode/firealarm/AlarmClient.kt
+120_V_panel_with_24_Wh_rechargeable_backup;_starts_empty=120 V panel with 24 Wh rechargeable backup; starts empty
+Active\:_%1$=Active: %1$
+Adjustable_heat_threshold;_detects_nearby_radiant_heat_and_room_temperature=Adjustable heat threshold; detects nearby radiant heat and room temperature
+Alarm=Alarm
+Backup\:_%1$_Wh;_linked_devices\:_%2$=Backup: %1$ Wh; linked devices: %2$
+Channel_(blank_for_wired-only)=Channel (blank for wired-only)
+Channel_power_from_panel,_or_wired_24_V=Channel power from panel, or wired 24 V
+Clear_active_detectors_and_pulled_stations_before_reset=Clear active detectors and pulled stations before reset
+Detection_radius\:_%1$_m=Detection radius: %1$ m
+Detects_fire_and_lit_campfire_smoke_through_connected_air,_not_solid_walls=Detects fire and lit campfire smoke through connected air, not solid walls
+Forget_missing=Forget missing
+Heat\:_%1$_C;_threshold\:_%2$_C=Heat: %1$ C; threshold: %2$ C
+No_power=No power
+Normal=Normal
+Outer_face\:_left_signal_input,_right_signal_output;_side_terminals_accept_24_V=Outer face: left signal input, right signal output; side terminals accept 24 V
+Panel_silence_stops_sound;_strobes_remain_active_until_reset=Panel silence stops sound; strobes remain active until reset
+Powered_by_its_linked_panel,_or_an_optional_wired_24_V_supply=Powered by its linked panel, or an optional wired 24 V supply
+Powers_linked_devices;_latching_alarm,_silence,_reset_and_test_controls=Powers linked devices; latching alarm, silence, reset and test controls
+Pull_/_reset_station=Pull / reset station
+Reset_alarm=Reset alarm
+Right-click_empty-handed_to_pull;_sneak-right-click_for_setup_and_reset=Right-click empty-handed to pull; sneak-right-click for setup and reset
+Save_names=Save names
+Set_heat_threshold=Set heat threshold
+Shared_channel_within_128_m,_or_use_ELN_signal_wires=Shared channel within 128 m, or use ELN signal wires
+Side_power_terminals;_outer_face\:_left_trigger,_right_alarm,_top_trouble,_bottom_reset=Side power terminals; outer face: left trigger, right alarm, top trouble, bottom reset
+Silence_/_resound=Silence / resound
+Test_for_10_s=Test for 10 s
+Trouble=Trouble
+Zone_/_device_label=Zone / device label
+
+# src/main/kotlin/mods/eln/transparentnode/firealarm/AlarmElement.kt
+Measured_temperature\:_%1$_C=Measured temperature: %1$ C
+
+# src/main/kotlin/mods/eln/transparentnode/firealarm/AlarmKind.kt
+Fire_Alarm_Bell.name=Fire Alarm Bell
+Fire_Alarm_Control_Panel.name=Fire Alarm Control Panel
+Fire_Alarm_Heat_Detector.name=Fire Alarm Heat Detector
+Fire_Alarm_Horn_Strobe.name=Fire Alarm Horn Strobe
+Fire_Alarm_Pull_Station.name=Fire Alarm Pull Station
+Fire_Alarm_Smoke_Detector.name=Fire Alarm Smoke Detector
+Fire_Alarm_Strobe.name=Fire Alarm Strobe
 
 # src/main/kotlin/mods/eln/transparentnode/floodlight/FloodlightDescriptor.kt
 A_powerful_lamp_that_specializes_in\nthe_illumination_of_large_spaces.\nUses_inserted_light_bulbs.=Výkonná lampa specializovaná na\nosvětlení velkých prostor.\nPoužívá vložené žárovky.
@@ -3019,7 +3093,6 @@ Programmable_output\:_1_to_3200_V;_up_to_10000_W=Programmable output: 1 to 3200 
 # src/main/kotlin/mods/eln/transparentnode/ups/UpsElement.kt
 %1$/48_(%2$_active)=%1$/48 (%2$ active)
 Installed_batteries=Installed batteries
-Stored_energy=Stored energy
 UPS_status=UPS status
 
 # src/main/kotlin/mods/eln/transparentnode/ups/UpsLargeCell.kt
@@ -3342,6 +3415,33 @@ Fits_the_North_American_Meter_Base;_records_imported_and_exported_energy=Fits th
 Pole_Fuse_Link.name=Pole Fuse Link
 Right-click_a_fused_pole_to_replace_its_first_blown_link=Right-click a fused pole to replace its first blown link
 Smart_Digital_Service_Meter.name=Smart Digital Service Meter
+
+# src/main/kotlin/mods/eln/utility/insulator/LineInsulator.kt
+12.5_kV_Cable_Feed_Insulator.name=12.5 kV Cable Feed Insulator
+12.5_kV_Line_Insulator.name=12.5 kV Line Insulator
+230_kV_Cable_Feed_Insulator.name=230 kV Cable Feed Insulator
+230_kV_Line_Insulator.name=230 kV Line Insulator
+240_V_service=240 V service
+3.2_kV_Cable_Feed_Insulator.name=3.2 kV Cable Feed Insulator
+3.2_kV_Line_Insulator.name=3.2 kV Line Insulator
+69_kV_Cable_Feed_Insulator.name=69 kV Cable Feed Insulator
+69_kV_Line_Insulator.name=69 kV Line Insulator
+800_V_Cable_Feed_Insulator.name=800 V Cable Feed Insulator
+800_V_Line_Insulator.name=800 V Line Insulator
+Circuit=Circuit
+General_single_circuit=General single circuit
+L1_120_V_service=L1 120 V service
+L2_120_V_service=L2 120 V service
+
+# src/main/kotlin/mods/eln/utility/insulator/LineInsulatorClient.kt
+Base_cable_terminals_connect_directly_to_the_same_conductor=Base cable terminals connect directly to the same conductor
+Connect_spans_at_the_outer_clamp;_no_voltage_conversion=Connect spans at the outer clamp; no voltage conversion
+Disconnect_spans_before_changing_circuit=Disconnect spans before changing circuit
+Insulators_need_a_solid_mounting_face=Insulators need a solid mounting face
+Rated_insulation\:_%1$_V;_span_limit\:_%2$_m=Rated insulation: %1$ V; span limit: %2$ m
+Single_Circuit_Insulator=Single Circuit Insulator
+Single_conductor;_mount_on_floors,_walls_or_ceilings=Single conductor; mount on floors, walls or ceilings
+Use_for_120,_240,_480_or_600_V;_select_a_service_circuit_for_modern_LV_poles=Use for 120, 240, 480 or 600 V; select a service circuit for modern LV poles
 
 # src/main/kotlin/mods/eln/wiki/CircuitLessons.kt
 1._Hold_a_Multimeter_or_AllMeter._Normal_right-click_keeps_the_existing_machine_readings._Sneak-click_a_connector_to_select_reference_A,_then_sneak-click_a_second_connector_B.=1. Hold a Multimeter or AllMeter. Normal right-click keeps the existing machine readings. Sneak-click a connector to select reference A, then sneak-click a second connector B.

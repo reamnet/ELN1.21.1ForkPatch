@@ -1,0 +1,341 @@
+{
+  "passed": [
+    "All ten insulator variants place on all six mounting faces with matching conductor endpoints",
+    "Aiming the L2 rack connects a single-conductor LV insulator without shorting the service bundle",
+    "230 kV spans and direct fixed-cable feed carry real power; wired-only alarms work at 24 V",
+    "Heat detects the sealed fire while smoke is blocked by glass",
+    "Opening the smoke path activates the smoke detector",
+    "Pull station latches the panel; silence retains strobes; reset refuses active sources",
+    "Panel backup energy decreases during mains loss and signals trouble",
+    "Real CEE 1.1.4 Converter pulls the bridge's FE and supplies a native wired CEE resistor",
+    "All new static bodies and all 18 new item previews are baked"
+  ],
+  "measurements": {
+    "ceeResistorTemperature": 2817.3591,
+    "ceeScaleWattsPerFeTick": 34.0,
+    "bridgeInputJoules": 217000.0,
+    "exportedJoules": 6764.300000000092,
+    "bufferJoules": 199260.49999999924,
+    "lossJoules": 10975.199999999197
+  },
+  "previews": [
+    {
+      "item": "eln:800_v_line_insulator",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 210
+    },
+    {
+      "item": "eln:800_v_line_insulator",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 210
+    },
+    {
+      "item": "eln:800_v_cable_feed_insulator",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 216
+    },
+    {
+      "item": "eln:800_v_cable_feed_insulator",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 216
+    },
+    {
+      "item": "eln:3.2_kv_line_insulator",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 270
+    },
+    {
+      "item": "eln:3.2_kv_line_insulator",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 270
+    },
+    {
+      "item": "eln:3.2_kv_cable_feed_insulator",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 276
+    },
+    {
+      "item": "eln:3.2_kv_cable_feed_insulator",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 276
+    },
+    {
+      "item": "eln:12.5_kv_line_insulator",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 270
+    },
+    {
+      "item": "eln:12.5_kv_line_insulator",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 270
+    },
+    {
+      "item": "eln:12.5_kv_cable_feed_insulator",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 276
+    },
+    {
+      "item": "eln:12.5_kv_cable_feed_insulator",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 276
+    },
+    {
+      "item": "eln:69_kv_line_insulator",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 414
+    },
+    {
+      "item": "eln:69_kv_line_insulator",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 414
+    },
+    {
+      "item": "eln:69_kv_cable_feed_insulator",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 420
+    },
+    {
+      "item": "eln:69_kv_cable_feed_insulator",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 420
+    },
+    {
+      "item": "eln:230_kv_line_insulator",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 414
+    },
+    {
+      "item": "eln:230_kv_line_insulator",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 414
+    },
+    {
+      "item": "eln:230_kv_cable_feed_insulator",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 420
+    },
+    {
+      "item": "eln:230_kv_cable_feed_insulator",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 420
+    },
+    {
+      "item": "eln:120_240v_secondary_utility_pole",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 394
+    },
+    {
+      "item": "eln:120_240v_secondary_utility_pole",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 394
+    },
+    {
+      "item": "eln:fire_alarm_control_panel",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 42
+    },
+    {
+      "item": "eln:fire_alarm_control_panel",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 42
+    },
+    {
+      "item": "eln:fire_alarm_pull_station",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 30
+    },
+    {
+      "item": "eln:fire_alarm_pull_station",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 30
+    },
+    {
+      "item": "eln:fire_alarm_horn_strobe",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 54
+    },
+    {
+      "item": "eln:fire_alarm_horn_strobe",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 54
+    },
+    {
+      "item": "eln:fire_alarm_bell",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 182
+    },
+    {
+      "item": "eln:fire_alarm_bell",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 182
+    },
+    {
+      "item": "eln:fire_alarm_strobe",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 24
+    },
+    {
+      "item": "eln:fire_alarm_strobe",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 24
+    },
+    {
+      "item": "eln:fire_alarm_smoke_detector",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 196
+    },
+    {
+      "item": "eln:fire_alarm_smoke_detector",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 196
+    },
+    {
+      "item": "eln:fire_alarm_heat_detector",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 244
+    },
+    {
+      "item": "eln:fire_alarm_heat_detector",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 244
+    },
+    {
+      "item": "eln:eln_to_cee_power_bridge",
+      "context": "GUI",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 156
+    },
+    {
+      "item": "eln:eln_to_cee_power_bridge",
+      "context": "GROUND",
+      "baked": true,
+      "converted": true,
+      "alreadyBaked": false,
+      "quads": 156
+    }
+  ],
+  "version": "3.0.52",
+  "runtime": {
+    "minecraft": "1.21.1",
+    "neoforge": "21.1.249",
+    "create": "6.0.10",
+    "electroenergetics": "1.1.4",
+    "sodium": "0.8.13",
+    "iris": "1.8.14-beta.1",
+    "shader": "BSL v10.1.8",
+    "distant_horizons": "3.3.3",
+    "renderer": "Mesa llvmpipe (correctness checks, not FPS benchmark)"
+  },
+  "command": "-Deln.gridAlarmCeeChecks=true ./gradlew --no-daemon --max-workers=2 -PwithCreate runClient",
+  "energy_balance_error_joules": 1.4551915228366852e-09
+}

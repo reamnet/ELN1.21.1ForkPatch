@@ -24,6 +24,12 @@ class UtilityServiceInteractionTest {
     private fun panel()=BreakerPanelElement(TransparentNode(),
         Eln.transparentNodeItem.subItemList.values.filterIsInstance<BreakerPanelDescriptor>().single())
 
+    @Test fun singleConductorBranchesRetainTheIndividualLowVoltageTiePointInEitherClickOrder() {
+        for(kind in DistributionKind.entries.filterNot { it.underground }) {
+            val p=pole(kind)
+            for(terminal in 40..42)assertEquals(terminal,p.singleGridTerminalForHit(Direction.XN,p.renderedGridCablePoint(terminal,0)),kind.name)
+        }
+    }
     @Test fun aimingAtActualTiePointsSelectsVoltageAndBundlesThreeIndependentPhases() {
         // Underground cabinets use placed cables and deliberately have no overhead tie points.
         for(kind in DistributionKind.entries.filterNot { it.underground }) {

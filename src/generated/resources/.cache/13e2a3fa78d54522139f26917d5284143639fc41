@@ -1,4 +1,4 @@
-// 1.21.1	2026-10-25T07:45:56.05231417	Item Models: eln
+// 1.21.1	2026-10-25T17:38:02.460927659	Item Models: eln
 c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/100_a_pole_fuse.json
 a5ac578ee8f459ff5057195ce2b630f75ac6edbb assets/eln/models/item/100_kw_pole_transformer.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/100a_electrical_breaker.json
@@ -8,6 +8,8 @@ a5ac578ee8f459ff5057195ce2b630f75ac6edbb assets/eln/models/item/10_kw_pole_trans
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/10a_diode.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/10a_electrical_breaker.json
 545dc1ad8561074077d4e11ed76e1d2a30d05598 assets/eln/models/item/10a_lead_fuse.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/12.5_kv_cable_feed_insulator.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/12.5_kv_line_insulator.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/12.5kv_single_phase_fused_underground_feeder.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/12.5kv_single_phase_fused_underground_feeder_with_street_light.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/12.5kv_three_phase_fused_underground_feeder.json
@@ -48,6 +50,8 @@ c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/20_a_pole_fuse.j
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/20a_electrical_breaker.json
 545dc1ad8561074077d4e11ed76e1d2a30d05598 assets/eln/models/item/20a_lead_fuse.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/20a_switch.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/230_kv_cable_feed_insulator.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/230_kv_line_insulator.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/230_kv_steel_transmission_tower.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/230_kv_three_phase_cable_riser_tower.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/230_kv_three_phase_substation_disconnect.json
@@ -89,8 +93,10 @@ c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/2_a_pole_fuse.js
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/2x3_rotating_solar_panel.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/2x3_solar_panel.json
 922ec301cbf0349f32201cd4e7ab42b57d9180e8 assets/eln/models/item/2x_graphite_rods.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/3.2_kv_cable_feed_insulator.json
 f93030a66344007a6cbf214aea03c88a6e9fb436 assets/eln/models/item/3.2_kv_industrial_cord.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/3.2_kv_industrial_outlet.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/3.2_kv_line_insulator.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/3.3v_boost_regulator_chip.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/3.3v_ldo_regulator_chip.json
 c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/30_a_pole_fuse.json
@@ -131,13 +137,17 @@ c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/5v_boost_regulat
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/5v_control_relay_10a.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/5v_ldo_regulator_chip.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/60a_electrical_breaker.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/69_kv_cable_feed_insulator.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/69_kv_line_insulator.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/69_kv_steel_transmission_pole.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/69_kv_three_phase_cable_riser_pole.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/69_kv_three_phase_substation_disconnect.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/69_kv_to_12.5_kv_substation_transformer.json
 a5ac578ee8f459ff5057195ce2b630f75ac6edbb assets/eln/models/item/75_kw_pole_transformer.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/800_v_cable_feed_insulator.json
 f93030a66344007a6cbf214aea03c88a6e9fb436 assets/eln/models/item/800_v_industrial_cord.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/800_v_industrial_outlet.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/800_v_line_insulator.json
 c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/8_a_pole_fuse.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/adjustable_gimbal_recessed_light.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/adjustable_suspended_warehouse_light.json
@@ -443,6 +453,7 @@ d04f067ade578b576a8d6ee73a60214ae9324ec0 assets/eln/models/item/electrical_probe
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/electrical_source.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/electrical_timer.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/electrical_weather_sensor.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/eln_to_cee_power_bridge.json
 b0f3e8f66d06ec3ffaf8401ed262935bb0b1a9c8 assets/eln/models/item/elnprobe.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/energy_meter.json
 fe64e387e1916ca7502d8bd82e07914a597c223b assets/eln/models/item/energyconverter.json
@@ -457,6 +468,13 @@ a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/fabricator.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/farmhouse_fireplace_tv_stand.json
 cbe25243f6276ccec689438109ec97ac0d3dc301 assets/eln/models/item/fast_electrical_drill.json
 72ee6520f271c506d176d32c67ebcaf97f7e1f28 assets/eln/models/item/ferrite_ingot.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/fire_alarm_bell.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/fire_alarm_control_panel.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/fire_alarm_heat_detector.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/fire_alarm_horn_strobe.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/fire_alarm_pull_station.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/fire_alarm_smoke_detector.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/fire_alarm_strobe.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/fixed_shaft.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/flat_electric_cooktop.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/flat_lamp_socket.json

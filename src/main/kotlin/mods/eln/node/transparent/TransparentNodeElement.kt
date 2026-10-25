@@ -196,6 +196,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
     }
 
     open fun getFluidHandler(): ISidedFluidHandler? = null
+    open fun getEnergyStorage(side: net.minecraft.core.Direction?): net.neoforged.neoforge.energy.IEnergyStorage? = null
 
     open fun onNeighborBlockChange() {
         checkCanStay(false)

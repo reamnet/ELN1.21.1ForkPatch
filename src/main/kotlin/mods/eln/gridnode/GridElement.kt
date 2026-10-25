@@ -74,7 +74,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
         }
         val automatic=hit!=null && !entityPlayer.isShiftKeyDown
         var terminal=if(automatic) aimedGridTerminal(side,hit) else selectedGridTerminal(side)
-        val singleTerminal=if(automatic)aimedSingleGridTerminal(side,hit) else terminal
+        val singleTerminal=if(automatic)singleGridTerminalForHit(side,hit) else terminal
         val p = pending[uuid]
         var other: GridElement? = null
         if (p != null) {
@@ -108,9 +108,9 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
         } else {
             var otherTerminal=p!!.terminal
             // Preserve the individual insulator hit in either click order; ABC-to-ABC still bundles all phases.
-            if(automatic && terminal in ServiceTerminals.HV_LINE_BUNDLE..ServiceTerminals.HV_LOAD_BUNDLE && other.gridLoads(otherTerminal).size==1)
+            if(automatic && terminal in ServiceTerminals.BUNDLE..ServiceTerminals.HV_LOAD_BUNDLE && terminal!=51 && other.gridLoads(otherTerminal).size==1)
                 terminal=singleTerminal
-            if(p.automatic && otherTerminal in ServiceTerminals.HV_LINE_BUNDLE..ServiceTerminals.HV_LOAD_BUNDLE && gridLoads(terminal).size==1)
+            if(p.automatic && otherTerminal in ServiceTerminals.BUNDLE..ServiceTerminals.HV_LOAD_BUNDLE && otherTerminal!=51 && gridLoads(terminal).size==1)
                 otherTerminal=p.singleTerminal
             val distance = other.coordinate().trueDistanceTo(this.coordinate())
             val cableLength = Math.ceil(distance).toInt()*gridLoads(terminal).size.coerceAtLeast(1)
@@ -228,6 +228,11 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
     /** Existing saved spans still load; new overhead service stops at the weatherhead. */
     open val allowsNewGridLinks=true
     open fun aimedSingleGridTerminal(side: Direction,localHit: Vec3)=aimedGridTerminal(side,localHit)
+    fun singleGridTerminalForHit(side: Direction,localHit: Vec3): Int {
+        val aimed=aimedSingleGridTerminal(side,localHit)
+        if(aimed!=ServiceTerminals.BUNDLE)return aimed
+        return (40..42).filter { gridLoads(it).size==1 }.minByOrNull { renderedGridCablePoint(it,0).distanceToSqr(localHit) } ?: aimed
+    }
     open fun aimedGridTerminal(side: Direction,localHit: Vec3)=selectedGridTerminal(side)
     open fun gridLoads(terminal: Int): List<ElectricalLoad> = Direction.fromInt(terminal)?.let(::getGridElectricalLoad)?.let(::listOf) ?: emptyList()
     open fun gridCircuitKey(terminal: Int)="LEGACY"
@@ -237,7 +242,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
     open fun gridCablePoint(terminal: Int,wire: Int): Vec3 = getRenderCablePoint(Direction.fromInt(terminal) ?: Direction.XN,wire)
     fun gridRenderAngle(terminal: Int)=if(!alignsPoleSpans)idealRenderingAngle else
         if(PoleSpanAlignment.secondary(terminal))lowVoltageRenderAngle else highVoltageRenderAngle
-    fun renderedGridCablePoint(terminal: Int,wire: Int)=gridCablePoint(terminal,wire)
+    open fun renderedGridCablePoint(terminal: Int,wire: Int)=gridCablePoint(terminal,wire)
         .yRot(Math.toRadians(gridRenderAngle(terminal).toDouble()).toFloat())
 
     // TODO: This should check if the wire isn't passing through blocks.

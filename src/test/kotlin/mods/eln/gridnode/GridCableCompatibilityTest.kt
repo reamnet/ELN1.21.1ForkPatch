@@ -26,6 +26,7 @@ class GridCableCompatibilityTest {
     private val expectedDevices = setOf("Grid DC-DC Converter", "Utility Pole",
         "Utility Pole w/DC-DC Converter", "Transmission Tower", "Direct Utility Pole", "Grid Switch",
         "Utility Pole Street Light", "Utility Pole Cobrahead Street Light", "Utility Pole Twin LED Street Light") +
+        mods.eln.utility.insulator.InsulatorVoltage.entries.flatMap { listOf(it.lineName,it.feedName) } +
         mods.eln.utility.DistributionKind.entries.map { it.title } +
         mods.eln.utility.TransmissionKind.entries.map { it.title } +
         mods.eln.utility.ServiceMastStyle.entries.drop(1).map { it.title } +

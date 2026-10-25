@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "minecraft:white_terracotta"
+    },
+    "I": {
+      "item": "minecraft:iron_nugget"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    " C ",
+    "CIC",
+    " P "
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:800_v_line_insulator"
+  }
+}

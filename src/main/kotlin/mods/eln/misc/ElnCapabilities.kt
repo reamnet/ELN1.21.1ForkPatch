@@ -28,6 +28,9 @@ object ElnCapabilities {
     @JvmStatic
     fun register(event: RegisterCapabilitiesEvent) {
         for (type in listOf(TransparentNodeEntity.TYPE.get(), TransparentNodeEntityWithFluid.TYPE.get())) {
+            event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, type) { entity, side ->
+                (entity.node as? mods.eln.node.transparent.TransparentNode)?.element?.getEnergyStorage(side)
+            }
             event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, type) { entity, side ->
                 if (side != null) SidedInvWrapper(entity as WorldlyContainer, side) else NodeItemHandler(entity)
             }

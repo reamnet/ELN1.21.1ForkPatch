@@ -49,6 +49,18 @@ object UtilityRecipes {
             if(kind.light)addShapelessRecipe(findItemStack(kind.title),base,findItemStack("Basic Lamp Holder"),ItemStack(Items.IRON_INGOT))
             else addRecipe(findItemStack(kind.title),"PFP","CBC","PPP",'P',findItemStack("Iron Plate"),'F',findItemStack("Pole Fuse Link"),'C',findItemStack("Copper Cable"),'B',base)
         }
+        val alarmComponents=listOf(Items.COMPARATOR,Items.LEVER,Items.NOTE_BLOCK,Items.BELL,Items.GLOWSTONE_DUST,Items.OBSERVER,Items.BLAZE_POWDER)
+        mods.eln.transparentnode.firealarm.AlarmKind.entries.forEachIndexed { i,kind->
+            addRecipe(findItemStack(kind.title),"IRI","RCR","IWI",'I',findItemStack("Iron Plate"),'R',ItemStack(Items.REDSTONE),'C',ItemStack(alarmComponents[i]),'W',findItemStack("Signal Cable"))
+        }
+        addRecipe(findItemStack("ELN to CEE Power Bridge"),"ICI","VSV","IMI",'I',findItemStack("Iron Plate"),'C',findItemStack("Copper Cable"),
+            'V',findItemStack("Variable DC-DC Converter"),'S',findItemStack("Silicon Wafer"),'M',findItemStack("Machine Block"))
+        mods.eln.utility.insulator.InsulatorVoltage.entries.forEachIndexed { i,v->
+            if(i==0)addRecipe(findItemStack(v.lineName)," C ","CIC"," P ",'C',ItemStack(Blocks.WHITE_TERRACOTTA),'I',ItemStack(Items.IRON_NUGGET),'P',findItemStack("Iron Plate"))
+            else addRecipe(findItemStack(v.lineName),"ICI","PBP",'I',findItemStack("Iron Plate"),'C',ItemStack(if(v.volts>=69000)Blocks.QUARTZ_BLOCK else Blocks.WHITE_TERRACOTTA),
+                'P',ItemStack(Items.IRON_INGOT),'B',findItemStack(mods.eln.utility.insulator.InsulatorVoltage.entries[i-1].lineName))
+            addShapelessRecipe(findItemStack(v.feedName),findItemStack(v.lineName),findItemStack("Copper Cable"),ItemStack(Items.IRON_NUGGET))
+        }
         mods.eln.transparentnode.switchgear.SwitchgearKind.entries.forEach { kind->
             val previous=when(kind) {
                 mods.eln.transparentnode.switchgear.SwitchgearKind.CONTACTOR_THREE->"Single Pole Contactor"
