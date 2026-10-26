@@ -1,0 +1,45 @@
+{
+  "passed": [
+    "69/230 kV rotated porcelain uploads real Sodium terrain in air-only sections without filler blocks",
+    "Nearby loaded transmission poles and wires have no active DH proxy",
+    "Air-only insulator geometry remains uploaded after flying close",
+    "Distant Horizons supplies transmission silhouettes and thin conductors after normal chunks unload",
+    "Returning to the detailed model restores air-only overhangs without placing blocks"
+  ],
+  "measurements": {
+    "airOnlyOverhangSections": [
+      "SectionPos{x=31, y=5, z=32}",
+      "SectionPos{x=32, y=5, z=32}",
+      "SectionPos{x=34, y=5, z=35}",
+      "SectionPos{x=35, y=5, z=35}",
+      "SectionPos{x=34, y=5, z=31}",
+      "SectionPos{x=33, y=5, z=32}",
+      "SectionPos{x=33, y=6, z=32}",
+      "SectionPos{x=34, y=5, z=32}",
+      "SectionPos{x=37, y=5, z=34}",
+      "SectionPos{x=36, y=5, z=35}",
+      "SectionPos{x=36, y=6, z=35}",
+      "SectionPos{x=37, y=5, z=35}"
+    ]
+  },
+  "distant": {
+    "available": true,
+    "failed": false,
+    "bound": true,
+    "cached": 6,
+    "groups": 6,
+    "active": 0,
+    "pending": 0
+  },
+  "version": "3.0.53",
+  "command": "-Deln.transmissionRenderChecks=true ./gradlew --no-daemon --max-workers=2 runClient",
+  "runtime": {
+    "minecraft": "1.21.1",
+    "neoforge": "21.1.249",
+    "sodium": "0.8.13",
+    "iris": "1.8.14-beta.1",
+    "shader": "BSL v10.1.8",
+    "distant_horizons": "3.3.3",
+    "renderer": "Mesa llvmpipe (correctness, not FPS benchmark)"
+  }
+}

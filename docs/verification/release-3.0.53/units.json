@@ -1,0 +1,59 @@
+{
+  "tests": 923,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "version": "3.0.53",
+  "suites": 224,
+  "command": "./gradlew --no-daemon --max-workers=2 test",
+  "target_suites": [
+    {
+      "name": "mods.eln.client.terrain.TerrainMeshTest",
+      "tests": "8",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T03:11:30.124Z",
+      "hostname": "67293bf35eff",
+      "time": "0.015"
+    },
+    {
+      "name": "mods.eln.client.terrain.DistantGeometryTest",
+      "tests": "5",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T03:11:30.099Z",
+      "hostname": "67293bf35eff",
+      "time": "0.015"
+    },
+    {
+      "name": "mods.eln.lighting.TransmissionAndLightingTest",
+      "tests": "7",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T03:11:31.932Z",
+      "hostname": "67293bf35eff",
+      "time": "0.137"
+    },
+    {
+      "name": "mods.eln.gridnode.OverheadCableMeshTest",
+      "tests": "2",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T03:11:31.029Z",
+      "hostname": "67293bf35eff",
+      "time": "0.002"
+    }
+  ],
+  "final_focused_check": {
+    "tests": 26,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "command": "./gradlew --no-daemon --max-workers=2 test --tests 'mods.eln.client.terrain.*' --tests '*TransmissionAndLightingTest' --tests '*OverheadCableMeshTest'",
+    "suites": 5
+  }
+}

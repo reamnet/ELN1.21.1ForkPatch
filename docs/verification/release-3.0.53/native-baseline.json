@@ -1,0 +1,31 @@
+{
+  "passed": [],
+  "failure": "java.lang.IllegalStateException: Air-only overhang has no uploaded terrain: SectionPos{x=31, y=5, z=32}, flags=0\n\tat TRANSFORMER/eln@3.0.53/mods.eln.devtest.TransmissionRenderChecks.checkEmptySections(TransmissionRenderChecks.kt:70)\n\tat TRANSFORMER/eln@3.0.53/mods.eln.devtest.TransmissionRenderChecks.tick(TransmissionRenderChecks.kt:105)\n\tat MC-BOOTSTRAP/net.neoforged.bus/net.neoforged.bus.EventBus.post(EventBus.java:360)\n\tat MC-BOOTSTRAP/net.neoforged.bus/net.neoforged.bus.EventBus.post(EventBus.java:328)\n\tat TRANSFORMER/neoforge@21.1.249/net.neoforged.neoforge.client.ClientHooks.fireClientTickPost(ClientHooks.java:1077)\n\tat TRANSFORMER/minecraft@1.21.1/net.minecraft.client.Minecraft.tick(Minecraft.java:1927)\n\tat TRANSFORMER/minecraft@1.21.1/net.minecraft.client.Minecraft.runTick(Minecraft.java:1167)\n\tat TRANSFORMER/minecraft@1.21.1/net.minecraft.client.Minecraft.run(Minecraft.java:813)\n\tat TRANSFORMER/minecraft@1.21.1/net.minecraft.client.main.Main.main(Main.java:230)\n\tat java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat MC-BOOTSTRAP/fml_loader@4.0.44/net.neoforged.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:136)\n\tat MC-BOOTSTRAP/fml_loader@4.0.44/net.neoforged.fml.loading.targets.CommonLaunchHandler.clientService(CommonLaunchHandler.java:124)\n\tat MC-BOOTSTRAP/fml_loader@4.0.44/net.neoforged.fml.loading.targets.NeoForgeClientDevLaunchHandler.runService(NeoForgeClientDevLaunchHandler.java:23)\n\tat MC-BOOTSTRAP/fml_loader@4.0.44/net.neoforged.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:118)\n\tat MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30)\n\tat MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53)\n\tat MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71)\n\tat MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.Launcher.run(Launcher.java:103)\n\tat MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.Launcher.main(Launcher.java:74)\n\tat MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26)\n\tat MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23)\n\tat cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.run(BootstrapLauncher.java:210)\n\tat cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:69)\n\tat java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat net.neoforged.devlaunch.Main.main(Main.java:57)\n",
+  "measurements": {
+    "airOnlyOverhangSections": [
+      "SectionPos{x=31, y=5, z=32}",
+      "SectionPos{x=32, y=5, z=32}",
+      "SectionPos{x=34, y=5, z=35}",
+      "SectionPos{x=35, y=5, z=35}",
+      "SectionPos{x=34, y=5, z=31}",
+      "SectionPos{x=33, y=5, z=32}",
+      "SectionPos{x=33, y=6, z=32}",
+      "SectionPos{x=34, y=5, z=32}",
+      "SectionPos{x=37, y=5, z=34}",
+      "SectionPos{x=36, y=5, z=35}",
+      "SectionPos{x=36, y=6, z=35}",
+      "SectionPos{x=37, y=5, z=35}"
+    ]
+  },
+  "distant": {
+    "available": true,
+    "failed": false,
+    "bound": true,
+    "cached": 6,
+    "groups": 6,
+    "active": 0,
+    "pending": 0
+  },
+  "expected_failure": true,
+  "diagnostic_flag": "eln.disableSodiumTerrainFix=true"
+}

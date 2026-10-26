@@ -128,6 +128,10 @@ object TerrainModels {
     internal fun meshFor(owner: Any)=bodies[owner]?.mesh
     internal fun refreshNow(node: NodeBlockEntity) { lastUpdate.remove(node);update(node) }
     internal fun sectionsFor(owner: Any)=bodies[owner]?.sections?.keys ?: emptySet()
+    /** Called only by client meshing setup, on the main thread. Air-only sections
+     * can still contain the overhanging part of another section's baked model. */
+    @JvmStatic fun hasSectionGeometry(level: net.minecraft.world.level.Level,key: Long)=
+        enabled && world===level && !sections[key].isNullOrEmpty()
 
     fun dynamic(draw: () -> Unit) { MeshPartSelection.dynamic(draw) }
 

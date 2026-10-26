@@ -52,5 +52,13 @@ internal object DistantGeometry {
         }
         return emptyList()
     }
-    fun wire(points: List<Vec3>)=points.zipWithNext().map { (a,b)->DistantBox(AABB(a,b).inflate(.035),0xff393735.toInt()) }
+    /** DH boxes cannot rotate. A whole diagonal catenary segment's bounding box
+     * becomes a several-block-wide slab, so subdivide before taking bounds. */
+    fun wire(points: List<Vec3>)=points.zipWithNext().flatMap { (a,b)->
+        val delta=b.subtract(a)
+        val count=ceil(maxOf(abs(delta.x),abs(delta.y),abs(delta.z))/.25).toInt().coerceAtLeast(1)
+        (0 until count).map { i->
+            DistantBox(AABB(a.add(delta.scale(i.toDouble()/count)),a.add(delta.scale((i+1.0)/count))).inflate(.035),0xff393735.toInt())
+        }
+    }
 }

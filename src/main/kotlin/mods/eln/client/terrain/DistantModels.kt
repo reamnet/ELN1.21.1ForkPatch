@@ -38,6 +38,8 @@ object DistantModels {
     private var register: Any?=null
     private var save: File?=null
     private var clock=0
+    private var cameraChunk=Long.MIN_VALUE
+    private var lastView=-1
     private var dirty=false
     private var failed=false
     private val revisions=LinkedHashMap<Key,Long>()
@@ -118,9 +120,14 @@ object DistantModels {
         clear();world=next
     }
     @SubscribeEvent fun tick(event: ClientTickEvent.Post) {
-        if(!available || ++clock%20!=0)return
+        if(!available)return
         val level=mc.level ?: return
         selectWorld(level)
+        val center=mc.gameRenderer.mainCamera.position
+        val chunk=net.minecraft.world.level.ChunkPos.asLong(net.minecraft.core.SectionPos.blockToSectionCoord(center.x),net.minecraft.core.SectionPos.blockToSectionCoord(center.z))
+        val view=mc.options.effectiveRenderDistance
+        if(++clock%20!=0 && chunk==cameraChunk && view==lastView)return
+        cameraChunk=chunk;lastView=view
         try {
             val api=bridge ?: Bridge().also { bridge=it }
             if(register==null) {
@@ -128,16 +135,14 @@ object DistantModels {
                 val nextRegister=api.levelType.getMethod("getRenderRegister").invoke(wrapper) ?: return
                 val folder=api.cacheFolder(wrapper,level)
                 register=nextRegister
-                save=folder?.let { File(it,"eln-objects-v1.dat") }
+                save=folder?.let { File(it,"eln-objects-v2.dat") }
                 load()
             }
             val radius=api.renderDistanceBlocks()
-            val center=mc.gameRenderer.mainCamera.position
-            val view=mc.options.effectiveRenderDistance*16.0
             var created=0
             val iterator=entries.entries.iterator()
-            fun isDistant(key: Key)=kotlin.math.abs(key.pos.x-center.x)>view || kotlin.math.abs(key.pos.z-center.z)>view ||
-                level.chunkSource.getChunk(key.pos.x shr 4,key.pos.z shr 4,ChunkStatus.FULL,false)==null
+            fun isDistant(key: Key)=DistantVisibility.useDistant(key.pos,center,view,
+                level.chunkSource.getChunk(key.pos.x shr 4,key.pos.z shr 4,ChunkStatus.FULL,false)!=null)
             val nearby=entries.keys.filter { it.pos.distToCenterSqr(center)<radius*radius }.sortedBy { it.pos.distToCenterSqr(center) }
             val ordered=nearby.filter(::isDistant).take(256).toSet()
             val wanted=ordered+nearby.take(64)
@@ -170,11 +175,13 @@ object DistantModels {
     private fun load() {
         val file=save?.takeIf { it.isFile } ?: return
         try { DataInputStream(GZIPInputStream(file.inputStream().buffered())).use { input->
-            require(input.readInt()==1)
+            require(input.readInt()==2)
             var total=0
             repeat(input.readInt().also { require(it in 0..2048) }) {
                 val key=Key(BlockPos.of(input.readLong()),input.readByte().toInt())
-                val count=input.readInt();require(count in 0..8192);total+=count;require(total<=150_000)
+                // A junction can own several newly subdivided spans. Accept the
+                // same total box budget that the writer keeps, even in one group.
+                val count=input.readInt();require(count in 0..150_000);total+=count;require(total<=150_000)
                 val boxes=List(count) {
                     val v=DoubleArray(6) { input.readFloat().toDouble().also { require(it.isFinite() && kotlin.math.abs(it)<4096) } }
                     DistantBox(AABB(v[0],v[1],v[2],v[3],v[4],v[5]),input.readInt())
@@ -190,7 +197,7 @@ object DistantModels {
         try {
             file.parentFile.mkdirs();val temp=File(file.path+".tmp")
             DataOutputStream(GZIPOutputStream(temp.outputStream().buffered())).use { out->
-                out.writeInt(1);out.writeInt(entries.size)
+                out.writeInt(2);out.writeInt(entries.size)
                 for((key,entry) in entries) {
                     out.writeLong(key.pos.asLong());out.writeByte(key.face);out.writeInt(entry.boxes.size)
                     for(box in entry.boxes) {
@@ -204,7 +211,7 @@ object DistantModels {
         } catch(error: Exception) { Eln.logger.warn("Could not save ELN distant objects: {}",error.message) }
     }
     private fun clear() {
-        store();entries.values.forEach(::remove);entries.clear();colors.clear();revisions.clear();wireSignatures.clear();worker.queue.clear();register=null;save=null;world=null;dirty=false
+        store();entries.values.forEach(::remove);entries.clear();colors.clear();revisions.clear();wireSignatures.clear();worker.queue.clear();register=null;save=null;world=null;dirty=false;cameraChunk=Long.MIN_VALUE;lastView=-1
     }
     @SubscribeEvent fun unload(event: LevelEvent.Unload) { if(event.level===world)clear() }
 
