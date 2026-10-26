@@ -72,6 +72,7 @@ class ServiceSecondary(owner: TransparentNodeElement,source: ElectricalLoad,priv
 object ServiceTerminals {
     const val LEFT=40;const val RIGHT=41;const val LINE240=42;const val BUNDLE=50
     const val HV_LINE_BUNDLE=52;const val HV_LOAD_BUNDLE=53
+    fun isService(terminal: Int)=terminal in LEFT..LINE240 || terminal==BUNDLE
     fun index(terminal: Int)=terminal-LEFT
     fun key(terminal: Int)=when(terminal) { LEFT -> "SERVICE_L1";RIGHT -> "SERVICE_L2";LINE240 -> "SERVICE_240";BUNDLE -> "SERVICE_BUNDLE";HV_LINE_BUNDLE,HV_LOAD_BUNDLE -> "HV_THREE_PHASE";else -> "HV${(terminal-32)%4}" }
     fun label(terminal: Int)=when(terminal) {

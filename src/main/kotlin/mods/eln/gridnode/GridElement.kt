@@ -40,6 +40,8 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
     var lowVoltageRenderAngle=0f
         private set
     open val alignsPoleSpans=false
+    open val suspendsServiceCable get()=alignsPoleSpans && gridLoads(50).size==3
+    open val serviceDropEndpoint=false
     open val alignsPrimaryPhaseOrder=false
     open fun contributesToPoleAlignment(terminal: Int)=true
 
@@ -103,6 +105,10 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
             return true
         }
         if (other == null) {
+            if(!GridCablePolicy.acceptsTerminal(cable,terminal)) {
+                Utils.sendMessage(entityPlayer,tr("120/240 V service spans require insulated power cable"))
+                return true
+            }
             Utils.sendMessage(entityPlayer, tr("Setting starting point"))
             pending[uuid]=PendingConnection(coordinate(),terminal,automatic,singleTerminal)
         } else {
@@ -374,29 +380,8 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
             // Each wire pair should be drawn by exactly one node.
             // Check for which ones it's this one.
             val ourLinks = gridLinkList.filter { it.a == coordinate()/* && link.connected*/ }
-            // The renderer needs to know, for each catenary:
-            // - Vec3 of the starting point.
-            // - Vec3 of the end point.
-            // There's a finite number of starting points, and a potentially unlimited number of endpoints...
-            // But until we get protocol buffers or something, simple remains good.
-            // So we'll just send pairs, even if there's some duplication.
             stream.writeInt(ourLinks.size)
-            for (link in ourLinks) {
-                val target = link.getOtherElement(this)
-                val ourSide = link.getTerminal(this)
-                val theirSide = link.getTerminal(target)
-                // It's always the "a" side doing this.
-                val offset = link.b.subtract(link.a)
-                val wires=minOf(renderWireCount(ourSide),target.renderWireCount(theirSide))
-                stream.writeByte(wires)
-                for (i in 0 until wires) {
-                    val start = renderedGridCablePoint(ourSide, i)
-                    var end = target.renderedGridCablePoint(theirSide, i)
-                    end = end.add(offset.x.toDouble(), offset.y.toDouble(), offset.z.toDouble())
-                    writeVec(stream, start)
-                    writeVec(stream, end)
-                }
-            }
+            for (link in ourLinks) OverheadSpanPublication.span(link).write(stream)
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -414,13 +399,6 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
         getCablePoint(side, i).add(
             desc.renderOffset.xCoord, desc.renderOffset.yCoord, desc.renderOffset.zCoord
         )
-
-    @Throws(IOException::class)
-    private fun writeVec(stream: DataOutputStream, sp: Vec3) {
-        stream.writeFloat(sp.xCoord.toFloat())
-        stream.writeFloat(sp.yCoord.toFloat())
-        stream.writeFloat(sp.zCoord.toFloat())
-    }
 
     override fun multiMeterString(side: Direction): String {
         val electricalLoad = getGridElectricalLoad(side)

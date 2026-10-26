@@ -87,11 +87,11 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
             }
             preserveMatrix {
                 GL11.glRotatef(lvAngle-base,0f,1f,0f)
-                part("SecondaryRack",.29f,.31f,.32f);repeat(3) { part("Secondary$it",.54f,.65f,.67f) }
+                PoleSecondaryVisual.suspension()
             }
             if(kind.transformer && display?.installed!=false)repeat(3) { i ->
                 val from=net.minecraft.world.phys.Vec3(-.60,5.15+i*.05,.20).yRot(Math.toRadians((hvAngle-base).toDouble()).toFloat())
-                val to=net.minecraft.world.phys.Vec3(.405,4.65+i*.32,0.0).yRot(Math.toRadians((lvAngle-base).toDouble()).toFloat())
+                val to=mods.eln.gridnode.OverheadSpanMesh.terminal(net.minecraft.world.phys.Vec3(.405,4.97,0.0),i,.025).yRot(Math.toRadians((lvAngle-base).toDouble()).toFloat())
                 val mid=net.minecraft.world.phys.Vec3(-.05,5.6+i*.06,.48)
                 PoleLeadVisual.draw(from,mid);PoleLeadVisual.draw(mid,to)
             }

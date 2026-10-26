@@ -83,11 +83,16 @@ class LegacyPoleDisplay {
 }
 object PoleSecondaryVisual {
     private val model by lazy { Eln.obj.getObj("distributionpole") }
+    /** One compact suspension point; service connectors belong to actual branch links. */
+    fun suspension() {
+        GL11.glColor3f(.54f,.65f,.67f);model.getPart("Secondary1")?.drawNoBind()
+        PoleLeadVisual.draw(Vec3(.18,5.13,0.0),Vec3(.18,4.97,0.0))
+        PoleLeadVisual.draw(Vec3(.18,4.97,0.0),Vec3(.405,4.97,0.0))
+    }
     fun draw(front: Direction)=preserveMatrix {
         front.glRotateXnRef();GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
-            GL11.glDisable(GL11.GL_TEXTURE_2D);GL11.glColor3f(.29f,.31f,.32f);model.getPart("SecondaryRack")?.drawNoBind()
-            GL11.glColor3f(.54f,.65f,.67f);repeat(3) { model.getPart("Secondary$it")?.drawNoBind() }
+            GL11.glDisable(GL11.GL_TEXTURE_2D);suspension()
         } finally { GL11.glPopAttrib() }
     }
 }

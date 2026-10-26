@@ -31,6 +31,8 @@ import kotlin.math.min
  * buffers. Chunk workers see immutable meshes only; the GL emulator/renderer instances never escape. */
 @EventBusSubscriber(modid=Eln.MODID,value=[Dist.CLIENT])
 object TerrainModels {
+    /** Separate static surface owned by the same node, with a key distinct from its pole body. */
+    internal class CableOwner(val render: mods.eln.gridnode.GridRender)
     private data class MeshKey(val descriptor: Any,val side: Any?,val appearance: Any)
     private class Body(val node: NodeBlockEntity,val key: MeshKey,val mesh: TerrainMesh,
         val sections: Map<Long,List<TerrainSlice>>,var light: Int)
@@ -55,7 +57,7 @@ object TerrainModels {
     private var atlasRevision=-1L
     val isDiscovering get()=discovering!=null
 
-    /** Wrap just the model body; cables, particles and sound remain in their original paths. */
+    /** Capture a static surface; animations, ordinary attached wires, particles and sound stay live. */
     fun body(owner: Any, appearance: Any, animated: Set<String> = emptySet(), draw: () -> Unit) {
         if (!enabled) { draw(); return }
         val node=discovering
@@ -69,6 +71,7 @@ object TerrainModels {
         val descriptor:Any
         val side:Any?
         when(owner) {
+            is CableOwner -> { descriptor=owner.render.transparentNodeDescriptor;side="overheadCables" }
             is SixNodeElementRender -> { descriptor=owner.sixNodeDescriptor;side=owner.side }
             is TransparentNodeElementRender -> { descriptor=owner.transparentNodeDescriptor;side=null }
             else -> error("Unknown terrain model owner")
@@ -88,7 +91,7 @@ object TerrainModels {
         capture=TerrainCapture(); FixedFunction.setMeshSink(capture)
         removeBody(owner)
         val split=TerrainPartition.split(mesh,node.blockPos)
-        if(DistantModels.available) {
+        if(DistantModels.available && owner !is CableOwner) {
             // Freeze rotating geometry at the last observed angle for the distant
             // silhouette; don't animate or retain sounds/cables in this snapshot.
             val lod=TerrainCapture().apply { enabled=true }
@@ -166,7 +169,12 @@ object TerrainModels {
                     try { Direction.fromInt(index)!!.glRotateXnRef();GL11.glTranslatef(-.5f,0f,0f);drawElement(render) { render.draw() } }
                     finally { GL11.glPopMatrix() }
                 }
-                is TransparentNodeEntity -> node.elementRender?.let { render->drawElement(render) { render.draw() } }
+                is TransparentNodeEntity -> node.elementRender?.let { render->
+                    // Capture spans before the automatic legacy-body signature pass. They
+                    // share a node but can cross many otherwise air-only terrain sections.
+                    if(render is mods.eln.gridnode.GridRender)render.captureTerrainCables()
+                    drawElement(render) { render.draw() }
+                }
             }
             val owners=nodeBodies[node]?.toList() ?: emptyList()
             owners.filter { it !in visited }.forEach { DistantModels.forget(it,node);removeBody(it) }

@@ -11,6 +11,14 @@ import org.junit.Test
 import kotlin.test.*
 
 class DistantGeometryTest {
+    @Test fun distantConductorsRetainTheirIndividualGaugeAndCopperOrAluminumColor() {
+        val points=listOf(Vec3.ZERO,Vec3(48.0,6.0,32.0))
+        for(radius in listOf(.008,.025,.075))for(color in listOf(0xffd96b2e.toInt(),0xffc7ccd6.toInt(),0xff222629.toInt())) {
+            val boxes=DistantGeometry.wire(points,radius,color)
+            assertTrue(boxes.all { it.color==color && maxOf(it.bounds.xsize,it.bounds.ysize,it.bounds.zsize)<=.250001+2*radius })
+            assertTrue(boxes.zipWithNext().all { (a,b)->a.bounds.intersects(b.bounds) })
+        }
+    }
     @Test fun distantSurfacesKeepTheirTintAndNeverFillTheWholeObjectsBounds() {
         val color=VertexColors.pack(.4f,.25f,.1f,1f)
         val data=listOf(Vec3(0.0,0.0,0.0),Vec3(.04,0.0,0.0),Vec3(.04,8.0,0.0),Vec3(0.0,8.0,0.0)).flatMap { p->

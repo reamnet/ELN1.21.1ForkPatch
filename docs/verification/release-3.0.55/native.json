@@ -1,0 +1,59 @@
+{
+  "passed": [
+    "Native server rejects a bare service spool without consuming it; installed secondary and service drop use insulated cable",
+    "Native spans and splice fittings bake into terrain meshes across multiple air-only sections",
+    "Real span packets create native copper/aluminum geometry at distinct installed gauges, plus insulated triplex",
+    "Disconnecting the service drop removes its splice and leads, leaving only the suspended main triplex",
+    "Reversing connection ownership preserves branch splices; unchanged status packets reuse native cable geometry",
+    "Baked spans emit no per-frame device vertices; whole-span fallback preserves render-boundary wires before DH handoff",
+    "DH actually draws cached colored/gauged spans after vanilla chunks unload"
+  ],
+  "measurements": {
+    "bakedCableQuads": 2640,
+    "bakedCableSections": 18,
+    "meshComponents": 22,
+    "wireColors": [
+      "ffd96b2e",
+      "ffc7ccd6",
+      "ff222629"
+    ],
+    "wireRadii": [
+      0.019631171599030495,
+      0.025164782486855983,
+      0.038100019097328186,
+      0.04695802253484726,
+      0.0761999636888504,
+      0.07748073600232601,
+      0.08677842432260514
+    ],
+    "distant": {
+      "available": true,
+      "failed": false,
+      "bound": true,
+      "genericRenderingEnabled": true,
+      "bindingGeneration": 1,
+      "retryTicks": 0,
+      "cacheFile": "eln-objects-v2.dat",
+      "cached": 19,
+      "groups": 19,
+      "gridSnapshots": 19,
+      "active": 19,
+      "pending": 0
+    },
+    "distantWireDraws": 294
+  },
+  "distant": {
+    "available": true,
+    "failed": false,
+    "bound": true,
+    "genericRenderingEnabled": true,
+    "bindingGeneration": 1,
+    "retryTicks": 0,
+    "cacheFile": "eln-objects-v2.dat",
+    "cached": 19,
+    "groups": 19,
+    "gridSnapshots": 19,
+    "active": 19,
+    "pending": 0
+  }
+}

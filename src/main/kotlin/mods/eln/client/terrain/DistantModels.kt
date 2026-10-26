@@ -49,7 +49,7 @@ object DistantModels {
     private var lastError: String?=null
     private var genericRendering: Boolean?=null
     private val revisions=LinkedHashMap<Key,Long>()
-    private val wireSignatures=HashMap<Key,List<List<Vec3>>>()
+    private val wireSignatures=HashMap<Key,List<mods.eln.gridnode.OverheadWire>>()
     private var sequence=0L
     private val worker=java.util.concurrent.ThreadPoolExecutor(1,1,0L,java.util.concurrent.TimeUnit.SECONDS,
         java.util.concurrent.ArrayBlockingQueue<Runnable>(2048),java.util.concurrent.ThreadFactory { task->Thread(task,"ELN distant geometry").apply { isDaemon=true;priority=Thread.MIN_PRIORITY } },java.util.concurrent.ThreadPoolExecutor.DiscardOldestPolicy())
@@ -70,14 +70,14 @@ object DistantModels {
             mc.execute { if(world===level && revisions[key]==revision)put(key,boxes) }
         }
     }
-    fun cables(node: NodeBlockEntity,points: List<List<Vec3>>) {
+    internal fun cables(node: NodeBlockEntity,points: List<mods.eln.gridnode.OverheadWire>) {
         if(!available || node.level !is ClientLevel)return
         selectWorld(node.level as ClientLevel)
         val key=Key(node.blockPos,6)
         gridKeys+=key;gridKeys+=Key(node.blockPos,-1)
         if(wireSignatures[key]==points)return
         wireSignatures[key]=points
-        put(key,points.flatMap { DistantGeometry.wire(it.map { p->p.add(.5,.5,.5) }) })
+        put(key,points.flatMap { DistantGeometry.wire(it.points.map { p->p.add(.5,.5,.5) },it.radius,it.color) })
     }
     fun cover(node: NodeBlockEntity,state: net.minecraft.world.level.block.state.BlockState) {
         if(!available || node.level !is ClientLevel)return
@@ -104,6 +104,7 @@ object DistantModels {
         dirty=true
     }
     internal fun forget(owner: Any,node: NodeBlockEntity) {
+        if(owner is TerrainModels.CableOwner)return // dedicated wire snapshots have their own lifetime/key
         val key=Key(node.blockPos,if(owner is SixNodeElementRender)owner.side.int else -1)
         revisions.remove(key);entries.remove(key)?.let(::remove);gridKeys.remove(key)
         if(owner is mods.eln.gridnode.GridRender) {

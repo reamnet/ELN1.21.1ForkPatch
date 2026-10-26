@@ -10,6 +10,7 @@
 (Increases_capacity)=(Increases capacity)
 (Increases_inductance)=(Increases inductance)
 *_Missing_an_inductive_voltage_spike_on_field_collapse=* Missing an inductive voltage spike on field collapse
+120/240_V_service_spans_require_insulated_power_cable=120/240 V service spans require insulated power cable
 240_V_Appliance_Cord.name=240 V Appliance Cord
 A_relay_is_an_electrical\ncontact_that_conducts\ncurrent_when_a_signal\nvoltage_is_applied.=A relay is an electrical\ncontact that conducts\ncurrent when a signal\nvoltage is applied.
 Accepted_lamp_types\:_%1$=Accepted lamp types: %1$

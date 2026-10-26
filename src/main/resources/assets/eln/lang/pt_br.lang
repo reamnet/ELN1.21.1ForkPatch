@@ -10,6 +10,7 @@
 (Increases_capacity)=(Aumenta a capacitância)
 (Increases_inductance)=(Aumenta a indutância)
 *_Missing_an_inductive_voltage_spike_on_field_collapse=* Ausência de pico de tensão indutiva no colapso do campo
+120/240_V_service_spans_require_insulated_power_cable=120/240 V service spans require insulated power cable
 240_V_Appliance_Cord.name=240 V Appliance Cord
 A_relay_is_an_electrical\ncontact_that_conducts\ncurrent_when_a_signal\nvoltage_is_applied.=Um relé é um contato\nelétrico que conduz\ncorrente quando uma tensão\nde sinal é aplicada.
 Accepted_lamp_types\:_%1$=Tipos de lâmpada aceitos: %1$

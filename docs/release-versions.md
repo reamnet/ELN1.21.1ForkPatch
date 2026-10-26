@@ -58,6 +58,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.52` | — | Add six-face single-conductor insulators and cable-feed versions, a complete channel/wired fire alarm system, and an energy-accounted ELN to CEE bridge |
 | `v3.0.53` | — | Keep transmission insulator overhangs baked in air-only Sodium sections; keep distant wires thin and align DH handoff with loaded render chunks |
 | `v3.0.54` | — | Recover DH geometry across renderer replacement and reconnect; prioritize power lines; mark substation voltage banks and phases, fix rotated terminal picking and keep banks stationary |
+| `v3.0.55` | — | Gauge- and material-aware overhead cables, insulated secondary triplex, compact suspension points and real service-drop splice leads |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`

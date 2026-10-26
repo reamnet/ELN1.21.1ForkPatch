@@ -10,6 +10,7 @@
 (Increases_capacity)=(增大电容)
 (Increases_inductance)=(增大电感)
 *_Missing_an_inductive_voltage_spike_on_field_collapse=* 磁场崩溃时缺少感应电压尖峰
+120/240_V_service_spans_require_insulated_power_cable=120/240 V service spans require insulated power cable
 240_V_Appliance_Cord.name=240 V Appliance Cord
 A_relay_is_an_electrical\ncontact_that_conducts\ncurrent_when_a_signal\nvoltage_is_applied.=继电器是一种电气触点，\n当施加信号电压时导通电流。
 Accepted_lamp_types\:_%1$=支持的灯泡类型: %1$

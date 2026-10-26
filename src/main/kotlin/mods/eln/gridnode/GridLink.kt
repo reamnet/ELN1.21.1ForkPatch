@@ -278,6 +278,7 @@ class GridLink : INBTTReady {
             validateOverheadEndpoints(a,b)
             if(!(a.transparentNodeDescriptor as GridDescriptor).acceptsGridCable(cable) || !(b.transparentNodeDescriptor as GridDescriptor).acceptsGridCable(cable))
                 throw UserError(tr("Grid links require an intact power cable; signal and melted cables are not supported"))
+            validateServiceCable(cable,from,to)
             val x=a.gridLoads(from);val y=b.gridLoads(to)
             if(a===b || x.isEmpty() || x.size!=y.size || cableLength<=0)throw UserError(tr("Select matching grid terminal circuits"))
             val ka=a.gridCircuitKey(from);val kb=b.gridCircuitKey(to)
@@ -303,6 +304,11 @@ class GridLink : INBTTReady {
         private fun validateOverheadEndpoints(a: GridElement,b: GridElement) {
             if(!a.allowsNewGridLinks || !b.allowsNewGridLinks)
                 throw UserError(tr("Terminate overhead wires at a Service Weatherhead; use placed wall cables for meters and panels"))
+        }
+
+        internal fun validateServiceCable(cable: ElectricalCableDescriptor,from: Int,to: Int) {
+            if(!GridCablePolicy.acceptsTerminal(cable,from) || !GridCablePolicy.acceptsTerminal(cable,to))
+                throw UserError(tr("120/240 V service spans require insulated power cable"))
         }
 
     }

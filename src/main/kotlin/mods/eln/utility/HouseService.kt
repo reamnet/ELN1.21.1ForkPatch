@@ -71,6 +71,7 @@ class ServiceEnergy {
 }
 
 class HouseServiceElement(node: TransparentNode,descriptor: TransparentNodeDescriptor): GridElement(node,descriptor,64) {
+    override val serviceDropEndpoint get()=!(transparentNodeDescriptor as HouseServiceDescriptor).meter && !(transparentNodeDescriptor as HouseServiceDescriptor).disconnect
     val meter=(descriptor as HouseServiceDescriptor).meter
     val serviceDisconnect=(descriptor as HouseServiceDescriptor).disconnect
     private val switched get()=meter || serviceDisconnect

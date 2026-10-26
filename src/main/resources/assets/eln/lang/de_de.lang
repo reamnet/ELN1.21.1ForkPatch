@@ -10,6 +10,7 @@
 (Increases_capacity)=(Erhöht Kapazität)
 (Increases_inductance)=(Erhöht Induktivität)
 *_Missing_an_inductive_voltage_spike_on_field_collapse=* Induktive Spannungsspitze beim Feldzusammenbruch fehlt
+120/240_V_service_spans_require_insulated_power_cable=120/240 V service spans require insulated power cable
 240_V_Appliance_Cord.name=240 V Appliance Cord
 A_relay_is_an_electrical\ncontact_that_conducts\ncurrent_when_a_signal\nvoltage_is_applied.=Ein Relais ist ein elektrischer\nKontakt, der Strom leitet,\nwenn eine Signalspannung\nangelegt wird.
 Accepted_lamp_types\:_%1$=Akzeptierte Lampentypen: %1$

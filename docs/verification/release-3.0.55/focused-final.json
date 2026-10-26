@@ -1,0 +1,81 @@
+{
+  "version": "3.0.55",
+  "suites": 7,
+  "command": "./gradlew --no-daemon --max-workers=2 test --tests mods.eln.gridnode.OverheadCableAppearanceTest --tests mods.eln.gridnode.OverheadCableVisibilityTest --tests mods.eln.gridnode.OverheadCableMeshTest --tests mods.eln.gridnode.GridCableCompatibilityTest --tests mods.eln.client.terrain.DistantGeometryTest --tests mods.eln.client.terrain.TerrainMeshTest --tests mods.eln.client.gl.RecordedQuadsTest runClient",
+  "tests": 40,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "results": [
+    {
+      "name": "mods.eln.client.terrain.TerrainMeshTest",
+      "tests": "8",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T16:27:43.498Z",
+      "hostname": "67293bf35eff",
+      "time": "0.035"
+    },
+    {
+      "name": "mods.eln.client.terrain.DistantGeometryTest",
+      "tests": "6",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T16:27:43.478Z",
+      "hostname": "67293bf35eff",
+      "time": "0.02"
+    },
+    {
+      "name": "mods.eln.client.gl.RecordedQuadsTest",
+      "tests": "7",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T16:27:43.388Z",
+      "hostname": "67293bf35eff",
+      "time": "0.088"
+    },
+    {
+      "name": "mods.eln.gridnode.OverheadCableVisibilityTest",
+      "tests": "1",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T16:27:44.518Z",
+      "hostname": "67293bf35eff",
+      "time": "0.005"
+    },
+    {
+      "name": "mods.eln.gridnode.OverheadCableMeshTest",
+      "tests": "2",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T16:27:44.515Z",
+      "hostname": "67293bf35eff",
+      "time": "0.003"
+    },
+    {
+      "name": "mods.eln.gridnode.OverheadCableAppearanceTest",
+      "tests": "7",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T16:27:44.433Z",
+      "hostname": "67293bf35eff",
+      "time": "0.081"
+    },
+    {
+      "name": "mods.eln.gridnode.GridCableCompatibilityTest",
+      "tests": "9",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T16:27:43.533Z",
+      "hostname": "67293bf35eff",
+      "time": "0.899"
+    }
+  ]
+}

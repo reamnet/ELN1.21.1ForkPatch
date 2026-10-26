@@ -86,6 +86,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     val outs=if(kind.protectedLine)List(kind.outputPhases) { NbtElectricalLoad("phaseOut$it").apply { serialResistance=.00001 } } else lines
     val fuses=List(kind.fuseCount) { CutoutFuse() }
     val recloser=RecloserControl()
+    override val suspendsServiceCable get()=!kind.underground
     var selectedTerminal=if(kind.lvOnly)ServiceTerminals.BUNDLE else 32
         private set
     var transformerPhase=0

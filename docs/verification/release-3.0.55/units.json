@@ -1,0 +1,51 @@
+{
+  "version": "3.0.55",
+  "suites": 228,
+  "command": "./gradlew --no-daemon --max-workers=2 test runClient",
+  "tests": 935,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "target_suites": [
+    {
+      "name": "mods.eln.client.terrain.DistantGeometryTest",
+      "tests": "6",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T15:58:25.724Z",
+      "hostname": "67293bf35eff",
+      "time": "0.025"
+    },
+    {
+      "name": "mods.eln.gridnode.OverheadCableMeshTest",
+      "tests": "2",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T15:58:27.532Z",
+      "hostname": "67293bf35eff",
+      "time": "0.004"
+    },
+    {
+      "name": "mods.eln.gridnode.OverheadCableAppearanceTest",
+      "tests": "6",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T15:58:27.400Z",
+      "hostname": "67293bf35eff",
+      "time": "0.131"
+    },
+    {
+      "name": "mods.eln.gridnode.GridCableCompatibilityTest",
+      "tests": "9",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T15:58:26.146Z",
+      "hostname": "67293bf35eff",
+      "time": "1.253"
+    }
+  ]
+}

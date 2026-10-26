@@ -43,7 +43,7 @@ object DistantMultiplayerServer {
                 if(w.getBlockEntity(pos) is TransparentNodeEntity)f.machine(pos) as GridElement
                 else f.placeMachine(Eln.findItemStack(name,1),pos) as GridElement
             }
-            if(elements[0].gridLinkList.isEmpty())GridLink.addLink(elements[0],elements[1],if(i==3)50 else 52,if(i==3)50 else 52,wire,144)
+            if(elements[0].gridLinkList.isEmpty())GridLink.addLink(elements[0],elements[1],if(i==3)50 else 52,if(i==3)50 else 52,if(i==3)UtilityCableDescriptor.allDescriptors().first { it.insulated && !it.melted } else wire,144)
         }
         for((i,kind)in listOf(TransmissionKind.STEP_230,TransmissionKind.STEP_69).withIndex()) {
             val pos=BlockPos(280+i*32,80,280)

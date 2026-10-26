@@ -10,6 +10,7 @@
 (Increases_capacity)=(Αυξάνει τη χωρητικότητα)
 (Increases_inductance)=(Αυξάνει την επαγωγή)
 *_Missing_an_inductive_voltage_spike_on_field_collapse=* Απουσία επαγωγικής αιχμής τάσης κατά την κατάρρευση του πεδίου
+120/240_V_service_spans_require_insulated_power_cable=120/240 V service spans require insulated power cable
 240_V_Appliance_Cord.name=240 V Appliance Cord
 A_relay_is_an_electrical\ncontact_that_conducts\ncurrent_when_a_signal\nvoltage_is_applied.=Ένα ρελέ είναι μια ηλεκτρική\nεπαφή που άγει\nρεύμα όταν εφαρμόζεται\nτάση σήματος.
 Accepted_lamp_types\:_%1$=Αποδεκτοί τύποι λαμπτήρων: %1$

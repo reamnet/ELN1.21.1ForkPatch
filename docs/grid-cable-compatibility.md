@@ -2,9 +2,9 @@
 
 All seven grid devices (Grid DC-DC Converter, Utility Pole, Utility Pole w/DC-DC Converter,
 Transmission Tower, Direct Utility Pole, Grid Switch and Utility Pole Street Light) accept
-**every intact power cable**.
+**every intact power cable** on HV/legacy grid terminals. New 120/240 V secondary and service-drop terminals (L1, L2, 240 V and the complete bundle) require **insulated** power cable. This is checked at both ends, including the direct connection API, before cable is consumed. Original ELN power cables have jackets and remain eligible. Existing bare secondary spans are retained rather than deleted or silently insulated.
 There is no minimum voltage: low-voltage legacy cables, 300/600 V spools, all HV spools and
-bare conductors qualify. Copper/aluminum, gauge, conductor count and the historical
+bare conductors qualify for HV/legacy terminals. Copper/aluminum, gauge, conductor count and the historical
 `poleEligible` flag do not restrict compatibility.
 
 The `signalWire` flag, not the creative-tab category, distinguishes actual signal circuits.
@@ -27,7 +27,7 @@ insulation-voltage protection, and mere connection compatibility is not proof of
 ## Connecting and saved worlds
 
 Hold an intact power cable and click a grid terminal on each device. Both endpoints use the
-same rule in either click order. Transformer/switch body faces remain invalid terminals.
+same terminal-specific rule in either click order. Transformer/switch body faces remain invalid terminals.
 Overhead-only poles remain overhead devices; motor/control inputs are not grid terminals.
 
 Survival spools pay the rounded-up endpoint distance in meters; legacy cable items pay their
@@ -36,7 +36,7 @@ or insufficient spool lengths, duplicate links and unavailable endpoints must no
 cable. Existing distance limits remain in place.
 
 Previously saved links are not deleted or upgraded. Their cable identity, paid length and
-thermal state remain readable; lower-rated cables also qualify for new/replacement links now.
+thermal state remain readable. Lower-rated cables qualify for replacement HV links; replacement secondary links must be insulated.
 Item registrations and save IDs are unchanged.
 
 ## Verification
@@ -58,3 +58,27 @@ checking the saved-world restart. This is server integration, not native mouse/v
 The focused workflow invokes the existing translation generator and publishes generated
 translations and test reports. Full build/runtime success must be established on the exact
 PR head; policy-only local checks are not FML or native-client verification.
+
+## Pole appearance (3.0.55)
+
+Overhead utility wire uses the installed descriptor's conductor area: diameter varies with
+its square root. Copper is copper-colored and aluminum is silver. Jackets are dark, with
+exposed metal at individual-wire terminations. Legacy power cable lacks area/material metadata
+and uses its existing render dimensions and a copper conductor fallback.
+
+Insulated three-circuit secondary bundles render as triplex: two wrapped jacketed conductors
+and a metallic messenger. These are visual equivalents of ELN's existing L1/L2/240 V buses;
+this does not introduce an AC neutral or change the electrical model. Individual selected
+secondary circuits remain jacketed single-conductor branches. Existing bare bundles retain
+three separate bare conductors.
+
+The main secondary hangs on a compact suspension point. Weatherhead service drops and
+individual secondary taps branch from real main-line strand positions, with short splice
+sleeves/bands. Removing the drop removes its splice geometry. A pole with no main secondary
+span uses its ordinary attachment point, without an invented main-line splice.
+
+Gauge, color, jacket and splice data are included in server span publications and DH snapshots.
+Complete nearby spans bake into normal terrain meshes; identical publications reuse those
+meshes. Spans crossing the normal render boundary retain their whole-span fallback to avoid
+a gap before the distant handoff. Both client and server must update to 3.0.55 because the span packet changed.
+See [verification](release-3.0.55-verification.md).

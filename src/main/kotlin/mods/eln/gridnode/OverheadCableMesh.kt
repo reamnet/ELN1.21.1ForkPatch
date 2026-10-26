@@ -37,7 +37,11 @@ internal object OverheadCableMesh {
     }
 
     fun sections(start: Vec3, end: Vec3, radius: Double = .05): List<List<Vec3>> {
-        val points = points(start, end)
+        return sections(points(start,end),radius)
+    }
+
+    fun sections(points: List<Vec3>,radius: Double): List<List<Vec3>> {
+        require(points.size>=2 && radius.isFinite() && radius>0)
         return points.indices.map { i ->
             val tangent = points[min(i + 1, points.lastIndex)].subtract(points[max(i - 1, 0)]).normalize()
             val horizontal = Vec3(-tangent.z, 0.0, tangent.x)
