@@ -30,7 +30,9 @@ internal object OverheadSpanPublication {
         val appearance=style(link);val delta=offset(a,b)
         val n=minOf(a.renderWireCount(from),b.renderWireCount(to))
         return OverheadSpan(List(n) { i->anchor(a,from,i,appearance) to anchor(b,to,i,appearance).add(delta) },appearance,
-            n==3 && ServiceTerminals.isService(from) && ServiceTerminals.isService(to) && appearance.insulated)
+            n==3 && ServiceTerminals.isService(from) && ServiceTerminals.isService(to) && appearance.insulated,
+            startPole=if(a.suspendsServiceCable && ServiceTerminals.isService(from))a.serviceClearance() else null,
+            endPole=if(b.suspendsServiceCable && ServiceTerminals.isService(to))b.serviceClearance().let { it.copy(center=it.center.add(delta)) } else null)
     }
     fun span(link: GridLink): OverheadSpan {
         var result=basic(link)
@@ -46,9 +48,20 @@ internal object OverheadSpanPublication {
             val mainSpec=basic(main);val strands=conductors(main,mainSpec)
             val hostAtStart=main.a==host.coordinate()
             val first=if(hostAtStart)strands[0].points else strands[0].points.asReversed()
-            val index=(1 until first.lastIndex).firstOrNull { first[it].distanceTo(first.first())>=.75 } ?: 1
+            val shield=host.serviceClearance()
+            val envelope=(3+kotlin.math.sqrt(2.0))*maxOf(result.appearance.outsideRadius,mainSpec.appearance.outsideRadius)
+            val sleeve=kotlin.math.sqrt(2.0)*1.65*1.12*maxOf(result.appearance.outsideRadius,mainSpec.appearance.outsideRadius)+.12
+            fun safe(index: Int): Boolean {
+                val shift=offset(host,main.elementA())
+                val p=strands.map { if(hostAtStart)it.points[index] else it.points[it.points.lastIndex-index] }.map { it.add(shift) }
+                val center=p.reduce(Vec3::add).scale(1.0/p.size)
+                return kotlin.math.hypot(center.x-shield.center.x,center.z-shield.center.z)>=shield.radius+envelope+.04 &&
+                    p.all { kotlin.math.hypot(it.x-shield.center.x,it.z-shield.center.z)>=shield.radius+sleeve }
+            }
+            val index=(1 until first.lastIndex).firstOrNull { first[it].distanceTo(first.first())>=.75 && safe(it) }
+                ?: (0 until first.lastIndex).firstOrNull(::safe) ?: 0
             val path=if(hostAtStart)strands[2].points else strands[2].points.asReversed()
-            val tangent=path[minOf(index+1,path.lastIndex)].subtract(path[index-1]).normalize()
+            val tangent=path[minOf(index+1,path.lastIndex)].subtract(path[maxOf(index-1,0)]).normalize()
             val translation=offset(link.elementA(),main.elementA())
             result=result.copy(ends=result.ends.mapIndexed { i,(a,b)->
                 val circuit=if(terminal==50)i else terminal-40

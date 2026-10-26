@@ -45,14 +45,25 @@ class ElectricalPoleRender(entity: TransparentNodeEntity, descriptor: Transparen
     }
 
     override fun draw() {
-        super.draw()
+        drawCables();descriptor.drawPole(highVoltageRenderAngle,display.rating)
         preserveMatrix {
             GL11.glRotatef(lowVoltageRenderAngle,0f,1f,0f)
-            PoleSecondaryVisual.draw(Direction.XN)
+            PoleSecondaryVisual.draw(Direction.XN,serviceMountReach.toDouble())
         }
         if(descriptor.includeTransformer)preserveMatrix {
             GL11.glRotatef(highVoltageRenderAngle,0f,1f,0f)
             PoleFuseVisual.draw(Direction.XN,display.fuseClosed,display.fuseBlown)
+            GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
+            try {
+                GL11.glDisable(GL11.GL_TEXTURE_2D)
+                descriptor.plus.firstOrNull()?.let { PoleLeadVisual.draw(it.boundingBox().centre(),Vec3(-.68,6.40,0.0)) }
+                PoleLeadVisual.draw(Vec3(-.68,5.85,0.0),PoleTransformerShape.of(display.rating).bushing)
+            } finally { GL11.glPopAttrib() }
+        }
+        if(descriptor.includeTransformer) {
+            GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
+            try { GL11.glDisable(GL11.GL_TEXTURE_2D);PoleTransformerVisual.secondaryLeads(display.rating,highVoltageRenderAngle,lowVoltageRenderAngle,serviceMountReach.toDouble()) }
+            finally { GL11.glPopAttrib() }
         }
         cableRenderType = drawCable(front!!.down(), Eln.instance.stdCableRender3200V, eConn, cableRenderType)
     }

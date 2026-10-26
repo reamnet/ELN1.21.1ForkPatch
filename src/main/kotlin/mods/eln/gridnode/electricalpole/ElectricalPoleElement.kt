@@ -47,6 +47,8 @@ data class Transformer(
 class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDescriptor)
     : GridElement(node, descriptor, (descriptor as GridDescriptor).connectRange) {
     override val alignsPoleSpans=true
+    internal override fun serviceClearance()=if((transparentNodeDescriptor as ElectricalPoleDescriptor).includeTransformer)
+        PoleTransformerShape.of(ratedWatts).clearance(highVoltageRenderAngle) else super.serviceClearance()
     companion object { val OUTPUT_VOLTAGES=intArrayOf(120,240,3200) }
     private val desc = descriptor as ElectricalPoleDescriptor
     override val inventory=object: mods.eln.node.transparent.TransparentNodeElementInventory(if(desc.includeTransformer)1 else 0,1,this@ElectricalPoleElement) {
@@ -246,7 +248,7 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
         }
         return super.onBlockActivated(player,side,vx,vy,vz)
     }
-    override fun inventoryChange(inventory: net.minecraft.world.Container?) { ratedWatts=mods.eln.utility.PoleHardware.transformerWatts(this.inventory.getItem(0)) ?: 10_000;needPublish() }
+    override fun inventoryChange(inventory: net.minecraft.world.Container?) { ratedWatts=mods.eln.utility.PoleHardware.transformerWatts(this.inventory.getItem(0)) ?: 10_000;publishServiceGeometry() }
     private fun writeSettings(nbt: CompoundTag) {
         ports.write(nbt);fuse.write(nbt,"legacyFuse")
         nbt.putBoolean("legacyHardwareV1",true);nbt.putInt("legacyRatedWatts",ratedWatts);nbt.putInt("legacyOutputVoltage",outputVoltage)

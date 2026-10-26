@@ -1,0 +1,201 @@
+{
+  "version": "3.0.56",
+  "suites": 19,
+  "command": "./gradlew --no-daemon --max-workers=2 test --tests 'mods.eln.gridnode.*Test' --tests mods.eln.utility.PoleHardwareGeometryTest --tests mods.eln.utility.PoleAlignmentAndTapTest --tests mods.eln.utility.PoleRefreshTest --tests mods.eln.utility.UtilityServiceInteractionTest --tests mods.eln.utility.FusedTapLightTest --tests mods.eln.utility.SubstationPhaseTest --tests mods.eln.utility.UtilityProtectionTest --tests 'mods.eln.client.terrain.*Test' --tests mods.eln.client.gl.RecordedQuadsTest runClient",
+  "tests": 85,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "results": [
+    {
+      "name": "mods.eln.client.terrain.DistantRetentionTest",
+      "tests": "2",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T19:29:36.461Z",
+      "hostname": "67293bf35eff",
+      "time": "0.002"
+    },
+    {
+      "name": "mods.eln.client.terrain.TerrainMeshTest",
+      "tests": "8",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T19:29:36.471Z",
+      "hostname": "67293bf35eff",
+      "time": "0.034"
+    },
+    {
+      "name": "mods.eln.utility.PoleRefreshTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T19:29:37.911Z",
+      "hostname": "67293bf35eff",
+      "time": "0.04"
+    },
+    {
+      "name": "mods.eln.client.terrain.DistantGeometryTest",
+      "tests": "6",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T19:29:36.431Z",
+      "hostname": "67293bf35eff",
+      "time": "0.026"
+    },
+    {
+      "name": "mods.eln.utility.SubstationPhaseTest",
+      "tests": "2",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T19:29:37.952Z",
+      "hostname": "67293bf35eff",
+      "time": "0.006"
+    },
+    {
+      "name": "mods.eln.client.gl.RecordedQuadsTest",
+      "tests": "7",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T19:29:36.386Z",
+      "hostname": "67293bf35eff",
+      "time": "0.04"
+    },
+    {
+      "name": "mods.eln.gridnode.OverheadCableVisibilityTest",
+      "tests": "1",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T19:29:37.631Z",
+      "hostname": "67293bf35eff",
+      "time": "0.003"
+    },
+    {
+      "name": "mods.eln.gridnode.OverheadCableMeshTest",
+      "tests": "2",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T19:29:37.629Z",
+      "hostname": "67293bf35eff",
+      "time": "0.001"
+    },
+    {
+      "name": "mods.eln.utility.PoleAlignmentAndTapTest",
+      "tests": "6",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T19:29:37.859Z",
+      "hostname": "67293bf35eff",
+      "time": "0.044"
+    },
+    {
+      "name": "mods.eln.client.terrain.DistantRenderBindingTest",
+      "tests": "1",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T19:29:36.459Z",
+      "hostname": "67293bf35eff",
+      "time": "0.001"
+    },
+    {
+      "name": "mods.eln.gridnode.SpanThermalPerformanceTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T19:29:37.838Z",
+      "hostname": "67293bf35eff",
+      "time": "0.008"
+    },
+    {
+      "name": "mods.eln.gridnode.OverheadCableAppearanceTest",
+      "tests": "7",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T19:29:37.531Z",
+      "hostname": "67293bf35eff",
+      "time": "0.096"
+    },
+    {
+      "name": "mods.eln.gridnode.ServiceCableClearanceTest",
+      "tests": "7",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T19:29:37.635Z",
+      "hostname": "67293bf35eff",
+      "time": "0.203"
+    },
+    {
+      "name": "mods.eln.gridnode.GridCableCompatibilityTest",
+      "tests": "9",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T19:29:36.505Z",
+      "hostname": "67293bf35eff",
+      "time": "1.025"
+    },
+    {
+      "name": "mods.eln.utility.UtilityServiceInteractionTest",
+      "tests": "5",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T19:29:37.960Z",
+      "hostname": "67293bf35eff",
+      "time": "0.028"
+    },
+    {
+      "name": "mods.eln.utility.FusedTapLightTest",
+      "tests": "2",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T19:29:37.846Z",
+      "hostname": "67293bf35eff",
+      "time": "0.012"
+    },
+    {
+      "name": "mods.eln.utility.UtilityProtectionTest",
+      "tests": "6",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T19:29:37.958Z",
+      "hostname": "67293bf35eff",
+      "time": "0.002"
+    },
+    {
+      "name": "mods.eln.utility.PoleHardwareGeometryTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T19:29:37.904Z",
+      "hostname": "67293bf35eff",
+      "time": "0.007"
+    },
+    {
+      "name": "mods.eln.client.terrain.LegacyMeshTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T19:29:36.464Z",
+      "hostname": "67293bf35eff",
+      "time": "0.007"
+    }
+  ]
+}

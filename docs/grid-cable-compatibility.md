@@ -82,3 +82,20 @@ Complete nearby spans bake into normal terrain meshes; identical publications re
 meshes. Spans crossing the normal render boundary retain their whole-span fallback to avoid
 a gap before the distant handoff. Both client and server must update to 3.0.55 because the span packet changed.
 See [verification](release-3.0.55-verification.md).
+
+## Pole and transformer clearance (3.0.56)
+
+LV suspension points sit to the side of the span rather than on its path through the wood.
+Their reach accounts for the installed wire diameter and transformer case. An installed can
+also selects the equivalent LV support orientation facing away from it. Spans that would
+intersect a pole/case envelope take a short catenary detour around it. Service splices remain
+on the actual routed main strands, with space for their connector sleeves. Secondary jumpers
+leave the transformer case outward before routing around the pole/case to the support.
+
+The five physical transformer ratings now have different can diameters and heights. The
+bushing height stays fixed, and leads follow the new locations. Swapping a transformer item
+publishes the geometry to its neighbours too, including the node that owns an incoming span.
+
+Clearance geometry and support reach travel in the updated span packet. Both client and
+server must update to 3.0.56. Saved IDs, cable lengths, circuit assignments and electrical
+ratings are unchanged. See [verification](release-3.0.56-verification.md).

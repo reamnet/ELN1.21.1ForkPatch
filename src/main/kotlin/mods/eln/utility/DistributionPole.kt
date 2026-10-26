@@ -82,6 +82,8 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         override fun canTakeItemThroughFace(slot: Int,stack: ItemStack?,side: Int)=kind.twinLight && slot in 0..1 || kind.transformer && slot==0
     }
     val installed get()=kind.transformer && isStepDownUnit(inventory.getItem(0))
+    internal override fun serviceClearance()=if(installed)PoleTransformerShape.of(PoleHardware.transformerWatts(inventory.getItem(0)) ?: 10_000)
+        .clearance(highVoltageRenderAngle) else super.serviceClearance()
     val lines=List(kind.phases) { NbtElectricalLoad("phase$it").apply { serialResistance=.00001 } }
     val outs=if(kind.protectedLine)List(kind.outputPhases) { NbtElectricalLoad("phaseOut$it").apply { serialResistance=.00001 } } else lines
     val fuses=List(kind.fuseCount) { CutoutFuse() }
@@ -251,7 +253,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         }
         return super.onBlockActivated(player,side,vx,vy,vz)
     }
-    override fun inventoryChange(inventory: Container?) { unit?.installRating(PoleHardware.transformerWatts(this.inventory.getItem(0)) ?: 10_000);applyContacts();needPublish() }
+    override fun inventoryChange(inventory: Container?) { unit?.installRating(PoleHardware.transformerWatts(this.inventory.getItem(0)) ?: 10_000);applyContacts();publishServiceGeometry() }
     override fun connectJob() { super.connectJob();unit?.let { Eln.simulator.mna.addProcess(it.controller) };applyContacts() }
     override fun disconnectJob() { unit?.let { Eln.simulator.mna.removeProcess(it.controller) };super.disconnectJob() }
     override fun selectedGridTerminal(side: Direction)=selectedTerminal
@@ -304,8 +306,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     override fun gridCablePoint(terminal: Int,wire: Int): Vec3=when {
         terminal==ServiceTerminals.HV_LINE_BUNDLE -> gridCablePoint(32+wire,0)
         terminal==ServiceTerminals.HV_LOAD_BUNDLE -> gridCablePoint(36+wire,0)
-        terminal==50 -> Vec3(.405,4.65+wire*.32,0.0)
-        terminal in 40..42 -> Vec3(.405,4.65+(terminal-40)*.32,0.0)
+        terminal==50 || terminal in 40..42 -> ServiceCableMount.point(terminal,wire,serviceMountReach)
         (terminal==32 && kind.phases==1 || terminal==33 && kind.phases==3) -> Vec3(0.0,7.15,0.0)
         terminal==36 && kind.singlePhaseTap -> Vec3(-.68,5.85,if(kind.transformer).65 else 0.0)
         terminal in 36..38 && kind.cutout -> Vec3(-.68,5.85,phaseZ(terminal-36))

@@ -24,6 +24,8 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
         private set
     var lowVoltageRenderAngle=0f
         private set
+    var serviceMountReach=ServiceCableMount.MIN_REACH.toFloat()
+        private set
 
     init {
         this.descriptor = descriptor as GridDescriptor
@@ -62,6 +64,8 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
         try {
             idealRenderingAngle = stream.readFloat()
             highVoltageRenderAngle=stream.readFloat();lowVoltageRenderAngle=stream.readFloat()
+            serviceMountReach=stream.readFloat()
+            require(serviceMountReach.isFinite() && serviceMountReach in .1f..8f)
             val linkCount=stream.readInt();require(linkCount in 0..4096)
             val incoming=List(linkCount) { OverheadSpan.read(stream) }
             // Voltage/status packets must not rebuild identical cable display lists or DH objects.

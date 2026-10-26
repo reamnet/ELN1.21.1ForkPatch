@@ -34,7 +34,7 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
     }
     private val twinFixture by lazy { Eln.obj.getObj("utilitytwinled") }
     override fun rotationIsFixed()=true
-    fun drawEquipment(front: Direction,display: DistributionDisplay?=null,hvAngle: Float=mods.eln.gridnode.PoleSpanAlignment.frontAngle(front),lvAngle: Float=mods.eln.gridnode.PoleSpanAlignment.frontAngle(front))=preserveMatrix {
+    fun drawEquipment(front: Direction,display: DistributionDisplay?=null,hvAngle: Float=mods.eln.gridnode.PoleSpanAlignment.frontAngle(front),lvAngle: Float=mods.eln.gridnode.PoleSpanAlignment.frontAngle(front),serviceReach: Double=mods.eln.gridnode.ServiceCableMount.MIN_REACH)=preserveMatrix {
         if(kind.underground) { UndergroundCabinetVisual.draw(kind,front,display);return@preserveMatrix }
         front.glRotateXnRef();GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
@@ -50,22 +50,17 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
                 part("TopPin",.57f,.66f,.68f)
             }
             if(kind.transformer && display?.installed!=false) {
-                part("Transformer",.53f,.55f,.54f);part("TransformerPin",.32f,.43f,.44f)
-                part("TransformerFeed${if(kind.phases==1)1 else display?.phase ?: 0}",.12f,.14f,.15f)
+                PoleTransformerVisual.draw(display?.rating ?: 10_000)
+                PoleLeadVisual.draw(net.minecraft.world.phys.Vec3(-.68,5.85,0.0),PoleTransformerShape.of(display?.rating ?: 10_000).bushing)
+                val phase=if(kind.phases==1)1 else display?.phase ?: 0
+                PoleLeadVisual.draw(net.minecraft.world.phys.Vec3(0.0,if(phase==1)7.15 else 6.63,if(kind.phases==1)0.0 else (phase-1)*.95),net.minecraft.world.phys.Vec3(-.68,6.40,0.0))
             }
             if(kind.transformer || kind.cutout || kind.regulator || kind.singlePhaseTap)repeat(kind.fuseCount) { i ->
                 preserveMatrix {
                 if(kind.transformer && kind.singlePhaseTap && i==1)GL11.glTranslated(0.0,0.0,.65)
                 val visual=if(kind.phases==1 || kind.transformer || kind.singlePhaseTap)1 else i
-                if(kind.cutout || kind.regulator)part("FuseJumper$visual",.13f,.15f,.16f)
-                part("CutoutBase$visual",.32f,.34f,.35f);part("CutoutInsulator$visual",.68f,.68f,.61f)
-                preserveMatrix {
-                    val z=if(kind.phases==1 || kind.transformer || kind.singlePhaseTap)0.0 else (i-1)*.95
-                    GL11.glTranslated(-.68,5.85,z)
-                    if(display?.fuseClosed?.getOrNull(i)==false)GL11.glRotated(125.0,0.0,0.0,1.0)
-                    GL11.glTranslated(.68,-5.85,-z)
-                    part("FuseDoor$visual",if(display?.fuseBlown?.getOrNull(i)==true).23f else .53f,.36f,.20f)
-                }
+                if(kind.cutout || kind.regulator)PoleLeadVisual.draw(net.minecraft.world.phys.Vec3(0.0,if(visual==1)7.15 else 6.63,(visual-1)*.95),net.minecraft.world.phys.Vec3(-.68,6.40,(visual-1)*.95))
+                PoleCutoutVisual.draw(visual,display?.fuseClosed?.getOrNull(i)!=false,display?.fuseBlown?.getOrNull(i)==true)
                 }
             }
             if(kind.singlePhaseTap)PoleLeadVisual.draw(net.minecraft.world.phys.Vec3(0.0,if(display?.phase==1)7.15 else 6.63,((display?.phase ?: 0)-1)*.95),net.minecraft.world.phys.Vec3(-.68,6.4,if(kind.transformer).65 else 0.0))
@@ -87,14 +82,9 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
             }
             preserveMatrix {
                 GL11.glRotatef(lvAngle-base,0f,1f,0f)
-                PoleSecondaryVisual.suspension()
+                PoleSecondaryVisual.suspension(serviceReach)
             }
-            if(kind.transformer && display?.installed!=false)repeat(3) { i ->
-                val from=net.minecraft.world.phys.Vec3(-.60,5.15+i*.05,.20).yRot(Math.toRadians((hvAngle-base).toDouble()).toFloat())
-                val to=mods.eln.gridnode.OverheadSpanMesh.terminal(net.minecraft.world.phys.Vec3(.405,4.97,0.0),i,.025).yRot(Math.toRadians((lvAngle-base).toDouble()).toFloat())
-                val mid=net.minecraft.world.phys.Vec3(-.05,5.6+i*.06,.48)
-                PoleLeadVisual.draw(from,mid);PoleLeadVisual.draw(mid,to)
-            }
+            if(kind.transformer && display?.installed!=false)PoleTransformerVisual.secondaryLeads(display?.rating ?: 10_000,hvAngle-base,lvAngle-base,serviceReach)
             if(kind.light)preserveMatrix {
                 fun lampPart(name: String,r: Float,g: Float,b: Float) {
                     if(kind.twinLight)preserveMatrix {
@@ -186,10 +176,10 @@ class DistributionPoleRender(entity: TransparentNodeEntity,descriptor: Transpare
     private var cable: mods.eln.cable.CableRenderType?=null
     override fun draw() {
         drawCables()
-        mods.eln.client.terrain.TerrainModels.body(this,listOf(front,highVoltageRenderAngle,lowVoltageRenderAngle,
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(front,highVoltageRenderAngle,lowVoltageRenderAngle,serviceMountReach,display.rating,
             display.installed,display.phase,display.fuseClosed,display.fuseBlown,display.closed,display.enabled,
             display.heightStep,display.yaw,display.pitch,display.light>0)) {
-            (transparentNodeDescriptor as DistributionPoleDescriptor).drawEquipment(front ?: Direction.XN,display,highVoltageRenderAngle,lowVoltageRenderAngle)
+            (transparentNodeDescriptor as DistributionPoleDescriptor).drawEquipment(front ?: Direction.XN,display,highVoltageRenderAngle,lowVoltageRenderAngle,serviceMountReach.toDouble())
         }
         cable=drawCable(Direction.YN,if((transparentNodeDescriptor as DistributionPoleDescriptor).kind==DistributionKind.FEEDER_THREE)Eln.instance.stdCableRender3200V else Eln.instance.stdCableRender200V,connections,cable)
     }

@@ -83,12 +83,15 @@ class UtilityStreetLightRender(entity: TransparentNodeEntity, descriptor: Transp
     private var cable: CableRenderType? = null
     override fun draw() {
         drawCables()
-        mods.eln.client.terrain.TerrainModels.body(this,listOf(front,highVoltageRenderAngle,lowVoltageRenderAngle,
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(front,highVoltageRenderAngle,lowVoltageRenderAngle,serviceMountReach,display.pole.rating,
             display.pole.fuseClosed,display.pole.fuseBlown,display.installed,display.heightStep,display.yaw,display.pitch,display.light>0)) {
             (transparentNodeDescriptor as UtilityStreetLightDescriptor).draw(highVoltageRenderAngle)
-            mods.eln.utility.PoleFuseVisual.draw(front ?: Direction.XN,display.pole.fuseClosed,display.pole.fuseBlown)
-            mods.eln.misc.preserveMatrix { mods.eln.client.gl.GL11.glRotatef(lowVoltageRenderAngle,0f,1f,0f);mods.eln.utility.PoleSecondaryVisual.draw(Direction.XN) }
-            (transparentNodeDescriptor as UtilityStreetLightDescriptor).drawLamp(front ?: Direction.XN, display.light > 0, display.installed, display.heightStep, display.yaw, display.pitch)
+            mods.eln.misc.preserveMatrix {
+                mods.eln.client.gl.GL11.glRotatef(highVoltageRenderAngle,0f,1f,0f)
+                mods.eln.utility.PoleFuseVisual.draw(Direction.XN,display.pole.fuseClosed,display.pole.fuseBlown)
+            }
+            mods.eln.misc.preserveMatrix { mods.eln.client.gl.GL11.glRotatef(lowVoltageRenderAngle,0f,1f,0f);mods.eln.utility.PoleSecondaryVisual.draw(Direction.XN,serviceMountReach.toDouble()) }
+            (transparentNodeDescriptor as UtilityStreetLightDescriptor).drawLamp(front ?: Direction.XN, display.light > 0, display.installed, display.heightStep, display.yaw, display.pitch,display.pole.rating,highVoltageRenderAngle)
         }
         cable = drawCable(front!!.down(), Eln.instance.stdCableRender200V, display.connections, cable)
     }

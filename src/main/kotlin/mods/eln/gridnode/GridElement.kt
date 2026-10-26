@@ -42,6 +42,23 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
     open val alignsPoleSpans=false
     open val suspendsServiceCable get()=alignsPoleSpans && gridLoads(50).size==3
     open val serviceDropEndpoint=false
+    internal open fun serviceClearance()=ServiceCableClearance(Vec3.ZERO,ServiceCableMount.POLE_RADIUS)
+    val serviceMountAngle: Float get() {
+        val normal=Vec3(0.0,0.0,-1.0).yRot(Math.toRadians(lowVoltageRenderAngle.toDouble()).toFloat())
+        return lowVoltageRenderAngle+if(normal.dot(serviceClearance().center)>1e-8)180f else 0f
+    }
+    val serviceMountReach: Double get() {
+        if(!suspendsServiceCable)return ServiceCableMount.MIN_REACH
+        val radius=gridLinkList.asSequence().filter { ServiceTerminals.isService(it.getTerminal(this)) }
+            .mapNotNull { ElectricalCableDescriptor.getDescriptor(it.cable) as? ElectricalCableDescriptor }
+            .map { OverheadCableAppearance.of(it).outsideRadius }.maxOrNull() ?: 0.0
+        return ServiceCableMount.reach(radius,serviceClearance(),serviceMountAngle)
+    }
+    /** A neighbour may own the span packet ending at this pole's resized can/support. */
+    internal fun publishServiceGeometry(resolve: (Coordinate)->GridElement? = { GridLink.getElementFromCoordinate(it) }) {
+        needPublish()
+        for(link in gridLinkList)resolve(if(link.a==coordinate())link.b else link.a)?.needPublish()
+    }
     open val alignsPrimaryPhaseOrder=false
     open fun contributesToPoleAlignment(terminal: Int)=true
 
@@ -250,7 +267,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
     open fun renderWireCount(terminal: Int)=2
     open fun gridCablePoint(terminal: Int,wire: Int): Vec3 = getRenderCablePoint(Direction.fromInt(terminal) ?: Direction.XN,wire)
     fun gridRenderAngle(terminal: Int)=if(!alignsPoleSpans)idealRenderingAngle else
-        if(PoleSpanAlignment.secondary(terminal))lowVoltageRenderAngle else highVoltageRenderAngle
+        if(PoleSpanAlignment.secondary(terminal))serviceMountAngle else highVoltageRenderAngle
     open fun renderedGridCablePoint(terminal: Int,wire: Int)=gridCablePoint(terminal,wire)
         .yRot(Math.toRadians(gridRenderAngle(terminal).toDouble()).toFloat())
 
@@ -376,7 +393,8 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
         super.networkSerialize(stream)
         try {
             stream.writeFloat(idealRenderingAngle)
-            stream.writeFloat(highVoltageRenderAngle);stream.writeFloat(lowVoltageRenderAngle)
+            stream.writeFloat(highVoltageRenderAngle);stream.writeFloat(serviceMountAngle)
+            stream.writeFloat(serviceMountReach.toFloat())
             // Each wire pair should be drawn by exactly one node.
             // Check for which ones it's this one.
             val ourLinks = gridLinkList.filter { it.a == coordinate()/* && link.connected*/ }

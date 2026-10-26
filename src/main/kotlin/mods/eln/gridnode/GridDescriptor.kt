@@ -40,7 +40,7 @@ open class GridDescriptor(name: String, protected val obj: Obj3D, ElementClass: 
         }
     }
 
-    fun draw(idealRenderingAngle: Float) {
+    open fun draw(idealRenderingAngle: Float) {
         preserveMatrix {
             glTranslated(
                 renderOffset.xCoord, renderOffset.yCoord, renderOffset.zCoord

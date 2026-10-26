@@ -31,13 +31,19 @@ class ElectricalPoleDescriptor(name: String,
             if (kind != Kind.OVERHEAD || name == "Transmission Tower")
                 static_parts.add(it)
         }
-        if (includeTransformer) {
-            arrayOf("transformer", "cables").forEach {
-                obj.getPart(it)?.let { rotating_parts.add(it) }
-            }
-        }
     }
 
     override fun hasCustomIcon() = this.name == "Transmission Tower"
+
+    override fun draw(idealRenderingAngle: Float)=drawPole(idealRenderingAngle,10_000)
+    fun drawPole(angle: Float,watts: Int) {
+        super.draw(angle)
+        if(includeTransformer)mods.eln.misc.preserveMatrix {
+            mods.eln.client.gl.GL11.glRotatef(angle,0f,1f,0f)
+            mods.eln.client.gl.GL11.glPushAttrib(mods.eln.client.gl.GL11.GL_ALL_ATTRIB_BITS)
+            try { mods.eln.client.gl.GL11.glDisable(mods.eln.client.gl.GL11.GL_TEXTURE_2D);mods.eln.utility.PoleTransformerVisual.draw(watts) }
+            finally { mods.eln.client.gl.GL11.glPopAttrib() }
+        }
+    }
 
 }

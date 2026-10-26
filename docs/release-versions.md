@@ -59,6 +59,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.53` | — | Keep transmission insulator overhangs baked in air-only Sodium sections; keep distant wires thin and align DH handoff with loaded render chunks |
 | `v3.0.54` | — | Recover DH geometry across renderer replacement and reconnect; prioritize power lines; mark substation voltage banks and phases, fix rotated terminal picking and keep banks stationary |
 | `v3.0.55` | — | Gauge- and material-aware overhead cables, insulated secondary triplex, compact suspension points and real service-drop splice leads |
+| `v3.0.56` | — | LV cables clear pole and transformer cases, rating-sized transformer cans, and fixed cutout holders with separate drop-out carriers |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`

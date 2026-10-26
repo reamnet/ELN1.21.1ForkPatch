@@ -28,7 +28,8 @@ internal data class OverheadCableAppearance(val radius: Double, val metal: Int, 
 internal data class OverheadWire(val points: List<Vec3>,val radius: Double,val color: Int)
 internal data class OverheadSplice(val tangent: Vec3,val radius: Double)
 internal data class OverheadSpan(val ends: List<Pair<Vec3,Vec3>>,val appearance: OverheadCableAppearance,
-                                 val triplex: Boolean=false,val startSplice: OverheadSplice?=null,val endSplice: OverheadSplice?=null) {
+                                 val triplex: Boolean=false,val startSplice: OverheadSplice?=null,val endSplice: OverheadSplice?=null,
+                                 val startPole: ServiceCableClearance?=null,val endPole: ServiceCableClearance?=null) {
     fun write(out: DataOutputStream) {
         out.writeByte(ends.size);out.writeFloat(appearance.radius.toFloat());out.writeInt(appearance.metal)
         out.writeBoolean(appearance.insulated);out.writeBoolean(triplex)
@@ -37,6 +38,7 @@ internal data class OverheadSpan(val ends: List<Pair<Vec3,Vec3>>,val appearance:
             out.writeBoolean(splice!=null)
             if(splice!=null) { writeVec(out,splice.tangent);out.writeFloat(splice.radius.toFloat()) }
         }
+        for(pole in listOf(startPole,endPole)) { out.writeBoolean(pole!=null);if(pole!=null) { writeVec(out,pole.center);out.writeFloat(pole.radius.toFloat()) } }
     }
     companion object {
         private fun writeVec(out: DataOutputStream,v: Vec3) { out.writeFloat(v.x.toFloat());out.writeFloat(v.y.toFloat());out.writeFloat(v.z.toFloat()) }
@@ -54,7 +56,12 @@ internal data class OverheadSpan(val ends: List<Pair<Vec3,Vec3>>,val appearance:
                 require(tangent.lengthSqr()>1e-12 && radius.isFinite() && radius in .00001..2.0)
                 OverheadSplice(tangent,radius)
             } else null
-            return OverheadSpan(ends,appearance,triplex,splice(),splice())
+            val start=splice();val end=splice()
+            fun pole()=if(input.readBoolean()) {
+                val center=readVec(input);val radius=input.readFloat().toDouble();require(radius.isFinite() && radius in .01..4.0)
+                ServiceCableClearance(center,radius)
+            } else null
+            return OverheadSpan(ends,appearance,triplex,start,end,pole(),pole())
         }
     }
 }
@@ -68,28 +75,36 @@ internal object OverheadSpanMesh {
     })
     fun conductors(span: OverheadSpan): List<OverheadWire> {
         val style=span.appearance;val r=style.outsideRadius
-        if(!span.triplex)return span.ends.map { (a,b)->OverheadWire(OverheadCableMesh.points(a,b),r,
+        fun route(points: List<Vec3>,envelope: Double): List<Vec3> {
+            return ServiceCablePath.route(points,listOfNotNull(span.startPole,span.endPole),envelope+.04)
+        }
+        if(!span.triplex)return span.ends.map { (a,b)->OverheadWire(route(OverheadCableMesh.points(a,b),sqrt(2.0)*r),r,
             if(style.insulated)OverheadCableAppearance.JACKET else style.metal) }
         val start=span.ends.map { it.first }.reduce(Vec3::add).scale(1.0/3)
         val end=span.ends.map { it.second }.reduce(Vec3::add).scale(1.0/3)
-        val length=start.distanceTo(end)
-        val centers=OverheadCableMesh.points(start,end,ceil(length*3).toInt().coerceIn(16,512))
-        val direction=end.subtract(start).normalize()
-        val right=Vec3(-direction.z,0.0,direction.x).let { if(it.lengthSqr()<1e-12)Vec3(1.0,0.0,0.0) else it.normalize() }
-        val up=direction.cross(right).normalize()
-        fun phase(offset: Vec3)=atan2(offset.dot(up),offset.dot(right))
-        val startPhase=phase(span.ends[0].first.subtract(start))
+        val centers=route(OverheadCableMesh.points(start,end,ceil(start.distanceTo(end)*3).toInt().coerceIn(16,512)),max(3*r,maxOf(span.ends.maxOf { hypot(it.first.x-start.x,it.first.z-start.z) },span.ends.maxOf { hypot(it.second.x-end.x,it.second.z-end.z) }))+sqrt(2.0)*r)
+        val distance=DoubleArray(centers.size)
+        for(i in 1..centers.lastIndex)distance[i]=distance[i-1]+centers[i].distanceTo(centers[i-1])
+        val length=distance.last()
+        fun frame(i: Int): Pair<Vec3,Vec3> {
+            val tangent=centers[min(i+1,centers.lastIndex)].subtract(centers[max(0,i-1)]).normalize()
+            val right=Vec3(-tangent.z,0.0,tangent.x).let { if(it.lengthSqr()<1e-12)Vec3(1.0,0.0,0.0) else it.normalize() }
+            return right to tangent.cross(right).normalize()
+        }
+        fun phase(offset: Vec3,i: Int)=frame(i).let { (right,up)->atan2(offset.dot(up),offset.dot(right)) }
+        val startPhase=phase(span.ends[0].first.subtract(start),0)
         val expectedEnd=startPhase+length*PI
-        val correction=phase(span.ends[0].second.subtract(end))-expectedEnd
+        val correction=phase(span.ends[0].second.subtract(end),centers.lastIndex)-expectedEnd
         val endPhase=expectedEnd+atan2(sin(correction),cos(correction))
         return (0..2).map { wire->
             val points=centers.mapIndexed { i,c->
                 if(i==0)return@mapIndexed span.ends[wire].first
                 if(i==centers.lastIndex)return@mapIndexed span.ends[wire].second
-                val t=i.toDouble()/centers.lastIndex
+                val t=distance[i]/length
                 // Match the terminal fan-out at both ends, so twisting cannot fold a hot
                 // conductor back through the messenger as it enters a splice or weatherhead.
                 val angle=startPhase+(endPhase-startPhase)*t
+                val (right,up)=frame(i)
                 val offset=if(wire==2)Vec3.ZERO else right.scale(cos(angle+wire*PI)*r*3).add(up.scale(sin(angle+wire*PI)*r*3))
                 fun smooth(x: Double)=x.coerceIn(0.0,1.0).let { it*it*(3-2*it) }
                 val fade=smooth(min(t,1-t)*length/.8)

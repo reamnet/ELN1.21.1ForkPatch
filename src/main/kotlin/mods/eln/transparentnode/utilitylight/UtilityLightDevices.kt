@@ -78,6 +78,8 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
     override val cordVoltage get()=unit.outputVoltage.toDouble()
     override fun cordChanged() { configureLamp() }
     val installed get() = isStepDownUnit(inventory.getItem(0))
+    internal override fun serviceClearance()=if(installed)mods.eln.utility.PoleTransformerShape.of(unit.ratedWatts)
+        .clearance(highVoltageRenderAngle) else super.serviceClearance()
     internal val lamp = Resistor(unit.secondary, null)
     private var darkOutside = false
     private val fixture get() = transparentNodeDescriptor as UtilityStreetLightDescriptor
@@ -140,7 +142,7 @@ class UtilityStreetLightElement(node: TransparentNode, descriptor: TransparentNo
     override fun getConnectionMask(side: Direction, lrdu: LRDU) =
         if (getElectricalLoad(side, lrdu) != null) NodeBase.maskElectricalPower else 0
     override fun getThermalLoad(side: Direction, lrdu: LRDU) = if (getElectricalLoad(side, lrdu) != null) unit.thermal else null
-    override fun inventoryChange(inventory: Container?) { unit.installRating(mods.eln.utility.PoleHardware.transformerWatts(this.inventory.getItem(0)) ?: 10_000);configureLamp(); needPublish() }
+    override fun inventoryChange(inventory: Container?) { unit.installRating(mods.eln.utility.PoleHardware.transformerWatts(this.inventory.getItem(0)) ?: 10_000);configureLamp();publishServiceGeometry() }
     override fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
         val held = player.mainHandItem
         if(mods.eln.utility.PoleHardware.extract(player,listOf(fuse))) { fuseContact.closed=fuse.closed;needPublish();return true }

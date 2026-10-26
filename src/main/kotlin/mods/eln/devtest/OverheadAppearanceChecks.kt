@@ -38,12 +38,14 @@ object OverheadAppearanceChecks {
     private val passed=ArrayList<String>();private val measured=linkedMapOf<String,Any>()
     private val output get()=mc.gameDirectory.toPath().resolve("overhead-appearance-checks")
     private val poles=ArrayList<BlockPos>()
+    private val ratedPoles=ArrayList<DistributionPoleElement>()
     private val mainPos=BlockPos(280,80,256);private val nextPos=BlockPos(304,80,256);private val mastPos=BlockPos(280,82,272)
     private lateinit var main: GridElement;private lateinit var next: GridElement;private lateinit var mast: GridElement
     private var drop: GridLink?=null
     private var savedMesh: Any?=null
     private var savedBakedMesh: Any?=null
     private var bakedDrawCalls=0L
+    private var closedHolder=emptySet<List<Int>>()
     private val draws=AtomicLong();private val groups=IdentityHashMap<Any,Boolean>()
     private fun cable(size: String,material: UtilityCableMaterial,insulated: Boolean)=UtilityCableDescriptor.allDescriptors().first {
         it.sizeLabel==size && it.material==material && it.insulated==insulated && !it.melted
@@ -58,6 +60,12 @@ object OverheadAppearanceChecks {
     }
     private fun baked(pos: BlockPos)=mods.eln.client.terrain.TerrainModels.meshFor(
         ((mc.level!!.getBlockEntity(pos) as TransparentNodeEntity).elementRender as GridRender).terrainCableOwner)
+    private fun cutoutVertices(color: Int): List<List<Int>> {
+        val render=(mc.level!!.getBlockEntity(BlockPos(280,80,368)) as TransparentNodeEntity).elementRender!!
+        return checkNotNull(mods.eln.client.terrain.TerrainModels.meshFor(render)).batches.flatMap { batch->
+            (0 until batch.vertices.size step 9).filter { batch.vertices[it+8]==color }.map { i->listOf(batch.vertices[i],batch.vertices[i+1],batch.vertices[i+2]) }
+        }
+    }
     private fun photo(name: String) { Files.createDirectories(output);Screenshot.takeScreenshot(mc.mainRenderTarget).use { it.writeToFile(output.resolve("$name.png")) } }
     private fun setup() {
         val p=mc.singleplayerServer!!.playerList.players.first();val w=p.serverLevel();val f=NativeCampaignFixtures(w,p)
@@ -79,6 +87,15 @@ object OverheadAppearanceChecks {
             val c=cable(if(i%2==0)"2 AWG" else "1000 kcmil",if(i<2)UtilityCableMaterial.COPPER else UtilityCableMaterial.ALUMINUM,false)
             GridLink.addLink(a,b,32,32,c,32)
         }
+        for((i,rating)in listOf(10_000,25_000,50_000,75_000,100_000).withIndex()) {
+            val pole=place(BlockPos(256+i*6,80,368),DistributionKind.TRANSFORMER_SINGLE.title) as DistributionPoleElement
+            pole.inventory.setItem(0,Eln.findItemStack(PoleHardware.transformerNames[i],1));pole.inventoryChange(pole.inventory)
+            ratedPoles+=pole
+            if(i>0)GridLink.addLink(ratedPoles[i-1],pole,50,50,cable("1000 kcmil",UtilityCableMaterial.ALUMINUM,true),18)
+        }
+        val corner=(0..2).map { i->place(listOf(BlockPos(320,80,288),BlockPos(344,80,288),BlockPos(344,80,312))[i],DistributionKind.SECONDARY.title) }
+        GridLink.addLink(corner[0],corner[1],50,50,cable("1000 kcmil",UtilityCableMaterial.ALUMINUM,true),72)
+        GridLink.addLink(corner[1],corner[2],50,50,cable("1000 kcmil",UtilityCableMaterial.ALUMINUM,true),72)
         val first=place(BlockPos(256,80,256),DistributionKind.SECONDARY.title)
         main=place(mainPos,DistributionKind.SECONDARY.title);next=place(nextPos,DistributionKind.SECONDARY.title)
         mast=place(mastPos,"120/240V Service Weatherhead")
@@ -113,7 +130,7 @@ object OverheadAppearanceChecks {
     @SubscribeEvent fun tick(event: ClientTickEvent.Post) {
         if(!java.lang.Boolean.getBoolean("eln.overheadAppearanceChecks") || done)return
         try {
-            ticks++;check(++total<2600) { "Timed out in phase $phase" }
+            ticks++;check(++total<3400) { "Timed out in phase $phase" }
             if(phase==8)attachDhCounters()
             when(phase) {
                 0->if(mc.screen is TitleScreen && mc.overlay==null && ticks>20) {
@@ -135,6 +152,36 @@ object OverheadAppearanceChecks {
                     }
                     check(bakedQuads>1000 && spanSections>4)
                     measured["bakedCableQuads"]=bakedQuads;measured["bakedCableSections"]=spanSections
+                    var minimum=Double.POSITIVE_INFINITY
+                    for(pos in poles) {
+                        val render=(mc.level!!.getBlockEntity(pos) as TransparentNodeEntity).elementRender as GridRender
+                        @Suppress("UNCHECKED_CAST")
+                        val spans=GridRender::class.java.getDeclaredField("spans").apply { isAccessible=true }.get(render) as? List<OverheadSpan> ?: continue
+                        for(span in spans)for(shield in listOfNotNull(span.startPole,span.endPole))for(wire in OverheadSpanMesh.geometry(span))for((a,b)in wire.points.zipWithNext()) {
+                            val dx=b.x-a.x;val dz=b.z-a.z;val squared=dx*dx+dz*dz
+                            val t=if(squared<1e-16)0.0 else (((shield.center.x-a.x)*dx+(shield.center.z-a.z)*dz)/squared).coerceIn(0.0,1.0)
+                            val clear=kotlin.math.hypot(a.x+dx*t-shield.center.x,a.z+dz*t-shield.center.z)-kotlin.math.sqrt(2.0)*wire.radius-shield.radius
+                            minimum=minOf(minimum,clear)
+                        }
+                    }
+                    check(minimum>=-1e-4) { "Published LV cable intersects a pole/can: $minimum" }
+                    measured["minimumPoleCanClearance"]=minimum
+                    passed+="Actual client span packets clear poles and all five transformer cans, including thick triplex corners and splices"
+                    val tankColor=mods.eln.client.gl.VertexColors.pack(.53f,.55f,.54f,1f)
+                    val dimensions=ArrayList<Map<String,Any>>()
+                    for((i,pole)in ratedPoles.withIndex()) {
+                        val pos=BlockPos(256+i*6,80,368)
+                        val render=(mc.level!!.getBlockEntity(pos) as TransparentNodeEntity).elementRender!!
+                        val body=checkNotNull(mods.eln.client.terrain.TerrainModels.meshFor(render))
+                        val points=body.batches.flatMap { batch->(0 until batch.vertices.size step 9).filter { batch.vertices[it+8]==tankColor }.map {
+                            Vec3(Float.fromBits(batch.vertices[it]).toDouble(),Float.fromBits(batch.vertices[it+1]).toDouble(),Float.fromBits(batch.vertices[it+2]).toDouble()) } }
+                        check(points.isNotEmpty()) { "No baked tank for rating $i" }
+                        dimensions+=mapOf("rating" to listOf(10,25,50,75,100)[i],"diameter" to maxOf(points.maxOf { it.x }-points.minOf { it.x },points.maxOf { it.z }-points.minOf { it.z }),"height" to points.maxOf { it.y }-points.minOf { it.y })
+                    }
+                    check(dimensions.zipWithNext().all { (a,b)->(a["diameter"] as Double)<(b["diameter"] as Double) && (a["height"] as Double)<(b["height"] as Double) })
+                    measured["transformerDimensions"]=dimensions
+                    passed+="Native baked tank geometry grows in both height and diameter from 10 through 100, with aligned bushings"
+
                     passed+="Native spans and splice fittings bake into terrain meshes across multiple air-only sections"
                     check(all.any { it.color==OverheadCableAppearance.COPPER } && all.any { it.color==OverheadCableAppearance.ALUMINUM })
                     check(all.filter { it.color==OverheadCableAppearance.COPPER }.map { it.radius }.distinct().size>=2)
@@ -142,6 +189,38 @@ object OverheadAppearanceChecks {
                     measured["wireRadii"]=all.map { it.radius }.distinct().sorted()
                     passed+="Real span packets create native copper/aluminum geometry at distinct installed gauges, plus insulated triplex"
                     photo("gauge-gallery")
+                    server { ratedPoles[1].inventory.setItem(0,Eln.findItemStack(PoleHardware.transformerNames[4],1));ratedPoles[1].inventoryChange(ratedPoles[1].inventory) };phase=13
+                }
+                13->if(work!!.isDone && ticks>100) {
+                    work!!.join()
+                    val render=(mc.level!!.getBlockEntity(BlockPos(256,80,368)) as TransparentNodeEntity).elementRender as GridRender
+                    @Suppress("UNCHECKED_CAST")
+                    val spans=GridRender::class.java.getDeclaredField("spans").apply { isAccessible=true }.get(render) as List<OverheadSpan>
+                    check(kotlin.math.abs(spans.single().endPole!!.radius-PoleTransformerShape.of(100_000).clearance(0f).radius)<1e-6) { "Neighbour-owned span kept old transformer geometry" }
+                    passed+="Swapping a transformer item refreshes the neighbour-owned wire endpoint and clearance envelope"
+                    server { ratedPoles[1].inventory.setItem(0,Eln.findItemStack(PoleHardware.transformerNames[1],1));ratedPoles[1].inventoryChange(ratedPoles[1].inventory) };phase=14
+                }
+                14->if(work!!.isDone && ticks>100) {
+                    work!!.join();server { camera(268.0,87.5,384.0,Vec3(268.0,85.7,368.5)) };phase=9
+                }
+                9->if(work!!.isDone && ticks>120) {
+                    work!!.join();photo("transformer-ratings")
+                    server { camera(281.9,85.6,370.8,Vec3(280.5,86.6,369.18)) };phase=10
+                }
+                10->if(work!!.isDone && ticks>100) {
+                    work!!.join();photo("cutout-closed")
+                    closedHolder=cutoutVertices(mods.eln.client.gl.VertexColors.pack(.68f,.68f,.61f,1f)).toSet()
+                    check(closedHolder.isNotEmpty())
+                    val carrier=cutoutVertices(mods.eln.client.gl.VertexColors.pack(.86f,.86f,.77f,1f))
+                    check(carrier.isNotEmpty() && carrier.minOf { Float.fromBits(it[1]) }>6.35f)
+                    server { check(ratedPoles.last().fuses[0].operate());ratedPoles.last().inventoryChange(ratedPoles.last().inventory) };phase=11
+                }
+                11->if(work!!.isDone && ticks>100) {
+                    work!!.join();photo("cutout-open")
+                    check(cutoutVertices(mods.eln.client.gl.VertexColors.pack(.68f,.68f,.61f,1f)).toSet()==closedHolder)
+                    val carrier=cutoutVertices(mods.eln.client.gl.VertexColors.pack(.86f,.86f,.77f,1f))
+                    check(carrier.isNotEmpty() && carrier.maxOf { Float.fromBits(it[1]) }<6.35f)
+                    passed+="The cutout holder stays mounted while its separate carrier opens away from the pole"
                     server { camera(286.0,85.5,263.0,Vec3(281.0,85.3,256.5)) };phase=3
                 }
                 3->if(work!!.isDone && ticks>100) {

@@ -1,0 +1,92 @@
+{
+  "passed": [
+    "Native server rejects a bare service spool without consuming it; installed secondary and service drop use insulated cable",
+    "Actual client span packets clear poles and all five transformer cans, including thick triplex corners and splices",
+    "Native baked tank geometry grows in both height and diameter from 10 through 100, with aligned bushings",
+    "Native spans and splice fittings bake into terrain meshes across multiple air-only sections",
+    "Real span packets create native copper/aluminum geometry at distinct installed gauges, plus insulated triplex",
+    "Swapping a transformer item refreshes the neighbour-owned wire endpoint and clearance envelope",
+    "The cutout holder stays mounted while its separate carrier opens away from the pole",
+    "Disconnecting the service drop removes its splice and leads, leaving only the suspended main triplex",
+    "Reversing connection ownership preserves branch splices; unchanged status packets reuse native cable geometry",
+    "Baked spans emit no per-frame device vertices; whole-span fallback preserves render-boundary wires before DH handoff",
+    "DH actually draws cached colored/gauged spans after vanilla chunks unload"
+  ],
+  "measurements": {
+    "bakedCableQuads": 5280,
+    "bakedCableSections": 30,
+    "minimumPoleCanClearance": 0.14075610477261358,
+    "transformerDimensions": [
+      {
+        "rating": 10,
+        "diameter": 0.4535999596118927,
+        "height": 0.7811999320983887
+      },
+      {
+        "rating": 25,
+        "diameter": 0.5669999420642853,
+        "height": 0.9548001289367676
+      },
+      {
+        "rating": 50,
+        "diameter": 0.6929999589920044,
+        "height": 1.1934995651245117
+      },
+      {
+        "rating": 75,
+        "diameter": 0.8063999116420746,
+        "height": 1.356250286102295
+      },
+      {
+        "rating": 100,
+        "diameter": 0.8945999145507812,
+        "height": 1.5190000534057617
+      }
+    ],
+    "meshComponents": 40,
+    "wireColors": [
+      "ffd96b2e",
+      "ffc7ccd6",
+      "ff222629"
+    ],
+    "wireRadii": [
+      0.019631171599030495,
+      0.025164782486855983,
+      0.038100019097328186,
+      0.04695802253484726,
+      0.0761999636888504,
+      0.07748073600232601,
+      0.08677842432260514,
+      0.09191595715284347
+    ],
+    "distant": {
+      "available": true,
+      "failed": false,
+      "bound": true,
+      "genericRenderingEnabled": true,
+      "bindingGeneration": 1,
+      "retryTicks": 0,
+      "cacheFile": "eln-objects-v2.dat",
+      "cached": 33,
+      "groups": 33,
+      "gridSnapshots": 33,
+      "active": 33,
+      "pending": 0
+    },
+    "distantWireDraws": 637
+  },
+  "distant": {
+    "available": true,
+    "failed": false,
+    "bound": true,
+    "genericRenderingEnabled": true,
+    "bindingGeneration": 1,
+    "retryTicks": 0,
+    "cacheFile": "eln-objects-v2.dat",
+    "cached": 33,
+    "groups": 33,
+    "gridSnapshots": 33,
+    "active": 33,
+    "pending": 0
+  }
+}

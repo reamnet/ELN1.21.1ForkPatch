@@ -20,7 +20,7 @@ object UndergroundService {
     fun circuit(lrdu: LRDU)=when(lrdu) { LRDU.Left->0;LRDU.Right->1;else->2 }
 }
 
-class LegacyPolePorts(owner: GridElement,private val high: ElectricalLoad,suppliedServices: List<NbtElectricalLoad>?=null) {
+class LegacyPolePorts(private val owner: GridElement,private val high: ElectricalLoad,suppliedServices: List<NbtElectricalLoad>?=null) {
     val services=suppliedServices ?: List(3) { NbtElectricalLoad("poleService$it").apply { serialResistance=.00001 } }
     var selected=32
         private set
@@ -28,7 +28,7 @@ class LegacyPolePorts(owner: GridElement,private val high: ElectricalLoad,suppli
     val terminals=listOf(32,50,40,41,42)
     fun select(value: Int) { if(value in terminals)selected=value }
     fun loads(id: Int): List<ElectricalLoad> = when(id) { in 0..5,32->listOf(high);50->services;in 40..42->listOf(services[id-40]);else->emptyList() }
-    fun point(id: Int,wire: Int)=Vec3(.405,4.65+(if(id==50)wire else (id-40).coerceIn(0,2))*.32,0.0)
+    fun point(id: Int,wire: Int)=mods.eln.gridnode.ServiceCableMount.point(id,wire,owner.serviceMountReach)
     fun key(id: Int)=if(id<6)"LEGACY" else ServiceTerminals.key(id)
     fun write(nbt: CompoundTag) { nbt.putInt("poleSelectedTerminal",selected) }
     fun read(nbt: CompoundTag) { selected=nbt.getInt("poleSelectedTerminal").takeIf { it in terminals } ?: 32 }
@@ -69,10 +69,7 @@ object PoleFuseVisual {
         front.glRotateXnRef();GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
             GL11.glDisable(GL11.GL_TEXTURE_2D)
-            GL11.glColor3f(.34f,.35f,.35f);model.getPart("CutoutBase1")?.drawNoBind()
-            GL11.glColor3f(.65f,.66f,.60f);model.getPart("CutoutInsulator1")?.drawNoBind()
-            GL11.glTranslated(-.68,5.85,0.0);if(!closed)GL11.glRotated(125.0,0.0,0.0,1.0);GL11.glTranslated(.68,-5.85,0.0)
-            GL11.glColor3f(if(blown).22f else .53f,.36f,.20f);model.getPart("FuseDoor1")?.drawNoBind()
+            PoleCutoutVisual.draw(1,closed,blown)
         } finally { GL11.glPopAttrib() }
     }
 }
@@ -84,15 +81,19 @@ class LegacyPoleDisplay {
 object PoleSecondaryVisual {
     private val model by lazy { Eln.obj.getObj("distributionpole") }
     /** One compact suspension point; service connectors belong to actual branch links. */
-    fun suspension() {
-        GL11.glColor3f(.54f,.65f,.67f);model.getPart("Secondary1")?.drawNoBind()
-        PoleLeadVisual.draw(Vec3(.18,5.13,0.0),Vec3(.18,4.97,0.0))
-        PoleLeadVisual.draw(Vec3(.18,4.97,0.0),Vec3(.405,4.97,0.0))
+    fun suspension(reach: Double=mods.eln.gridnode.ServiceCableMount.MIN_REACH)=preserveMatrix {
+        GL11.glRotatef(90f,0f,1f,0f)
+        preserveMatrix {
+            GL11.glTranslated(reach-.405,0.0,0.0)
+            GL11.glColor3f(.54f,.65f,.67f);model.getPart("Secondary1")?.drawNoBind()
+        }
+        PoleLeadVisual.draw(Vec3(.14,4.97,0.0),Vec3(reach-.17,4.97,0.0))
+        PoleLeadVisual.draw(Vec3(.14,5.23,0.0),Vec3(reach-.19,4.97,0.0))
     }
-    fun draw(front: Direction)=preserveMatrix {
+    fun draw(front: Direction,reach: Double=mods.eln.gridnode.ServiceCableMount.MIN_REACH)=preserveMatrix {
         front.glRotateXnRef();GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
-            GL11.glDisable(GL11.GL_TEXTURE_2D);suspension()
+            GL11.glDisable(GL11.GL_TEXTURE_2D);suspension(reach)
         } finally { GL11.glPopAttrib() }
     }
 }

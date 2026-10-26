@@ -20,7 +20,7 @@ class PoleTransformerDescriptor(name: String,val watts: Int): GenericItemUsingDa
     override fun renderItem(type: IItemRenderer.ItemRenderType?,item: ItemStack?,vararg data: Any?)=preserveMatrix {
         val model=Eln.obj.getObj("distributionpole")
         GL11.glTranslated(.4,-5.35,0.0);GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
-        try { GL11.glDisable(GL11.GL_TEXTURE_2D);GL11.glColor3f(.56f,.59f,.58f);model.getPart("Transformer")?.drawNoBind();GL11.glColor3f(.30f,.43f,.46f);model.getPart("TransformerPin")?.drawNoBind() }
+        try { GL11.glDisable(GL11.GL_TEXTURE_2D);PoleTransformerVisual.draw(watts) }
         finally { GL11.glPopAttrib() }
         Unit
     }

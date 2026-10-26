@@ -58,16 +58,17 @@ class UtilityStreetLightDescriptor(name: String, val style: PoleLampStyle = Pole
 
         }
     }
-    fun drawLamp(front: Direction, lit: Boolean, installed: Boolean, heightStep: Int = 0, yaw: Int = 0, pitch: Int = 0) = preserveMatrix {
+    fun drawLamp(front: Direction, lit: Boolean, installed: Boolean, heightStep: Int = 0, yaw: Int = 0, pitch: Int = 0, rating: Int = 10_000, transformerAngle: Float = mods.eln.gridnode.PoleSpanAlignment.frontAngle(front)) = preserveMatrix {
+        if(installed)preserveMatrix {
+            GL11.glRotatef(transformerAngle,0f,1f,0f);GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
+            try { GL11.glDisable(GL11.GL_TEXTURE_2D);mods.eln.utility.PoleTransformerVisual.draw(rating) }
+            finally { GL11.glPopAttrib() }
+        }
         front.glRotateXnRef()
         GL11.glTranslated(0.0,3.0,0.0)
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
             GL11.glDisable(GL11.GL_TEXTURE_2D)
-            if (installed) {
-                GL11.glColor3f(.52f, .55f, .57f)
-                fixture.getPart("Transformer")?.drawNoBind()
-            }
             GL11.glTranslated(0.0, StreetLightMount.offset(heightStep), 0.0)
             GL11.glRotatef(yaw.toFloat(), 0f, 1f, 0f)
             GL11.glColor3f(.46f, .49f, .52f)
