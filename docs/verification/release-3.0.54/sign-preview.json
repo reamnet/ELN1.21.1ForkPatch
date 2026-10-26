@@ -1,0 +1,38 @@
+{
+  "passed": [
+    "Joined a real dedicated server and received the transmission/distribution fixtures",
+    "Both substations retain baked voltage/phase nameplates"
+  ],
+  "measurements": {
+    "near": {
+      "available": true,
+      "failed": false,
+      "bound": true,
+      "genericRenderingEnabled": true,
+      "bindingGeneration": 1,
+      "retryTicks": 0,
+      "cacheFile": "eln-objects-v2.dat",
+      "cached": 14,
+      "groups": 14,
+      "gridSnapshots": 14,
+      "active": 8,
+      "pending": 0
+    },
+    "bodyRenderCalls": 490,
+    "wireRenderCalls": 196
+  },
+  "distant": {
+    "available": true,
+    "failed": false,
+    "bound": true,
+    "genericRenderingEnabled": true,
+    "bindingGeneration": 1,
+    "retryTicks": 0,
+    "cacheFile": "eln-objects-v2.dat",
+    "cached": 14,
+    "groups": 14,
+    "gridSnapshots": 14,
+    "active": 0,
+    "pending": 0
+  }
+}

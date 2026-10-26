@@ -1,0 +1,69 @@
+{
+  "passed": [
+    "Joined a real dedicated server and received the transmission/distribution fixtures",
+    "DH actually rendered pole bodies and wire groups after normal multiplayer chunks unloaded",
+    "Real DH registry recreation preserves pole and conductor draw calls without reloading vanilla chunks",
+    "Both substations retain baked voltage/phase nameplates",
+    "Disconnect clears live groups and flushes the multiplayer snapshot cache",
+    "Persisted multiplayer poles and conductors draw after reconnecting outside vanilla range"
+  ],
+  "measurements": {
+    "near": {
+      "available": true,
+      "failed": false,
+      "bound": true,
+      "genericRenderingEnabled": true,
+      "bindingGeneration": 1,
+      "retryTicks": 0,
+      "cacheFile": "eln-objects-v2.dat",
+      "cached": 14,
+      "groups": 14,
+      "gridSnapshots": 14,
+      "active": 8,
+      "pending": 0
+    },
+    "far": {
+      "available": true,
+      "failed": false,
+      "bound": true,
+      "genericRenderingEnabled": true,
+      "bindingGeneration": 1,
+      "retryTicks": 0,
+      "cacheFile": "eln-objects-v2.dat",
+      "cached": 14,
+      "groups": 14,
+      "gridSnapshots": 14,
+      "active": 14,
+      "pending": 0
+    },
+    "initialBodyRenderCalls": 420,
+    "initialWireRenderCalls": 168,
+    "bodyRenderCalls": 406,
+    "wireRenderCalls": 172
+  },
+  "distant": {
+    "available": true,
+    "failed": false,
+    "bound": true,
+    "genericRenderingEnabled": true,
+    "bindingGeneration": 3,
+    "retryTicks": 0,
+    "cacheFile": "eln-objects-v2.dat",
+    "cached": 14,
+    "groups": 14,
+    "gridSnapshots": 14,
+    "active": 14,
+    "pending": 0
+  },
+  "version": "3.0.54",
+  "runtime": {
+    "minecraft": "1.21.1",
+    "neoforge": "21.1.249",
+    "distant_horizons": "3.3.3 (client and dedicated server)",
+    "sodium": "0.8.13",
+    "iris": "1.8.14-beta.1",
+    "shader": "BSL v10.1.8",
+    "renderer": "Mesa llvmpipe (correctness, not FPS benchmark)"
+  },
+  "command": "-Deln.distantMultiplayerChecks=true ./gradlew --no-daemon --max-workers=2 runClient; localhost dedicated server with -Deln.distantMultiplayerServer=true"
+}

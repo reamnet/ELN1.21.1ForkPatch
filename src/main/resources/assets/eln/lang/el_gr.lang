@@ -3387,8 +3387,11 @@ Through_Roof_Service_Mast.name=Through Roof Service Mast
 # src/main/kotlin/mods/eln/utility/TransmissionClient.kt
 %1$\:_%2$_/_%3$=%1$: %2$ / %3$
 Base_cables\:_left_A,_right_B,_rear_C;_overhead_links_connect_all_three_phases=Base cables: left A, right B, rear C; overhead links connect all three phases
+Blue_bank\:_%1$_kV_secondary=Blue bank: %1$ kV secondary
 Design_loading_per_phase\:_%1$_MW=Design loading per phase: %1$ MW
 Nominal_output\:_%1$_kV;_fixed_ratio_follows_grid_fluctuations=Nominal output: %1$ kV; fixed ratio follows grid fluctuations
+Orange_bank\:_%1$_kV_primary=Orange bank: %1$ kV primary
+Phase_letters_mark_the_matching_A,_B_and_C_terminals=Phase letters mark the matching A, B and C terminals
 Primary_disconnect\:_Closed=Primary disconnect: Closed
 Primary_disconnect\:_Open=Primary disconnect: Open
 Secondary_disconnect\:_Closed=Secondary disconnect: Closed

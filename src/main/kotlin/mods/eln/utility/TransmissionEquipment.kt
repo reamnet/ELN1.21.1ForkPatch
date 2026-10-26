@@ -41,6 +41,7 @@ class TransmissionElement(node: TransparentNode,descriptor: TransparentNodeDescr
     override val inventory=TransparentNodeElementInventory(0,1,this)
     override val alignsPoleSpans get()=!kind.station
     override val alignsPrimaryPhaseOrder=true
+    override val primaryPhaseOrientationIsFixed get()=kind.station
     val inputs=List(3) { NbtElectricalLoad("transmissionInput$it").apply { serialResistance=.00001 } }
     val outputs=if(kind.station)List(3) { NbtElectricalLoad("transmissionOutput$it").apply { serialResistance=.00001 } } else inputs
     var primaryClosed=true;private set
@@ -103,10 +104,13 @@ class TransmissionElement(node: TransparentNode,descriptor: TransparentNodeDescr
         return if(kind.station)Vec3(if(terminal in 36..38)2.5 else -2.5,kind.height-.65,(phase-1)*kind.spread)
             else Vec3(0.0,kind.height-.75,(phase-1)*kind.spread)
     }
-    override fun aimedSingleGridTerminal(side: Direction,localHit: Vec3): Int =
-        (if(kind.station && localHit.x>0)36 else 32)+(if(localHit.z<-.16)0 else if(localHit.z>.16)2 else 1)
+    private fun modelHit(hit: Vec3)=hit.yRot(-Math.toRadians(highVoltageRenderAngle.toDouble()).toFloat())
+    override fun aimedSingleGridTerminal(side: Direction,localHit: Vec3): Int {
+        val hit=modelHit(localHit)
+        return (if(kind.station && hit.x>0)36 else 32)+(if(hit.z<-.16)0 else if(hit.z>.16)2 else 1)
+    }
     override fun aimedGridTerminal(side: Direction,localHit: Vec3)=
-        if(kind.station && localHit.x>0)ServiceTerminals.HV_LOAD_BUNDLE else ServiceTerminals.HV_LINE_BUNDLE
+        if(kind.station && modelHit(localHit).x>0)ServiceTerminals.HV_LOAD_BUNDLE else ServiceTerminals.HV_LINE_BUNDLE
     override fun getElectricalLoad(side: Direction,lrdu: LRDU): ElectricalLoad? {
         if(!kind.riser || lrdu!=LRDU.Down || side.isY)return null
         return when(side) { front.left()->inputs[0];front.right()->inputs[1];front.inverse->inputs[2];else->null }

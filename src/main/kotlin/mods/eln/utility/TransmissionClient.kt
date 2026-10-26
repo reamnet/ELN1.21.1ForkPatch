@@ -48,6 +48,7 @@ class TransmissionDescriptor(val kind: TransmissionKind): GridDescriptor(kind.ti
                 GL11.glTranslated(-x,-(kind.height-1.1),0.0)
                 GL11.glColor3f(.69f,.58f,.35f);obj.getPart(part)?.drawNoBind()
             }
+            if(kind.station)TransmissionMarkings.draw(kind)
         } finally { GL11.glPopAttrib() }
     }
     override fun renderItem(type: IItemRenderer.ItemRenderType,item: ItemStack,vararg data: Any)=preserveMatrix {
@@ -60,6 +61,11 @@ class TransmissionDescriptor(val kind: TransmissionKind): GridDescriptor(kind.ti
             list.add(tr("Nominal output: %1$ kV; fixed ratio follows grid fluctuations",kind.outputVolts/1000))
             list.add(tr("Separate gang-operated primary and secondary disconnects"))
             list.add(tr("Design loading per phase: %1$ MW",kind.wattsPerPhase/1_000_000))
+        }
+        if(kind.station) {
+            list.add(tr("Orange bank: %1$ kV primary",kind.inputVolts/1000))
+            list.add(tr("Blue bank: %1$ kV secondary",kind.outputVolts/1000))
+            list.add(tr("Phase letters mark the matching A, B and C terminals"))
         }
         if(kind.riser)list.add(tr("Base cables: left A, right B, rear C; overhead links connect all three phases"))
         if(!kind.station)list.add(tr("Steel structure: %1$ blocks tall",kind.height))
@@ -88,7 +94,7 @@ class TransmissionGui(player: Player,private val render: TransmissionRender): Gu
     private val kind=render.kind
     private var primary: GuiButtonEln?=null;private var secondary: GuiButtonEln?=null
     private lateinit var terminal: GuiButtonEln
-    override fun newHelper()=GuiHelperContainer(this,240,230,8,148)
+    override fun newHelper()=if(kind.station)GuiHelperContainer(this,240,266,8,184) else GuiHelperContainer(this,240,230,8,148)
     private val terminals get()=if(kind.station)listOf(52,53,32,33,34,36,37,38) else listOf(52,32,33,34)
     override fun initGui() {
         super.initGui();terminal=newGuiButton(8,27,224,"")
@@ -109,6 +115,42 @@ class TransmissionGui(player: Player,private val render: TransmissionRender): Gu
     override fun postDraw(f: Float,x: Int,y: Int) {
         super.postDraw(f,x,y)
         drawString(8,8,font.plainSubstrByWidth(tr(kind.title),224))
-        repeat(3) { i->drawString(8,108+i*12,tr("%1$: %2$ / %3$",listOf("A","B","C")[i],Utils.plotVolt("",render.inputs[i]).trim(),Utils.plotVolt("",render.outputs[i]).trim())) }
+        if(kind.station) {
+            drawString(8,108,tr("Orange bank: %1$ kV primary",kind.inputVolts/1000))
+            drawString(8,122,tr("Blue bank: %1$ kV secondary",kind.outputVolts/1000))
+        }
+        repeat(3) { i->drawString(8,(if(kind.station)142 else 108)+i*12,tr("%1$: %2$ / %3$",listOf("A","B","C")[i],Utils.plotVolt("",render.inputs[i]).trim(),Utils.plotVolt("",render.outputs[i]).trim())) }
+    }
+}
+
+/** Textured nameplates join the same baked mesh as the station. No live font rendering. */
+internal object TransmissionMarkings {
+    fun draw(kind: TransmissionKind) {
+        GL11.glEnable(GL11.GL_TEXTURE_2D)
+        UtilsClient.bindTexture(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("eln","model/transmissionmarkings/labels.png"))
+        GL11.glEnable(GL11.GL_CULL_FACE);GL11.glColor3f(1f,1f,1f)
+        fun plate(center: net.minecraft.world.phys.Vec3,right: net.minecraft.world.phys.Vec3,width: Double,height: Double,row: Int) {
+            val up=net.minecraft.world.phys.Vec3(0.0,height/2,0.0);val half=right.scale(width/2)
+            val vertices=listOf(center.subtract(half).subtract(up),center.add(half).subtract(up),center.add(half).add(up),center.subtract(half).add(up))
+            val normal=right.cross(net.minecraft.world.phys.Vec3(0.0,1.0,0.0))
+            // Give each side its own correctly oriented lettering. Merely
+            // disabling culling would mirror the text when viewed from behind.
+            for(back in listOf(false,true)) {
+                val n=if(back)normal.scale(-1.0) else normal
+                GL11.glNormal3f(n.x.toFloat(),n.y.toFloat(),n.z.toFloat());GL11.glBegin(GL11.GL_QUADS)
+                val order=if(back)listOf(1,0,3,2) else listOf(0,1,2,3)
+                for((i,index)in order.withIndex()) {
+                    GL11.glTexCoord2f(if(i==0 || i==3)0f else 1f,(row+if(i<2)1f else 0f)/8f)
+                    val v=vertices[index];GL11.glVertex3d(v.x,v.y,v.z)
+                }
+                GL11.glEnd()
+            }
+        }
+        for(side in listOf(-1,1)) {
+            val row=if(side<0) { if(kind.inputVolts>100_000)0 else 2 } else when { kind.outputVolts>100_000->7;kind.outputVolts>20_000->1;else->3 }
+            plate(net.minecraft.world.phys.Vec3(side*2.62,kind.height-1.55,0.0),net.minecraft.world.phys.Vec3(0.0,0.0,-side.toDouble()),2.4,.44,row)
+            for(end in listOf(-1,1))plate(net.minecraft.world.phys.Vec3(side*2.0,kind.height-1.8,end*(kind.spread+.52)),net.minecraft.world.phys.Vec3(end.toDouble(),0.0,0.0),1.65,.4,row)
+            repeat(3) { phase->plate(net.minecraft.world.phys.Vec3(side*2.65,kind.height-.95,(phase-1)*kind.spread),net.minecraft.world.phys.Vec3(0.0,0.0,-side.toDouble()),.28,.28,4+phase) }
+        }
     }
 }

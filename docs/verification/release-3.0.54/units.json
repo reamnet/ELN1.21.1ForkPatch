@@ -1,0 +1,59 @@
+{
+  "tests": 928,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "version": "3.0.54",
+  "suites": 227,
+  "command": "./gradlew --no-daemon --max-workers=2 test generateLangFiles",
+  "target_suites": [
+    {
+      "name": "mods.eln.client.terrain.DistantRetentionTest",
+      "tests": "2",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T06:03:42.956Z",
+      "hostname": "67293bf35eff",
+      "time": "0.002"
+    },
+    {
+      "name": "mods.eln.utility.SubstationPhaseTest",
+      "tests": "2",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T06:06:33.927Z",
+      "hostname": "67293bf35eff",
+      "time": "0.007"
+    },
+    {
+      "name": "mods.eln.utility.PoleAlignmentAndTapTest",
+      "tests": "6",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T06:06:33.799Z",
+      "hostname": "67293bf35eff",
+      "time": "0.064"
+    },
+    {
+      "name": "mods.eln.client.terrain.DistantRenderBindingTest",
+      "tests": "1",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-26T06:03:42.954Z",
+      "hostname": "67293bf35eff",
+      "time": "0.002"
+    }
+  ],
+  "final_focused_check": {
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suites": 4,
+    "command": "./gradlew --no-daemon --max-workers=2 test --tests '*SubstationPhaseTest' --tests '*PoleAlignmentAndTapTest' --tests '*DistantRenderBindingTest' --tests '*DistantRetentionTest'"
+  }
+}

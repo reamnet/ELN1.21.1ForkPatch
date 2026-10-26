@@ -1,0 +1,54 @@
+{
+  "passed": [
+    "Joined a real dedicated server and received the transmission/distribution fixtures",
+    "DH actually rendered pole bodies and wire groups after normal multiplayer chunks unloaded"
+  ],
+  "failure": "java.lang.IllegalStateException: Pole/wire rendering did not recover after DH replaced its registry\n\tat TRANSFORMER/eln@3.0.54/mods.eln.devtest.DistantMultiplayerChecks.tick(DistantMultiplayerChecks.kt:145)\n\tat MC-BOOTSTRAP/net.neoforged.bus/net.neoforged.bus.EventBus.post(EventBus.java:360)\n\tat MC-BOOTSTRAP/net.neoforged.bus/net.neoforged.bus.EventBus.post(EventBus.java:328)\n\tat TRANSFORMER/neoforge@21.1.249/net.neoforged.neoforge.client.ClientHooks.fireClientTickPost(ClientHooks.java:1077)\n\tat TRANSFORMER/minecraft@1.21.1/net.minecraft.client.Minecraft.tick(Minecraft.java:1927)\n\tat TRANSFORMER/minecraft@1.21.1/net.minecraft.client.Minecraft.runTick(Minecraft.java:1167)\n\tat TRANSFORMER/minecraft@1.21.1/net.minecraft.client.Minecraft.run(Minecraft.java:813)\n\tat TRANSFORMER/minecraft@1.21.1/net.minecraft.client.main.Main.main(Main.java:230)\n\tat java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat MC-BOOTSTRAP/fml_loader@4.0.44/net.neoforged.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:136)\n\tat MC-BOOTSTRAP/fml_loader@4.0.44/net.neoforged.fml.loading.targets.CommonLaunchHandler.clientService(CommonLaunchHandler.java:124)\n\tat MC-BOOTSTRAP/fml_loader@4.0.44/net.neoforged.fml.loading.targets.NeoForgeClientDevLaunchHandler.runService(NeoForgeClientDevLaunchHandler.java:23)\n\tat MC-BOOTSTRAP/fml_loader@4.0.44/net.neoforged.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:118)\n\tat MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30)\n\tat MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53)\n\tat MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71)\n\tat MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.Launcher.run(Launcher.java:103)\n\tat MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.Launcher.main(Launcher.java:74)\n\tat MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26)\n\tat MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23)\n\tat cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.run(BootstrapLauncher.java:210)\n\tat cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:69)\n\tat java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat net.neoforged.devlaunch.Main.main(Main.java:57)\n",
+  "measurements": {
+    "near": {
+      "available": true,
+      "failed": false,
+      "bound": true,
+      "genericRenderingEnabled": true,
+      "bindingGeneration": 1,
+      "retryTicks": 0,
+      "cacheFile": "eln-objects-v2.dat",
+      "cached": 14,
+      "groups": 14,
+      "active": 8,
+      "pending": 0
+    },
+    "far": {
+      "available": true,
+      "failed": false,
+      "bound": true,
+      "genericRenderingEnabled": true,
+      "bindingGeneration": 1,
+      "retryTicks": 0,
+      "cacheFile": "eln-objects-v2.dat",
+      "cached": 14,
+      "groups": 14,
+      "active": 14,
+      "pending": 0
+    },
+    "initialBodyRenderCalls": 390,
+    "initialWireRenderCalls": 156,
+    "bodyRenderCalls": 0,
+    "wireRenderCalls": 0
+  },
+  "distant": {
+    "available": true,
+    "failed": false,
+    "bound": true,
+    "genericRenderingEnabled": true,
+    "bindingGeneration": 1,
+    "retryTicks": 0,
+    "cacheFile": "eln-objects-v2.dat",
+    "cached": 14,
+    "groups": 14,
+    "active": 14,
+    "pending": 0
+  },
+  "expected_failure": true,
+  "diagnostic_flag": "eln.disableDistantRebind=true"
+}

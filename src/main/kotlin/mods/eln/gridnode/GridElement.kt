@@ -227,6 +227,9 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
     open fun selectedGridTerminal(side: Direction)=side.int
     /** Existing saved spans still load; new overhead service stops at the weatherhead. */
     open val allowsNewGridLinks=true
+    /** Substation banks stay where the player placed them; poles can turn their
+     * equivalent half-turn to keep phase order consistent with those banks. */
+    open val primaryPhaseOrientationIsFixed=false
     open fun aimedSingleGridTerminal(side: Direction,localHit: Vec3)=aimedGridTerminal(side,localHit)
     fun singleGridTerminalForHit(side: Direction,localHit: Vec3): Int {
         val aimed=aimedSingleGridTerminal(side,localHit)
@@ -344,14 +347,15 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
         // Its neighbours retain their local result; orienting the graph is linear.
         graph.keys.forEach { it.highVoltageRenderAngle=it.localPrimaryRenderAngle }
         // Stable root and traversal make placement order and save/load order irrelevant.
-        val root=graph.keys.minWith(order)
+        val root=graph.keys.minWith(compareBy<GridElement> { if(it.primaryPhaseOrientationIsFixed)0 else 1 }.then(order))
         val visited=hashSetOf(root);pending.add(root)
         while(pending.isNotEmpty()) {
             val e=pending.removeFirst()
             for(other in graph.getValue(e))if(visited.add(other)) {
                 val span=other.coordinate().subtract(e.coordinate())
-                other.highVoltageRenderAngle=PoleSpanAlignment.oriented(other.highVoltageRenderAngle,e.highVoltageRenderAngle,
-                    Vec3(span.x.toDouble(),0.0,span.z.toDouble()))
+                if(!other.primaryPhaseOrientationIsFixed)
+                    other.highVoltageRenderAngle=PoleSpanAlignment.oriented(other.highVoltageRenderAngle,e.highVoltageRenderAngle,
+                        Vec3(span.x.toDouble(),0.0,span.z.toDouble()))
                 pending.addLast(other)
             }
         }

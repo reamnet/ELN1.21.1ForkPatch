@@ -32,28 +32,35 @@ object DistantModels {
     private data class Key(val pos: BlockPos,val face: Int)
     private data class Entry(val boxes: List<DistantBox>,var group: Any?=null)
     private val entries=LinkedHashMap<Key,Entry>()
+    private val gridKeys=HashSet<Key>()
     private val colors=HashMap<net.minecraft.resources.ResourceLocation,Int>()
     private var world: ClientLevel?=null
     private var bridge: Bridge?=null
-    private var register: Any?=null
+    private val renderBinding=DistantRenderBinding()
+    private val register get()=renderBinding.register
     private var save: File?=null
     private var clock=0
     private var cameraChunk=Long.MIN_VALUE
     private var lastView=-1
     private var dirty=false
     private var failed=false
+    private var unsupportedApi=false
+    private var retryTicks=0
+    private var lastError: String?=null
+    private var genericRendering: Boolean?=null
     private val revisions=LinkedHashMap<Key,Long>()
     private val wireSignatures=HashMap<Key,List<List<Vec3>>>()
     private var sequence=0L
     private val worker=java.util.concurrent.ThreadPoolExecutor(1,1,0L,java.util.concurrent.TimeUnit.SECONDS,
         java.util.concurrent.ArrayBlockingQueue<Runnable>(2048),java.util.concurrent.ThreadFactory { task->Thread(task,"ELN distant geometry").apply { isDaemon=true;priority=Thread.MIN_PRIORITY } },java.util.concurrent.ThreadPoolExecutor.DiscardOldestPolicy())
     private val mc get()=Minecraft.getInstance()
-    val available get()=!failed && ModList.get().isLoaded("distanthorizons")
+    val available get()=!unsupportedApi && ModList.get().isLoaded("distanthorizons")
 
     internal fun capture(owner: Any,node: NodeBlockEntity,mesh: TerrainMesh) {
         if(!available || node.level !is ClientLevel)return
         selectWorld(node.level as ClientLevel)
         val key=Key(node.blockPos,if(owner is SixNodeElementRender)owner.side.int else -1)
+        if(owner is mods.eln.gridnode.GridRender)gridKeys+=key else gridKeys.remove(key)
         val level=world
         val revision=++sequence;revisions[key]=revision
         while(revisions.size>4096)revisions.remove(revisions.keys.first())
@@ -67,6 +74,7 @@ object DistantModels {
         if(!available || node.level !is ClientLevel)return
         selectWorld(node.level as ClientLevel)
         val key=Key(node.blockPos,6)
+        gridKeys+=key;gridKeys+=Key(node.blockPos,-1)
         if(wireSignatures[key]==points)return
         wireSignatures[key]=points
         put(key,points.flatMap { DistantGeometry.wire(it.map { p->p.add(.5,.5,.5) }) })
@@ -89,14 +97,19 @@ object DistantModels {
     }
     private fun trim() {
         while(entries.size>2048 || entries.values.sumOf { it.boxes.size }>150_000) {
-            val first=entries.entries.first();remove(first.value);entries.remove(first.key)
-            revisions.remove(first.key);wireSignatures.remove(first.key)
+            val key=DistantRetention.victim(entries.keys,gridKeys)
+            entries.remove(key)?.let(::remove)
+            revisions.remove(key);wireSignatures.remove(key);gridKeys.remove(key)
         }
         dirty=true
     }
     internal fun forget(owner: Any,node: NodeBlockEntity) {
         val key=Key(node.blockPos,if(owner is SixNodeElementRender)owner.side.int else -1)
-        revisions.remove(key);entries.remove(key)?.let(::remove);dirty=true
+        revisions.remove(key);entries.remove(key)?.let(::remove);gridKeys.remove(key)
+        if(owner is mods.eln.gridnode.GridRender) {
+            val wire=Key(node.blockPos,6);entries.remove(wire)?.let(::remove);wireSignatures.remove(wire);gridKeys.remove(wire)
+        }
+        dirty=true
     }
     internal fun invalidatePalette() { colors.clear() }
     private fun textureColor(material: TerrainMaterial): Int=colors.getOrPut(material.texture) {
@@ -112,7 +125,9 @@ object DistantModels {
         } catch(_: Exception) { 0xff808080.toInt() }
     }
     internal fun diagnostics()=mapOf("available" to available,"failed" to failed,"bound" to (register!=null),
+        "genericRenderingEnabled" to genericRendering,"bindingGeneration" to renderBinding.generation,"lastError" to lastError,"retryTicks" to retryTicks,"cacheFile" to save?.name,
         "cached" to entries.size,"groups" to entries.values.count { it.group!=null },
+        "gridSnapshots" to entries.keys.count { it in gridKeys },
         "active" to entries.values.count { entry->entry.group?.let { bridge?.groupType?.getMethod("isActive")?.invoke(it)==true }==true },
         "pending" to worker.queue.size)
     private fun selectWorld(next: ClientLevel) {
@@ -123,34 +138,44 @@ object DistantModels {
         if(!available)return
         val level=mc.level ?: return
         selectWorld(level)
+        ++clock
+        if(retryTicks>0) { retryTicks--;return }
         val center=mc.gameRenderer.mainCamera.position
         val chunk=net.minecraft.world.level.ChunkPos.asLong(net.minecraft.core.SectionPos.blockToSectionCoord(center.x),net.minecraft.core.SectionPos.blockToSectionCoord(center.z))
         val view=mc.options.effectiveRenderDistance
-        if(++clock%20!=0 && chunk==cameraChunk && view==lastView)return
+        if(clock%20!=0 && chunk==cameraChunk && view==lastView)return
         cameraChunk=chunk;lastView=view
         try {
             val api=bridge ?: Bridge().also { bridge=it }
-            if(register==null) {
+            // Server keys, DH reloads and world setup can replace this registry
+            // without replacing Minecraft's ClientLevel. Never retain a dead one.
+            if(register==null || !java.lang.Boolean.getBoolean("eln.disableDistantRebind")) {
                 val wrapper=api.level(level) ?: return
                 val nextRegister=api.levelType.getMethod("getRenderRegister").invoke(wrapper) ?: return
-                val folder=api.cacheFolder(wrapper,level)
-                register=nextRegister
-                save=folder?.let { File(it,"eln-objects-v2.dat") }
-                load()
+                if(renderBinding.bind(nextRegister) { store();entries.values.forEach(::remove) }) {
+                    val folder=api.cacheFolder(wrapper,level)
+                    save=folder?.let { File(it,"eln-objects-v2.dat") }
+                    load()
+                    Eln.logger.info("Distant Horizons object integration bound to {} (generation {}, {} snapshots)",wrapper.javaClass.simpleName,renderBinding.generation,entries.size)
+                }
             }
+            failed=false
+            val enabled=api.genericRenderingEnabled()
+            if(enabled==false && genericRendering!=false)Eln.logger.warn("ELN distant poles and wires cannot draw: Distant Horizons generic rendering is disabled. Enable DH Advanced / Graphics / Generic Rendering.")
+            genericRendering=enabled
             val radius=api.renderDistanceBlocks()
             var created=0
             val iterator=entries.entries.iterator()
             fun isDistant(key: Key)=DistantVisibility.useDistant(key.pos,center,view,
                 level.chunkSource.getChunk(key.pos.x shr 4,key.pos.z shr 4,ChunkStatus.FULL,false)!=null)
             val nearby=entries.keys.filter { it.pos.distToCenterSqr(center)<radius*radius }.sortedBy { it.pos.distToCenterSqr(center) }
-            val ordered=nearby.filter(::isDistant).take(256).toSet()
+            val ordered=DistantRetention.renderOrder(nearby.filter(::isDistant),gridKeys).take(256).toSet()
             val wanted=ordered+nearby.take(64)
             while(iterator.hasNext()) {
                 val (key,entry)=iterator.next()
                 val chunk=level.chunkSource.getChunk(key.pos.x shr 4,key.pos.z shr 4,ChunkStatus.FULL,false)
                 if(chunk!=null && chunk.getBlockState(key.pos).block !is NodeBlock) {
-                    remove(entry);iterator.remove();revisions.remove(key);wireSignatures.remove(key);dirty=true;continue
+                    remove(entry);iterator.remove();revisions.remove(key);wireSignatures.remove(key);gridKeys.remove(key);dirty=true;continue
                 }
                 if(key !in wanted)remove(entry)
                 if(entry.group==null && key in wanted && created<8) {
@@ -160,8 +185,11 @@ object DistantModels {
                 entry.group?.let { api.groupType.getMethod("setActive",Boolean::class.javaPrimitiveType).invoke(it,distance<radius*radius && key in ordered) }
             }
         } catch(error: Exception) {
-            Eln.logger.warn("Distant Horizons object integration disabled after an API error",error)
-            failed=true;clear()
+            val message="${error.javaClass.simpleName}: ${error.cause?.message ?: error.message}"
+            unsupportedApi=error is ClassNotFoundException || error is NoSuchMethodException || error is NoSuchFieldException
+            if(lastError!=message)Eln.logger.warn(if(unsupportedApi)"Distant Horizons object integration cannot use this API version" else "Distant Horizons object integration will retry after an API error",error)
+            lastError=message;failed=true;retryTicks=100
+            renderBinding.clear { entries.values.forEach(::remove) }
         }
     }
     private fun remove(entry: Entry) {
@@ -188,6 +216,17 @@ object DistantModels {
                 }
                 entries.putIfAbsent(key,Entry(boxes))
             }
+            // Optional metadata trailer: older v2 readers simply stop after the
+            // boxes; older caches without the trailer remain readable here.
+            val marker=runCatching { input.readInt() }.getOrNull()
+            if(marker!=null) {
+                require(marker==0x454c4e47)
+                repeat(input.readInt().also { require(it in 0..2048) }) {
+                    val key=Key(BlockPos.of(input.readLong()),input.readByte().toInt())
+                    if(key in entries)gridKeys+=key
+                }
+            }
+            entries.keys.filter { it.face==6 }.forEach { gridKeys+=it;gridKeys+=Key(it.pos,-1) }
         } } catch(error: Exception) { Eln.logger.warn("Ignoring unreadable ELN distant-object cache: {}",error.message) }
         trim()
     }
@@ -206,14 +245,18 @@ object DistantModels {
                         out.writeInt(box.color)
                     }
                 }
+                val grid=entries.keys.filter { it in gridKeys }
+                out.writeInt(0x454c4e47);out.writeInt(grid.size)
+                for(key in grid) { out.writeLong(key.pos.asLong());out.writeByte(key.face) }
             }
             Files.move(temp.toPath(),file.toPath(),StandardCopyOption.REPLACE_EXISTING)
         } catch(error: Exception) { Eln.logger.warn("Could not save ELN distant objects: {}",error.message) }
     }
     private fun clear() {
-        store();entries.values.forEach(::remove);entries.clear();colors.clear();revisions.clear();wireSignatures.clear();worker.queue.clear();register=null;save=null;world=null;dirty=false;cameraChunk=Long.MIN_VALUE;lastView=-1
+        store();renderBinding.clear { entries.values.forEach(::remove) };entries.clear();gridKeys.clear();colors.clear();revisions.clear();wireSignatures.clear();worker.queue.clear();save=null;world=null;dirty=false;cameraChunk=Long.MIN_VALUE;lastView=-1;retryTicks=0;failed=false
     }
     @SubscribeEvent fun unload(event: LevelEvent.Unload) { if(event.level===world)clear() }
+    @SubscribeEvent fun logout(event: net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut) { clear() }
 
     private class Bridge {
         private val prefix="com.seibel.distanthorizons.api."
@@ -234,9 +277,10 @@ object DistantModels {
             // In an integrated world getAllLoadedLevelWrappers returns the
             // server dimensions. This accessor exposes the current client level.
             val client=proxyType.getMethod("getSinglePlayerLevel").invoke(proxy)
-            if(client!=null && unsafe.getMethod("getWrappedMcObject").invoke(client)===level)return client
             val levels=proxyType.getMethod("getAllLoadedLevelWrappers").invoke(proxy) as Iterable<*>
-            return levels.firstOrNull { it!=null && unsafe.getMethod("getWrappedMcObject").invoke(it)===level }
+            return (listOfNotNull(client)+levels.filterNotNull()).firstOrNull {
+                unsafe.getMethod("getWrappedMcObject").invoke(it)===level && levelType.getMethod("getRenderRegister").invoke(it)!=null
+            }
         }
         fun cacheFolder(wrapper: Any,level: ClientLevel): File? {
             // DH 3.3.3's integrated-world save structure casts a client wrapper
@@ -247,6 +291,13 @@ object DistantModels {
             return mc.singleplayerServer?.getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT)
                 ?.resolve("data/eln-distant")?.resolve(id)?.toFile()
         }
+        fun genericRenderingEnabled(): Boolean? = runCatching {
+            val config=delayed.getField("configs").get(null) ?: return null
+            val graphics=Class.forName(prefix+"interfaces.config.IDhApiConfig").getMethod("graphics").invoke(config)
+            val generic=Class.forName(prefix+"interfaces.config.client.IDhApiGraphicsConfig").getMethod("genericRendering").invoke(graphics)
+            val enabled=Class.forName(prefix+"interfaces.config.client.IDhApiGenericRenderingConfig").getMethod("renderingEnabled").invoke(generic)
+            Class.forName(prefix+"interfaces.config.IDhApiConfigValue").getMethod("getValue").invoke(enabled) as? Boolean
+        }.getOrNull()
         fun renderDistanceBlocks(): Double {
             val config=delayed.getField("configs").get(null) ?: return 1024.0
             val graphics=Class.forName(prefix+"interfaces.config.IDhApiConfig").getMethod("graphics").invoke(config)
