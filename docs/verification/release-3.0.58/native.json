@@ -1,0 +1,129 @@
+{
+  "passed": [
+    "All new machine previews and accessory icons render as baked item quads",
+    "Held arrester installs on a real pole, receives the lightning event and publishes its baked protection kit",
+    "All ten new static machine bodies compile into native terrain meshes under Sodium/Iris/BSL",
+    "Real charger and jukebox placement faces the player in all four horizontal directions; input/output sides retain their wiring orientation",
+    "Normal client inventory clicks insert one pack into the visible slot and real feeder power charges it",
+    "Normal clicks remove the same charged pack without losing its name or duplicating it",
+    "Shift-click insertion/extraction preserves exactly one charged pack"
+  ],
+  "measurements": {
+    "bakedMachineQuads": 1948,
+    "bakedItemPreviews": [
+      {
+        "item": "eln:programmable_load_bank",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 270
+      },
+      {
+        "item": "eln:grid_control_console",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 102
+      },
+      {
+        "item": "eln:protective_relay_cabinet",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 72
+      },
+      {
+        "item": "eln:pole_surge_arrester",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 736
+      },
+      {
+        "item": "eln:pad_mounted_neighbourhood_transformer",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 96
+      },
+      {
+        "item": "eln:variable_frequency_motor_drive",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 126
+      },
+      {
+        "item": "eln:automatic_load_shedding_controller",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 72
+      },
+      {
+        "item": "eln:programmable_ev_pack_charger",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 78
+      },
+      {
+        "item": "eln:electric_welding_station",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 72
+      },
+      {
+        "item": "eln:powered_web_jukebox",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 384
+      },
+      {
+        "item": "eln:48_v_20_kwh_traction_battery",
+        "context": "GUI",
+        "baked": true,
+        "converted": false,
+        "alreadyBaked": true,
+        "quads": 15
+      },
+      {
+        "item": "eln:welded_machine_frame",
+        "context": "GUI",
+        "baked": true,
+        "converted": false,
+        "alreadyBaked": true,
+        "quads": 146
+      },
+      {
+        "item": "eln:electric_forklift",
+        "context": "GUI",
+        "baked": true,
+        "converted": false,
+        "alreadyBaked": true,
+        "quads": 53
+      },
+      {
+        "item": "eln:warehouse_equipment_pallet",
+        "context": "GUI",
+        "baked": true,
+        "converted": false,
+        "alreadyBaked": true,
+        "quads": 120
+      }
+    ],
+    "chargedPackJoules": 506090.0676966093
+  }
+}

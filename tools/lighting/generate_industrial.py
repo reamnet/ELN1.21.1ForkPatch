@@ -48,6 +48,9 @@ for kind in ['load_bank','scada','relay','arrester','pad','drive','shedder','cha
     for x in range(9):m.box('Trim',-.3+x*.07,-.32,.24,.025,.60,.08)
  m.box('Input',-.47,-.39,-.08,.05,.15,.16);m.box('Output',.42,-.39,-.08,.05,.15,.16)
  m.box('Indicator',-.02,.36,-.25,.04,.035,.025)
+ # Electrical front uses local +Z. Reflect only front/back so the blue input
+ # stays on the existing left terminal; reverse winding to preserve outward normals.
+ m.p={part:[[(x,y,-z) for x,y,z in reversed(face)] for face in faces] for part,faces in m.p.items()}
  m.save('industrial_'+kind)
 m=Mesh()
 m.box('Body',-.52,.24,-.90,1.04,.42,1.65);m.box('Body',-.5,.65,-.83,1,.28,.58)

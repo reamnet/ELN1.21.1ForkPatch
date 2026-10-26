@@ -16,3 +16,10 @@ Some graphics are public domain:
 - `src/main/resources/assets/eln/textures/blocks/smallsolarpanel.png`
 - `src/main/resources/assets/eln/textures/blocks/smallrotatingsolarpanel.png`
 - `src/main/resources/assets/eln/textures/blocks/2x3rotatingsolarpanel.png`
+
+## Bundled media runtime
+
+The native executables and archives under `src/main/resources/assets/eln/media-runtime/` are
+unmodified third-party programs supplied under their own licenses, rather than Electrical Age's
+source or graphics license. See that directory's `notice.md`, pinned manifest, and original
+copyright/license notices and source/build references in `notices/`.

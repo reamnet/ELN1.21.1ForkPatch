@@ -48,7 +48,9 @@ object IndustrialExpansionChecks {
     private lateinit var forklift: ForkliftEntity
     private var start=Vec3.ZERO
     private var energy=0.0
-    private val output get()=mc.gameDirectory.toPath().resolve("industrial-expansion-checks")
+    private val chargerChecks get()=java.lang.Boolean.getBoolean("eln.chargerSlotChecks")
+    private val output get()=mc.gameDirectory.toPath().resolve(if(chargerChecks)"charger-slot-checks" else "industrial-expansion-checks")
+    private val facingDevices=ArrayList<Pair<BlockPos,Direction>>()
     private fun server(action: ()->Unit) { task=mc.singleplayerServer!!.submit<Unit>(action);ticks=0 }
     private fun photo(name: String) { Files.createDirectories(output);Screenshot.takeScreenshot(mc.mainRenderTarget).use { it.writeToFile(output.resolve("$name.png")) } }
     private fun setup() {
@@ -77,6 +79,12 @@ object IndustrialExpansionChecks {
         check(pole.onBlockActivated(p,Direction.ZP,.5f,.5f,.5f) && pole.arrester.fitted && p.mainHandItem.isEmpty)
         val bolt=net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(w)!!;bolt.setPos(Vec3.atBottomCenterOf(poleAt.above(7)));w.addFreshEntity(bolt)
         check(pole.arrester.remaining==160000.0)
+        if(chargerChecks)for((j,kind)in listOf(IndustrialKind.CHARGER,IndustrialKind.JUKEBOX).withIndex())for(i in 0..3) {
+            val at=BlockPos(300+i*3,80,272+j*3);w.setBlockAndUpdate(at.below(),Blocks.STONE.defaultBlockState());p.yRot=i*90f;p.xRot=0f
+            val expected=mods.eln.misc.Utils.entityLivingHorizontalViewDirection(p).inverse
+            check(Eln.transparentNodeItem.placeBlockAt(Eln.findItemStack(kind.title,1),p,w,at,net.minecraft.core.Direction.UP))
+            check(fixtures.machine(at).front==expected);facingDevices+=at to expected
+        }
         val scada=machines[IndustrialKind.SCADA.ordinal];val relayPos=positions[IndustrialKind.RELAY.ordinal]
         check(scada.applySettings(doubleArrayOf(relayPos.x.toDouble(),relayPos.y.toDouble(),relayPos.z.toDouble(),1.0)));scada.bindTarget()
         for(x in 256..280)for(z in 264..288)w.setBlockAndUpdate(BlockPos(x,79,z),Blocks.STONE.defaultBlockState())
@@ -123,7 +131,7 @@ object IndustrialExpansionChecks {
         mc.execute { mc.stop();kotlin.concurrent.thread { Thread.sleep(1500);kotlin.system.exitProcess(if(error==null)0 else 1) } }
     }
     @SubscribeEvent fun tick(event: ClientTickEvent.Post) {
-        if(!java.lang.Boolean.getBoolean("eln.industrialExpansionChecks") || done)return
+        if(!(java.lang.Boolean.getBoolean("eln.industrialExpansionChecks") || chargerChecks) || done)return
         try {
             if(phase==5)mc.options.keyUp.setDown(true)
             if(phase==7)ForkliftKeys.raise.setDown(true)
@@ -152,6 +160,23 @@ object IndustrialExpansionChecks {
                 }
                 20->if(task!!.isDone && ticks>25 && mc.screen is IndustrialGui) {
                     task!!.join()
+                    if(chargerChecks && IndustrialKind.entries[guiIndex]==IndustrialKind.CHARGER) {
+                        for((at,front)in facingDevices) {
+                            val render=(mc.level!!.getBlockEntity(at) as TransparentNodeEntity).elementRender!!
+                            val mesh=checkNotNull(TerrainModels.meshFor(render));val color=mods.eln.client.gl.VertexColors.pack(.025f,.10f,.12f,1f)
+                            val projections=mesh.batches.flatMap { batch->(0 until batch.vertices.size step 9).filter { batch.vertices[it+8]==color }.map { n->
+                                (Float.fromBits(batch.vertices[n])-.5f)*front.toFacing().stepX+(Float.fromBits(batch.vertices[n+2])-.5f)*front.toFacing().stepZ
+                            } }
+                            check(projections.isNotEmpty() && projections.min()>.2f) { "Screen faces away from placed front at $at / $front: $projections" }
+                        }
+                        passed+="Real charger and jukebox placement faces the player in all four horizontal directions; input/output sides retain their wiring orientation"
+                        server {
+                            val d=machines[IndustrialKind.CHARGER.ordinal];d.inventory.setItem(0,ItemStack.EMPTY);d.inventory.setChanged()
+                            val p=fixtures.player;p.inventory.clearContent()
+                            val pack=Eln.findItemStack(IndustrialItems.PACK,1);IndustrialElement.battery(pack)!!.setEnergy(pack,500000.0)
+                            pack.set(DataComponents.CUSTOM_NAME,net.minecraft.network.chat.Component.literal("Charger slot test"));p.inventory.setItem(9,pack);p.containerMenu.broadcastChanges()
+                        };phase=30;return
+                    }
                     if(IndustrialKind.entries[guiIndex]==IndustrialKind.JUKEBOX && webStreams.get()==0) {
                         check(ticks<500) { "Native web audio did not start: ${((mc.level!!.getBlockEntity(positions[guiIndex]) as TransparentNodeEntity).elementRender as IndustrialRender).webAudio.status()}" }
                         return
@@ -164,6 +189,62 @@ object IndustrialExpansionChecks {
                         server(::electricalChecks);phase=3
                     }
                 }
+                30->if(task!!.isDone && ticks>20) {
+                    task!!.join();val menu=mc.player!!.containerMenu;val slot=menu.getSlot(0)
+                    check(menu.slots.size==37 && slot.x==8 && slot.y==70 && !slot.hasItem())
+                    check((slot as mods.eln.gui.ISlotSkin).slotSkin==mods.eln.gui.ISlotSkin.SlotSkin.medium)
+                    photo("charger-empty-slot")
+                    mc.gameMode!!.handleInventoryMouseClick(menu.containerId,1,0,net.minecraft.world.inventory.ClickType.PICKUP,mc.player!!)
+                    mc.gameMode!!.handleInventoryMouseClick(menu.containerId,0,0,net.minecraft.world.inventory.ClickType.PICKUP,mc.player!!)
+                    server { };phase=31
+                }
+                31->if(task!!.isDone && ticks>20) {
+                    task!!.join();server {
+                        val d=machines[IndustrialKind.CHARGER.ordinal];val pack=d.inventory.getItem(0)
+                        check(pack.count==1 && pack.hoverName.string=="Charger slot test" && fixtures.player.containerMenu.carried.isEmpty)
+                        check(IndustrialElement.battery(pack)!!.getEnergy(pack)>500000.0)
+                        values["chargedPackJoules"]=IndustrialElement.battery(pack)!!.getEnergy(pack)
+                        passed+="Normal client inventory clicks insert one pack into the visible slot and real feeder power charges it"
+                    };phase=32
+                }
+                32->if(task!!.isDone && ticks>10) {
+                    task!!.join();photo("charger-inserted-pack");val menu=mc.player!!.containerMenu
+                    mc.gameMode!!.handleInventoryMouseClick(menu.containerId,0,0,net.minecraft.world.inventory.ClickType.PICKUP,mc.player!!)
+                    mc.gameMode!!.handleInventoryMouseClick(menu.containerId,1,0,net.minecraft.world.inventory.ClickType.PICKUP,mc.player!!)
+                    server { };phase=33
+                }
+                33->if(task!!.isDone && ticks>15) {
+                    task!!.join();server {
+                        check(machines[IndustrialKind.CHARGER.ordinal].inventory.isEmpty)
+                        check(fixtures.player.inventory.getItem(9).hoverName.string=="Charger slot test")
+                        passed+="Normal clicks remove the same charged pack without losing its name or duplicating it"
+                    };phase=34
+                }
+                34->if(task!!.isDone && ticks>10) {
+                    task!!.join();val menu=mc.player!!.containerMenu
+                    mc.gameMode!!.handleInventoryMouseClick(menu.containerId,1,0,net.minecraft.world.inventory.ClickType.QUICK_MOVE,mc.player!!)
+                    server { };phase=35
+                }
+                35->if(task!!.isDone && ticks>15) {
+                    task!!.join();server {
+                        check(machines[IndustrialKind.CHARGER.ordinal].inventory.getItem(0).count==1)
+                        check(fixtures.player.inventory.getItem(9).isEmpty)
+                    };phase=36
+                }
+                36->if(task!!.isDone && ticks>10) {
+                    task!!.join();val menu=mc.player!!.containerMenu
+                    mc.gameMode!!.handleInventoryMouseClick(menu.containerId,0,0,net.minecraft.world.inventory.ClickType.QUICK_MOVE,mc.player!!)
+                    server { };phase=37
+                }
+                37->if(task!!.isDone && ticks>15) {
+                    task!!.join();server {
+                        check(machines[IndustrialKind.CHARGER.ordinal].inventory.isEmpty)
+                        val packs=fixtures.player.inventory.items.filter { !it.isEmpty }
+                        check(packs.size==1 && packs.single().count==1 && packs.single().hoverName.string=="Charger slot test")
+                        passed+="Shift-click insertion/extraction preserves exactly one charged pack"
+                    };phase=38
+                }
+                38->if(task!!.isDone && ticks>10) { task!!.join();finish(null) }
                 3->if(task!!.isDone && ticks>240) {
                     task!!.join();server {
                         fixtures.player.teleportTo(fixtures.world,285.0,81.5,269.0,180f,0f);fixtures.player.lookAt(EntityAnchorArgument.Anchor.EYES,Vec3(285.0,80.4,264.0))

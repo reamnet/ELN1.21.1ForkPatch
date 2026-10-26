@@ -2796,6 +2796,8 @@ Temperature_outside_growing_range=Temperature outside growing range
 120_kJ_per_welded_frame_or_25_percent_durability_repair=120 kJ per welded frame or 25 percent durability repair
 Actual_frequency\:_%1$_Hz;_case_%2$_C=Actual frequency: %1$ Hz; case %2$ C
 Apply_settings=Apply settings
+Battery_/_pack=Battery / pack
+Battery_/_pack_(one)=Battery / pack (one)
 Bind_address=Bind address
 Blue_left_or_bottom\:_input;_orange_right\:_output=Blue left or bottom: input; orange right: output
 Case\:_%1$_C;_consumed\:_%2$_kJ=Case: %1$ C; consumed: %2$ kJ
@@ -2811,9 +2813,11 @@ Eight_explicit_targets_within_256_blocks;_loaded_chunks_only=Eight explicit targ
 Enable_/_close=Enable / close
 Finite-energy_shunt_protection;_200_kJ_cartridge;_replace_when_spent=Finite-energy shunt protection; 200 kJ cartridge; replace when spent
 Front_top\:_trip_signal;_front_bottom\:_control_signal=Front top: trip signal; front bottom: control signal
+Fuse=Fuse
 Input\:_%1$;_%2$=Input: %1$; %2$
 Install_a_pole_transformer_and_fuse;_fixed_ratio_follows_primary_sag=Install a pole transformer and fuse; fixed ratio follows primary sag
 Invalid_electrical_readings=Invalid electrical readings
+Iron_ingot=Iron ingot
 Left\:_iron_ingot_or_damaged_tool;_middle\:_iron_ingot;_right\:_output=Left: iron ingot or damaged tool; middle: iron ingot; right: output
 Line_contacts\:_left/right_bottom;_return_contacts\:_left/right_right=Line contacts: left/right bottom; return contacts: left/right right
 Output\:_%1$;_%2$=Output: %1$; %2$
@@ -2832,11 +2836,13 @@ Shed=Shed
 Stop=Stop
 Surge_capacity_remaining\:_%1$_kJ=Surge capacity remaining: %1$ kJ
 Target_%1$=Target %1$
+Transformer=Transformer
 Transformer_/_fuse=Transformer / fuse
 Tripped;_inspect_circuit_before_reset=Tripped; inspect circuit before reset
 Voltage_outside_protection_settings=Voltage outside protection settings
 Welding\:_%1$_/_120_kJ=Welding: %1$ / 120 kJ
-YouTube_and_other_audio_formats_need_local_yt-dlp_/_FFmpeg;_see_the_web_jukebox_guide=YouTube and other audio formats need local yt-dlp / FFmpeg; see the web jukebox guide
+Workpiece=Workpiece
+YouTube_and_other_audio_formats_use_bundled_media_tools;_no_separate_installation=YouTube and other audio formats use bundled media tools; no separate installation
 
 # src/main/kotlin/mods/eln/transparentnode/industrial/IndustrialElement.kt
 Command_accepted=Command accepted
@@ -2908,17 +2914,18 @@ Target_unavailable_or_chunk_unloaded=Target unavailable or chunk unloaded
 # src/main/kotlin/mods/eln/transparentnode/industrial/WebJukeboxAudio.kt
 Audio_unavailable;_check_link,_HTTPS_access_and_media_tools=Audio unavailable; check link, HTTPS access and media tools
 Converting_selected_audio...=Converting selected audio...
+Could_not_prepare_bundled_YouTube_tools=Could not prepare bundled YouTube tools
+Could_not_prepare_bundled_audio_decoder=Could not prepare bundled audio decoder
 Downloading_selected_audio...=Downloading selected audio...
+Extracting_bundled_media_tools...=Extracting bundled media tools...
 Four_web_audio_players_are_already_active=Four web audio players are already active
 Paste_a_HTTPS_audio_/_YouTube_link_and_press_Play=Paste a HTTPS audio / YouTube link and press Play
 Playing_web_audio=Playing web audio
 Preparing_web_audio...=Preparing web audio...
 Song_finished;_press_Play_to_restart=Song finished; press Play to restart
-This_format_needs_local_FFmpeg;_direct_Vorbis_OGG_also_works=This format needs local FFmpeg; direct Vorbis OGG also works
 Waiting_for_listener_within_32_blocks=Waiting for listener within 32 blocks
 Web_audio_muted;_check_volume_/_Records_slider=Web audio muted; check volume / Records slider
 Web_audio_stopped=Web audio stopped
-YouTube_needs_local_yt-dlp_and_FFmpeg=YouTube needs local yt-dlp and FFmpeg
 
 # src/main/kotlin/mods/eln/transparentnode/kitchen/KitchenClient.kt
 27_food-storage_slots;_freezes_a_water_bucket_into_ice_and_returns_the_bucket=27 food-storage slots; freezes a water bucket into ice and returns the bucket

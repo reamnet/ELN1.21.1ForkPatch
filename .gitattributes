@@ -47,3 +47,7 @@
 
 # Binary glTF contains packed PNG signatures; never normalize its line endings.
 *.[gG][lL][bB]          binary
+
+# Standalone media executables have platform-specific names, often without extensions.
+src/main/resources/assets/eln/media-runtime/quickjs-* binary
+src/main/resources/assets/eln/media-runtime/yt-dlp-*  binary

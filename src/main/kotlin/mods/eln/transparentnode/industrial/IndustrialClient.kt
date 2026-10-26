@@ -9,7 +9,6 @@ import mods.eln.misc.*
 import mods.eln.node.transparent.*
 import net.minecraft.world.Container
 import net.minecraft.world.entity.player.Player
-import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import java.io.DataInputStream
 
@@ -25,7 +24,7 @@ class IndustrialDescriptor(val kind: IndustrialKind): TransparentNodeDescriptor(
             p("Base",.18f,.20f,.22f);p("Case",if(kind==IndustrialKind.PAD).18f else .58f,if(kind==IndustrialKind.PAD).37f else .62f,if(kind==IndustrialKind.PAD).23f else .65f)
             p("Trim",.12f,.14f,.16f);p("Screen",.025f,.10f,.12f);p("Input",.13f,.38f,.8f);p("Output",.96f,.48f,.07f);p("Terminal",.66f,.46f,.20f)
             p("Ceramic",.67f,.53f,.39f);p("Red",.74f,.06f,.04f)
-            preserveMatrix { if(open) { GL11.glTranslated(-.40,0.0,-.37);GL11.glRotated(-100.0,0.0,1.0,0.0);GL11.glTranslated(.40,0.0,.37) };p("Door",.17f,.35f,.22f) }
+            preserveMatrix { if(open) { GL11.glTranslated(-.40,0.0,.37);GL11.glRotated(-100.0,0.0,1.0,0.0);GL11.glTranslated(.40,0.0,-.37) };p("Door",.17f,.35f,.22f) }
             if(on || fault)UtilsClient.disableLight()
             p("Indicator",if(fault).95f else .06f,if(on && !fault).8f else .14f,.06f)
             if(on || fault)UtilsClient.enableLight()
@@ -33,7 +32,7 @@ class IndustrialDescriptor(val kind: IndustrialKind): TransparentNodeDescriptor(
     }
     override fun handleRenderType(item: ItemStack,type: IItemRenderer.ItemRenderType)=true
     override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType,item: ItemStack,helper: IItemRenderer.ItemRendererHelper)=true
-    override fun renderItem(type: IItemRenderer.ItemRenderType,item: ItemStack,vararg data: Any)=draw()
+    override fun renderItem(type: IItemRenderer.ItemRenderType,item: ItemStack,vararg data: Any)=draw(Direction.ZN)
     override fun addInformation(stack: ItemStack?,player: Player?,list: MutableList<String>,advanced: Boolean) {
         list.add(tr("Blue left or bottom: input; orange right: output"))
         list.add(tr("Front top: trip signal; front bottom: control signal"))
@@ -46,12 +45,18 @@ class IndustrialDescriptor(val kind: IndustrialKind): TransparentNodeDescriptor(
             IndustrialKind.DRIVE->{ list.add(tr("Ramped 0-60 Hz motor voltage control; passive current-limited output"));list.add(tr("Output impedance limits short-circuit current; loaded voltage falls with current")) }
             IndustrialKind.SHEDDER->list.add(tr("Right terminals: left priority 1, right 2, down 3, up 4; restore every five healthy seconds"))
             IndustrialKind.CHARGER->list.add(tr("Charges removable vehicle and UPS packs using real input energy; 94 percent efficiency"))
-            IndustrialKind.JUKEBOX->{ list.add(tr("120/240 V; 25 W playing, 2 W standby; cords or fixed cables"));list.add(tr("Direct HTTPS Ogg Vorbis audio works without extra tools"));list.add(tr("YouTube and other audio formats need local yt-dlp / FFmpeg; see the web jukebox guide")) }
+            IndustrialKind.JUKEBOX->{ list.add(tr("120/240 V; 25 W playing, 2 W standby; cords or fixed cables"));list.add(tr("Direct HTTPS Ogg Vorbis audio works without extra tools"));list.add(tr("YouTube and other audio formats use bundled media tools; no separate installation")) }
             IndustrialKind.WELDER->{ list.add(tr("Left: iron ingot or damaged tool; middle: iron ingot; right: output"));list.add(tr("120 kJ per welded frame or 25 percent durability repair")) }
         }
     }
 }
-class IndustrialContainer(player: Player,val deviceInventory: Container,kind: IndustrialKind): BasicContainer(player,deviceInventory,Array(kind.slots) { i->object: Slot(deviceInventory,i,8+i*24,138) {
+class IndustrialContainer(player: Player,val deviceInventory: Container,kind: IndustrialKind): BasicContainer(player,deviceInventory,Array(kind.slots) { i->object: SlotWithSkinAndComment(deviceInventory,i,8+i*24,if(kind==IndustrialKind.CHARGER)70 else 138,
+    ISlotSkin.SlotSkin.medium,arrayOf(when(kind) {
+        IndustrialKind.CHARGER->tr("Battery / pack (one)")
+        IndustrialKind.PAD->if(i==0)tr("Transformer") else tr("Fuse")
+        IndustrialKind.WELDER->when(i) { 0->tr("Workpiece");1->tr("Iron ingot");else->tr("Output") }
+        else->tr("Input")
+    })) {
     override fun mayPlace(stack: ItemStack)=if(deviceInventory is TransparentNodeElementInventory)deviceInventory.canPlaceItemThroughFace(i,stack,0) else false
     override fun getMaxStackSize()=if(kind==IndustrialKind.CHARGER || kind==IndustrialKind.PAD)1 else 64
 } })
@@ -134,13 +139,14 @@ class IndustrialGui(player: Player,private val render: IndustrialRender): GuiCon
                 1->tr("Voltage outside protection settings");2->tr("Overcurrent trip");3->tr("Differential current trip");4->tr("Invalid electrical readings");5->tr("Remote signal trip");else->tr("Protection ready")
             })
             IndustrialKind.ARRESTER->drawString(if(render.kind.slots>0)8+render.kind.slots*24 else 8,140,tr("Surge capacity remaining: %1$ kJ",(render.stats[9]/1000).toInt()))
-            IndustrialKind.CHARGER->drawString(if(render.kind.slots>0)8+render.kind.slots*24 else 8,140,tr("Session stored: %1$ kJ",(render.stats[7]/1000).toInt()))
+            IndustrialKind.CHARGER->drawString(8,140,tr("Session stored: %1$ kJ",(render.stats[7]/1000).toInt()))
             IndustrialKind.WELDER->drawString(if(render.kind.slots>0)8+render.kind.slots*24 else 8,140,tr("Welding: %1$ / 120 kJ",(render.stats[8]/1000).toInt()))
             IndustrialKind.DRIVE->drawString(if(render.kind.slots>0)8+render.kind.slots*24 else 8,140,tr("Actual frequency: %1$ Hz; case %2$ C",render.stats[5].toInt(),render.stats[4].toInt()))
             IndustrialKind.SHEDDER->drawString(if(render.kind.slots>0)8+render.kind.slots*24 else 8,140,tr("Priorities 1-4: %1$",render.closed.joinToString(" / ") { if(it)tr("On") else tr("Shed") }))
             IndustrialKind.LOAD_BANK->drawString(if(render.kind.slots>0)8+render.kind.slots*24 else 8,140,tr("Case: %1$ C; consumed: %2$ kJ",render.stats[4].toInt(),(render.stats[6]/1000).toInt()))
             else->Unit
         }
+        if(render.kind==IndustrialKind.CHARGER)drawString(32,74,tr("Battery / pack"))
         if(render.kind==IndustrialKind.PAD)drawString(64,140,tr("Transformer / fuse"))
     }
 }

@@ -1,0 +1,14 @@
+{
+  "jarBytes": 295100697,
+  "uniqueArchives": 14,
+  "toolArchiveBytes": 281854000,
+  "platforms": [
+    "windows-x64",
+    "linux-x64",
+    "linux-arm64",
+    "macos-x64",
+    "macos-arm64"
+  ],
+  "hashesVerified": true,
+  "staleDenoFiles": false
+}

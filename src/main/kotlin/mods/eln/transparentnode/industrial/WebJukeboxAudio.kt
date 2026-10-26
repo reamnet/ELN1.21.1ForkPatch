@@ -64,10 +64,11 @@ class WebJukeboxAudio(private val render: IndustrialRender,private val tile: Tra
             2->tr("Converting selected audio...")
             3->tr("Playing web audio")
             4->tr("Song finished; press Play to restart")
-            5->tr("YouTube needs local yt-dlp and FFmpeg")
-            6->tr("This format needs local FFmpeg; direct Vorbis OGG also works")
+            5->tr("Could not prepare bundled YouTube tools")
+            6->tr("Could not prepare bundled audio decoder")
             7->tr("Audio unavailable; check link, HTTPS access and media tools")
             8->tr("Four web audio players are already active")
+            9->tr("Extracting bundled media tools...")
             else->tr("Web audio stopped")
         }
         fun start() {
@@ -80,14 +81,17 @@ class WebJukeboxAudio(private val render: IndustrialRender,private val tile: Tra
                     val dir=Files.createTempDirectory("eln-web-audio-");directory=dir;val source=dir.resolve("source.media")
                     state=1
                     if(WebAudioUrl.youtube(uri)) {
-                        runTool(tool("media.ytdlpPath","yt-dlp"),listOf("--ignore-config","--no-plugin-dirs","--no-playlist","--no-progress","--quiet","--no-cache-dir","--no-part","--max-filesize","64M","--socket-timeout","15","--match-filter","duration <= 3600","-f","bestaudio","-o",source.toString(),"--",uri.toASCIIString()),5)
+                        state=9
+                        val ytdlp=tool("media.ytdlpPath","ytdlp");val javascript=tool("media.quickjsPath","quickjs");val ffmpeg=tool("media.ffmpegPath","ffmpeg")
+                        state=1
+                        runTool(ytdlp,listOf("--no-js-runtimes","--js-runtimes","quickjs:$javascript","--ffmpeg-location",ffmpeg,"--ignore-config","--no-plugin-dirs","--no-playlist","--no-progress","--quiet","--no-cache-dir","--no-part","--max-filesize","64M","--socket-timeout","15","--match-filter","duration <= 3600","-f","bestaudio","-o",source.toString(),"--",uri.toASCIIString()),5)
                     } else download(uri,source)
                     require(Files.size(source)<=MAX_BYTES)
                     if(cancelled.get())return@submit
                     val prefix=Files.newInputStream(source).use { it.readNBytes(96) }.toString(Charsets.ISO_8859_1)
                     val ready=if(prefix.startsWith("OggS") && prefix.contains("vorbis"))source else {
-                        state=2;val converted=dir.resolve("decoded.ogg")
-                        runTool(tool("media.ffmpegPath","ffmpeg"),listOf("-nostdin","-v","error","-protocol_whitelist","file,pipe","-i",source.toString(),"-vn","-t","3600","-ac","1","-ar","44100","-c:a","libvorbis","-q:a","4","-f","ogg",converted.toString()),6)
+                        state=9;val ffmpeg=tool("media.ffmpegPath","ffmpeg");state=2;val converted=dir.resolve("decoded.ogg")
+                        runTool(ffmpeg,listOf("-nostdin","-v","error","-protocol_whitelist","file,pipe","-i",source.toString(),"-vn","-t","3600","-ac","1","-ar","44100","-c:a","libvorbis","-q:a","4","-f","ogg",converted.toString()),6)
                         require(Files.size(converted)<=MAX_BYTES);converted
                     }
                     if(cancelled.get())return@submit
@@ -131,7 +135,7 @@ class WebJukeboxAudio(private val render: IndustrialRender,private val tile: Tra
                 val addresses=InetAddress.getAllByName(at.host)
                 require(addresses.isNotEmpty() && addresses.none { it.isAnyLocalAddress || it.isLoopbackAddress || it.isLinkLocalAddress || it.isSiteLocalAddress || it.isMulticastAddress })
                 val conn=at.toURL().openConnection() as HttpsURLConnection
-                conn.instanceFollowRedirects=false;conn.connectTimeout=10000;conn.readTimeout=10000;conn.setRequestProperty("User-Agent","ElectricalAge-WebJukebox/3.0.57")
+                conn.instanceFollowRedirects=false;conn.connectTimeout=10000;conn.readTimeout=10000;conn.setRequestProperty("User-Agent","ElectricalAge-WebJukebox/3.0.58")
                 try {
                     if(conn.responseCode in 300..399) {
                         val location=conn.getHeaderField("Location") ?: throw IOException("Missing redirect")
@@ -167,7 +171,10 @@ class WebJukeboxAudio(private val render: IndustrialRender,private val tile: Tra
             future?.cancel(true);try { audio?.close() }catch(_: IOException) { }
             cleanup()
         }
-        private fun tool(key: String,fallback: String)=Eln.config.getStringOrElse(key,fallback).trim().ifBlank { fallback }
+        private fun tool(key: String,name: String): String {
+            val override=Eln.config.getStringOrElse(key,"").trim()
+            return override.ifBlank { runtime.resolve(name).toString() }
+        }
     }
     private class WebSound(private val job: Job): AbstractTickableSoundInstance(SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath("eln","web_jukebox_audio")),SoundSource.RECORDS,SoundInstance.createUnseededRandom()) {
         init { x=job.tile.blockPos.x+.5;y=job.tile.blockPos.y+.5;z=job.tile.blockPos.z+.5;volume=job.render.settings[1].toFloat() }
@@ -197,6 +204,7 @@ class WebJukeboxAudio(private val render: IndustrialRender,private val tile: Tra
         @Synchronized override fun close() { if(closed)return;closed=true;try { delegate.close() }finally { cleanup() } }
     }
     companion object {
+        private val runtime by lazy { BundledMediaRuntime(Minecraft.getInstance().gameDirectory.toPath().resolve("eln-media-runtime")) }
         private const val MAX_BYTES=64L*1024*1024
         private val active=HashSet<Job>()
         private val workers=Executors.newFixedThreadPool(2) { r->Thread(r,"eln-web-audio").apply { isDaemon=true } }

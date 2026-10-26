@@ -46,7 +46,7 @@ Changing nominal input voltage while plugged in is rejected: unplug first.
   1, right = 2, bottom = 3, top = 4. Low input voltage or excess input power sheds the lowest
   remaining priority once per second. Healthy voltage plus headroom restores one output every
   five seconds. Set the nominal input and total watt budget.
-- **Programmable EV Pack Charger:** insert a removable battery; set input voltage, watts and
+- **Programmable EV Pack Charger:** insert one removable battery in the outlined, labeled slot above the buttons; set input voltage, watts and
   game-clock charging hours (0–23, with equal start/end meaning always). Actual input energy
   charges the pack at 94% efficiency, limited by its capacity and charge rating. The new empty
   48 V / 20 kWh traction pack powers the forklift. No third-party vehicle integration is claimed.
@@ -56,7 +56,7 @@ Changing nominal input voltage while plugged in is rejected: unplug first.
   Changing the input discards unfinished work. Sparks and arc sound run only while welding.
 
 The [Powered Web Jukebox](powered-web-jukebox.md) adds HTTPS/YouTube music playback using
-real 120/240 V power, with optional client media tools for YouTube and non-Vorbis formats.
+real 120/240 V power, with bundled client media tools for YouTube and non-Vorbis formats.
 
 ## Electric forklift
 
