@@ -29,12 +29,14 @@ Cable_slot=Slot pro kabel
 Can_create\:=Umí vyrobit:
 Capacity=Kapacita
 Capacity\:_%1$F=Kapacita: %1$F
+Case_temperature\:_%1$_C=Case temperature: %1$ C
 Casing_slot=Slot pro pouzdro
 Channel=Kanál
 Charge=Nabití
 Charge_power=Nabíjecí výkon
 Charge_power\:_%1$W=Nabíjecí výkon: %1$W
 Circuit_%1$\:_%2$=Circuit %1$: %2$
+Close=Close
 Close_fuse=Close fuse
 Closed=Zavřeno
 Condition\:_%1$=Stav: %1$
@@ -129,6 +131,7 @@ No_valid_fluids_for_this_turbine!=Žádné platné kapaliny pro tuto turbínu!
 Nominal\:=Jmenovité:
 Nominal\:_%1$_V=Nominal: %1$ V
 Nominal_Ratings\:=Jmenovité hodnoty:
+Nominal_V=Nominal V
 Nominal_mains_class\:_%1$V=Jmenovitá třída sítě: %1$V
 Nominal_output_at_12.47_kV;_follows_grid_voltage_proportionally=Nominal output at 12.47 kV; follows grid voltage proportionally
 Nominal_power\:_%1$W=Jmenovitý výkon: %1$W
@@ -193,6 +196,7 @@ Regulator_slot=Slot pro regulátor
 Relative_humidity=Relativní vlhkost
 Released=Released
 Reset=Resetovat
+Reset_trip=Reset trip
 Resistance=Odpor
 Resistance\:_%1$Ω=Odpor: %1$Ω
 Right=Vpravo
@@ -209,6 +213,7 @@ Specify_the_channel=Určete kanál
 Speed=Rychlost
 Standby_Gasoline_Generator.name=Standby Gasoline Generator
 State=Stav
+Status=Status
 Stored_energy=Stored energy
 Stored_energy\:_%1$J_(%2$%)=Uložená energie: %1$J (%2$%)
 Subsystem_Matrix_Size=Velikost matice subsystému
@@ -232,6 +237,7 @@ Toggle=Přepnout
 Toggle_switch=Přepínač
 Toggles_the_output_each_time\nan_emitter's_value_rises.\nUseful_to_allow_multiple_buttons\nto_control_the_same_light.=Přepíná výstup při každém\nvzestupu hodnoty vysílače.\nUžitečné pro ovládání stejného\nsvětla více tlačítky.
 Transforms_an_input_voltage_to\nan_output_voltage.=Transformuje vstupní napětí na\nvýstupní napětí.
+Tripped=Tripped
 Unavailable=Unavailable
 Up=Up
 Used=Použito
@@ -996,7 +1002,6 @@ ELN_to_CEE_Power_Bridge.name=ELN to CEE Power Bridge
 Input\:_%1$_/_%2$=Input: %1$ / %2$
 Input_overvoltage;_check_nominal_setting=Input overvoltage; check nominal setting
 Input_watts=Input watts
-Nominal_V=Nominal V
 Nominal_amps=Nominal amps
 Optional_integration;_does_not_require_CEE_to_load_Electrical_Age=Optional integration; does not require CEE to load Electrical Age
 Orange_face_to_CEE_Converter's_back=Orange face to CEE Converter's back
@@ -2614,7 +2619,6 @@ No_power_-_passive_cooling=No power - passive cooling
 Outdoor_exhaust_required_-_dry_cooling=Outdoor exhaust required - dry cooling
 Redstone_interlock_-_passive_cooling=Redstone interlock - passive cooling
 Right-click_for_controls;_use_water_or_empty_buckets_to_transfer_water.=Right-click for controls; use water or empty buckets to transfer water.
-Status=Status
 Surface_too_hot_-_dry_cooling=Surface too hot - dry cooling
 Target_reached_-_passive_cooling=Target reached - passive cooling
 Unsupported_climate_-_dry_cooling=Unsupported climate - dry cooling
@@ -2786,6 +2790,135 @@ Plants\:_%1$_/_20;_bulbs\:_%2$_/_48=Plants: %1$ / 20; bulbs: %2$ / 48
 Seeds=Seeds
 Supports_standard_crop-block_seeds;_planting_stock_is_retained=Supports standard crop-block seeds; planting stock is retained
 Temperature_outside_growing_range=Temperature outside growing range
+
+# src/main/kotlin/mods/eln/transparentnode/industrial/IndustrialClient.kt
+120/240_V;_25_W_playing,_2_W_standby;_cords_or_fixed_cables=120/240 V; 25 W playing, 2 W standby; cords or fixed cables
+120_kJ_per_welded_frame_or_25_percent_durability_repair=120 kJ per welded frame or 25 percent durability repair
+Actual_frequency\:_%1$_Hz;_case_%2$_C=Actual frequency: %1$ Hz; case %2$ C
+Apply_settings=Apply settings
+Bind_address=Bind address
+Blue_left_or_bottom\:_input;_orange_right\:_output=Blue left or bottom: input; orange right: output
+Case\:_%1$_C;_consumed\:_%2$_kJ=Case: %1$ C; consumed: %2$ kJ
+Charges_removable_vehicle_and_UPS_packs_using_real_input_energy;_94_percent_efficiency=Charges removable vehicle and UPS packs using real input energy; 94 percent efficiency
+Console_supply\:_120_V_/_20_W;_remote_closing_never_resets_a_trip=Console supply: 120 V / 20 W; remote closing never resets a trip
+Control_smart_meters,_service_disconnects,_breakers,_reclosers_and_industrial_devices=Control smart meters, service disconnects, breakers, reclosers and industrial devices
+Differential_current_trip=Differential current trip
+Differential_protection_requires_both_forward_and_return_conductors;_0_disables_it=Differential protection requires both forward and return conductors; 0 disables it
+Direct_HTTPS_Ogg_Vorbis_audio_works_without_extra_tools=Direct HTTPS Ogg Vorbis audio works without extra tools
+Direct_HTTPS_audio_URL_or_YouTube_video_link=Direct HTTPS audio URL or YouTube video link
+Disable_/_open=Disable / open
+Eight_explicit_targets_within_256_blocks;_loaded_chunks_only=Eight explicit targets within 256 blocks; loaded chunks only
+Enable_/_close=Enable / close
+Finite-energy_shunt_protection;_200_kJ_cartridge;_replace_when_spent=Finite-energy shunt protection; 200 kJ cartridge; replace when spent
+Front_top\:_trip_signal;_front_bottom\:_control_signal=Front top: trip signal; front bottom: control signal
+Input\:_%1$;_%2$=Input: %1$; %2$
+Install_a_pole_transformer_and_fuse;_fixed_ratio_follows_primary_sag=Install a pole transformer and fuse; fixed ratio follows primary sag
+Invalid_electrical_readings=Invalid electrical readings
+Left\:_iron_ingot_or_damaged_tool;_middle\:_iron_ingot;_right\:_output=Left: iron ingot or damaged tool; middle: iron ingot; right: output
+Line_contacts\:_left/right_bottom;_return_contacts\:_left/right_right=Line contacts: left/right bottom; return contacts: left/right right
+Output\:_%1$;_%2$=Output: %1$; %2$
+Output_impedance_limits_short-circuit_current;_loaded_voltage_falls_with_current=Output impedance limits short-circuit current; loaded voltage falls with current
+Overcurrent_trip=Overcurrent trip
+Play_/_restart=Play / restart
+Priorities_1-4\:_%1$=Priorities 1-4: %1$
+Programmable_resistive_load,_0-1000_kW;_real_voltage_response_and_fan_cooling=Programmable resistive load, 0-1000 kW; real voltage response and fan cooling
+Protection_ready=Protection ready
+Ramped_0-60_Hz_motor_voltage_control;_passive_current-limited_output=Ramped 0-60 Hz motor voltage control; passive current-limited output
+Remote_signal_trip=Remote signal trip
+Right-click_an_overhead_distribution_pole_to_install;_sneak_empty-handed_to_remove=Right-click an overhead distribution pole to install; sneak empty-handed to remove
+Right_terminals\:_left_priority_1,_right_2,_down_3,_up_4;_restore_every_five_healthy_seconds=Right terminals: left priority 1, right 2, down 3, up 4; restore every five healthy seconds
+Session_stored\:_%1$_kJ=Session stored: %1$ kJ
+Shed=Shed
+Stop=Stop
+Surge_capacity_remaining\:_%1$_kJ=Surge capacity remaining: %1$ kJ
+Target_%1$=Target %1$
+Transformer_/_fuse=Transformer / fuse
+Tripped;_inspect_circuit_before_reset=Tripped; inspect circuit before reset
+Voltage_outside_protection_settings=Voltage outside protection settings
+Welding\:_%1$_/_120_kJ=Welding: %1$ / 120 kJ
+YouTube_and_other_audio_formats_need_local_yt-dlp_/_FFmpeg;_see_the_web_jukebox_guide=YouTube and other audio formats need local yt-dlp / FFmpeg; see the web jukebox guide
+
+# src/main/kotlin/mods/eln/transparentnode/industrial/IndustrialElement.kt
+Command_accepted=Command accepted
+Command_rejected\:_check_console_power,_target_type,_chunk_or_trip_latch=Command rejected: check console power, target type, chunk or trip latch
+
+# src/main/kotlin/mods/eln/transparentnode/industrial/IndustrialItems.kt
+27_equipment_slots;_right-click_to_open;_sneak_empty-handed_to_pack_up=27 equipment slots; right-click to open; sneak empty-handed to pack up
+48_V_20_kWh_Traction_Battery.name=48 V 20 kWh Traction Battery
+Electric_Forklift.name=Electric Forklift
+Removable_vehicle_pack;_charge_in_the_EV_Pack_Charger;_crafted_empty=Removable vehicle pack; charge in the EV Pack Charger; crafted empty
+Right-click_to_drive;_movement_keys_steer;_Page_Up/Down_raise/lower;_G_loads/unloads_a_pallet=Right-click to drive; movement keys steer; Page Up/Down raise/lower; G loads/unloads a pallet
+Sneak_with_a_traction_pack_to_install;_sneak_empty-handed_to_remove_it_while_parked=Sneak with a traction pack to install; sneak empty-handed to remove it while parked
+Warehouse_Equipment_Pallet.name=Warehouse Equipment Pallet
+Welded_Machine_Frame.name=Welded Machine Frame
+
+# src/main/kotlin/mods/eln/transparentnode/industrial/IndustrialKind.kt
+Automatic_Load_Shedding_Controller.name=Automatic Load Shedding Controller
+Charge_power_W=Charge power W
+Circuit_(1-12)=Circuit (1-12)
+Current_limit_A=Current limit A
+Diff_A_(0_\=_off)=Diff A (0 = off)
+Electric_Welding_Station.name=Electric Welding Station
+End_hour_(0-23)=End hour (0-23)
+Frequency_Hz=Frequency Hz
+Grid_Control_Console.name=Grid Control Console
+Load_watts=Load watts
+Nominal_input_V=Nominal input V
+Nominal_line_V=Nominal line V
+Nominal_output_V=Nominal output V
+Overcurrent_A=Overcurrent A
+Overvoltage_ratio=Overvoltage ratio
+Pad_Mounted_Neighbourhood_Transformer.name=Pad Mounted Neighbourhood Transformer
+Pole_Surge_Arrester.name=Pole Surge Arrester
+Power_budget_W=Power budget W
+Powered_Web_Jukebox.name=Powered Web Jukebox
+Primary_V=Primary V
+Programmable_EV_Pack_Charger.name=Programmable EV Pack Charger
+Programmable_Load_Bank.name=Programmable Load Bank
+Protective_Relay_Cabinet.name=Protective Relay Cabinet
+Ramp_seconds=Ramp seconds
+Secondary_V=Secondary V
+Start_hour_(0-23)=Start hour (0-23)
+Target_X=Target X
+Target_Y=Target Y
+Target_Z=Target Z
+Trip_delay_seconds=Trip delay seconds
+Undervoltage_ratio=Undervoltage ratio
+Variable_Frequency_Motor_Drive.name=Variable Frequency Motor Drive
+Volume_(0-1)=Volume (0-1)
+Welding_power_W=Welding power W
+
+# src/main/kotlin/mods/eln/transparentnode/industrial/IndustrialTransport.kt
+Forklift\:_movement_keys_drive;_Page_Up/Down_lift;_G_pallet;_sneak_dismounts=Forklift: movement keys drive; Page Up/Down lift; G pallet; sneak dismounts
+Warehouse_Equipment_Pallet=Warehouse Equipment Pallet
+
+# src/main/kotlin/mods/eln/transparentnode/industrial/IndustrialTransportClient.kt
+Electrical_Age_vehicles=Electrical Age vehicles
+Forklift\:_load_or_unload_pallet=Forklift: load or unload pallet
+Forklift\:_lower_forks=Forklift: lower forks
+Forklift\:_raise_forks=Forklift: raise forks
+Traction_pack\:_%1$%;_forks\:_%2$_cm=Traction pack: %1$%; forks: %2$ cm
+
+# src/main/kotlin/mods/eln/transparentnode/industrial/ScadaLink.kt
+%1$\n%2$=%1$\n%2$
+Circuit_%1$\:_%2$_V_/_%3$_A\nBreaker\:_%4$_A;_%5$=Circuit %1$: %2$ V / %3$ A\nBreaker: %4$ A; %5$
+Circuit_unavailable=Circuit unavailable
+Target_unavailable_or_chunk_unloaded=Target unavailable or chunk unloaded
+
+# src/main/kotlin/mods/eln/transparentnode/industrial/WebJukeboxAudio.kt
+Audio_unavailable;_check_link,_HTTPS_access_and_media_tools=Audio unavailable; check link, HTTPS access and media tools
+Converting_selected_audio...=Converting selected audio...
+Downloading_selected_audio...=Downloading selected audio...
+Four_web_audio_players_are_already_active=Four web audio players are already active
+Paste_a_HTTPS_audio_/_YouTube_link_and_press_Play=Paste a HTTPS audio / YouTube link and press Play
+Playing_web_audio=Playing web audio
+Preparing_web_audio...=Preparing web audio...
+Song_finished;_press_Play_to_restart=Song finished; press Play to restart
+This_format_needs_local_FFmpeg;_direct_Vorbis_OGG_also_works=This format needs local FFmpeg; direct Vorbis OGG also works
+Waiting_for_listener_within_32_blocks=Waiting for listener within 32 blocks
+Web_audio_muted;_check_volume_/_Records_slider=Web audio muted; check volume / Records slider
+Web_audio_stopped=Web audio stopped
+YouTube_needs_local_yt-dlp_and_FFmpeg=YouTube needs local yt-dlp and FFmpeg
 
 # src/main/kotlin/mods/eln/transparentnode/kitchen/KitchenClient.kt
 27_food-storage_slots;_freezes_a_water_bucket_into_ice_and_returns_the_bucket=27 food-storage slots; freezes a water bucket into ice and returns the bucket
@@ -3031,16 +3164,13 @@ Loss\:_%1$;_case\:_%2$_C=Loss: %1$; case: %2$ C
 Mechanical_switching_click;_independent_electrically_isolated_poles=Mechanical switching click; independent electrically isolated poles
 Overload_or_overheating_opens_all_contacts;_inspect_the_fault_before_resetting=Overload or overheating opens all contacts; inspect the fault before resetting
 Rear_face\:_normally_closed_contacts;_break-before-make_switching=Rear face: normally closed contacts; break-before-make switching
-Reset_trip=Reset trip
 Restore_contacts=Restore contacts
 Select_ELN_signal,_120_V_coil_or_240_V_coil_in_the_menu=Select ELN signal, 120 V coil or 240 V coil in the menu
 Silent_semiconductor_switching;_real_conduction_loss_and_overheat_protection=Silent semiconductor switching; real conduction loss and overheat protection
 Tripped;_inspect_load_and_allow_cooling=Tripped; inspect load and allow cooling
 
 # src/main/kotlin/mods/eln/transparentnode/switchgear/SwitchgearElement.kt
-Case_temperature\:_%1$_C=Case temperature: %1$ C
 Contact_%1$\:_%2$;_NO_%3$;_NC_%4$=Contact %1$: %2$; NO %3$; NC %4$
-Tripped=Tripped
 
 # src/main/kotlin/mods/eln/transparentnode/switchgear/SwitchgearKind.kt
 120_V_coil=120 V coil
@@ -3220,7 +3350,6 @@ Any_phase_fault_opens_all_three;_timed_retries_stop_at_lockout=Any phase fault o
 Automatic_regulation_within_10_percent_of_line_voltage;_passive,_power-conserving_taps=Automatic regulation within 10 percent of line voltage; passive, power-conserving taps
 Base\:_left_A,_right_B,_rear_C;_three_separate_underground_cable_inputs=Base: left A, right B, rear C; three separate underground cable inputs
 Blown=Blown
-Close=Close
 Close_all_phases=Close all phases
 Close_switch=Close switch
 Draws_directly_from_the_selected_LV_circuit;_does_not_convert_voltage=Draws directly from the selected LV circuit; does not convert voltage

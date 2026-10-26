@@ -325,6 +325,7 @@ public class Eln {
 
     /** What used to be preInit: everything the mod constructs, in the order it always did. */
     private void registerContent() {
+        mods.eln.transparentnode.industrial.ForkliftControls.register();
         ElnNetwork.register("achieve", AchievePacket.class, AchievePacket::new, new AchievePacketHandler(), true);
         ElnNetwork.register("transparent_node_request", TransparentNodeRequestPacket.class, TransparentNodeRequestPacket::new, new TransparentNodeRequestPacketHandler(), true);
         ElnNetwork.register("transparent_node_response", TransparentNodeResponsePacket.class, TransparentNodeResponsePacket::new, new TransparentNodeResponsePacketHandler(), false);

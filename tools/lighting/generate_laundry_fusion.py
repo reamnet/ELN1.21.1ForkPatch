@@ -3,7 +3,7 @@
 from generate_fans_and_outlet import Mesh, ring
 from math import sin, cos, tau
 from pathlib import Path
-for name,washer in [('electricwasher',True),('electricdryer',False)]:
+for name,washer in [('electricwasher',True)]:
  m=Mesh()
  # The top cap owns the roof surface. A coplanar white case roof at y=.46
  # fought the gray trim roof under Sodium/Iris. Stop the case at its underside.
@@ -27,6 +27,35 @@ for name,washer in [('electricwasher',True),('electricdryer',False)]:
  else:
   m.cyl('Trim',2,(0,-.20,-.49),.07,.095,n=24)
  m.save(name)
+# Classic vented dryer: opaque rectangular drum door, raised rear timer console,
+# top lint-filter pull and rear exhaust. No washer porthole or detergent drawer.
+m=Mesh()
+m.box('Case',-.46,-.45,-.43,.92,.84,.86)
+m.box('Trim',-.47,.39,-.45,.94,.07,.90)  # single roof surface, no coplanar case top
+m.box('Case',-.43,.46,-.40,.86,.18,.15)
+m.box('Black',-.40,.485,-.247,.80,.125,.012)
+for x,r in [(-.25,.047),(.24,.056)]:
+ m.cyl('Trim',2,(x,.55,-.23),.033,r,n=24)
+ m.box('Black',x-.006,.55,-.194,.012,.035,.005)
+m.box('Display',-.075,.532,-.23,.15,.035,.012)
+# Recessed gasket and chamfered solid steel loading door.
+m.box('Black',-.373,-.333,.433,.746,.576,.016)
+outline=[(-.30,-.31),(.30,-.31),(.35,-.26),(.35,.17),(.30,.22),(-.30,.22),(-.35,.17),(-.35,-.26)]
+back=[(x,y,.451) for x,y in outline];face=[(x,y,.477) for x,y in outline]
+m.poly('Door',list(reversed(back)));m.poly('Door',face)
+for i in range(len(face)):m.poly('Door',[back[i],back[(i+1)%len(face)],face[(i+1)%len(face)],face[i]])
+m.box('Black',.205,.070,.479,.105,.041,.012)
+m.box('Trim',.205,.102,.491,.105,.020,.018)
+for y in [-.22,.08]:m.box('Trim',-.379,y,.453,.022,.07,.031)
+# Lint trap in the flat top; surfaces are separated to keep shader roofs stable.
+m.box('Black',.13,.461,-.12,.25,.006,.32)
+m.box('Lint',.143,.468,-.108,.224,.004,.294)
+m.box('Trim',.18,.475,-.10,.15,.009,.025)
+for i in range(11):m.box('Vent',-.37+i*.069,-.398,.434,.046,.023,.008)
+m.cyl('Exhaust',2,(0,-.23,-.52),.09,.096,n=24)
+for x in [-.35,.35]:
+ for z in [-.32,.32]:m.cyl('Black',1,(x,-.50,z),.05,.043,n=12)
+m.save('electricdryer')
 # Native model orientation XN: six across Z, two deep X, two high Y.
 # Root at local block (0,0,0); ghost occupancy is x=0..1,y=0..1,z=-2..3.
 m=Mesh()

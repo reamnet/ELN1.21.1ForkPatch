@@ -80,7 +80,7 @@ object ElnNetwork {
 
     @SubscribeEvent
     fun onRegisterPayloads(event: RegisterPayloadHandlersEvent) {
-        val registrar = event.registrar("eln-overhead-3")
+        val registrar = event.registrar("eln-industrial-4")
         registrar.playBidirectional(RawPayload.TYPE, RawPayload.CODEC) { payload, context ->
             rawHandler?.invoke(payload.data, context)
         }

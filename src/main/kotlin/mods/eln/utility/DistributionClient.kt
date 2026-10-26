@@ -172,18 +172,21 @@ class DistributionContainer(player: Player,inventory: Container,transformer: Boo
 class DistributionPoleRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDescriptor): GridRender(entity,descriptor) {
     override val inventory=TransparentNodeElementInventory(if((descriptor as DistributionPoleDescriptor).kind.twinLight)2 else if(descriptor.kind.transformer)1 else 0,1,this)
     val display=DistributionDisplay()
+    var arresterFitted=false;private set
+    var arresterRemaining=0.0;private set
     private val connections=LRDUMask()
     private var cable: mods.eln.cable.CableRenderType?=null
     override fun draw() {
         drawCables()
         mods.eln.client.terrain.TerrainModels.body(this,listOf(front,highVoltageRenderAngle,lowVoltageRenderAngle,serviceMountReach,display.rating,
             display.installed,display.phase,display.fuseClosed,display.fuseBlown,display.closed,display.enabled,
-            display.heightStep,display.yaw,display.pitch,display.light>0)) {
+            display.heightStep,display.yaw,display.pitch,display.light>0,arresterFitted,arresterRemaining<=0)) {
+            if(arresterFitted)mods.eln.transparentnode.industrial.PoleArresterVisual.draw(highVoltageRenderAngle,(transparentNodeDescriptor as DistributionPoleDescriptor).kind.phases,arresterRemaining<=0)
             (transparentNodeDescriptor as DistributionPoleDescriptor).drawEquipment(front ?: Direction.XN,display,highVoltageRenderAngle,lowVoltageRenderAngle,serviceMountReach.toDouble())
         }
         cable=drawCable(Direction.YN,if((transparentNodeDescriptor as DistributionPoleDescriptor).kind==DistributionKind.FEEDER_THREE)Eln.instance.stdCableRender3200V else Eln.instance.stdCableRender200V,connections,cable)
     }
-    override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream);display.read(stream);connections.deserialize(stream);cable=null }
+    override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream);display.read(stream);connections.deserialize(stream);arresterFitted=stream.readBoolean();arresterRemaining=stream.readDouble();cable=null }
     override fun newGuiDraw(side: Direction,player: Player)=DistributionGui(player,this)
 }
 class DistributionGui(player: Player,private val render: DistributionPoleRender): GuiContainerEln(DistributionContainer(player,render.inventory,(render.transparentNodeDescriptor as DistributionPoleDescriptor).kind.transformer,(render.transparentNodeDescriptor as DistributionPoleDescriptor).kind.twinLight)) {

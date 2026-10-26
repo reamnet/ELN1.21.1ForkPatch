@@ -22,6 +22,12 @@ object EntityRegistration {
     fun registerEntities() {
         registerReplicator()
         registerElectricMinecart()
+        mods.eln.transparentnode.industrial.ForkliftEntity.TYPE=ElnRegistry.registerEntityType("electric_forklift") {
+            EntityType.Builder.of({ type,level -> mods.eln.transparentnode.industrial.ForkliftEntity(type,level) },MobCategory.MISC).sized(1.1f,2.1f).clientTrackingRange(8).updateInterval(2)
+        }
+        mods.eln.transparentnode.industrial.PalletEntity.TYPE=ElnRegistry.registerEntityType("equipment_pallet") {
+            EntityType.Builder.of({ type,level -> mods.eln.transparentnode.industrial.PalletEntity(type,level) },MobCategory.MISC).sized(1.0f,.85f).clientTrackingRange(8).updateInterval(3)
+        }
     }
 
     private fun registerReplicator() {

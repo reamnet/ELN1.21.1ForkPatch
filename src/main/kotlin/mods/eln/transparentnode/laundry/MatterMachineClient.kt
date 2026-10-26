@@ -41,12 +41,18 @@ class MatterMachineDescriptor(val kind: MatterMachineKind): TransparentNodeDescr
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
             GL11.glDisable(GL11.GL_TEXTURE_2D)
-            GL11.glColor3f(.78f,.80f,.82f);model.getPart("Case")?.drawNoBind()
+            GL11.glColor3f(if(kind==MatterMachineKind.DRYER).88f else .78f,if(kind==MatterMachineKind.DRYER).86f else .80f,if(kind==MatterMachineKind.DRYER).82f else .82f);model.getPart("Case")?.drawNoBind()
             GL11.glColor3f(.10f,.13f,.16f);model.getPart("Black")?.drawNoBind()
             GL11.glColor3f(.43f,.48f,.53f);model.getPart("Trim")?.drawNoBind()
             GL11.glColor3f(.10f,.35f,.47f);model.getPart("Glass")?.drawNoBind()
             GL11.glColor3f(.14f,.48f,.62f);model.getPart("Display")?.drawNoBind()
             GL11.glColor3f(.80f,.45f,.12f);model.getPart("Coils")?.drawNoBind()
+            if(kind==MatterMachineKind.DRYER) {
+                GL11.glColor3f(.83f,.81f,.76f);model.getPart("Door")?.drawNoBind()
+                GL11.glColor3f(.72f,.72f,.68f);model.getPart("Lint")?.drawNoBind()
+                GL11.glColor3f(.17f,.18f,.18f);model.getPart("Vent")?.drawNoBind()
+                GL11.glColor3f(.55f,.58f,.60f);model.getPart("Exhaust")?.drawNoBind()
+            }
             Unit
         } finally { GL11.glPopAttrib() }
     }

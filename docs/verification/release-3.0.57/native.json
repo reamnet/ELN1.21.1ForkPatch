@@ -1,0 +1,140 @@
+{
+  "passed": [
+    "All new machine previews and accessory icons render as baked item quads",
+    "Held arrester installs on a real pole, receives the lightning event and publishes its baked protection kit",
+    "All ten new static machine bodies compile into native terrain meshes under Sodium/Iris/BSL",
+    "Public HTTPS Vorbis audio downloads asynchronously and reaches a native positional streaming sound channel",
+    "All ten real server menus open and render without overlapping settings or inventory slots",
+    "Real placed cables supply all ten machines; load, passive transformer, drive, charger and remote contacts work without network collapse",
+    "Replaceable arrester cartridge accounts for lightning energy",
+    "Dryer has its own baked solid-door, console, lint-filter and exhaust geometry",
+    "Live sag propagates to secondary; relay latches, priorities shed and welding consumes actual grid energy",
+    "Real client control packets drive the server-authoritative forklift and drain its traction pack",
+    "Loaded pallet, battery energy and fork height survive actual entity save/load without separate duplicate contents",
+    "Client pallet pickup/drop preserves all equipment stacks and creates exactly one destination pallet"
+  ],
+  "measurements": {
+    "bakedMachineQuads": 1944,
+    "bakedItemPreviews": [
+      {
+        "item": "eln:programmable_load_bank",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 270
+      },
+      {
+        "item": "eln:grid_control_console",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 102
+      },
+      {
+        "item": "eln:protective_relay_cabinet",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 72
+      },
+      {
+        "item": "eln:pole_surge_arrester",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 732
+      },
+      {
+        "item": "eln:pad_mounted_neighbourhood_transformer",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 96
+      },
+      {
+        "item": "eln:variable_frequency_motor_drive",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 126
+      },
+      {
+        "item": "eln:automatic_load_shedding_controller",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 72
+      },
+      {
+        "item": "eln:programmable_ev_pack_charger",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 78
+      },
+      {
+        "item": "eln:electric_welding_station",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 72
+      },
+      {
+        "item": "eln:powered_web_jukebox",
+        "context": "GUI",
+        "baked": true,
+        "converted": true,
+        "alreadyBaked": false,
+        "quads": 384
+      },
+      {
+        "item": "eln:48_v_20_kwh_traction_battery",
+        "context": "GUI",
+        "baked": true,
+        "converted": false,
+        "alreadyBaked": true,
+        "quads": 15
+      },
+      {
+        "item": "eln:welded_machine_frame",
+        "context": "GUI",
+        "baked": true,
+        "converted": false,
+        "alreadyBaked": true,
+        "quads": 146
+      },
+      {
+        "item": "eln:electric_forklift",
+        "context": "GUI",
+        "baked": true,
+        "converted": false,
+        "alreadyBaked": true,
+        "quads": 53
+      },
+      {
+        "item": "eln:warehouse_equipment_pallet",
+        "context": "GUI",
+        "baked": true,
+        "converted": false,
+        "alreadyBaked": true,
+        "quads": 120
+      }
+    ],
+    "nativeWebAudioStreams": 1,
+    "loadBankWatts": 49983.79712432416,
+    "padOutputVolts": 239.85009558229925,
+    "driveOutputVolts": 399.991737427863,
+    "storedChargeJoules": 254429.4948805663,
+    "forkliftTravelBlocks": 2.8699999999999477,
+    "forkHeight": 0.9249996542930603
+  }
+}

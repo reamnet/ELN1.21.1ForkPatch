@@ -202,6 +202,9 @@ class TransparentNode : Node() {
 
     override fun networkUnserialize(stream: DataInputStream, player: ServerPlayer?) {
         super.networkUnserialize(stream, player)
+        val industrial=element as? mods.eln.transparentnode.industrial.IndustrialElement
+        if(industrial!=null && (player==null || player.level()!==coordinate.world() || player.distanceToSqr(coordinate.x+.5,coordinate.y+.5,coordinate.z+.5)>64 ||
+            (player.containerMenu as? mods.eln.transparentnode.industrial.IndustrialContainer)?.deviceInventory!==industrial.inventory))return
         try {
             if (elementId == stream.readShort().toInt()) {
                 element!!.networkUnserialize(stream, player)

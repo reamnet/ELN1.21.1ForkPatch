@@ -85,6 +85,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     internal override fun serviceClearance()=if(installed)PoleTransformerShape.of(PoleHardware.transformerWatts(inventory.getItem(0)) ?: 10_000)
         .clearance(highVoltageRenderAngle) else super.serviceClearance()
     val lines=List(kind.phases) { NbtElectricalLoad("phase$it").apply { serialResistance=.00001 } }
+    val arrester=mods.eln.transparentnode.industrial.PoleSurgeUpgrade(this,lines,if(kind.lvOnly)240.0 else 12470.0)
     val outs=if(kind.protectedLine)List(kind.outputPhases) { NbtElectricalLoad("phaseOut$it").apply { serialResistance=.00001 } } else lines
     val fuses=List(kind.fuseCount) { CutoutFuse() }
     val recloser=RecloserControl()
@@ -173,6 +174,13 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         slowProcessList.add(IProcess { if(!clearancesReady)clearancesReady=PoleHeightUpgrade.update(this) })
         applyContacts()
     }
+    fun remoteSwitch(closed: Boolean): Boolean {
+        if(kind.recloser) {
+            if(closed && (recloser.locked || !recloser.closed && !recloser.manualOff))return false
+            if(recloser.closed!=closed)recloser.operate()
+        } else if(kind==DistributionKind.AIR_BREAK_THREE)gangClosed=closed else return false
+        applyContacts();sound("utility_recloser_bump",.5);needPublish();return true
+    }
     private fun applyContacts() {
         contacts.forEachIndexed { i,c -> c.closed=when {
             kind.pedestal -> fuses[0].closed
@@ -244,7 +252,9 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         if(!player.abilities.instabuild)cartridge.shrink(1)
         applyContacts();player.inventory.setChanged();needPublish();return true
     }
+    override fun onBreakElement() { arrester.drop();super.onBreakElement() }
     override fun onBlockActivated(player: Player,side: Direction,vx: Float,vy: Float,vz: Float): Boolean {
+        if(!kind.lvOnly && !kind.underground && arrester.interact(player))return true
         if(PoleHardware.extract(player,fuses)) { applyContacts();needPublish();return true }
         if(UtilityItems.isFuse(player.mainHandItem))return fuses.indices.firstOrNull { fuses[it].blown || !fuses[it].hasCartridge }?.let { replaceFuse(player,it) } ?: true
         if(kind.transformer && isStepDownUnit(player.mainHandItem) && !installed) {
@@ -336,7 +346,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     override fun thermoMeterString(side: Direction)=unit?.let { plotAmbientCelsius("T",it.thermal.temperatureCelsius) } ?: ""
     override fun getWaila()=linkedMapOf(tr("Cable terminal") to ServiceTerminals.label(selectedTerminal),(if(kind.singlePhaseTap)tr("Tap phase") else tr("Transformer phase")) to listOf("A","B","C")[transformerPhase],tr("Protection") to when { recloser.locked->tr("Recloser locked out");fuses.any { it.blown }->tr("Fuse blown");else->tr("Ready") })
     private fun writeSettings(nbt: CompoundTag) {
-        unit?.write(nbt);nbt.putInt("utilityTerminal",selectedTerminal);nbt.putInt("utilityPhase",transformerPhase);nbt.putDouble("utilityFuseAmps",fuseAmps);nbt.putBoolean("utilityGangClosed",gangClosed)
+        arrester.write(nbt);unit?.write(nbt);nbt.putInt("utilityTerminal",selectedTerminal);nbt.putInt("utilityPhase",transformerPhase);nbt.putDouble("utilityFuseAmps",fuseAmps);nbt.putBoolean("utilityGangClosed",gangClosed)
         fuses.forEachIndexed { i,f -> f.write(nbt,"utilityFuse$i") };recloser.write(nbt)
         nbt.putDouble("regulatorTarget",regulatorTarget);nbt.putBoolean("regulatorAuto",regulatorAutomatic);regulatorTaps.forEachIndexed { i,t -> nbt.putDouble("regulatorRatio$i",t.ratio) }
         nbt.putInt("utilityLampYaw",lampYaw);nbt.putInt("utilityLampHeight",lampHeightStep);nbt.putInt("utilityLampPitch",lampPitch)
@@ -362,7 +372,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         if(oldFuse.hasCartridge && inventory.getItem(1).isEmpty)inventory.setItem(1,oldFuse.removeCartridge())
     }
     override fun readFromNBT(nbt: CompoundTag) {
-        super.readFromNBT(nbt);recoverTwinHardware(nbt);readSettings(TwinPoleMigration.settings(kind,nbt))
+        super.readFromNBT(nbt);arrester.read(nbt);recoverTwinHardware(nbt);readSettings(TwinPoleMigration.settings(kind,nbt))
     }
     override fun getItemStackNBT()=CompoundTag().also(::writeSettings)
     override fun readItemStackNBT(nbt: CompoundTag?) { if(nbt!=null) { recoverTwinHardware(nbt);readSettings(TwinPoleMigration.settings(kind,nbt)) } }
@@ -377,7 +387,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
             yaw=this@DistributionPoleElement.yaw;heightStep=this@DistributionPoleElement.heightStep;pitch=this@DistributionPoleElement.pitch
             input=if(kind.pedestal)undergroundInput[2].voltage else if(kind.lvOnly)services[0].voltage else lines[transformerPhase].voltage;output=if(kind.lvOnly)services[if(kind.twinLight && lampVoltage==240)2 else if(kind.pedestal)2 else 0].voltage else unit?.secondary?.voltage ?: outs[0].voltage;watts=if(kind.pedestal)contacts.indices.sumOf { undergroundInput[it].voltage*contacts[it].current } else unit?.output?.power ?: lampPower
         }.write(stream)
-        node!!.lrduCubeMask.getTranslate(Direction.YN).serialize(stream)
+        node!!.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);stream.writeBoolean(arrester.fitted);stream.writeDouble(arrester.remaining)
     }
     override fun networkUnserialize(stream: DataInputStream): Byte {
         val id=super.networkUnserialize(stream)

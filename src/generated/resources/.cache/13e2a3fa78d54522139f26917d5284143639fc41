@@ -1,4 +1,4 @@
-// 1.21.1	2026-10-25T17:38:02.460927659	Item Models: eln
+// 1.21.1	2026-10-26T21:40:07.78337865	Item Models: eln
 c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/100_a_pole_fuse.json
 a5ac578ee8f459ff5057195ce2b630f75ac6edbb assets/eln/models/item/100_kw_pole_transformer.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/100a_electrical_breaker.json
@@ -112,6 +112,7 @@ a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/480_v_industrial
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/480v_defence_turret.json
 1c10b6ad9521a41115967ed889d0cbc8263edaa8 assets/eln/models/item/480v_heavy_tungsten_heating_element.json
 e4cd44dda64a7a1a9dd0e5ccce50be42ad6556b5 assets/eln/models/item/480v_tungsten_heating_element.json
+dd4aed31ad85b4c06218ffafd126c977f45261ae assets/eln/models/item/48_v_20_kwh_traction_battery.json
 f93030a66344007a6cbf214aea03c88a6e9fb436 assets/eln/models/item/48_v_machine_cord.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/48_v_machine_outlet.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/48v_compressor.json
@@ -215,6 +216,7 @@ a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/armored_oval_bul
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/articulated_task_table_lamp.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/aura_five_blade_ceiling_fan.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/auto_miner.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/automatic_load_shedding_controller.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/automatic_transfer_switch.json
 f728944d4172a7c580f484a481a6592651cea82a assets/eln/models/item/average_electrical_drill.json
 d7407fe07e84744241e9561c08a2ba97ab1f73e9 assets/eln/models/item/average_ferromagnetic_core.json
@@ -428,6 +430,7 @@ a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/direct_utility_p
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/double_candle_wall_sconce.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_coffee_maker.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_dryer.json
+8414bd216e3b5239f79449006aa1fb0cb4007b0c assets/eln/models/item/electric_forklift.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_kettle.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_microwave.json
 e3c160d8996f205794fce647f1b79865110378a8 assets/eln/models/item/electric_minecart.json
@@ -439,6 +442,7 @@ a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_refrige
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_rice_cooker.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_toaster.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_washing_machine.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_welding_station.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/electrical_anemometer_sensor.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/electrical_daylight_sensor.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/electrical_entity_sensor.json
@@ -504,6 +508,7 @@ a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/grand_halo_ring_
 dc958e43bd1f9cb25bebe4bdfab559c438256ab9 assets/eln/models/item/gray_brush.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/green_banker_table_lamp.json
 cd654aabd733359d1128f6b3710f9cbdc327f764 assets/eln/models/item/green_brush.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/grid_control_console.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/grid_dc-dc_converter.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/grid_switch.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/ground_cable.json
@@ -658,6 +663,7 @@ a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/outdoor_motion_f
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/overhead_lines.json
 00b852b7f534bf34630b8b7bb20e7f199740f7cc assets/eln/models/item/overheating_protection.json
 20e0d7b151c9646307ce9731410913cb752d494c assets/eln/models/item/overvoltage_protection.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/pad_mounted_neighbourhood_transformer.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/pal_chip.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/patio_electric_grill.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/patio_festoon_party_lights.json
@@ -668,6 +674,7 @@ e1b85e4bd722dbe63b2e90a418957d43709269a1 assets/eln/models/item/player_filter.js
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/polarized_shaft_generator.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/polarized_shaft_motor.json
 c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/pole_fuse_link.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/pole_surge_arrester.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/pool_corner_wash_light.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/pool_step_marker_light.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/poolside_globe_string_lights.json
@@ -686,7 +693,11 @@ a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/power_capacitor_
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/power_inductor.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/power_inductor_80.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/power_resistor.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/powered_web_jukebox.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/programmable_ev_pack_charger.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/programmable_load_bank.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/programmable_ups.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/protective_relay_cabinet.json
 3143800c51d01e51f916e24428ac205b0ef0a361 assets/eln/models/item/purple_brush.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/quad_head_parking_lot_light.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/radial_motor.json
@@ -836,6 +847,7 @@ a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/utility_pole_twi
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/utility_pole_w_dc-dc_converter.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/utility_wind_turbine_3.2kv.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/variable_dc-dc_converter.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/variable_frequency_motor_drive.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/variable_inductor.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/very_high_voltage_cable.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/very_high_voltage_relay.json
@@ -852,10 +864,12 @@ a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/wall-mounted_hyb
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/wall-mounted_mini-split_air_conditioner.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/wall-mounted_mppt_solar_controller.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/wall-mounted_programmable_ups.json
+6a00c76dad4489b4173068fc650b93db7460d65c assets/eln/models/item/warehouse_equipment_pallet.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/warehouse_wall_floodlight.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/warm_white_christmas_fairy_lights.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/warm_white_deck_globe_string_lights.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/water_turbine.json
+fe680fb953398132b3b82e94a8ddbd2052d6d4ba assets/eln/models/item/welded_machine_frame.json
 60944bc528cfdef884a10a20c275b5170f74722b assets/eln/models/item/white_brush.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/white_fairy_lights_on_green_wire.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/wind_turbine.json

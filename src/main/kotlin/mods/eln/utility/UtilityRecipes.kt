@@ -7,6 +7,7 @@ import net.minecraft.world.level.block.Blocks
 
 object UtilityRecipes {
     fun register(shaped: (ItemStack,Array<out Any>)->Unit,shapeless: (ItemStack,Array<out Any>)->Unit) {
+        mods.eln.transparentnode.industrial.IndustrialRecipes.register(shaped)
         fun addRecipe(output: ItemStack,vararg params: Any)=shaped(output,params)
         fun addShapelessRecipe(output: ItemStack,vararg params: Any)=shapeless(output,params)
         fun findItemStack(name: String,stackSize: Int=1)=Eln.findItemStack(name,stackSize)

@@ -38,6 +38,8 @@ public final class ClientSetup {
         // the fluid-handling transparent nodes (EntityMetaTag.Fluid: the steam and gas turbines, the
         // radial motor, the fuel heat furnace, the heat exchanger) are their own block entity type
         event.registerBlockEntityRenderer(mods.eln.node.transparent.TransparentNodeEntityWithFluid.TYPE.get(), context -> new TransparentNodeRender());
+        event.registerEntityRenderer(mods.eln.transparentnode.industrial.ForkliftEntity.TYPE.get(), context -> new mods.eln.transparentnode.industrial.IndustrialTransportRenderer<>(context, false));
+        event.registerEntityRenderer(mods.eln.transparentnode.industrial.PalletEntity.TYPE.get(), context -> new mods.eln.transparentnode.industrial.IndustrialTransportRenderer<>(context, true));
         event.registerEntityRenderer(ReplicatorEntity.TYPE.get(),
             context -> new ReplicatorRender(context, new SilverfishModel<>(context.bakeLayer(ModelLayers.SILVERFISH)), 0.3f));
     }

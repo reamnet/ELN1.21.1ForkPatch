@@ -60,6 +60,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.54` | — | Recover DH geometry across renderer replacement and reconnect; prioritize power lines; mark substation voltage banks and phases, fix rotated terminal picking and keep banks stationary |
 | `v3.0.55` | — | Gauge- and material-aware overhead cables, insulated secondary triplex, compact suspension points and real service-drop splice leads |
 | `v3.0.56` | — | LV cables clear pole and transformer cases, rating-sized transformer cans, and fixed cutout holders with separate drop-out carriers |
+| `v3.0.57` | — | Industrial load bank, grid console, protective relay, surge arrester/pole kit, pad transformer, motor drive, load shedder, EV pack charger, welding station and rechargeable forklift with equipment pallets; distinct dryer model and powered HTTPS/YouTube jukebox |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`

@@ -1513,6 +1513,9 @@ object TransparentNodeRegistration {
     }
 
     private fun registerGridDevices(id: Int) {
+        mods.eln.transparentnode.industrial.IndustrialKind.entries.forEach { kind ->
+            transparentNodeItem.addDescriptor(kind.ordinal+(126 shl 6),mods.eln.transparentnode.industrial.IndustrialDescriptor(kind))
+        }
         mods.eln.transparentnode.laundry.MatterMachineKind.entries.forEach { kind ->
             transparentNodeItem.addDescriptor(kind.subId+(125 shl 6),mods.eln.transparentnode.laundry.MatterMachineDescriptor(kind).apply { setCreativeTab(Eln.creativeTabMachines) })
         }

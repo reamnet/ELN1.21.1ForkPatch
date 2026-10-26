@@ -35,6 +35,7 @@ class PanelBreaker {
         private set
     private var heat=0.0
     fun operate() { if(tripped) { tripped=false;heat=0.0;enabled=true } else enabled=!enabled }
+    fun remoteEnabled(value: Boolean) { enabled=value }
     fun removed() { tripped=false;heat=0.0 }
     fun step(seconds: Double,amps: Double,rating: Double): Boolean {
         if(!seconds.isFinite() || seconds<=0 || !rating.isFinite() || rating<=0 || !amps.isFinite())return false
@@ -144,6 +145,11 @@ class BreakerPanelElement(node: TransparentNode,descriptor: TransparentNodeDescr
     override fun inventoryChange(inventory: Container?) {
         circuits.forEach { c -> val next=c.rating;if(next!=c.previousRating) { c.breaker.removed();c.previousRating=next };c.configure() }
         needPublish()
+    }
+    fun remoteCircuit(index: Int,closed: Boolean): Boolean {
+        val c=circuits.getOrNull(index) ?: return false
+        if(closed && (c.breaker.tripped || c.rating<=0))return false
+        c.breaker.remoteEnabled(closed);c.configure();needPublish();return true
     }
     fun setPowerChannel(index: Int,value: String) {
         val c=circuits.getOrNull(index) ?: return
