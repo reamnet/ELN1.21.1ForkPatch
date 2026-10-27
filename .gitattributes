@@ -51,3 +51,4 @@
 # Standalone media executables have platform-specific names, often without extensions.
 src/main/resources/assets/eln/media-runtime/quickjs-* binary
 src/main/resources/assets/eln/media-runtime/yt-dlp-*  binary
+tools/media/tv_fixture/*.webm binary

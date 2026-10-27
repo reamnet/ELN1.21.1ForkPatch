@@ -1,0 +1,38 @@
+{
+  "passed": [
+    "Real Chromium decodes moving WebM video and nonzero audio samples from an HTTP stream; static cabinet is baked",
+    "Real browser mouse clicks and typed characters pass through the TV screen to webpage controls",
+    "Closing controls leaves the same browser and video playing on the in-world TV",
+    "Loss of actual placed-cable power closes Chromium and stops playback",
+    "Restoring electrical power recreates the browser and resumes the selected page",
+    "Leaving the 32-block viewing range releases the browser and its texture/audio resources"
+  ],
+  "measurements": {
+    "browserPlayback": {
+      "time": 3.522667,
+      "paused": false,
+      "width": 320,
+      "audioTracks": 1,
+      "muted": false,
+      "volume": 0.5681176947438429,
+      "contextState": "running",
+      "rms": 0.04993553909970289,
+      "clicks": 0,
+      "input": ""
+    },
+    "paintedFrames": 10,
+    "powerWatts": 149.99772249380857,
+    "interactivePage": {
+      "time": 6.589333,
+      "paused": false,
+      "width": 320,
+      "audioTracks": 1,
+      "muted": false,
+      "volume": 0.5681176947438429,
+      "contextState": "running",
+      "rms": 0.04976858563067553,
+      "clicks": 1,
+      "input": "TV!"
+    }
+  }
+}

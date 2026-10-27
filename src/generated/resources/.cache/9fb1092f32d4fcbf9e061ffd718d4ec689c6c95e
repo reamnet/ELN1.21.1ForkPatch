@@ -1,4 +1,4 @@
-// 1.21.1	2026-10-26T21:40:07.759528056	Recipes
+// 1.21.1	2026-10-27T01:58:02.461786813	Recipes
 72b08ae301f68a7a5b4ffeb00733765cfc9259c5 data/eln/advancement/recipes/misc/100_a_pole_fuse.json
 de21adcd90ac44899fa6d8e71cbbe823fbc0d070 data/eln/advancement/recipes/misc/100_kw_pole_transformer.json
 c45ab92bbdd9de0dab6c23fed31d9bcc1fda2fb0 data/eln/advancement/recipes/misc/100a_electrical_breaker.json
@@ -511,6 +511,7 @@ a0b81305378820c3a236b3a75f88129fe07a5a05 data/eln/advancement/recipes/misc/porta
 f6e3559c8a7d12d5c96812226012328c2b146e92 data/eln/advancement/recipes/misc/power_capacitor.json
 037ac18ef51df833fd86ed6d60b9e3de00c7b5ed data/eln/advancement/recipes/misc/power_inductor.json
 67dd4479fc47471e3c316f19b67c237a5abe1a22 data/eln/advancement/recipes/misc/power_resistor.json
+27bf4317b06048ec2ec86632d1c7a1a40c1c0711 data/eln/advancement/recipes/misc/powered_browser_television.json
 07cbde0a5613be70487b45d10a879b2d853c8ac6 data/eln/advancement/recipes/misc/powered_web_jukebox.json
 280341e43b83110e447a33592ac0078f5aa02714 data/eln/advancement/recipes/misc/programmable_ev_pack_charger.json
 2bcb834a40ecede009326779aa179845d2b9d473 data/eln/advancement/recipes/misc/programmable_load_bank.json
@@ -1228,6 +1229,7 @@ f9df0f75e3e4937cc6c2a16e684e5e9743664dfd data/eln/recipe/portable_electric_space
 41119b66f055ca246bb16034fdef8ecbbff7d9b3 data/eln/recipe/power_capacitor.json
 c865958c2db519f2435e80b4bfce3d8c709cd863 data/eln/recipe/power_inductor.json
 00ddf01683f0239d999ed1363434cf6d19eae241 data/eln/recipe/power_resistor.json
+3682fadaaaa10e627bd9ffe48ac55316afddb971 data/eln/recipe/powered_browser_television.json
 7a113125a1d99f9b6633c3e0fa6026f1da0e7d93 data/eln/recipe/powered_web_jukebox.json
 88d2acce32cb4cf699e0050acea5b80fbc6cef44 data/eln/recipe/programmable_ev_pack_charger.json
 c3f5346ae193c46867eb5d5e26c37a32f4ab2e97 data/eln/recipe/programmable_load_bank.json

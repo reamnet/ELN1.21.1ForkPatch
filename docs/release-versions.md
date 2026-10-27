@@ -63,6 +63,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.57` | — | Industrial load bank, grid console, protective relay, surge arrester/pole kit, pad transformer, motor drive, load shedder, EV pack charger, welding station and rechargeable forklift with equipment pallets; distinct dryer model and powered HTTPS/YouTube jukebox |
 
 | `v3.0.58` | — | Visible labeled charger/transformer/welder inventory slots, corrected industrial cabinet facing, and fully bundled FFmpeg/yt-dlp/QuickJS media tools |
+| `v3.0.59` | — | Powered interactive Chromium TV with streaming video/audio, baked cabinet, browser controls and bundled MCEF bridge |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`

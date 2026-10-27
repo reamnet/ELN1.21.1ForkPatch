@@ -1,0 +1,7 @@
+{
+  "started": true,
+  "cleanStopAfterTicks": 40,
+  "chromiumInitialized": false,
+  "chromiumRuntimeInstalled": false,
+  "mcefBridgePresent": true
+}

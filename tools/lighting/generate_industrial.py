@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 """Original industrial cabinets, load rack, welding bench and electric forklift."""
 from generate_fans_and_outlet import Mesh
-for kind in ['load_bank','scada','relay','arrester','pad','drive','shedder','charger','welder','jukebox']:
+for kind in ['load_bank','scada','relay','arrester','pad','drive','shedder','charger','welder','jukebox','tv']:
  m=Mesh()
- if kind=='jukebox':
+ if kind=='tv':
+  m.box('Base',-.52,-.49,-.28,1.04,.05,.56)
+  m.box('Trim',-.075,-.44,-.055,.15,.28,.11)
+  m.box('Case',-1.36,-.20,-.10,2.72,1.59,.16)
+  m.box('Trim',-1.32,-.16,-.115,2.64,1.51,.04)
+  m.box('Screen',-1.28,-.12,-.14,2.56,1.44,.015)
+ elif kind=='jukebox':
   m.box('Base',-.42,-.49,-.32,.84,.07,.64)
   m.box('Case',-.39,-.42,-.28,.78,.84,.56)
   m.box('Trim',-.33,-.34,-.297,.66,.48,.016)

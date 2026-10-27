@@ -221,6 +221,11 @@ tasks.processResources {
 
 // --------------------------------------------------------------- dependencies
 repositories {
+    maven {
+        name = "CinemaMod"
+        url = uri("https://mcef-download.cinemamod.com/repositories/releases")
+        content { includeGroup("com.cinemamod") }
+    }
     // The one curse.maven artifact below is a compileOnly dependency of the MAIN source set, so
     // it is required to build at all. Resolving it only through cursemaven.com made that proxy a
     // single point of failure: when it rate-limits (HTTP 429) and the CI cache is cold, every job
@@ -259,6 +264,9 @@ repositories {
 }
 
 dependencies {
+    // Chromium browser bridge for the powered TV; includes its normal client runtime installer.
+    implementation("com.cinemamod:mcef-neoforge:2.1.6-1.21.1") { isTransitive = false }
+    jarJar("com.cinemamod:mcef-neoforge:2.1.6-1.21.1") { isTransitive = false }
     // Native OC callbacks are optional. Runtime mods are installed from the verified companion lock.
     compileOnly("curse.maven:opencomputers-rebooted-1634364:8721690") { isTransitive = false }
     compileOnly("maven.modrinth:create:6.0.10+mc1.21.1")

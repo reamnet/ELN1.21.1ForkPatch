@@ -23,3 +23,7 @@ The native executables and archives under `src/main/resources/assets/eln/media-r
 unmodified third-party programs supplied under their own licenses, rather than Electrical Age's
 source or graphics license. See that directory's `notice.md`, pinned manifest, and original
 copyright/license notices and source/build references in `notices/`.
+
+The nested MCEF browser bridge retains its LGPL-2.1-or-later license; its Java CEF
+component retains the accompanying BSD license. See
+`src/main/resources/assets/eln/browser-notices/notice.md` and the full license texts there.

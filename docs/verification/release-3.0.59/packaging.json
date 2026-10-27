@@ -1,0 +1,21 @@
+{
+  "jarBytes": 295355610,
+  "nestedBrowser": {
+    "identifier": {
+      "group": "com.cinemamod",
+      "artifact": "mcef-neoforge"
+    },
+    "version": {
+      "range": "[2.1.6-1.21.1,)",
+      "artifactVersion": "2.1.6-1.21.1"
+    },
+    "path": "META-INF/jarjar/mcef-neoforge-2.1.6-1.21.1.jar",
+    "isObfuscated": false
+  },
+  "bridgeSha512Verified": true,
+  "bridgeSha512": "ef975f64d100ad1f774e04c8cc31d06b99c5c72196e0ee270008a71148b90ddf43d72a103224e5536f58b16f984f263b45c96dd8df0b722c2ee63526baf61195",
+  "publisherChecksumUrl": "https://mcef-download.cinemamod.com/repositories/releases/com/cinemamod/mcef-neoforge/2.1.6-1.21.1/mcef-neoforge-2.1.6-1.21.1.jar.sha512",
+  "televisionClassesModelAndRecipe": true,
+  "browserScriptsAndLicenses": true,
+  "chromiumNativeLibrariesInsideJar": false
+}

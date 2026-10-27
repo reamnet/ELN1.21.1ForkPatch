@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.Blocks
 object IndustrialRecipes {
     fun register(shaped: (ItemStack,Array<out Any>)->Unit) {
         fun find(name: String)=Eln.findItemStack(name,1)
-        val centers=listOf(Items.BLAZE_ROD,Items.COMPARATOR,Items.REPEATER,Items.LIGHTNING_ROD,Items.IRON_BLOCK,Items.REDSTONE_BLOCK,Items.OBSERVER,Items.QUARTZ,Items.FLINT_AND_STEEL,Items.JUKEBOX)
+        val centers=listOf(Items.BLAZE_ROD,Items.COMPARATOR,Items.REPEATER,Items.LIGHTNING_ROD,Items.IRON_BLOCK,Items.REDSTONE_BLOCK,Items.OBSERVER,Items.QUARTZ,Items.FLINT_AND_STEEL,Items.JUKEBOX,Items.GLASS_PANE)
         IndustrialKind.entries.forEachIndexed { i,kind->
             shaped(find(kind.title),arrayOf("IPI","WCW","IMI",'I',find("Iron Plate"),'P',ItemStack(Items.REDSTONE),'W',find("Copper Cable"),'C',ItemStack(centers[i]),'M',find("Machine Block")))
         }

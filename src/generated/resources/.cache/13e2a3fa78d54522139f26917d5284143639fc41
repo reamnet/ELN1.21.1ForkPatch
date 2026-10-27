@@ -1,4 +1,4 @@
-// 1.21.1	2026-10-26T21:40:07.78337865	Item Models: eln
+// 1.21.1	2026-10-27T01:58:02.499937745	Item Models: eln
 c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/100_a_pole_fuse.json
 a5ac578ee8f459ff5057195ce2b630f75ac6edbb assets/eln/models/item/100_kw_pole_transformer.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/100a_electrical_breaker.json
@@ -693,6 +693,7 @@ a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/power_capacitor_
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/power_inductor.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/power_inductor_80.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/power_resistor.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/powered_browser_television.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/powered_web_jukebox.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/programmable_ev_pack_charger.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/programmable_load_bank.json

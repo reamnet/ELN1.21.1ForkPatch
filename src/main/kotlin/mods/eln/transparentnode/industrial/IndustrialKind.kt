@@ -13,7 +13,8 @@ enum class IndustrialKind(val title: String,val nominal: Double,val defaults: Do
     SHEDDER(I18N.TR_NAME(I18N.Type.NONE,"Automatic Load Shedding Controller"),240.0,doubleArrayOf(240.0,50000.0)),
     CHARGER(I18N.TR_NAME(I18N.Type.NONE,"Programmable EV Pack Charger"),240.0,doubleArrayOf(240.0,7200.0,0.0,0.0)),
     WELDER(I18N.TR_NAME(I18N.Type.NONE,"Electric Welding Station"),240.0,doubleArrayOf(240.0,6000.0)),
-    JUKEBOX(I18N.TR_NAME(I18N.Type.NONE,"Powered Web Jukebox"),120.0,doubleArrayOf(120.0,.65));
+    JUKEBOX(I18N.TR_NAME(I18N.Type.NONE,"Powered Web Jukebox"),120.0,doubleArrayOf(120.0,.65)),
+    TV(I18N.TR_NAME(I18N.Type.NONE,"Powered Browser Television"),120.0,doubleArrayOf(120.0,.65));
     val model get()="industrial_"+name.lowercase(java.util.Locale.ROOT)
     val slots get()=when(this) { PAD->2;CHARGER->1;WELDER->3;else->0 }
     fun labels(): List<String> = when(this) {
@@ -26,7 +27,7 @@ enum class IndustrialKind(val title: String,val nominal: Double,val defaults: Do
         SHEDDER->listOf(tr("Nominal input V"),tr("Power budget W"))
         CHARGER->listOf(tr("Nominal input V"),tr("Charge power W"),tr("Start hour (0-23)"),tr("End hour (0-23)"))
         WELDER->listOf(tr("Nominal input V"),tr("Welding power W"))
-        JUKEBOX->listOf(tr("Nominal input V"),tr("Volume (0-1)"))
+        JUKEBOX,TV->listOf(tr("Nominal input V"),tr("Volume (0-1)"))
     }
     fun valid(p: DoubleArray): Boolean {
         if(p.size!=defaults.size || p.any { !it.isFinite() })return false
@@ -40,7 +41,7 @@ enum class IndustrialKind(val title: String,val nominal: Double,val defaults: Do
             SHEDDER->p[1] in 100.0..1e6
             CHARGER->p[0] in 120.0..480.0 && p[1] in 100.0..50000.0 && p[2] in 0.0..23.0 && p[3] in 0.0..23.0
             WELDER->p[0] in 120.0..480.0 && p[1] in 1000.0..20000.0
-            JUKEBOX->p[0] in listOf(120.0,240.0) && p[1] in 0.0..1.0
+            JUKEBOX,TV->p[0] in listOf(120.0,240.0) && p[1] in 0.0..1.0
             else->true
         }
     }

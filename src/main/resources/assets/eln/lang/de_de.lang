@@ -2792,6 +2792,7 @@ Supports_standard_crop-block_seeds;_planting_stock_is_retained=Supports standard
 Temperature_outside_growing_range=Temperature outside growing range
 
 # src/main/kotlin/mods/eln/transparentnode/industrial/IndustrialClient.kt
+120/240_V;_150_W_on,_2_W_standby;_cords_or_fixed_cables=120/240 V; 150 W on, 2 W standby; cords or fixed cables
 120/240_V;_25_W_playing,_2_W_standby;_cords_or_fixed_cables=120/240 V; 25 W playing, 2 W standby; cords or fixed cables
 120_kJ_per_welded_frame_or_25_percent_durability_repair=120 kJ per welded frame or 25 percent durability repair
 Actual_frequency\:_%1$_Hz;_case_%2$_C=Actual frequency: %1$ Hz; case %2$ C
@@ -2800,6 +2801,7 @@ Battery_/_pack=Battery / pack
 Battery_/_pack_(one)=Battery / pack (one)
 Bind_address=Bind address
 Blue_left_or_bottom\:_input;_orange_right\:_output=Blue left or bottom: input; orange right: output
+Browser_bridge_included;_Chromium_installs_on_first_client_launch=Browser bridge included; Chromium installs on first client launch
 Case\:_%1$_C;_consumed\:_%2$_kJ=Case: %1$ C; consumed: %2$ kJ
 Charges_removable_vehicle_and_UPS_packs_using_real_input_energy;_94_percent_efficiency=Charges removable vehicle and UPS packs using real input energy; 94 percent efficiency
 Console_supply\:_120_V_/_20_W;_remote_closing_never_resets_a_trip=Console supply: 120 V / 20 W; remote closing never resets a trip
@@ -2816,6 +2818,7 @@ Front_top\:_trip_signal;_front_bottom\:_control_signal=Front top: trip signal; f
 Fuse=Fuse
 Input\:_%1$;_%2$=Input: %1$; %2$
 Install_a_pole_transformer_and_fuse;_fixed_ratio_follows_primary_sag=Install a pole transformer and fuse; fixed ratio follows primary sag
+Interactive_Chromium_TV\:_webpages,_video_and_stereo_audio=Interactive Chromium TV: webpages, video and stereo audio
 Invalid_electrical_readings=Invalid electrical readings
 Iron_ingot=Iron ingot
 Left\:_iron_ingot_or_damaged_tool;_middle\:_iron_ingot;_right\:_output=Left: iron ingot or damaged tool; middle: iron ingot; right: output
@@ -2877,6 +2880,7 @@ Overvoltage_ratio=Overvoltage ratio
 Pad_Mounted_Neighbourhood_Transformer.name=Pad Mounted Neighbourhood Transformer
 Pole_Surge_Arrester.name=Pole Surge Arrester
 Power_budget_W=Power budget W
+Powered_Browser_Television.name=Powered Browser Television
 Powered_Web_Jukebox.name=Powered Web Jukebox
 Primary_V=Primary V
 Programmable_EV_Pack_Charger.name=Programmable EV Pack Charger
@@ -2910,6 +2914,26 @@ Traction_pack\:_%1$%;_forks\:_%2$_cm=Traction pack: %1$%; forks: %2$ cm
 Circuit_%1$\:_%2$_V_/_%3$_A\nBreaker\:_%4$_A;_%5$=Circuit %1$: %2$ V / %3$ A\nBreaker: %4$ A; %5$
 Circuit_unavailable=Circuit unavailable
 Target_unavailable_or_chunk_unloaded=Target unavailable or chunk unloaded
+
+# src/main/kotlin/mods/eln/transparentnode/industrial/TelevisionBrowser.kt
+Browser_could_not_start;_turn_the_TV_off_and_on_to_retry=Browser could not start; turn the TV off and on to retry
+Browser_engine_unavailable;_check_MCEF_setup=Browser engine unavailable; check MCEF setup
+Browser_ready;_click_the_picture_to_interact=Browser ready; click the picture to interact
+Enter_a_webpage_or_video_address_and_turn_on_the_TV=Enter a webpage or video address and turn on the TV
+Loading_webpage...=Loading webpage...
+Two_nearby_TVs_are_already_active=Two nearby TVs are already active
+Waiting_for_viewer_within_32_blocks=Waiting for viewer within 32 blocks
+
+# src/main/kotlin/mods/eln/transparentnode/industrial/TelevisionScreen.kt
+Go=Go
+Powered_Browser_Television=Powered Browser Television
+Reload=Reload
+Share_page=Share page
+Supply\:_%1$;_%2$;_volume_%3$_percent=Supply: %1$; %2$; volume %3$ percent
+TV_off=TV off
+TV_on=TV on
+Use_a_complete_HTTP_or_HTTPS_address=Use a complete HTTP or HTTPS address
+Web_address=Web address
 
 # src/main/kotlin/mods/eln/transparentnode/industrial/WebJukeboxAudio.kt
 Audio_unavailable;_check_link,_HTTPS_access_and_media_tools=Audio unavailable; check link, HTTPS access and media tools

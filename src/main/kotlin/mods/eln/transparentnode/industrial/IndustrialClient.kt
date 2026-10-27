@@ -14,7 +14,7 @@ import java.io.DataInputStream
 
 class IndustrialDescriptor(val kind: IndustrialKind): TransparentNodeDescriptor(kind.title,IndustrialElement::class.java,IndustrialRender::class.java) {
     private val model by lazy { Eln.obj.getObj(kind.model) }
-    init { creativeTab=if(kind==IndustrialKind.WELDER || kind==IndustrialKind.LOAD_BANK || kind==IndustrialKind.JUKEBOX)Eln.creativeTabMachines else Eln.creativeTabPowerElectronics }
+    init { creativeTab=if(kind==IndustrialKind.WELDER || kind==IndustrialKind.LOAD_BANK || kind==IndustrialKind.JUKEBOX || kind==IndustrialKind.TV)Eln.creativeTabMachines else Eln.creativeTabPowerElectronics }
     override fun mustHaveFloor()=false
     fun draw(front: Direction=Direction.ZP,on: Boolean=false,fault: Boolean=false,open: Boolean=false)=preserveMatrix {
         front.inverse.glRotateZnRef();GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
@@ -46,6 +46,7 @@ class IndustrialDescriptor(val kind: IndustrialKind): TransparentNodeDescriptor(
             IndustrialKind.SHEDDER->list.add(tr("Right terminals: left priority 1, right 2, down 3, up 4; restore every five healthy seconds"))
             IndustrialKind.CHARGER->list.add(tr("Charges removable vehicle and UPS packs using real input energy; 94 percent efficiency"))
             IndustrialKind.JUKEBOX->{ list.add(tr("120/240 V; 25 W playing, 2 W standby; cords or fixed cables"));list.add(tr("Direct HTTPS Ogg Vorbis audio works without extra tools"));list.add(tr("YouTube and other audio formats use bundled media tools; no separate installation")) }
+            IndustrialKind.TV->{ list.add(tr("Interactive Chromium TV: webpages, video and stereo audio"));list.add(tr("120/240 V; 150 W on, 2 W standby; cords or fixed cables"));list.add(tr("Browser bridge included; Chromium installs on first client launch")) }
             IndustrialKind.WELDER->{ list.add(tr("Left: iron ingot or damaged tool; middle: iron ingot; right: output"));list.add(tr("120 kJ per welded frame or 25 percent durability repair")) }
         }
     }
@@ -74,16 +75,18 @@ class IndustrialRender(entity: TransparentNodeEntity,descriptor: TransparentNode
     var target=0;var telemetry="";val closed=BooleanArray(4)
     var mediaUrl="";var mediaRequested=false;var mediaRevision=0
     val webAudio by lazy { WebJukeboxAudio(this,tileEntity) }
-    override fun refresh(deltaT: Float) { super.refresh(deltaT);if(kind==IndustrialKind.JUKEBOX)webAudio.update() }
-    override fun destructor() { if(kind==IndustrialKind.JUKEBOX)webAudio.close();super.destructor() }
-    override fun draw()=mods.eln.client.terrain.TerrainModels.body(this,listOf(front,enabled),setOf("Indicator")) {
+    val television by lazy { TelevisionBrowser(this) }
+    override fun refresh(deltaT: Float) { super.refresh(deltaT);if(kind==IndustrialKind.JUKEBOX)webAudio.update();if(kind==IndustrialKind.TV)television.update() }
+    override fun destructor() { if(kind==IndustrialKind.JUKEBOX)webAudio.close();if(kind==IndustrialKind.TV)television.close();super.destructor() }
+    private fun drawBody()=mods.eln.client.terrain.TerrainModels.body(this,listOf(front,enabled),setOf("Indicator")) {
         (transparentNodeDescriptor as IndustrialDescriptor).draw(front ?: Direction.ZP,working,trip || kind==IndustrialKind.ARRESTER && stats[9]<=0,!enabled && kind==IndustrialKind.PAD)
     }
+    override fun draw() { drawBody();if(kind==IndustrialKind.TV)television.drawWorld() }
     override fun networkUnserialize(input: DataInputStream) {
         super.networkUnserialize(input);settings.indices.forEach { settings[it]=input.readDouble() };enabled=input.readBoolean();trip=input.readBoolean();working=input.readBoolean();stats.indices.forEach { stats[it]=input.readDouble() }
-        target=input.readUnsignedByte().coerceIn(0,7);telemetry=input.readUTF();closed.indices.forEach { closed[it]=input.readBoolean() };if(kind==IndustrialKind.JUKEBOX) { mediaUrl=input.readUTF();mediaRequested=input.readBoolean();mediaRevision=input.readInt() }
+        target=input.readUnsignedByte().coerceIn(0,7);telemetry=input.readUTF();closed.indices.forEach { closed[it]=input.readBoolean() };if(kind==IndustrialKind.JUKEBOX || kind==IndustrialKind.TV) { mediaUrl=input.readUTF();mediaRequested=input.readBoolean();mediaRevision=input.readInt() }
     }
-    override fun newGuiDraw(side: Direction,player: Player)=IndustrialGui(player,this)
+    override fun newGuiDraw(side: Direction,player: Player)=if(kind==IndustrialKind.TV)TelevisionScreen(this) else IndustrialGui(player,this)
 }
 class IndustrialGui(player: Player,private val render: IndustrialRender): GuiContainerEln(IndustrialContainer(player,render.inventory,render.kind)) {
     private val fields=ArrayList<GuiTextFieldEln>()

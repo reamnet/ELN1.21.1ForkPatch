@@ -1,15 +1,15 @@
-# Industrial equipment — 3.0.57
+# Industrial equipment — 3.0.59
 
-All ten stationary machines have baked terrain bodies. The forklift and pallet are moving
+All eleven stationary machines have baked terrain bodies. The forklift and pallet are moving
 entities; their reusable OBJ geometry remains in the entity renderer. Existing saved item IDs
-are unchanged. New transparent machines occupy group 126, slots 0–9; accessories occupy
+are unchanged. New transparent machines occupy group 126, slots 0–10; accessories occupy
 shared-item group 117, slots 0–3.
 
 ## Wiring and controls
 
 Blue left or bottom is input. Orange right is output. Front top is an ELN trip/fault signal;
 front bottom is an inhibit/trip signal. Use ordinary placed cables. The load bank, motor drive,
-charger and welder also accept voltage-matching cords with sufficient nominal ampacity.
+charger, welder, jukebox and TV also accept voltage-matching cords with sufficient nominal ampacity.
 Changing nominal input voltage while plugged in is rejected: unplug first.
 
 - **Programmable Load Bank:** select nominal voltage and 0–1,000,000 W. Its real resistive
@@ -57,6 +57,9 @@ Changing nominal input voltage while plugged in is rejected: unplug first.
 
 The [Powered Web Jukebox](powered-web-jukebox.md) adds HTTPS/YouTube music playback using
 real 120/240 V power, with bundled client media tools for YouTube and non-Vorbis formats.
+
+The [Powered Browser Television](powered-browser-tv.md) adds interactive webpages, streaming video
+and stereo audio. It uses 120/240 V at 150 W while on, with the MCEF browser bridge included.
 
 ## Electric forklift
 
