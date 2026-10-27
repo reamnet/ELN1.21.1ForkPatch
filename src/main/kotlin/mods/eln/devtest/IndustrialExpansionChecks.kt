@@ -35,7 +35,6 @@ import kotlin.math.*
 @EventBusSubscriber(modid=Eln.MODID,value=[Dist.CLIENT])
 object IndustrialExpansionChecks {
     private val mc get()=Minecraft.getInstance()
-    private val webStreams=java.util.concurrent.atomic.AtomicInteger()
     private var guiIndex=0
     private var phase=0;private var ticks=0;private var total=0;private var done=false
     private var task: CompletableFuture<*>?=null
@@ -79,7 +78,7 @@ object IndustrialExpansionChecks {
         check(pole.onBlockActivated(p,Direction.ZP,.5f,.5f,.5f) && pole.arrester.fitted && p.mainHandItem.isEmpty)
         val bolt=net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(w)!!;bolt.setPos(Vec3.atBottomCenterOf(poleAt.above(7)));w.addFreshEntity(bolt)
         check(pole.arrester.remaining==160000.0)
-        if(chargerChecks)for((j,kind)in listOf(IndustrialKind.CHARGER,IndustrialKind.JUKEBOX).withIndex())for(i in 0..3) {
+        if(chargerChecks)for((j,kind)in listOf(IndustrialKind.CHARGER).withIndex())for(i in 0..3) {
             val at=BlockPos(300+i*3,80,272+j*3);w.setBlockAndUpdate(at.below(),Blocks.STONE.defaultBlockState());p.yRot=i*90f;p.xRot=0f
             val expected=mods.eln.misc.Utils.entityLivingHorizontalViewDirection(p).inverse
             check(Eln.transparentNodeItem.placeBlockAt(Eln.findItemStack(kind.title,1),p,w,at,net.minecraft.core.Direction.UP))
@@ -91,12 +90,8 @@ object IndustrialExpansionChecks {
         forklift=ForkliftEntity(ForkliftEntity.TYPE.get(),w);forklift.moveTo(266.0,80.0,274.0,0f,0f);check(w.addFreshEntity(forklift))
         p.teleportTo(w,288.0,90.0,232.0,0f,0f);p.lookAt(EntityAnchorArgument.Anchor.EYES,Vec3(288.0,80.4,256.0))
     }
-    @SubscribeEvent fun webAudio(event: net.neoforged.neoforge.client.event.sound.PlayStreamingSourceEvent) {
-        if(java.lang.Boolean.getBoolean("eln.industrialExpansionChecks") && event.sound.location.path=="web_jukebox_audio")webStreams.incrementAndGet()
-    }
     private fun openGui(index: Int) {
         val at=positions[index];val p=fixtures.player;p.closeContainer();p.teleportTo(fixtures.world,at.x+.5,at.y.toDouble(),at.z+3.0,180f,0f)
-        if(machines[index].kind==IndustrialKind.JUKEBOX)check(machines[index].playMedia("https://raw.githubusercontent.com/reamnet/ELN1.21.1ForkPatch/main/src/main/resources/assets/eln/sounds/click.ogg"))
         mods.eln.GuiHandler.open(p,mods.eln.GuiHandler.nodeBaseOpen+Direction.ZP.int,fixtures.world,at.x,at.y,at.z)
     }
     private fun electricalChecks() {
@@ -109,7 +104,7 @@ object IndustrialExpansionChecks {
         val relay=machines[IndustrialKind.RELAY.ordinal];check(relay.contacts[0].closed && !relay.protection.tripped)
         val console=machines[IndustrialKind.SCADA.ordinal];check(console.telemetry.isNotBlank());check(console.commandTarget(false));check(!relay.contacts[0].closed);check(console.commandTarget(true));check(relay.contacts[0].closed)
         check(!ScadaLink.command(console,BlockPos(1000,80,1000).asLong(),0,false));check(w.chunkSource.getChunkNow(1000 shr 4,1000 shr 4)==null)
-        passed+="Real placed cables supply all ten machines; load, passive transformer, drive, charger and remote contacts work without network collapse"
+        passed+="Real placed cables supply all core industrial machines; load, passive transformer, drive, charger and remote contacts work without network collapse"
         val arrester=machines[IndustrialKind.ARRESTER.ordinal];arrester.absorbLightning();check(arrester.surgeRemaining==160000.0)
         passed+="Replaceable arrester cartridge accounts for lightning energy"
         fixtures.voltage(positions[IndustrialKind.PAD.ordinal].west(2),pad.nominal*.95)
@@ -155,7 +150,7 @@ object IndustrialExpansionChecks {
                     val poleRender=(mc.level!!.getBlockEntity(pole.coordinate().pos) as TransparentNodeEntity).elementRender as mods.eln.utility.DistributionPoleRender
                     check(poleRender.arresterFitted && poleRender.arresterRemaining==160000.0 && TerrainModels.meshFor(poleRender)!=null)
                     passed+="Held arrester installs on a real pole, receives the lightning event and publishes its baked protection kit"
-                    passed+="All ten new static machine bodies compile into native terrain meshes under Sodium/Iris/BSL"
+                    passed+="All core industrial static machine bodies compile into native terrain meshes under Sodium/Iris/BSL"
                     photo("industrial-gallery");guiIndex=0;server { openGui(guiIndex) };phase=20
                 }
                 20->if(task!!.isDone && ticks>25 && mc.screen is IndustrialGui) {
@@ -169,7 +164,7 @@ object IndustrialExpansionChecks {
                             } }
                             check(projections.isNotEmpty() && projections.min()>.2f) { "Screen faces away from placed front at $at / $front: $projections" }
                         }
-                        passed+="Real charger and jukebox placement faces the player in all four horizontal directions; input/output sides retain their wiring orientation"
+                        passed+="Real charger placement faces the player in all four horizontal directions; input/output sides retain their wiring orientation"
                         server {
                             val d=machines[IndustrialKind.CHARGER.ordinal];d.inventory.setItem(0,ItemStack.EMPTY);d.inventory.setChanged()
                             val p=fixtures.player;p.inventory.clearContent()
@@ -177,15 +172,10 @@ object IndustrialExpansionChecks {
                             pack.set(DataComponents.CUSTOM_NAME,net.minecraft.network.chat.Component.literal("Charger slot test"));p.inventory.setItem(9,pack);p.containerMenu.broadcastChanges()
                         };phase=30;return
                     }
-                    if(IndustrialKind.entries[guiIndex]==IndustrialKind.JUKEBOX && webStreams.get()==0) {
-                        check(ticks<500) { "Native web audio did not start: ${((mc.level!!.getBlockEntity(positions[guiIndex]) as TransparentNodeEntity).elementRender as IndustrialRender).webAudio.status()}" }
-                        return
-                    }
-                    if(IndustrialKind.entries[guiIndex]==IndustrialKind.JUKEBOX) { values["nativeWebAudioStreams"]=webStreams.get();passed+="Public HTTPS Vorbis audio downloads asynchronously and reaches a native positional streaming sound channel" }
                     photo("gui-${IndustrialKind.entries[guiIndex].name.lowercase(java.util.Locale.ROOT)}")
                     mc.screen!!.onClose();guiIndex++
                     if(guiIndex<positions.size)server { openGui(guiIndex) } else {
-                        passed+="All ten real server menus open and render without overlapping settings or inventory slots"
+                        passed+="All core industrial server menus open and render without overlapping settings or inventory slots"
                         server(::electricalChecks);phase=3
                     }
                 }

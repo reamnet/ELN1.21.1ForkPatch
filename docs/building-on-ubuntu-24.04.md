@@ -15,7 +15,7 @@ cd ELN1.21.1ForkPatch
 ./gradlew --no-daemon --max-workers=2 build
 ```
 
-The mod jar is `build/libs/ElectricalAge-3.0.59.jar`. The build also runs the
+The mod jar is `build/libs/ElectricalAge-3.0.60.jar`. The build also runs the
 unit tests. The first build downloads Minecraft tooling and takes longer than
 subsequent builds. Gradle is configured with a 4 GB heap and the Kotlin compiler
 with a 3 GB heap; allow additional memory for the operating system and build tools.
@@ -24,12 +24,12 @@ To rebuild this exact release instead of the current `main`:
 
 ```bash
 git fetch --tags origin
-git switch --detach v3.0.59
+git switch --detach v3.0.60
 ./gradlew --no-daemon --max-workers=2 build
 ```
 
 The version is set by `modVersion` in `gradle.properties`. Each update increments
-it, so building 3.0.59 keeps an existing `ElectricalAge-3.0.58.jar` beside the new
+it, so building 3.0.60 keeps an existing `ElectricalAge-3.0.59.jar` beside the new
 jar in `build/libs/`. Rebuilding the same version replaces that version's jar.
 Use `build` to keep previous jars; `clean` deletes the entire build directory.
 
@@ -37,10 +37,10 @@ For a separately named local build, you can override the version without editing
 files:
 
 ```bash
-./gradlew --no-daemon --max-workers=2 build -PmodVersion=3.0.59-local.1
+./gradlew --no-daemon --max-workers=2 build -PmodVersion=3.0.60-local.1
 ```
 
-That produces `build/libs/ElectricalAge-3.0.59-local.1.jar` and sets the same version
+That produces `build/libs/ElectricalAge-3.0.60-local.1.jar` and sets the same version
 inside the mod. See [release versions](release-versions.md) for the numbered
 updates and their source tags.
 
@@ -61,3 +61,12 @@ Stop Minecraft before replacing the previous Electrical Age jar in `mods/`.
 Use matching jars on the clients and server. This build targets Minecraft 1.21.1,
 NeoForge 21.1.249 and Kotlin for Forge 5.12.0 (the NeoForge edition). Kotlin for Forge
 is installed separately; it is not bundled into the Electrical Age jar.
+
+## Optional TV and jukebox
+
+Starting with 3.0.60, media devices and their large client dependencies live in the separate
+[EA Media addon](https://github.com/reamnet/EAMedia). Core ELN does not need it. Build this core
+first, then follow the addon's [build instructions](https://github.com/reamnet/EAMedia/blob/main/docs/building.md).
+Use the full addon on clients and its small `-server.jar` on a dedicated server. Both sides
+need the addon when media is enabled. Existing TV/jukebox save IDs are preserved; without
+the addon they become hidden, inactive placeholders retaining their saved settings.

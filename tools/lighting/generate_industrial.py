@@ -1,25 +1,9 @@
 #!/usr/bin/env python3
 """Original industrial cabinets, load rack, welding bench and electric forklift."""
 from generate_fans_and_outlet import Mesh
-for kind in ['load_bank','scada','relay','arrester','pad','drive','shedder','charger','welder','jukebox','tv']:
+for kind in ['load_bank','scada','relay','arrester','pad','drive','shedder','charger','welder']:
  m=Mesh()
- if kind=='tv':
-  m.box('Base',-.52,-.49,-.28,1.04,.05,.56)
-  m.box('Trim',-.075,-.44,-.055,.15,.28,.11)
-  m.box('Case',-1.36,-.20,-.10,2.72,1.59,.16)
-  m.box('Trim',-1.32,-.16,-.115,2.64,1.51,.04)
-  m.box('Screen',-1.28,-.12,-.14,2.56,1.44,.015)
- elif kind=='jukebox':
-  m.box('Base',-.42,-.49,-.32,.84,.07,.64)
-  m.box('Case',-.39,-.42,-.28,.78,.84,.56)
-  m.box('Trim',-.33,-.34,-.297,.66,.48,.016)
-  for x in [-.19,.19]:
-   m.cyl('Trim',2,(x,-.11,-.32),.015,.13,n=24)
-   m.cyl('Terminal',2,(x,-.11,-.338),.012,.038,n=16)
-  m.box('Screen',-.28,.21,-.30,.42,.12,.025)
-  m.cyl('Terminal',2,(.24,.27,-.317),.035,.05,n=20)
-  for i in range(7):m.box('Red',-.28+i*.085,.12,-.32,.04,.035,.02)
- elif kind=='arrester':
+ if kind=='arrester':
   m.box('Base',-.2,-.49,-.2,.4,.07,.4);m.cyl('Terminal',1,(0,-.42,0),.75,.027,n=12)
   for y in range(8):m.cyl('Ceramic',1,(0,-.34+y*.075,0),.045,.12,.06,n=20)
   m.cyl('Terminal',1,(0,.26,0),.17,.045,n=12)

@@ -1,0 +1,18 @@
+[
+  {
+    "name": "mods.eln.transparentnode.industrial.IndustrialDevicesTest",
+    "tests": "20",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "time": "0.897"
+  },
+  {
+    "name": "mods.eln.transparentnode.industrial.OptionalMediaTest",
+    "tests": "2",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "time": "0.003"
+  }
+]

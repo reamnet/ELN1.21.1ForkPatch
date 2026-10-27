@@ -42,6 +42,11 @@ The creative inventory has nine categories: **Wires & Cables**, **Signals & Cont
 
 See the [Create adapter guide](docs/create-shaft-adapters.md) for connections on all three axes, gear selection and signal inputs. For worked circuits, explore the [electrical examples](docs/examples/README.md).
 
+**Optional media:** from ELN 3.0.60, the powered TV and web jukebox live in
+[EA Media](https://github.com/reamnet/EAMedia). Its client jar contains the browser and media
+tools; core ELN needs none of those large payloads. See the addon's
+[installation/build guide](https://github.com/reamnet/EAMedia/blob/main/docs/building.md).
+
 **In-game recipes and help:** press **P** to open the [Electrical Age guide](docs/in-game-guide.md). Search items, scroll through recipes and click ingredients to follow their crafting chains.
 
 **Device configuration and unattended plants:** text fields support clipboard shortcuts; lamp supplies have selectable power coverage. See the [configuration and chunk-loading guide](docs/device-configuration-and-chunk-loading.md) for remembered lamp channels and `/eln chunkload` commands.

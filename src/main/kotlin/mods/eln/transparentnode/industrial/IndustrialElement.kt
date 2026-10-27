@@ -46,7 +46,7 @@ class IndustrialElement(node: TransparentNode,descriptor: TransparentNodeDescrip
     val tripSource=NbtElectricalGateOutputProcess("industrialTrip",tripSignal)
     override val cord=ApplianceCord(this,input)
     override val cordVoltage get()=nominal
-    override fun acceptsCord(rating: CordRating)=kind in listOf(IndustrialKind.LOAD_BANK,IndustrialKind.CHARGER,IndustrialKind.WELDER,IndustrialKind.DRIVE,IndustrialKind.JUKEBOX,IndustrialKind.TV) && rating.accepts(nominal) && (when(kind) { IndustrialKind.DRIVE->settings[1]*settings[4];IndustrialKind.JUKEBOX->25.0;IndustrialKind.TV->150.0;else->settings[1] })/nominal<=rating.amps
+    override fun acceptsCord(rating: CordRating)=kind in listOf(IndustrialKind.LOAD_BANK,IndustrialKind.CHARGER,IndustrialKind.WELDER,IndustrialKind.DRIVE) && rating.accepts(nominal) && (when(kind) { IndustrialKind.DRIVE->settings[1]*settings[4];else->settings[1] })/nominal<=rating.amps
     val nominal get()=if(kind==IndustrialKind.SCADA)120.0 else settings[0]
     override val inventory=object: TransparentNodeElementInventory(kind.slots,64,this) {
         override fun canPlaceItem(slot: Int,stack: ItemStack)=accepts(slot,stack)
@@ -66,15 +66,6 @@ class IndustrialElement(node: TransparentNode,descriptor: TransparentNodeDescrip
     val targets=LongArray(8) { Long.MIN_VALUE }
     val targetCircuits=IntArray(8)
     var telemetry="";private set
-    var mediaUrl="";private set
-    var mediaRequested=false;private set
-    var mediaRevision=0;private set
-    fun playMedia(value: String): Boolean {
-        if(kind!=IndustrialKind.JUKEBOX && kind!=IndustrialKind.TV)return false
-        val url=(if(kind==IndustrialKind.TV)TelevisionUrl.parse(value) else WebAudioUrl.parse(value)) ?: return false
-        mediaUrl=url.toASCIIString();mediaRequested=true;mediaRevision++;prepare();needPublish();return true
-    }
-    fun stopMedia() { mediaRequested=false;prepare();needPublish() }
     var working=false;private set
     private var chargePack: ItemStack?=null
     private var welderTemplate=ItemStack.EMPTY
@@ -131,11 +122,6 @@ class IndustrialElement(node: TransparentNode,descriptor: TransparentNodeDescrip
                 val stack=inventory.getItem(0);if(chargePack!==stack) { if(chargePack!=null)sessionJoules=0.0;chargePack=stack };val battery=battery(stack)
                 working=working && battery!=null && battery.getEnergy(stack)<battery.getEnergyMax(stack)-.01 && IndustrialEnergy.schedule(dayTime,settings[2].toInt(),settings[3].toInt())
                 if(working && battery!=null)demand=min(settings[1],battery.getChargePower(stack))
-            }
-            IndustrialKind.JUKEBOX,IndustrialKind.TV->{
-                working=working && mediaRequested && (if(kind==IndustrialKind.TV)TelevisionUrl.parse(mediaUrl) else WebAudioUrl.parse(mediaUrl))!=null
-                demand=if(working) { if(kind==IndustrialKind.TV)150.0 else 25.0 } else if(enabled)2.0 else 0.0
-                working=working && abs(input.voltage)>=nominal*.8
             }
             IndustrialKind.WELDER->{
                 val item=inventory.getItem(0)
@@ -252,7 +238,7 @@ class IndustrialElement(node: TransparentNode,descriptor: TransparentNodeDescrip
     override fun getConnectionMask(side: Direction,lrdu: LRDU)=when(getElectricalLoad(side,lrdu)) { null->0;signal->NodeBase.maskElectricalInputGate;tripSignal->NodeBase.maskElectricalOutputGate;else->NodeBase.maskElectricalPower }
     override fun getThermalLoad(side: Direction,lrdu: LRDU)=null
     override fun hasGui()=true
-    override fun newContainer(side: Direction,player: Player)=if(kind==IndustrialKind.TV)null else IndustrialContainer(player,inventory,kind)
+    override fun newContainer(side: Direction,player: Player)=IndustrialContainer(player,inventory,kind)
     override fun multiMeterString(side: Direction)=tr("Input: %1$; output: %2$",Utils.plotUIP(input.voltage,input.current),Utils.plotUIP(outputs[0].voltage,outputCurrent))
     override fun thermoMeterString(side: Direction)=tr("Case temperature: %1$ C",temperature.toInt())
     override fun getWaila()=linkedMapOf(tr("Supply") to Utils.plotVolt("",input.voltage),tr("Power") to Utils.plotPower("",inputWatts),tr("Status") to if(protection.tripped)tr("Tripped") else if(enabled)tr("Enabled") else tr("Disabled"))
@@ -263,7 +249,6 @@ class IndustrialElement(node: TransparentNode,descriptor: TransparentNodeDescrip
         tag.putInt("industrialTarget",selectedTarget);tag.putLongArray("industrialTargets",targets);tag.putIntArray("industrialCircuits",targetCircuits)
         if(!welderTemplate.isEmpty)tag.put("industrialTemplate",welderTemplate.writeToNBT(CompoundTag()))
         shed.closed.forEachIndexed { i,v->tag.putBoolean("industrialShed$i",v) };tag.putBoolean("industrialArmed",protection.armed);tag.putDouble("industrialTripTime",protection.elapsed)
-        tag.putString("mediaUrl",mediaUrl);tag.putBoolean("mediaRequested",mediaRequested);tag.putInt("mediaRevision",mediaRevision)
         cord.write(tag)
     }
     private fun load(tag: CompoundTag) {
@@ -274,7 +259,6 @@ class IndustrialElement(node: TransparentNode,descriptor: TransparentNodeDescrip
         selectedTarget=tag.getInt("industrialTarget").coerceIn(0,7);tag.getLongArray("industrialTargets").takeIf { it.size==8 }?.copyInto(targets);tag.getIntArray("industrialCircuits").takeIf { it.size==8 }?.let { a->a.forEachIndexed { i,v->targetCircuits[i]=v.coerceIn(0,11) } }
         welderTemplate=if(tag.contains("industrialTemplate"))stackFromNbt(tag.getCompound("industrialTemplate")) else ItemStack.EMPTY
         shed.closed.indices.forEach { i->shed.closed[i]=!tag.contains("industrialShed$i") || tag.getBoolean("industrialShed$i") };protection.armed=tag.getBoolean("industrialArmed");protection.elapsed=finite("industrialTripTime",0.0,0.0,60.0)
-        mediaUrl=tag.getString("mediaUrl").takeIf { (if(kind==IndustrialKind.TV)TelevisionUrl.parse(it) else WebAudioUrl.parse(it))!=null } ?: "";mediaRequested=tag.getBoolean("mediaRequested");mediaRevision=tag.getInt("mediaRevision")
         cord.read(tag);configure()
     }
     override fun readFromNBT(tag: CompoundTag) { super.readFromNBT(tag);load(tag) }
@@ -284,7 +268,7 @@ class IndustrialElement(node: TransparentNode,descriptor: TransparentNodeDescrip
     override fun networkSerialize(out: DataOutputStream) {
         super.networkSerialize(out);settings.forEach(out::writeDouble);out.writeBoolean(enabled);out.writeBoolean(protection.tripped);out.writeBoolean(working)
         listOf(input.voltage,inputWatts,outputs[0].voltage,outputCurrent,temperature,hertz,lifetimeJoules,sessionJoules,workJoules,surgeRemaining,protection.reason.toDouble()).forEach(out::writeDouble)
-        out.writeByte(selectedTarget);out.writeUTF(telemetry.take(2000));shed.closed.forEach(out::writeBoolean);if(kind==IndustrialKind.JUKEBOX || kind==IndustrialKind.TV) { out.writeUTF(mediaUrl);out.writeBoolean(mediaRequested);out.writeInt(mediaRevision) }
+        out.writeByte(selectedTarget);out.writeUTF(telemetry.take(2000));shed.closed.forEach(out::writeBoolean);
     }
     override fun networkUnserialize(stream: DataInputStream): Byte {
         val id=super.networkUnserialize(stream)
@@ -295,8 +279,6 @@ class IndustrialElement(node: TransparentNode,descriptor: TransparentNodeDescrip
             83->bindTarget()
             84->selectTarget(stream.readInt())
             85->commandTarget(stream.readBoolean())
-            86->if(kind==IndustrialKind.JUKEBOX || kind==IndustrialKind.TV)playMedia(stream.readUTF())
-            87->if(kind==IndustrialKind.JUKEBOX || kind==IndustrialKind.TV)stopMedia()
         }
         needPublish();return id
     }

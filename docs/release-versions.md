@@ -64,6 +64,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 
 | `v3.0.58` | — | Visible labeled charger/transformer/welder inventory slots, corrected industrial cabinet facing, and fully bundled FFmpeg/yt-dlp/QuickJS media tools |
 | `v3.0.59` | — | Powered interactive Chromium TV with streaming video/audio, baked cabinet, browser controls and bundled MCEF bridge |
+| `v3.0.60` | — | Optional EAMedia addon split; lightweight core, preserved media save IDs, and fixed inventory-free TV/jukebox controls |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`

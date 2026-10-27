@@ -1,0 +1,8 @@
+{
+  "coreVersion": "3.0.60",
+  "addonPresent": false,
+  "started": true,
+  "stoppedAfterTicks": 40,
+  "cleanShutdown": true,
+  "browserInitialized": false
+}

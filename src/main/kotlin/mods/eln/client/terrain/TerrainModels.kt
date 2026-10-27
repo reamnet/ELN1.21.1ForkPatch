@@ -129,6 +129,7 @@ object TerrainModels {
     }
 
     internal fun meshFor(owner: Any)=bodies[owner]?.mesh
+    fun hasBakedBody(owner: Any)=bodies.containsKey(owner)
     internal fun refreshNow(node: NodeBlockEntity) { lastUpdate.remove(node);update(node) }
     internal fun sectionsFor(owner: Any)=bodies[owner]?.sections?.keys ?: emptySet()
     /** Called only by client meshing setup, on the main thread. Air-only sections
@@ -197,7 +198,7 @@ object TerrainModels {
     }
     private fun clear() { bodies.clear();nodeBodies.clear();lastUpdate.clear();sections.clear();pool.clear();unsupported.clear();world=null }
     private fun explicit(render: Any): Boolean = if(render is mods.eln.sixnode.lampsocket.LampSocketRender)
-        render.descriptor.fixture!=null else render.javaClass.simpleName in SUPPORTED || render is mods.eln.transparentnode.festive.FairyLightsRender
+        render.descriptor.fixture!=null else render is BakedNodeRenderer || render.javaClass.simpleName in SUPPORTED || render is mods.eln.transparentnode.festive.FairyLightsRender
     private val SUPPORTED=setOf("IndustrialRender","CeeBridgeRender","AlarmRender","LineInsulatorRender","SwitchgearRender","ColorCableTrayRender","TransmissionRender","GrowingBedRender","MatterMachineRender","KitchenRender","FanRender","RenewableRender","IndustrialPumpRender","UpsRender",
         "ClimateRender","BackupRender","OutletRender","DistributionPoleRender","HouseServiceRender","BreakerPanelRender",
         "WorkLightRender","StepDownUnitRender","UtilityStreetLightRender","HolidayCandleRender","StringLightsRender","ChristmasTreeRender","WallWirelessRender")

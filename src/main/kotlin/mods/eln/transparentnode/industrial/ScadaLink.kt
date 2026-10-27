@@ -36,6 +36,7 @@ object ScadaLink {
             is DistributionPoleElement->device.remoteSwitch(closed)
             is SwitchgearElement->{ device.setEnabled(closed);true }
             is IndustrialElement->if(device.kind==IndustrialKind.SCADA)false else { device.setEnabled(closed);true }
+            is mods.eln.api.media.RemoteSwitchableDevice->{ device.setRemoteEnabled(closed);true }
             else->false
         }
         owner.needPublish();return success

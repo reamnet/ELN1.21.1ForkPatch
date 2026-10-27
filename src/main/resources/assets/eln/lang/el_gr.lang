@@ -836,6 +836,13 @@ Search_items=Search items
 No_matching_items.=No matching items.
 Search_results\:_%1$=Search results: %1$
 
+# src/main/kotlin/mods/eln/api/media/MediaAddonProvider.kt
+Powered_Browser_Television.name=Powered Browser Television
+Powered_Web_Jukebox.name=Powered Web Jukebox
+
+# src/main/kotlin/mods/eln/api/media/MissingMediaDevice.kt
+Install_Electrical_Age_Media_to_use_this_saved_device=Install Electrical Age Media to use this saved device
+
 # src/main/kotlin/mods/eln/block/ArcClayBlock.kt
 tile.arc_clay_block.name=Μπλοκ Πηλού Τόξου
 tile.arc_metal_block.name=Μπλοκ Μετάλλου Τόξου
@@ -2792,8 +2799,6 @@ Supports_standard_crop-block_seeds;_planting_stock_is_retained=Supports standard
 Temperature_outside_growing_range=Temperature outside growing range
 
 # src/main/kotlin/mods/eln/transparentnode/industrial/IndustrialClient.kt
-120/240_V;_150_W_on,_2_W_standby;_cords_or_fixed_cables=120/240 V; 150 W on, 2 W standby; cords or fixed cables
-120/240_V;_25_W_playing,_2_W_standby;_cords_or_fixed_cables=120/240 V; 25 W playing, 2 W standby; cords or fixed cables
 120_kJ_per_welded_frame_or_25_percent_durability_repair=120 kJ per welded frame or 25 percent durability repair
 Actual_frequency\:_%1$_Hz;_case_%2$_C=Actual frequency: %1$ Hz; case %2$ C
 Apply_settings=Apply settings
@@ -2801,15 +2806,12 @@ Battery_/_pack=Battery / pack
 Battery_/_pack_(one)=Battery / pack (one)
 Bind_address=Bind address
 Blue_left_or_bottom\:_input;_orange_right\:_output=Blue left or bottom: input; orange right: output
-Browser_bridge_included;_Chromium_installs_on_first_client_launch=Browser bridge included; Chromium installs on first client launch
 Case\:_%1$_C;_consumed\:_%2$_kJ=Case: %1$ C; consumed: %2$ kJ
 Charges_removable_vehicle_and_UPS_packs_using_real_input_energy;_94_percent_efficiency=Charges removable vehicle and UPS packs using real input energy; 94 percent efficiency
 Console_supply\:_120_V_/_20_W;_remote_closing_never_resets_a_trip=Console supply: 120 V / 20 W; remote closing never resets a trip
 Control_smart_meters,_service_disconnects,_breakers,_reclosers_and_industrial_devices=Control smart meters, service disconnects, breakers, reclosers and industrial devices
 Differential_current_trip=Differential current trip
 Differential_protection_requires_both_forward_and_return_conductors;_0_disables_it=Differential protection requires both forward and return conductors; 0 disables it
-Direct_HTTPS_Ogg_Vorbis_audio_works_without_extra_tools=Direct HTTPS Ogg Vorbis audio works without extra tools
-Direct_HTTPS_audio_URL_or_YouTube_video_link=Direct HTTPS audio URL or YouTube video link
 Disable_/_open=Disable / open
 Eight_explicit_targets_within_256_blocks;_loaded_chunks_only=Eight explicit targets within 256 blocks; loaded chunks only
 Enable_/_close=Enable / close
@@ -2818,7 +2820,6 @@ Front_top\:_trip_signal;_front_bottom\:_control_signal=Front top: trip signal; f
 Fuse=Fuse
 Input\:_%1$;_%2$=Input: %1$; %2$
 Install_a_pole_transformer_and_fuse;_fixed_ratio_follows_primary_sag=Install a pole transformer and fuse; fixed ratio follows primary sag
-Interactive_Chromium_TV\:_webpages,_video_and_stereo_audio=Interactive Chromium TV: webpages, video and stereo audio
 Invalid_electrical_readings=Invalid electrical readings
 Iron_ingot=Iron ingot
 Left\:_iron_ingot_or_damaged_tool;_middle\:_iron_ingot;_right\:_output=Left: iron ingot or damaged tool; middle: iron ingot; right: output
@@ -2826,7 +2827,6 @@ Line_contacts\:_left/right_bottom;_return_contacts\:_left/right_right=Line conta
 Output\:_%1$;_%2$=Output: %1$; %2$
 Output_impedance_limits_short-circuit_current;_loaded_voltage_falls_with_current=Output impedance limits short-circuit current; loaded voltage falls with current
 Overcurrent_trip=Overcurrent trip
-Play_/_restart=Play / restart
 Priorities_1-4\:_%1$=Priorities 1-4: %1$
 Programmable_resistive_load,_0-1000_kW;_real_voltage_response_and_fan_cooling=Programmable resistive load, 0-1000 kW; real voltage response and fan cooling
 Protection_ready=Protection ready
@@ -2836,7 +2836,6 @@ Right-click_an_overhead_distribution_pole_to_install;_sneak_empty-handed_to_remo
 Right_terminals\:_left_priority_1,_right_2,_down_3,_up_4;_restore_every_five_healthy_seconds=Right terminals: left priority 1, right 2, down 3, up 4; restore every five healthy seconds
 Session_stored\:_%1$_kJ=Session stored: %1$ kJ
 Shed=Shed
-Stop=Stop
 Surge_capacity_remaining\:_%1$_kJ=Surge capacity remaining: %1$ kJ
 Target_%1$=Target %1$
 Transformer=Transformer
@@ -2845,7 +2844,6 @@ Tripped;_inspect_circuit_before_reset=Tripped; inspect circuit before reset
 Voltage_outside_protection_settings=Voltage outside protection settings
 Welding\:_%1$_/_120_kJ=Welding: %1$ / 120 kJ
 Workpiece=Workpiece
-YouTube_and_other_audio_formats_use_bundled_media_tools;_no_separate_installation=YouTube and other audio formats use bundled media tools; no separate installation
 
 # src/main/kotlin/mods/eln/transparentnode/industrial/IndustrialElement.kt
 Command_accepted=Command accepted
@@ -2880,8 +2878,6 @@ Overvoltage_ratio=Overvoltage ratio
 Pad_Mounted_Neighbourhood_Transformer.name=Pad Mounted Neighbourhood Transformer
 Pole_Surge_Arrester.name=Pole Surge Arrester
 Power_budget_W=Power budget W
-Powered_Browser_Television.name=Powered Browser Television
-Powered_Web_Jukebox.name=Powered Web Jukebox
 Primary_V=Primary V
 Programmable_EV_Pack_Charger.name=Programmable EV Pack Charger
 Programmable_Load_Bank.name=Programmable Load Bank
@@ -2895,7 +2891,6 @@ Target_Z=Target Z
 Trip_delay_seconds=Trip delay seconds
 Undervoltage_ratio=Undervoltage ratio
 Variable_Frequency_Motor_Drive.name=Variable Frequency Motor Drive
-Volume_(0-1)=Volume (0-1)
 Welding_power_W=Welding power W
 
 # src/main/kotlin/mods/eln/transparentnode/industrial/IndustrialTransport.kt
@@ -2914,42 +2909,6 @@ Traction_pack\:_%1$%;_forks\:_%2$_cm=Traction pack: %1$%; forks: %2$ cm
 Circuit_%1$\:_%2$_V_/_%3$_A\nBreaker\:_%4$_A;_%5$=Circuit %1$: %2$ V / %3$ A\nBreaker: %4$ A; %5$
 Circuit_unavailable=Circuit unavailable
 Target_unavailable_or_chunk_unloaded=Target unavailable or chunk unloaded
-
-# src/main/kotlin/mods/eln/transparentnode/industrial/TelevisionBrowser.kt
-Browser_could_not_start;_turn_the_TV_off_and_on_to_retry=Browser could not start; turn the TV off and on to retry
-Browser_engine_unavailable;_check_MCEF_setup=Browser engine unavailable; check MCEF setup
-Browser_ready;_click_the_picture_to_interact=Browser ready; click the picture to interact
-Enter_a_webpage_or_video_address_and_turn_on_the_TV=Enter a webpage or video address and turn on the TV
-Loading_webpage...=Loading webpage...
-Two_nearby_TVs_are_already_active=Two nearby TVs are already active
-Waiting_for_viewer_within_32_blocks=Waiting for viewer within 32 blocks
-
-# src/main/kotlin/mods/eln/transparentnode/industrial/TelevisionScreen.kt
-Go=Go
-Powered_Browser_Television=Powered Browser Television
-Reload=Reload
-Share_page=Share page
-Supply\:_%1$;_%2$;_volume_%3$_percent=Supply: %1$; %2$; volume %3$ percent
-TV_off=TV off
-TV_on=TV on
-Use_a_complete_HTTP_or_HTTPS_address=Use a complete HTTP or HTTPS address
-Web_address=Web address
-
-# src/main/kotlin/mods/eln/transparentnode/industrial/WebJukeboxAudio.kt
-Audio_unavailable;_check_link,_HTTPS_access_and_media_tools=Audio unavailable; check link, HTTPS access and media tools
-Converting_selected_audio...=Converting selected audio...
-Could_not_prepare_bundled_YouTube_tools=Could not prepare bundled YouTube tools
-Could_not_prepare_bundled_audio_decoder=Could not prepare bundled audio decoder
-Downloading_selected_audio...=Downloading selected audio...
-Extracting_bundled_media_tools...=Extracting bundled media tools...
-Four_web_audio_players_are_already_active=Four web audio players are already active
-Paste_a_HTTPS_audio_/_YouTube_link_and_press_Play=Paste a HTTPS audio / YouTube link and press Play
-Playing_web_audio=Playing web audio
-Preparing_web_audio...=Preparing web audio...
-Song_finished;_press_Play_to_restart=Song finished; press Play to restart
-Waiting_for_listener_within_32_blocks=Waiting for listener within 32 blocks
-Web_audio_muted;_check_volume_/_Records_slider=Web audio muted; check volume / Records slider
-Web_audio_stopped=Web audio stopped
 
 # src/main/kotlin/mods/eln/transparentnode/kitchen/KitchenClient.kt
 27_food-storage_slots;_freezes_a_water_bucket_into_ice_and_returns_the_bucket=27 food-storage slots; freezes a water bucket into ice and returns the bucket
