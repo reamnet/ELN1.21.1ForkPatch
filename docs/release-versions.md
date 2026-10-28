@@ -70,6 +70,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.63` | — | Removable secondary-fed pole streetlights; vaulted built-in lights; single-phase underground primary and transformer service risers |
 | `v3.0.64` | — | Fuse the single-phase underground primary riser; physical cutout, protected buried ports, overload isolation and safe reclosing |
 | `v3.0.65` | — | Reduce repeated double-double port projections, simultaneous converter command restoration and multi-bulb lighting queries |
+| `v3.0.66` | — | Compose local converter derivatives and exact fixed-ratio transformer responses to reduce mixed-grid convergence spikes; reuse unchanged precise linear solutions |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`

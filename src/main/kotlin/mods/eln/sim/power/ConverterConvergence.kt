@@ -13,6 +13,9 @@ import kotlin.math.max
  */
 class ConverterConvergence {
     private val localRestores = !java.lang.Boolean.getBoolean("eln.disableLocalConverterRestores")
+    private val localDerivatives = !java.lang.Boolean.getBoolean("eln.disableLocalCommandJacobian")
+    var localJacobianBuilds = 0L
+        private set
     private data class Derivative(val sources: List<mods.eln.sim.mna.component.SwitchableVoltageSource>,
         val scales: DoubleArray, val weights: DoubleArray, val regions: List<String>, val matrix: Array<DoubleArray>)
     private val derivatives = mutableMapOf<List<ConservativePowerProcess>, Derivative>()
@@ -184,6 +187,10 @@ class ConverterConvergence {
         val systems = group.flatMap { it.connectedSystems() }.distinct()
         fun sameRegions(regions: List<String>) = group.indices.all { group[it].iterationRegion() == regions[it] }
         val bounds = group.flatMap { it.trialVoltageBounds().entries }.associate { it.key to it.value }
+        // Purely nonlinear banks still require roughly the original number of probes,
+        // so composition adds work there. Reserve it for groups dominated by exact rows.
+        var tryLocalDerivative = localDerivatives && active.size >= 16 &&
+            group.count { it.hasLinearCommandDerivative() } >= maxOf(8, (group.size + 1) / 2)
         fun trialVoltage(i: Int, normalized: Double): Double {
             val volts = normalized * scales[i]
             val range = bounds[active[i]] ?: return volts
@@ -239,9 +246,20 @@ class ConverterConvergence {
             // wire temperature changes). Every candidate still passes the real physics checks;
             // a changed limiter/mask or failed improvement rebuilds the derivative normally.
             val reuse = cached?.takeIf { it.regions == regions && iteration < 3 }
+            val local = if (reuse == null && tryLocalDerivative) {
+                // Establish the same initial mask/commands for a local chain. Always replay
+                // the ordinary evaluator afterwards, including when a branch is unsupported.
+                for (i in all.indices) { all[i].voltage = savedVolts[i]; all[i].enabled = savedEnabled[i] }
+                val matrix = LocalCommandJacobian.build(group, all, active, scales, weights, x, simultaneous, ::trialVoltage)
+                val replay = evaluate(x)
+                matrix?.takeIf { replay != null && sameRegions(regions) && replay.indices.all {
+                    abs(replay[it] - residual[it]) <= 1e-10 * max(1.0, abs(residual[it]))
+                } }
+            } else null
             val jacobian = reuse?.matrix?.map { it.clone() }?.toTypedArray()
-                ?: Array(x.size) { DoubleArray(x.size) }
-            if (reuse == null) for (column in x.indices) {
+                ?: local ?: Array(x.size) { DoubleArray(x.size) }
+            if (local != null) localJacobianBuilds++
+            if (reuse == null && local == null) for (column in x.indices) {
                 if (preciseDerivative) {
                     // A source bus can have a common-mode derivative far smaller
                     // than the entries of its command map. First-order truncation
@@ -299,7 +317,12 @@ class ConverterConvergence {
                 if (!simultaneous) derivatives[key] = cached!!
             }
             val delta = solve(jacobian, DoubleArray(x.size) { -residual[it] })
-            if (delta == null) { evaluate(x); return }
+            if (delta == null) {
+                evaluate(x)
+                if (local == null) return
+                tryLocalDerivative = false; cached = null; derivatives.remove(key)
+                return@repeat
+            }
             // Trust region and backtracking prevent an ill-conditioned Jacobian from publishing
             // enormous speculative commands. This bound changes no accepted device rating.
             var alpha = minOf(1.0, 4.0 / max(4.0, delta.maxOf { abs(it) }))
@@ -317,7 +340,8 @@ class ConverterConvergence {
             }
             if (!improved) {
                 evaluate(x)
-                if (reuse == null) return
+                if (local != null) tryLocalDerivative = false
+                else if (reuse == null) return
                 cached = null; derivatives.remove(key)
             }
         }

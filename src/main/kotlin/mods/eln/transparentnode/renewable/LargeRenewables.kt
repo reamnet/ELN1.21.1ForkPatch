@@ -76,6 +76,7 @@ class RenewableSupply(val source: SwitchableVoltageSource,private val available:
     override fun failClosed() { blocked=true;source.enabled=false }
     override fun iterationRegion()=region
     override fun trialSources()=listOf(source)
+    override fun supportsLocalCommandDerivative() = true
     override fun trialVoltageBounds()=mapOf(source to (0.0..3200.0))
     override fun connectedSystems()=setOfNotNull(source.subSystem)
     // Bracket the limited branch between the voltage ceiling and power/current

@@ -1,0 +1,9 @@
+{
+  "command": "./gradlew --no-daemon --max-workers=2 --console=plain build benchmarkTest --tests *ServerTickHotspotBenchmarkTest",
+  "result": "BUILD SUCCESSFUL",
+  "suites": 241,
+  "tests": 997,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0
+}

@@ -87,6 +87,7 @@ class ShaftGeneratorProcess @JvmOverloads constructor(
     }
 
     override fun trialSources() = listOf(source)
+    override fun supportsLocalCommandDerivative() = true
     override fun iterationRegion(): String {
         if (!source.enabled) return "OPEN"
         val requested = (voltageTarget - source.voltage) / droop

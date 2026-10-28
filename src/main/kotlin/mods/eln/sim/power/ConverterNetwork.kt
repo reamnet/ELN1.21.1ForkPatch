@@ -23,6 +23,15 @@ interface ConservativePowerProcess : IRootSystemPreStepProcess {
     fun trialSources(): List<SwitchableVoltageSource> = emptyList()
     /** All mutable source commands, including outputs eliminated from the free trial vector. */
     fun controlledSources(): List<SwitchableVoltageSource> = trialSources()
+    /** Opt-in for controllers whose trials only update their owned commands and diagnostics,
+     * and read command voltages only through connectedSystems. Physical clocks/history
+     * must advance in beginStep, never during a trial. */
+    fun supportsLocalCommandDerivative(): Boolean = false
+    /** Cost hint only: enough exact rows must replace whole-grid probes to justify composition. */
+    fun hasLinearCommandDerivative(): Boolean = false
+    /** Optional exact local response, rows in controlledSources order, columns in commands order.
+     * Null uses a branch-checked numerical derivative of this controller alone. */
+    fun localCommandDerivative(commands: Array<SwitchableVoltageSource>): Array<DoubleArray>? = null
     /** Hard source-command domains for numerical trials, never a change to device ratings. */
     fun trialVoltageBounds(): Map<SwitchableVoltageSource, ClosedFloatingPointRange<Double>> = emptyMap()
     /** Piecewise operating region for a one-sided numerical derivative only. */

@@ -123,6 +123,26 @@ class SafeTransformerProcess(
 
     override fun controlledSources() = listOf(input, output)
 
+    override fun supportsLocalCommandDerivative() = true
+    override fun hasLinearCommandDerivative() = voltageTarget == null
+
+    override fun localCommandDerivative(commands: Array<SwitchableVoltageSource>): Array<DoubleArray>? {
+        if (voltageTarget != null || status != "TRANSFERRING" || !input.enabled || !output.enabled) return null
+        val a = probePort(primary, null, input)
+        val b = probePort(secondary, null, output)
+        if (!a.volts.isFinite() || !b.volts.isFinite() || a.ohms !in 0.0..<RegulatedConverter.OPEN_OHMS ||
+            b.ohms !in 0.0..<RegulatedConverter.OPEN_OHMS || !ratio.isFinite() || ratio <= 0.0) return null
+        val da = primary.subSystem?.sourceVoltageSensitivity(input, commands) ?: return null
+        val db = secondary.subSystem?.sourceVoltageSensitivity(output, commands) ?: return null
+        val denominator = b.ohms + ratio * ratio * a.ohms
+        if (!denominator.isFinite() || denominator <= 0.0) return null
+        val primaryWeight = b.ohms / denominator
+        val secondaryWeight = ratio * a.ohms / denominator
+        val din = DoubleArray(commands.size) { primaryWeight * da[it] + secondaryWeight * db[it] }
+        val dout = DoubleArray(commands.size) { ratio * din[it] }
+        return arrayOf(din, dout).takeIf { rows -> rows.all { row -> row.all(Double::isFinite) } }
+    }
+
     override fun trialSources(): List<SwitchableVoltageSource> =
         // An unloaded target output is already fixed by its control law. Probing
         // it as a free variable can activate an otherwise idle attached drive.

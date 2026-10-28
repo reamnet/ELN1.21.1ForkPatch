@@ -727,6 +727,7 @@ class OneWayDcDcProcess(private val element: OneWayDcDcElement) : ConservativePo
     }
 
     override fun controlledSources() = listOf(element.inputSink, element.outputSource)
+    override fun supportsLocalCommandDerivative() = modernRegulated
 
     override fun trialSources(): List<SwitchableVoltageSource> =
         if (modernRegulated) regulated.trialSources() else listOf(element.inputSink, element.outputSource)

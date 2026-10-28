@@ -126,6 +126,7 @@ class RegulatedPowerProcess(
     override fun isolatesLoadOnFailure() = true
     override fun connectedSystems(): Set<SubSystem> = setOfNotNull(primary.subSystem, secondary.subSystem)
     override fun controlledSources() = listOf(input, output)
+    override fun supportsLocalCommandDerivative() = true
 
     override fun trialSources(): List<SwitchableVoltageSource> =
         if (!input.enabled && output.enabled) listOf(input) else listOf(input, output)

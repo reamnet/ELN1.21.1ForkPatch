@@ -49,6 +49,11 @@ public class SubSystem {
 
     DD[][] AInvdata;
     private MnaFactorization factorization;
+    private final boolean identicalRhsReuse = !Boolean.getBoolean("eln.disableIdenticalRhsReuse");
+    private final boolean directPortDispatch = !Boolean.getBoolean("eln.disableDirectPortDispatch");
+    private double[] lastPreciseRhs;
+    private DD[] lastPreciseSolution;
+    private long identicalRhsReuses;
     // Diagnostic opt-out is sampled once, so baseline/optimized circuits can be compared.
     private final boolean affineProbes = !Boolean.getBoolean("eln.disableAffineProbeUpdates");
     private final boolean sparseRebuild = !Boolean.getBoolean("eln.disableSparseMnaRebuild");
@@ -132,6 +137,8 @@ public class SubSystem {
 
     public void generateMatrix() {
         probeRhs = null; probeSolution = null; probeUpdates = 0;
+        lastPreciseRhs = null; lastPreciseSolution = null;
+        validStepSolution = false;
         stateCount = states.size();
         portProjectionRows = null;
 
@@ -458,10 +465,25 @@ public class SubSystem {
         if (portProjectionDepth > 0 && --portProjectionDepth == 0) portProjectionRows = null;
     }
 
+    public long getIdenticalRhsReuses() { return identicalRhsReuses; }
+
     private DD[] solvePrecise(double[] rhs) {
-        if (factorization != null) return factorization.solve(rhs);
-        DD[] value = new DD[stateCount];
-        for (int row = 0; row < stateCount; row++) value[row] = dot(AInvdata[row], rhs);
+        if (identicalRhsReuse && lastPreciseRhs != null && java.util.Arrays.equals(lastPreciseRhs, rhs)) {
+            identicalRhsReuses++;
+            return lastPreciseSolution.clone();
+        }
+        DD[] value;
+        if (factorization != null) value = factorization.solve(rhs);
+        else {
+            value = new DD[stateCount];
+            for (int row = 0; row < stateCount; row++) value[row] = dot(AInvdata[row], rhs);
+        }
+        if (identicalRhsReuse && stateCount >= 64) {
+            boolean finite = true;
+            for (DD entry : value) if (!entry.isFinite()) { finite = false; break; }
+            lastPreciseRhs = finite ? rhs.clone() : null;
+            lastPreciseSolution = finite ? value.clone() : null;
+        }
         return value;
     }
 
@@ -566,7 +588,7 @@ public class SubSystem {
         }
         int index = pin.getId();
         DD[] portRow = responseRow(index);
-        DD current = portCurrent(index, portRow, rhs);
+        DD current = directPortDispatch && portProjectionDepth == 0 ? dot(portRow, rhs) : portCurrent(index, portRow, rhs);
         if (voltageGauge.getActive()) {
             if (!validProbeRhs()) return result;
         }
@@ -585,6 +607,25 @@ public class SubSystem {
         if (g < 0.0) return result;
         result.resistance = conductance.reciprocal().doubleValue();
         result.voltage = intercept.divide(conductance).doubleValue();
+        return result;
+    }
+
+    /** Derivative of an enabled port's open-circuit voltage with respect to source commands.
+     * The controller has already validated the port. Only the same stamped matrix is used;
+     * no physical state or RHS is changed. Unsupported/open ports use numerical correction. */
+    public double[] sourceVoltageSensitivity(SwitchableVoltageSource port, SwitchableVoltageSource[] commands) {
+        if (!matrixValid || singularMatrix || !port.getEnabled() || port.getSubSystem() != this) return null;
+        DD[] row = responseRow(port.getCurrentState().getId());
+        DD conductance = row[port.getCurrentState().getId()].negate();
+        if (!conductance.isFinite() || conductance.doubleValue() <= 1e-18) return null;
+        double[] result = new double[commands.length];
+        for (int i = 0; i < commands.length; i++) {
+            SwitchableVoltageSource command = commands[i];
+            if (command != port && command.getEnabled() && command.getSubSystem() == this) {
+                result[i] = row[command.getCurrentState().getId()].divide(conductance).doubleValue();
+                if (!Double.isFinite(result[i])) return null;
+            }
+        }
         return result;
     }
 

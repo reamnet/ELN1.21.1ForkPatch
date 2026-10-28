@@ -1,0 +1,11 @@
+{
+  "jar": "ElectricalAge-3.0.66.jar",
+  "bytes": 20743820,
+  "sha256": "ddd3ffd01e6fa29ab0fed44d4b778915a89f77bbf8529f2b7f6965ba6dd313ca",
+  "version": "3.0.66",
+  "localCommandJacobianPackaged": true,
+  "unusedSourceMaskExperimentPackaged": false,
+  "assetsAndGeneratedResourcesUnchanged": true,
+  "gradleConfigurationAndWrapperUnchangedExceptAuthorizedVersion": true,
+  "mediaRuntimeArchives": false
+}

@@ -1,0 +1,12 @@
+{
+  "reportedModVersion": "3.0.60",
+  "reportedPeakMspt": 10200,
+  "suppliedAggregateInclusivePercentages": {
+    "waitUntilNextTick": 68.55,
+    "tickServer": 31.16,
+    "Simulator.tick": 20.40,
+    "RootSystem.step": 12.63,
+    "ConverterConvergence.correct": 7.27
+  },
+  "interpretation": "Aggregate profile from 3.0.60; it does not isolate the reported peak. The paired benchmark compares the new implementation against the 3.0.65 paths in the same JVM, not against 3.0.60 or the user's saved world."
+}

@@ -19,7 +19,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.test.*
 
-/** Same production controllers and MNA on both paths; only the two reuse options differ. */
+/** Same physical circuit; baseline retains 3.0.65 optimizations and disables only the new work. */
 class ServerTickHotspotBenchmarkTest {
     private class Grid(poles: Int, optimized: Boolean) {
         val root: RootSystem
@@ -28,7 +28,8 @@ class ServerTickHotspotBenchmarkTest {
         private val controllers=ArrayList<ConservativePowerProcess>()
         private val secondaries=ArrayList<State>()
         init {
-            val options=listOf("eln.disableAffinePortProjections","eln.disableLocalConverterRestores")
+            val options=listOf("eln.disableLocalCommandJacobian",
+                "eln.disableIdenticalRhsReuse","eln.disableDirectPortDispatch")
             val saved=options.associateWith(System::getProperty)
             options.forEach { System.setProperty(it,(!optimized).toString()) }
             try {
@@ -82,8 +83,8 @@ class ServerTickHotspotBenchmarkTest {
                 repeat(20) { root.step() }
             } finally { saved.forEach { (k,v)->if(v==null)System.clearProperty(k) else System.setProperty(k,v) } }
         }
-        fun step(i: Int): Double {
-            windWatts=listOf(15_000.0,5000.0,1000.0,20_000.0)[(i/5)%4]
+        fun step(i: Int,changeWind: Boolean=true): Double {
+            if(changeWind)windWatts=listOf(15_000.0,5000.0,1000.0,20_000.0)[(i/5)%4]
             val start=System.nanoTime();root.step();val ms=(System.nanoTime()-start)/1e6
             assertTrue(hv.voltage>14_000,"Grid blinked at step $i")
             // A physical flush deliberately clears pending trial values. Re-solve
@@ -97,6 +98,9 @@ class ServerTickHotspotBenchmarkTest {
             secondaries.forEach { assertEquals(expected,it.state,.5) }
             return ms
         }
+        fun counters()=mapOf("fullFactorizations" to root.systems.sumOf { it.fullFactorizations },
+            "localJacobianBuilds" to root.localJacobianBuilds,
+            "identicalRhsReuses" to root.systems.sumOf { it.identicalRhsReuses })
     }
     @Test fun pairedMixedSourceAndTransformerGridMeasurements() {
         Eln.debugEnabled=false
@@ -117,7 +121,18 @@ class ServerTickHotspotBenchmarkTest {
             }
             fun stats(v: List<Double>): String { val s=v.sorted();return "p50=${s[samples/2-1]},p95=${s[(samples*.95).toInt()-1]},mean=${s.average()}" }
             println("SERVER_HOTSPOT_BENCH poles=$count baseline_ms={${stats(a)}} optimized_ms={${stats(b)}} max_states=${fast.root.systems.maxOf { it.states.size }}")
-            results+=mapOf("poles" to count,"warmupSteps" to 20,"baselineMilliseconds" to a,"optimizedMilliseconds" to b,"maxStates" to fast.root.systems.maxOf { it.states.size })
+            repeat(30) { base.step(it,false);fast.step(it,false) }
+            val steadyA=ArrayList<Double>();val steadyB=ArrayList<Double>()
+            repeat(100) { i->
+                if(i%2==0) { steadyA+=base.step(i,false);steadyB+=fast.step(i,false) }
+                else { steadyB+=fast.step(i,false);steadyA+=base.step(i,false) }
+                assertEquals(base.hv.voltage,fast.hv.voltage,.01)
+            }
+            println("SERVER_STEADY_BENCH poles=$count baseline_mean_ms=${steadyA.average()} optimized_mean_ms=${steadyB.average()}")
+            results+=mapOf("poles" to count,"warmupSteps" to 20,"baselineMilliseconds" to a,"optimizedMilliseconds" to b,
+                "steadyBaselineMilliseconds" to steadyA,"steadyOptimizedMilliseconds" to steadyB,
+                "baselineCounters" to base.counters(),"optimizedCounters" to fast.counters(),
+                "maxStates" to fast.root.systems.maxOf { it.states.size })
             Files.writeString(report,com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(results))
         }
         Files.writeString(progress,"passed\n")

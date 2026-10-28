@@ -40,6 +40,8 @@ public class RootSystem {
         this.interSystemOverSampling = interSystemOverSampling;
     }
 
+    public long getLocalJacobianBuilds() { return converterConvergence.getLocalJacobianBuilds(); }
+
     public void addComponent(Component c) {
         addComponents.add(c);
         c.onAddToRootSystem();
