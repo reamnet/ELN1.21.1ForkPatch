@@ -1,15 +1,13 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:false"
+    }
+  ],
   "type": "minecraft:crafting_shapeless",
-  "category": "misc",
   "ingredients": [
     {
-      "item": "eln:utility_pole"
-    },
-    {
-      "item": "eln:pole_fuse_link"
-    },
-    {
-      "item": "minecraft:glowstone_dust"
+      "item": "minecraft:barrier"
     }
   ],
   "result": {

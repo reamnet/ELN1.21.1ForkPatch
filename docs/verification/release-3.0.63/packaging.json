@@ -1,0 +1,21 @@
+{
+  "jar": "ElectricalAge-3.0.63.jar",
+  "bytes": 20714665,
+  "version": "3.0.63",
+  "nativeMediaArchives": false,
+  "retiredLightRecipeOverrides": [
+    "three_phase_secondary_fed_street_light_pole.json",
+    "12.5kv_single_phase_fused_underground_feeder_with_street_light.json",
+    "three_phase_transformer_street_light_pole_with_fused_single_phase_tap.json",
+    "120_240v_secondary_street_light_pole.json",
+    "single_phase_transformer_street_light_pole.json",
+    "three_phase_fused_tap_secondary_fed_street_light_pole.json",
+    "three_phase_transformer_street_light_pole.json",
+    "single_phase_underground_feeder_pole_with_secondary_fed_street_light.json",
+    "single_phase_secondary_fed_street_light_pole.json",
+    "utility_pole_twin_led_street_light.json",
+    "12.5kv_three_phase_fused_underground_feeder_with_street_light.json"
+  ],
+  "distributionModelExistingPartsUnchanged": true,
+  "addedModelPart": "SecondaryServiceRiser"
+}

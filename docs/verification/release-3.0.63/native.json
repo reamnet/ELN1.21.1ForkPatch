@@ -1,0 +1,198 @@
+{
+  "server-initial": {
+    "role": "server",
+    "id": "initial",
+    "action": "state",
+    "status": "passed",
+    "observation": {
+      "url": "",
+      "working": false,
+      "watts": 1.9999995951182623,
+      "revision": 0,
+      "epoch": "fefb35d3-834e-4a67-a621-e27003b02638",
+      "position": 0.0,
+      "paused": false,
+      "imageHash": 1,
+      "imageBytes": 0,
+      "poles": {
+        "pole0": {
+          "primary": [
+            12469.999996330711
+          ],
+          "secondary": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "installed": true,
+          "lampWatts": 0.0,
+          "light": 0
+        },
+        "pole1": {
+          "primary": [
+            12470.0
+          ],
+          "secondary": [
+            0.0,
+            0.0,
+            240.0
+          ],
+          "installed": true,
+          "lampWatts": 70.0,
+          "light": 15
+        },
+        "pole2": {
+          "primary": [
+            12469.999937988741
+          ],
+          "secondary": [
+            119.9976654671681,
+            119.9976654671921,
+            239.9952726021999
+          ],
+          "installed": true,
+          "lampWatts": 69.99724237844265,
+          "light": 14
+        }
+      }
+    }
+  },
+  "B-pole-controls": {
+    "role": "B",
+    "id": "pole-controls",
+    "action": "pole-open",
+    "status": "passed",
+    "observation": {
+      "screen": "PoleStreetlightScreen",
+      "installed": true,
+      "light": 15,
+      "watts": 70.0,
+      "volts": 240.0,
+      "yaw": 0,
+      "height": 0,
+      "pitch": 0
+    }
+  },
+  "B-pole-yaw": {
+    "role": "B",
+    "id": "pole-yaw",
+    "action": "pole-button",
+    "status": "passed",
+    "observation": {
+      "screen": "PoleStreetlightScreen",
+      "installed": true,
+      "light": 15,
+      "watts": 70.0,
+      "volts": 240.0,
+      "yaw": 345,
+      "height": 0,
+      "pitch": 0
+    }
+  },
+  "B-pole-height": {
+    "role": "B",
+    "id": "pole-height",
+    "action": "pole-button",
+    "status": "passed",
+    "observation": {
+      "screen": "PoleStreetlightScreen",
+      "installed": true,
+      "light": 15,
+      "watts": 70.0,
+      "volts": 240.0,
+      "yaw": 345,
+      "height": 1,
+      "pitch": 0
+    }
+  },
+  "B-pole-pitch": {
+    "role": "B",
+    "id": "pole-pitch",
+    "action": "pole-button",
+    "status": "passed",
+    "observation": {
+      "screen": "PoleStreetlightScreen",
+      "installed": true,
+      "light": 15,
+      "watts": 70.0,
+      "volts": 240.0,
+      "yaw": 345,
+      "height": 1,
+      "pitch": -5
+    }
+  },
+  "B-pole-remove": {
+    "role": "B",
+    "id": "pole-remove",
+    "action": "pole-button",
+    "status": "passed",
+    "observation": {
+      "installed": false,
+      "light": 0,
+      "watts": 5.76e-15,
+      "volts": 240.0,
+      "yaw": 345,
+      "height": 1,
+      "pitch": -5
+    }
+  },
+  "server-removed-pole": {
+    "role": "server",
+    "id": "removed-pole",
+    "action": "state",
+    "status": "passed",
+    "observation": {
+      "url": "http://127.0.0.1:8765/index.html",
+      "working": true,
+      "watts": 149.99769390362786,
+      "revision": 1,
+      "host": "5bdcfb47-0b99-3f35-8c47-66e5f36b9087",
+      "epoch": "5dde17e1-c437-4233-a298-5ab881b61b86",
+      "position": 6.34,
+      "paused": false,
+      "imageHash": -2069589518,
+      "imageBytes": 36927,
+      "poles": {
+        "pole0": {
+          "primary": [
+            12469.999996348135
+          ],
+          "secondary": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "installed": true,
+          "lampWatts": 0.0,
+          "light": 0
+        },
+        "pole1": {
+          "primary": [
+            12470.0
+          ],
+          "secondary": [
+            0.0,
+            0.0,
+            240.0
+          ],
+          "installed": false,
+          "lampWatts": 5.76e-15,
+          "light": 0
+        },
+        "pole2": {
+          "primary": [
+            12469.999938398125
+          ],
+          "secondary": [
+            119.99766547110757,
+            119.99766547113155,
+            239.9952726100788
+          ],
+          "installed": true,
+          "lampWatts": 69.9972423830386,
+          "light": 14
+        }
+      }
+    }
+  }
+}

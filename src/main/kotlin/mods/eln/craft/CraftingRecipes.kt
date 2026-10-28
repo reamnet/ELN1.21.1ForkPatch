@@ -348,8 +348,6 @@ object CraftingRecipes {
             Triple("Wireless Toggle Button","Wireless Button",Items.IRON_NUGGET))) {
             addRecipe(findItemStack(name)," M ","MLM"," P ",'M',ItemStack(material),'L',findItemStack(base),'P',findItemStack("Iron Plate"))
         }
-        addRecipe(findItemStack("Utility Pole Twin LED Street Light"),"L L"," P ",
-            'L',findItemStack("Modern LED Street Light"),'P',findItemStack("120/240V Secondary Utility Pole"))
         // These recipes create empty cells; ingredient charge is intentionally not copied.
         addRecipe(findItemStack("UPS AGM Battery Cell"),"PPP","LBL","PPP",'P',findItemStack("Iron Plate"),
             'L',"ingotLead",'B',findItemStack("Portable Battery"))
@@ -424,8 +422,6 @@ object CraftingRecipes {
                     'B',pole,'P',findItemStack("Iron Plate"))
             }
         }
-        addShapelessRecipe(findItemStack("Three Phase Fused Tap Secondary Fed Street Light Pole"),findItemStack("Three Phase Pole with Fused Single Phase Tap"),findItemStack("Flat Lamp Socket"))
-        addShapelessRecipe(findItemStack("Three Phase Transformer Street Light Pole with Fused Single Phase Tap"),findItemStack("Three Phase Transformer Street Light Pole"),findItemStack("Three Phase Pole with Fused Single Phase Tap"))
         addShapelessRecipe(findItemStack("240 V 30 A Dryer Cord"),findItemStack("240 V Appliance Cord"),findItemStack("Copper Cable"),findItemStack("Rubber"))
         addShapelessRecipe(findItemStack("240 V 30 A Dryer Outlet"),findItemStack("240 V Wall Outlet"),findItemStack("Copper Cable"),findItemStack("Iron Plate"))
         addRecipe(findItemStack("Electric Refrigerator"), "PPP", "GCG", "PRP",

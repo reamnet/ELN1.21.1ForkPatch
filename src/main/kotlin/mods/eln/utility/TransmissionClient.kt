@@ -95,7 +95,7 @@ class TransmissionGui(player: Player,private val render: TransmissionRender): Gu
     private var primary: GuiButtonEln?=null;private var secondary: GuiButtonEln?=null
     private lateinit var terminal: GuiButtonEln
     override fun newHelper()=if(kind.station)GuiHelperContainer(this,240,266,8,184) else GuiHelperContainer(this,240,230,8,148)
-    private val terminals get()=if(kind.station)listOf(52,53,32,33,34,36,37,38) else listOf(52,32,33,34)
+    private val terminals get()=if(kind.station)listOf(52,53,32,33,34,36,37,38) else listOf(52,32,33,34,50,40,41,42)
     override fun initGui() {
         super.initGui();terminal=newGuiButton(8,27,224,"")
         if(kind.station)primary=newGuiButton(8,53,224,"")

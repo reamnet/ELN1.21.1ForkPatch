@@ -19,6 +19,8 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
     private var cableMesh: Catenary?=null
     private var spans: List<OverheadSpan>?=null
     internal val terrainCableOwner=mods.eln.client.terrain.TerrainModels.CableOwner(this)
+    internal val streetlightOwner=mods.eln.client.terrain.TerrainModels.AttachmentOwner(this)
+    var poleStreetlight=mods.eln.utility.PoleStreetlightDisplay();private set
     protected var idealRenderingAngle: Float = 0.toFloat()
     var highVoltageRenderAngle=0f
         private set
@@ -37,9 +39,11 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
     }
 
     open fun drawCables() {
+        capturePoleStreetlight()
         if (mods.eln.client.terrain.TerrainModels.isDiscovering) return
         captureTerrainCables()
     }
+    internal fun capturePoleStreetlight()=mods.eln.utility.PoleStreetlightVisual.draw(this)
 
     internal fun captureTerrainCables() {
         if(cableMesh==null)return
@@ -68,6 +72,7 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
             require(serviceMountReach.isFinite() && serviceMountReach in .1f..8f)
             val linkCount=stream.readInt();require(linkCount in 0..4096)
             val incoming=List(linkCount) { OverheadSpan.read(stream) }
+            poleStreetlight=if(stream.readBoolean())mods.eln.utility.PoleStreetlightDisplay.read(stream) else mods.eln.utility.PoleStreetlightDisplay()
             // Voltage/status packets must not rebuild identical cable display lists or DH objects.
             if(incoming!=spans) {
                 spans=incoming

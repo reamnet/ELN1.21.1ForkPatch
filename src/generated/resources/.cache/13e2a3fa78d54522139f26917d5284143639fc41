@@ -1,4 +1,4 @@
-// 1.21.1	2026-10-28T02:15:14.846358258	Item Models: eln
+// 1.21.1	2026-10-28T04:22:33.49702079	Item Models: eln
 c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/100_a_pole_fuse.json
 a5ac578ee8f459ff5057195ce2b630f75ac6edbb assets/eln/models/item/100_kw_pole_transformer.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/100a_electrical_breaker.json
@@ -675,6 +675,7 @@ e1b85e4bd722dbe63b2e90a418957d43709269a1 assets/eln/models/item/player_filter.js
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/polarized_shaft_generator.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/polarized_shaft_motor.json
 c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/pole_fuse_link.json
+1457655886e7eb4cf946892a0429a2ee2b1dbb4d assets/eln/models/item/pole_streetlight_attachment.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/pole_surge_arrester.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/pool_corner_wash_light.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/pool_step_marker_light.json
@@ -751,7 +752,10 @@ a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/single_phase_aut
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/single_phase_fused_cutout_pole.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/single_phase_secondary_fed_street_light_pole.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/single_phase_transformer_pole.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/single_phase_transformer_pole_with_underground_service_riser.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/single_phase_transformer_street_light_pole.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/single_phase_underground_feeder_pole.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/single_phase_underground_feeder_pole_with_secondary_fed_street_light.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/single_phase_utility_pole.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/single_pole_contactor.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/six_socket_power_strip.json

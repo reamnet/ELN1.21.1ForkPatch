@@ -1,0 +1,12 @@
+{
+  "criteria": {
+    "retired": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "retired"
+    ]
+  ]
+}

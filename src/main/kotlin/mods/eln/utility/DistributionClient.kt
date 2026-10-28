@@ -26,7 +26,7 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
     DistributionPoleElement::class.java,DistributionPoleRender::class.java,"textures/wire.png",Eln.instance.veryHighVoltageCableDescriptor,64) {
     init {
         creativeTab=Eln.creativeTabPowerElectronics
-        if(kind.retiredGroundCabinet)hideFromCreative()
+        if(kind.retiredGroundCabinet || kind.light)hideFromCreative()
         ghostGroup=GhostGroup().apply {
             for(y in 1..if(kind.underground) { if(kind.light)5 else 1 } else 7)addElement(0,y,0,if(kind.underground && y==1)GhostBlock.tCube else GhostBlock.tClearance)
             if(!kind.lvOnly && !kind.underground)for(y in 6..7)for(x in -1..1)for(z in -1..1)
@@ -65,7 +65,7 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
                 }
             }
             if(kind.singlePhaseTap)PoleLeadVisual.draw(net.minecraft.world.phys.Vec3(0.0,if(display?.phase==1)7.15 else 6.63,((display?.phase ?: 0)-1)*.95),net.minecraft.world.phys.Vec3(-.68,6.4,if(kind.transformer).65 else 0.0))
-            if(kind==DistributionKind.FEEDER_THREE)repeat(3) { part("Riser$it",.28f,.31f,.32f);part("RiserJumper$it",.13f,.15f,.16f) }
+            if(kind.primaryRiser)for(i in if(kind.singlePrimaryRiser)listOf(1) else listOf(0,1,2)) { part("Riser$i",.28f,.31f,.32f);part("RiserJumper$i",.13f,.15f,.16f) }
             if(kind.regulator)repeat(kind.phases) { val i=if(kind.phases==1)1 else it;part("Regulator$i",.64f,.66f,.63f);part("RegulatorPin$i",.44f,.48f,.38f);part("RegulatorLoadPin$i",.44f,.48f,.38f);part("RegulatorFeed$i",.13f,.15f,.16f) }
             if(kind.capacitor) { part("CapacitorRack",.35f,.38f,.40f);repeat(3) { part("Capacitor$it",.76f,.77f,.72f);part("CapacitorPin$it",.4f,.45f,.35f);part("CapacitorFeed$it",.13f,.15f,.16f) } }
             if(kind.recloser) { part("Recloser",.57f,.61f,.58f);part("Control",.60f,.63f,.61f) }
@@ -86,6 +86,11 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
                 PoleSecondaryVisual.suspension(serviceReach)
             }
             if(kind.transformer && display?.installed!=false)PoleTransformerVisual.secondaryLeads(display?.rating ?: 10_000,hvAngle-base,lvAngle-base,serviceReach)
+            if(kind.buriedSecondary)preserveMatrix {
+                GL11.glRotatef(lvAngle-base,0f,1f,0f)
+                part("SecondaryServiceRiser",.28f,.31f,.32f)
+                for(i in 0..2)PoleLeadVisual.draw(net.minecraft.world.phys.Vec3(.30,4.53,.27),mods.eln.gridnode.ServiceCableMount.point(40+i,0,serviceReach))
+            }
             if(kind.light)preserveMatrix {
                 fun lampPart(name: String,r: Float,g: Float,b: Float) {
                     if(kind.twinLight)preserveMatrix {
@@ -134,6 +139,12 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
         if(kind.capacitor)list.add(tr("Three independent charge storage branches smooth DC-equivalent voltage changes"))
         if(kind.light && !kind.transformer)list.add(tr("Street light draws from the LV rack only; feed it from an upstream transformer"))
         if(kind==DistributionKind.FEEDER_THREE)list.add(tr("Base: left A, right B, rear C; three separate underground cable inputs"))
+        if(kind.singlePrimaryRiser) {
+            list.add(tr("Underground primary: bottom Up or left base; one conductor to the pole top"))
+            list.add(tr("Separate secondary: bottom Left L1, Right L2, Down 240 V; right base is 240 V"))
+            if(kind.light)list.add(tr("Street light requires an external 120/240 V secondary feed; no transformer is built in"))
+        }
+        if(kind.buriedSecondary)list.add(tr("12.47 kV nominal primary; bottom Left L1, Right L2, Up/Down 240 V underground service"))
     }
 }
 
@@ -185,7 +196,7 @@ class DistributionPoleRender(entity: TransparentNodeEntity,descriptor: Transpare
             if(arresterFitted)mods.eln.transparentnode.industrial.PoleArresterVisual.draw(highVoltageRenderAngle,(transparentNodeDescriptor as DistributionPoleDescriptor).kind.phases,arresterRemaining<=0)
             (transparentNodeDescriptor as DistributionPoleDescriptor).drawEquipment(front ?: Direction.XN,display,highVoltageRenderAngle,lowVoltageRenderAngle,serviceMountReach.toDouble())
         }
-        cable=drawCable(Direction.YN,if((transparentNodeDescriptor as DistributionPoleDescriptor).kind==DistributionKind.FEEDER_THREE)Eln.instance.stdCableRender3200V else Eln.instance.stdCableRender200V,connections,cable)
+        cable=drawCable(Direction.YN,if((transparentNodeDescriptor as DistributionPoleDescriptor).kind.primaryRiser)Eln.instance.stdCableRender3200V else Eln.instance.stdCableRender200V,connections,cable)
     }
     override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream);display.read(stream);connections.deserialize(stream);arresterFitted=stream.readBoolean();arresterRemaining=stream.readDouble();cable=null }
     override fun newGuiDraw(side: Direction,player: Player)=DistributionGui(player,this)
@@ -207,7 +218,7 @@ class DistributionGui(player: Player,private val render: DistributionPoleRender)
             phase=newGuiButton(8,82,106,"");rating=newGuiButton(118,82,114,"");voltage=newGuiButton(8,106,106,"").apply { setComment(0,tr("Nominal output at 12.47 kV; follows grid voltage proportionally")) }
             operate=newGuiButton(118,106,114,"")
         }
-        if(kind.twinLight)voltage=newGuiButton(8,82,224,"").apply { setComment(0,tr("Draws directly from the selected LV circuit; does not convert voltage")) }
+        if(kind.dualLampVoltage)voltage=newGuiButton(8,82,224,"").apply { setComment(0,tr("Draws directly from the selected LV circuit; does not convert voltage")) }
         if(kind.singlePhaseTap && !kind.transformer)phase=newGuiButton(8,84,224,"")
         if(kind.cutout || kind.transformer || kind.regulator || kind.singlePhaseTap)repeat(kind.fuseCount) { i -> fuses.add(newGuiButton(8+i*75,134,72,"")) }
         if(kind.cutout || kind.recloser) {
@@ -236,7 +247,7 @@ class DistributionGui(player: Player,private val render: DistributionPoleRender)
         terminal.displayString=tr("Cable: %1$",ServiceTerminals.label(d.terminal))
         phase?.displayString=tr("Phase: %1$",listOf("A","B","C")[d.phase.coerceIn(0,2)])
         rating?.enabled=false
-        rating?.displayString=tr("Rating: %1$ kW",d.rating/1000);voltage?.displayString=if(kind.twinLight)tr("Lamp supply: %1$ V",d.voltage) else tr("Nominal: %1$ V",d.voltage)
+        rating?.displayString=tr("Rating: %1$ kW",d.rating/1000);voltage?.displayString=if(kind.dualLampVoltage)tr("Lamp supply: %1$ V",d.voltage) else tr("Nominal: %1$ V",d.voltage)
         operate?.displayString=when { kind.transformer -> if(d.enabled)tr("Transformer: On") else tr("Transformer: Off");kind.recloser -> if(d.closed)tr("Open all phases") else tr("Close all phases");else -> if(d.enabled)tr("Open switch") else tr("Close switch") }
         fuses.forEachIndexed { i,b -> b.displayString=tr("%1$: %2$",listOf("A","B","C")[if(kind.transformer || kind.singlePhaseTap)d.phase.coerceIn(0,2) else i],if(d.fuseBlown.getOrNull(i)==true)tr("Blown") else if(d.fuseClosed.getOrNull(i)!=false)tr("Open") else tr("Close"));b.enabled=d.fuseBlown.getOrNull(i)!=true;b.setComment(0,tr("Right-click the pole holding a Pole Fuse Link to replace a blown fuse"));if(kind.transformer && kind.singlePhaseTap)b.setComment(1,if(i==0)tr("Transformer fuse") else tr("Single phase tap fuse")) }
         max?.displayString=tr("Lockout after %1$ failed reclosures",d.maxFailures)

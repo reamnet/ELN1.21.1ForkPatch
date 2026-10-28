@@ -76,6 +76,8 @@ def pole():
   m.cyl('Pin%d'%i,1,(0,6.31,z),.28,.045,n=16)
   for k in range(3):m.cyl('Pin%d'%i,1,(0,6.35+k*.065,z),.025,.09,n=20)
  m.box('SecondaryRack',.12,4.45,-.39,.12,1.1,.78)
+ m.cyl('SecondaryServiceRiser',1,(.30,-.48,.27),4.85,.060,n=16)
+ m.cyl('SecondaryServiceRiser',1,(.30,4.37,.27),.16,.085,n=16)
  for i in range(3):
   m.cyl('Secondary%d'%i,0,(.24,4.65+i*.32,0),.15,.055,n=16)
   m.cyl('Secondary%d'%i,0,(.38,4.65+i*.32,0),.025,.10,n=20)

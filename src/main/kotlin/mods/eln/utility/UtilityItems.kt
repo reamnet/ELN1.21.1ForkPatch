@@ -8,8 +8,9 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 
 class UtilityPartDescriptor(name: String,val part: Int): GenericItemUsingDamageDescriptor(name) {
-    init { creativeTab=Eln.creativeTabPowerElectronics;setDefaultIcon(when(part) { 0->"polefuselink";1->"analogservicemeter";else->"smartservicemeter" }) }
+    init { creativeTab=Eln.creativeTabPowerElectronics;setDefaultIcon(when(part) { 0->"polefuselink";1->"analogservicemeter";3->"polestreetlightattachment";else->"smartservicemeter" }) }
     override fun addInformation(itemStack: ItemStack?,entityPlayer: Player?,list: MutableList<String>,par4: Boolean) {
+        if(part==3) { list.add(tr("Right-click a pole to install; powered only by its 120/240 V secondary"));list.add(tr("Sneak empty-handed on the pole for aiming, dusk control and removal"));return }
         if(part==0)list.add(tr("Right-click a fused pole to replace its first blown link"))
         else {
             list.add(tr("Fits compact and wide service sockets; readings and serial stay with this meter"))
@@ -29,6 +30,7 @@ object UtilityItems {
     fun isFuse(stack: ItemStack?)=part(stack)==0 || PoleHardware.fuse(stack)?.let { !it.spent }==true
     fun register() {
         PoleHardware.register()
+        Eln.sharedItem.addElement(24+(123 shl 6),UtilityPartDescriptor(I18N.TR_NAME(I18N.Type.NONE,"Pole Streetlight Attachment"),3))
         listOf(I18N.TR_NAME(I18N.Type.NONE,"Pole Fuse Link"),I18N.TR_NAME(I18N.Type.NONE,"Analog Glass Service Meter"),I18N.TR_NAME(I18N.Type.NONE,"Smart Digital Service Meter")).forEachIndexed { i,name -> Eln.sharedItem.addElement(FUSE_ID+i,UtilityPartDescriptor(name,i)) }
     }
 }

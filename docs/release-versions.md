@@ -67,6 +67,7 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.60` | — | Optional EAMedia addon split; lightweight core, preserved media save IDs, and fixed inventory-free TV/jukebox controls |
 | `v3.0.61` | — | American single-phase pad transformer cabinet, buried service riser/handhole, two-wide bottom-entry meter socket, portable meter registers and detailed analog/smart displays |
 | `v3.0.62` | — | Fix full-build grid compatibility tests for the new wide socket; verify valid overhead fixtures and reject overhead links to underground service entries |
+| `v3.0.63` | — | Removable secondary-fed pole streetlights; vaulted built-in lights; single-phase underground primary and transformer service risers |
 
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`

@@ -1,0 +1,17 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:false"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:barrier"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:utility_pole_twin_led_street_light"
+  }
+}

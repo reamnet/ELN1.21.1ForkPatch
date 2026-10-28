@@ -59,7 +59,7 @@ object DistantModels {
     internal fun capture(owner: Any,node: NodeBlockEntity,mesh: TerrainMesh) {
         if(!available || node.level !is ClientLevel)return
         selectWorld(node.level as ClientLevel)
-        val key=Key(node.blockPos,if(owner is SixNodeElementRender)owner.side.int else -1)
+        val key=Key(node.blockPos,if(owner is SixNodeElementRender)owner.side.int else if(owner is TerrainModels.AttachmentOwner)7 else -1)
         if(owner is mods.eln.gridnode.GridRender)gridKeys+=key else gridKeys.remove(key)
         val level=world
         val revision=++sequence;revisions[key]=revision
@@ -105,7 +105,7 @@ object DistantModels {
     }
     internal fun forget(owner: Any,node: NodeBlockEntity) {
         if(owner is TerrainModels.CableOwner)return // dedicated wire snapshots have their own lifetime/key
-        val key=Key(node.blockPos,if(owner is SixNodeElementRender)owner.side.int else -1)
+        val key=Key(node.blockPos,if(owner is SixNodeElementRender)owner.side.int else if(owner is TerrainModels.AttachmentOwner)7 else -1)
         revisions.remove(key);entries.remove(key)?.let(::remove);gridKeys.remove(key)
         if(owner is mods.eln.gridnode.GridRender) {
             val wire=Key(node.blockPos,6);entries.remove(wire)?.let(::remove);wireSignatures.remove(wire);gridKeys.remove(wire)

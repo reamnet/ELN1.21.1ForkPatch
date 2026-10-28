@@ -56,9 +56,16 @@ enum class DistributionKind(val title: String,val phases: Int=3,val transformer:
     UNDERGROUND_THREE(I18N.TR_NAME(I18N.Type.NONE,"12.5kV Three Phase Fused Underground Feeder"),cutout=true),
     UNDERGROUND_LIGHT_SINGLE(I18N.TR_NAME(I18N.Type.NONE,"12.5kV Single Phase Fused Underground Feeder with Street Light"),1,light=true,cutout=true),
     UNDERGROUND_LIGHT_THREE(I18N.TR_NAME(I18N.Type.NONE,"12.5kV Three Phase Fused Underground Feeder with Street Light"),light=true,cutout=true),
-    TWIN_SECONDARY_LIGHT(I18N.TR_NAME(I18N.Type.NONE,"Utility Pole Twin LED Street Light"),light=true,lvOnly=true);
+    TWIN_SECONDARY_LIGHT(I18N.TR_NAME(I18N.Type.NONE,"Utility Pole Twin LED Street Light"),light=true,lvOnly=true),
+    FEEDER_SINGLE(I18N.TR_NAME(I18N.Type.NONE,"Single Phase Underground Feeder Pole"),1),
+    FEEDER_LIGHT_SINGLE(I18N.TR_NAME(I18N.Type.NONE,"Single Phase Underground Feeder Pole with Secondary Fed Street Light"),1,light=true),
+    UNDERGROUND_SECONDARY_TRANSFORMER_SINGLE(I18N.TR_NAME(I18N.Type.NONE,"Single Phase Transformer Pole with Underground Service Riser"),1,transformer=true);
+    val singlePrimaryRiser get()=this==FEEDER_SINGLE || this==FEEDER_LIGHT_SINGLE
+    val primaryRiser get()=singlePrimaryRiser || this==FEEDER_THREE
+    val buriedSecondary get()=this==UNDERGROUND_SECONDARY_TRANSFORMER_SINGLE
     val retiredGroundCabinet get()=this==UNDERGROUND_THREE || this==UNDERGROUND_LIGHT_THREE
     val twinLight get()=this==TWIN_SECONDARY_LIGHT
+    val dualLampVoltage get()=twinLight || this==FEEDER_LIGHT_SINGLE
     val lampWatts get()=if(twinLight)120.0 else 70.0
     val lampHeads get()=if(twinLight)listOf(Vec3(-1.15,5.2,-.62),Vec3(-1.15,5.2,.62)) else listOf(Vec3(-1.15,5.2,0.0))
     val underground get()=this in SERVICE_PEDESTAL..UNDERGROUND_LIGHT_THREE
@@ -108,6 +115,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     val services: List<NbtElectricalLoad> = secondary?.loads ?: List(3) { NbtElectricalLoad("secondaryBus$it").apply { serialResistance=.00001 } }
     val undergroundInput=if(kind.pedestal)List(3) { NbtElectricalLoad("undergroundServiceIn$it").apply { serialResistance=.00001 } } else emptyList()
     private val undergroundSplit=if(kind.pedestal)WiredServiceSplit(this,undergroundInput) else null
+    private val riserServiceSplit=if(kind.singlePrimaryRiser)WiredServiceSplit(this,services) else null
     private val regulatorInputs=if(kind.regulator)List(kind.phases) { NbtElectricalLoad("regulatorInput$it").apply { serialResistance=.00001 } } else emptyList()
     private val contacts=when {
         kind.pedestal -> undergroundInput.indices.map { TransferContact(undergroundInput[it],services[it]) }
@@ -131,7 +139,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     var lampVoltage=120
         private set
     val lamp=Resistor(services[0],null)
-    private val lamp240=if(kind.twinLight)Resistor(services[2],null) else null
+    private val lamp240=if(kind.dualLampVoltage)Resistor(services[2],null) else null
     val lampPower get()=lamp.power+(lamp240?.power ?: 0.0)
     var lampEnabled=true
         private set
@@ -194,7 +202,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         transformerContacts.forEachIndexed { i,c -> c.closed=installed && transformerPhase==i && fuses[0].closed }
     }
     private fun step(dt: Double) {
-        secondary?.update();undergroundSplit?.update()
+        secondary?.update();undergroundSplit?.update();riserServiceSplit?.update()
         if(kind.transformer) {
             val limited=unit!!.outputOverloaded
             val amps=fuseCurrent(0)
@@ -327,7 +335,10 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     }
     private fun phaseZ(index: Int)=if(kind.phases==1)0.0 else (index-1)*.95
     override fun getElectricalLoad(side: Direction,lrdu: LRDU): ElectricalLoad? {
-        if(side==Direction.YN)return (if(kind.pedestal)undergroundInput else services)[UndergroundService.circuit(lrdu)]
+        if(side==Direction.YN) {
+            if(kind.singlePrimaryRiser && lrdu==LRDU.Up)return lines[0]
+            return (if(kind.pedestal)undergroundInput else services)[UndergroundService.circuit(lrdu)]
+        }
         if(kind.underground && !kind.pedestal) {
             if(side==front)return when(lrdu) { LRDU.Left->services[0];LRDU.Right->services[1];else->services[2] }
             val phase=when(side) { front.left()->0;front.right()->1;front.inverse->2;else->return null }
@@ -336,7 +347,9 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         }
         if(lrdu!=LRDU.Down || side.isY)return null
         val i=when(side) { front.left()->0;front.right()->1;front.inverse->2;else->return null }
-        return if(kind==DistributionKind.FEEDER_THREE)lines[i] else services[i]
+        return if(kind==DistributionKind.FEEDER_THREE)lines[i] else if(kind.singlePrimaryRiser) {
+            when(i) { 0->lines[0];1->services[2];else->services[0] }
+        } else services[i]
     }
     override fun getConnectionMask(side: Direction,lrdu: LRDU)=if(getElectricalLoad(side,lrdu)!=null)NodeBase.maskElectricalPower else 0
     override fun getThermalLoad(side: Direction,lrdu: LRDU)=null
@@ -359,7 +372,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         gangClosed=!nbt.contains("utilityGangClosed") || nbt.getBoolean("utilityGangClosed");fuses.forEachIndexed { i,f -> f.read(nbt,"utilityFuse$i") };recloser.read(nbt)
         regulatorTarget=nbt.getDouble("regulatorTarget").takeIf { it.isFinite() && it in 120.0..51_200.0 } ?: 12_470.0;regulatorAutomatic=!nbt.contains("regulatorAuto") || nbt.getBoolean("regulatorAuto")
         regulatorTaps.forEachIndexed { i,t -> t.ratio=nbt.getDouble("regulatorRatio$i").takeIf { it.isFinite() && it in .9..1.1 } ?: 1.0 }
-        lampVoltage=nbt.getInt("utilityLampVoltage").takeIf { kind.twinLight && it==240 } ?: 120
+        lampVoltage=nbt.getInt("utilityLampVoltage").takeIf { kind.dualLampVoltage && it==240 } ?: 120
         lampYaw=nbt.getInt("utilityLampYaw").takeIf(StreetLightMount::validYaw) ?: 0
         lampHeightStep=nbt.getInt("utilityLampHeight").takeIf(StreetLightMount::validStep) ?: 0
         lampPitch=nbt.getInt("utilityLampPitch").takeIf(StreetLightMount::validPitch) ?: 0
@@ -394,7 +407,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         val id=super.networkUnserialize(stream)
         if(unit?.packet(id,stream)==true) { secondary?.update();needPublish();return id }
         when(id.toInt()) {
-            80 -> { val volts=stream.readInt();if(kind.twinLight && volts in listOf(120,240))lampVoltage=volts }
+            80 -> { val volts=stream.readInt();if(kind.dualLampVoltage && volts in listOf(120,240))lampVoltage=volts }
             82 -> lampEnabled=stream.readBoolean()
             83 -> lampAutomatic=stream.readBoolean()
             84 -> { val move=stream.readInt();if(kind.light && move in listOf(-1,1))lampHeightStep=(lampHeightStep+move).coerceIn(StreetLightMount.MIN_STEP,StreetLightMount.MAX_STEP) }

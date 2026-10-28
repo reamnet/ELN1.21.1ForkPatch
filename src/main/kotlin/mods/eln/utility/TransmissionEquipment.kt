@@ -44,6 +44,7 @@ class TransmissionElement(node: TransparentNode,descriptor: TransparentNodeDescr
     override val primaryPhaseOrientationIsFixed get()=kind.station
     val inputs=List(3) { NbtElectricalLoad("transmissionInput$it").apply { serialResistance=.00001 } }
     val outputs=if(kind.station)List(3) { NbtElectricalLoad("transmissionOutput$it").apply { serialResistance=.00001 } } else inputs
+    val services=if(!kind.station)List(3) { NbtElectricalLoad("transmissionService$it").apply { serialResistance=.00001 } } else emptyList()
     var primaryClosed=true;private set
     var secondaryClosed=true;private set
     private var selected=ServiceTerminals.HV_LINE_BUNDLE
@@ -52,6 +53,7 @@ class TransmissionElement(node: TransparentNode,descriptor: TransparentNodeDescr
     val taps=ArrayList<ServiceTap>()
     init {
         electricalLoadList.addAll(inputs)
+        electricalLoadList.addAll(services)
         if(outputs!==inputs)electricalLoadList.addAll(outputs)
         if(kind.transformer)repeat(3) { phase->
             val primary=NbtElectricalLoad("windingPrimary$phase")
@@ -85,6 +87,8 @@ class TransmissionElement(node: TransparentNode,descriptor: TransparentNodeDescr
     override fun getGridElectricalLoad(side: Direction): ElectricalLoad?=inputs.first()
     override fun selectedGridTerminal(side: Direction)=selected
     override fun gridLoads(terminal: Int): List<ElectricalLoad> = when {
+        !kind.station && terminal==50->services
+        !kind.station && terminal in 40..42->listOf(services[terminal-40])
         // Keep the direction-based GridElement API consistent with its exposed
         // single-load adapter. Interactive links use the explicit phase terminals.
         terminal in 0..5->listOf(inputs.first())
@@ -94,10 +98,11 @@ class TransmissionElement(node: TransparentNode,descriptor: TransparentNodeDescr
         terminal==ServiceTerminals.HV_LOAD_BUNDLE && kind.station->outputs
         else->emptyList()
     }
-    override fun renderWireCount(terminal: Int)=if(terminal in ServiceTerminals.HV_LINE_BUNDLE..ServiceTerminals.HV_LOAD_BUNDLE)3 else 1
+    override fun renderWireCount(terminal: Int)=if(terminal==50 || terminal in ServiceTerminals.HV_LINE_BUNDLE..ServiceTerminals.HV_LOAD_BUNDLE)3 else 1
     override fun gridPhase(terminal: Int): Int?=when(terminal) { in 32..34->terminal-32;in 36..38->terminal-36;else->null }
     override fun gridCircuitKey(terminal: Int)=when(terminal) { in 32..34->"HV${terminal-32}";in 36..38->"HV${terminal-36}";else->ServiceTerminals.key(terminal) }
     override fun gridCablePoint(terminal: Int,wire: Int): Vec3 {
+        if(!kind.station && ServiceTerminals.isService(terminal))return ServiceCableMount.point(terminal,wire,serviceMountReach)
         if(terminal==ServiceTerminals.HV_LINE_BUNDLE)return gridCablePoint(32+wire,0)
         if(terminal==ServiceTerminals.HV_LOAD_BUNDLE)return gridCablePoint(36+wire,0)
         val phase=gridPhase(terminal) ?: 0
@@ -106,19 +111,21 @@ class TransmissionElement(node: TransparentNode,descriptor: TransparentNodeDescr
     }
     private fun modelHit(hit: Vec3)=hit.yRot(-Math.toRadians(highVoltageRenderAngle.toDouble()).toFloat())
     override fun aimedSingleGridTerminal(side: Direction,localHit: Vec3): Int {
+        if(!kind.station && localHit.y<8)return (40..42).minBy { renderedGridCablePoint(it,0).distanceToSqr(localHit) }
         val hit=modelHit(localHit)
         return (if(kind.station && hit.x>0)36 else 32)+(if(hit.z<-.16)0 else if(hit.z>.16)2 else 1)
     }
     override fun aimedGridTerminal(side: Direction,localHit: Vec3)=
-        if(kind.station && modelHit(localHit).x>0)ServiceTerminals.HV_LOAD_BUNDLE else ServiceTerminals.HV_LINE_BUNDLE
+        if(!kind.station && localHit.y<8)ServiceTerminals.BUNDLE else if(kind.station && modelHit(localHit).x>0)ServiceTerminals.HV_LOAD_BUNDLE else ServiceTerminals.HV_LINE_BUNDLE
     override fun getElectricalLoad(side: Direction,lrdu: LRDU): ElectricalLoad? {
+        if(!kind.station && side==Direction.YN)return services[UndergroundService.circuit(lrdu)]
         if(!kind.riser || lrdu!=LRDU.Down || side.isY)return null
         return when(side) { front.left()->inputs[0];front.right()->inputs[1];front.inverse->inputs[2];else->null }
     }
     override fun getConnectionMask(side: Direction,lrdu: LRDU)=if(getElectricalLoad(side,lrdu)!=null)NodeBase.maskElectricalPower else 0
     override fun newContainer(side: Direction,player: Player)=mods.eln.misc.BasicContainer(player,inventory,arrayOf())
     override fun multiMeterString(side: Direction)=inputs.mapIndexed { i,p->"${listOf("A","B","C")[i]} ${Utils.plotVolt("",p.voltage)} ${Utils.plotAmpere("",p.current)}" }.joinToString("\n")+
-        if(kind.station)outputs.mapIndexed { i,p->"\n${tr("Output")} ${listOf("A","B","C")[i]} ${Utils.plotVolt("",p.voltage)} ${Utils.plotAmpere("",p.current)}" }.joinToString("") else ""
+        if(kind.station)outputs.mapIndexed { i,p->"\n${tr("Output")} ${listOf("A","B","C")[i]} ${Utils.plotVolt("",p.voltage)} ${Utils.plotAmpere("",p.current)}" }.joinToString("") else services.mapIndexed { i,p->"\n${ServiceTerminals.label(40+i)} ${Utils.plotVolt("",p.voltage)} ${Utils.plotAmpere("",p.current)}" }.joinToString("")
     override fun thermoMeterString(side: Direction)=plotAmbientCelsius("T",0.0)
     private fun writeSettings(tag: CompoundTag) { tag.putBoolean("transmissionPrimaryClosed",primaryClosed);tag.putBoolean("transmissionSecondaryClosed",secondaryClosed);tag.putInt("transmissionTerminal",selected) }
     private fun readSettings(tag: CompoundTag) {

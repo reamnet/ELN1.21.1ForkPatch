@@ -31,13 +31,13 @@ class PoleRefreshTest {
             assertEquals(top.max.y,p.gridCablePoint(if(kind.phases==1)32 else 33,0).y,1e-6)
         }
     }
-    @Test fun obsoletePolesStayRegisteredAndHiddenWhileTwinRetainsItsSaveIdentityInPowerTab() {
+    @Test fun obsoleteLightPolesStayRegisteredAndHiddenIncludingTheTwin() {
         for(name in listOf("Utility Pole Street Light","Utility Pole Cobrahead Street Light")) {
             val d=Eln.transparentNodeItem.getDescriptor(Eln.findItemStack(name,1))
             assertTrue(d is UtilityStreetLightDescriptor);assertTrue(d.isHidden)
         }
         val d=Eln.transparentNodeItem.getDescriptor(Eln.findItemStack("Utility Pole Twin LED Street Light",1))
-        assertTrue(d is DistributionPoleDescriptor);d as DistributionPoleDescriptor;assertTrue(d.kind.twinLight);assertFalse(d.isHidden)
+        assertTrue(d is DistributionPoleDescriptor);d as DistributionPoleDescriptor;assertTrue(d.kind.twinLight);assertTrue(d.isHidden)
         assertSame(d,Eln.transparentNodeItem.subItemList[13+(124 shl 6)])
         assertSame(Eln.creativeTabPowerElectronics,d.creativeTab)
         val lighting=ArrayList<net.minecraft.world.item.ItemStack>();val power=ArrayList<net.minecraft.world.item.ItemStack>()
@@ -45,7 +45,7 @@ class PoleRefreshTest {
         mods.eln.generic.CreativeTabPopulator.addEntries(Eln.creativeTabPowerElectronics,power::add)
         val obsolete=listOf("Utility Pole Street Light","Utility Pole Cobrahead Street Light").map { Eln.transparentNodeItem.getDescriptor(Eln.findItemStack(it,1)) }
         assertTrue(lighting.none { Eln.transparentNodeItem.getDescriptor(it) in obsolete || Eln.transparentNodeItem.getDescriptor(it)===d })
-        assertTrue(power.any { Eln.transparentNodeItem.getDescriptor(it)===d })
+        assertTrue(power.none { Eln.transparentNodeItem.getDescriptor(it)===d })
     }
     @Test fun bothLampSupplySelectionsDrawReal120WattsAndFollowLineSagWithoutConversion() {
         for(volts in listOf(120,240)) {

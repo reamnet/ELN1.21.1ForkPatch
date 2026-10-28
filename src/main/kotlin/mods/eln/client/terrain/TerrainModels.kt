@@ -33,6 +33,7 @@ import kotlin.math.min
 object TerrainModels {
     /** Separate static surface owned by the same node, with a key distinct from its pole body. */
     internal class CableOwner(val render: mods.eln.gridnode.GridRender)
+    internal class AttachmentOwner(val render: mods.eln.gridnode.GridRender)
     private data class MeshKey(val descriptor: Any,val side: Any?,val appearance: Any)
     private class Body(val node: NodeBlockEntity,val key: MeshKey,val mesh: TerrainMesh,
         val sections: Map<Long,List<TerrainSlice>>,var light: Int)
@@ -72,6 +73,7 @@ object TerrainModels {
         val side:Any?
         when(owner) {
             is CableOwner -> { descriptor=owner.render.transparentNodeDescriptor;side="overheadCables" }
+            is AttachmentOwner -> { descriptor=owner.render.transparentNodeDescriptor;side="poleStreetlight" }
             is SixNodeElementRender -> { descriptor=owner.sixNodeDescriptor;side=owner.side }
             is TransparentNodeElementRender -> { descriptor=owner.transparentNodeDescriptor;side=null }
             else -> error("Unknown terrain model owner")
@@ -173,7 +175,7 @@ object TerrainModels {
                 is TransparentNodeEntity -> node.elementRender?.let { render->
                     // Capture spans before the automatic legacy-body signature pass. They
                     // share a node but can cross many otherwise air-only terrain sections.
-                    if(render is mods.eln.gridnode.GridRender)render.captureTerrainCables()
+                    if(render is mods.eln.gridnode.GridRender) { render.captureTerrainCables();render.capturePoleStreetlight() }
                     drawElement(render) { render.draw() }
                 }
             }

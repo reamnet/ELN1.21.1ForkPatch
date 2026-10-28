@@ -30,6 +30,7 @@ import mods.eln.misc.writeToNBT
 abstract class GridElement(transparentNode: TransparentNode, descriptor: TransparentNodeDescriptor, internal var connectRange: Int) : TransparentNodeElement(transparentNode, descriptor) {
     var gridLinkList = HashSet<GridLink>()
     var gridLinksBooting = HashSet<GridLink>()
+    val poleStreetlight by lazy { mods.eln.utility.PoleStreetlightAttachment.create(this) }
     private val desc: GridDescriptor
     private var idealRenderingAngle: Float = 0.toFloat()
     private var localPrimaryRenderAngle=0f
@@ -73,6 +74,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
 
     /* Connect one GridNode to another. */
     override fun onBlockActivated(player: Player, side: Direction, vx: Float, vy: Float, vz: Float): Boolean {
+        if(poleStreetlight?.interact(player)==true)return true
         // Check if user is holding an appropriate tool.
         val stack = player.mainHandItem
         val itemDesc = GenericItemBlockUsingDamageDescriptor.getDescriptor(stack)
@@ -182,6 +184,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
     }
 
     override fun initialize() {
+        poleStreetlight
         connect()
         for (link in gridLinksBooting) {
             link.connect()
@@ -219,6 +222,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
     }
 
     override fun writeToNBT(nbt: CompoundTag) {
+        poleStreetlight?.write(nbt)
         super.writeToNBT(nbt)
 
         val gridLinks = Utils.newNbtTagCompund(nbt, "gridLinks")
@@ -228,6 +232,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
     }
 
     override fun readFromNBT(nbt: CompoundTag) {
+        poleStreetlight?.read(nbt)
         super.readFromNBT(nbt)
 
         assert(gridLinkList.isEmpty())
@@ -400,6 +405,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
             val ourLinks = gridLinkList.filter { it.a == coordinate()/* && link.connected*/ }
             stream.writeInt(ourLinks.size)
             for (link in ourLinks) OverheadSpanPublication.span(link).write(stream)
+            stream.writeBoolean(poleStreetlight!=null);poleStreetlight?.display()?.write(stream)
         } catch (e: IOException) {
             e.printStackTrace()
         }

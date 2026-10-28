@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_modern_led_street_light": {
+    "has_iron_plate": {
       "conditions": {
         "items": [
           {
-            "items": "eln:modern_led_street_light"
+            "items": "eln:iron_plate"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "eln:utility_pole_twin_led_street_light"
+        "recipe": "eln:pole_streetlight_attachment"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -21,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_modern_led_street_light"
+      "has_iron_plate"
     ]
   ],
   "rewards": {
     "recipes": [
-      "eln:utility_pole_twin_led_street_light"
+      "eln:pole_streetlight_attachment"
     ]
   }
 }

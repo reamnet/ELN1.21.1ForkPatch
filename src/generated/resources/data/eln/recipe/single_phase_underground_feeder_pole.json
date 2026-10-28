@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "eln:single_phase_utility_pole"
+    },
+    {
+      "item": "eln:copper_cable"
+    },
+    {
+      "item": "eln:iron_plate"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:single_phase_underground_feeder_pole"
+  }
+}

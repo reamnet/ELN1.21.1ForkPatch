@@ -1,15 +1,13 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:false"
+    }
+  ],
   "type": "minecraft:crafting_shapeless",
-  "category": "misc",
   "ingredients": [
     {
-      "item": "eln:12.5kv_single_phase_fused_underground_feeder"
-    },
-    {
-      "item": "eln:basic_lamp_holder"
-    },
-    {
-      "item": "minecraft:iron_ingot"
+      "item": "minecraft:barrier"
     }
   ],
   "result": {

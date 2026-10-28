@@ -263,6 +263,9 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
         get() {
             val itemStack = Eln.transparentNodeItem.getDescriptor(node!!.elementId)?.newItemStack(1) ?: return ItemStack.EMPTY
             itemStack.tagCompound = getItemStackNBT()
+            (this as? mods.eln.gridnode.GridElement)?.poleStreetlight?.let { lamp->
+                val tag=itemStack.tagCompound ?: CompoundTag();lamp.write(tag);itemStack.tagCompound=tag
+            }
             return itemStack
         }
 
@@ -316,6 +319,7 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
 
     fun initializeFromThat(front: Direction, @Suppress("UNUSED_PARAMETER") entityLiving: LivingEntity?, itemStackNbt: CompoundTag?) {
         this.front = front
+        (this as? mods.eln.gridnode.GridElement)?.poleStreetlight?.let { if(itemStackNbt!=null)it.read(itemStackNbt) }
         readItemStackNBT(itemStackNbt)
         initialize()
     }

@@ -1,12 +1,13 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:false"
+    }
+  ],
   "type": "minecraft:crafting_shapeless",
-  "category": "misc",
   "ingredients": [
     {
-      "item": "eln:three_phase_pole_with_fused_single_phase_tap"
-    },
-    {
-      "item": "eln:flat_lamp_socket"
+      "item": "minecraft:barrier"
     }
   ],
   "result": {

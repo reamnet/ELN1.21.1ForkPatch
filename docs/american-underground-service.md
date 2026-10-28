@@ -72,3 +72,33 @@ No browser or media backend is added; EA Media remains a separate addon.
 ELN represents residential service with scalar voltage equivalents, not an explicit
 AC neutral/phase solver. The handhole splices one 240 V equivalent; downstream
 service taps derive proportional 120 V branches while conserving power.
+
+## Pole risers and removable streetlights (3.0.63)
+
+**Single Phase Underground Feeder Pole** brings a buried primary cable up to a single overhead
+conductor. The primary cable enters the left side of its base. Its separate secondary rack can
+carry an upstream 120/240 V service without connecting that service to the primary.
+
+**Single Phase Transformer Pole with Underground Service Riser** accepts the existing physical
+transformer upgrades and fuse links. At nominal 12.47 kV its transformer supplies the selected
+secondary voltage; primary sag or rise changes that output proportionally. Its added conduit
+marks the underground secondary route. The bottom ports expose 240 V (Down) and 120 V branches
+(Left/Right), while the ordinary primary and secondary overhead connections remain available.
+
+Use a **Pole Streetlight Attachment** on an ordinary distribution pole, legacy utility pole or
+69/230 kV pole/tower. Right-click the pole with the attachment to install it. Shift-right-click
+with an empty hand reopens its controls. The controls provide on/off, dusk/night operation,
+automatic or fixed 120/240 V supply selection, full horizontal rotation, height and tilt, and
+removal. Removing it returns the physical attachment; picking up a pole carries its attachment
+and settings with it.
+
+The lamp draws 70 W at nominal voltage from the pole's **secondary only**. A pole with no local
+transformer needs an externally fed secondary. Connecting only its primary never powers the lamp.
+Steel transmission poles now also expose an independent secondary rack and bottom cable ports;
+they do not silently convert their high voltage into lighting power. The lamp is a passive load,
+so its brightness and consumption follow the supplied voltage. Static attachment geometry uses
+the terrain mesh and Distant Horizons integration.
+
+Dedicated poles with permanently built-in streetlights are vaulted from new crafting and creative
+selection. Their saved IDs and existing placed blocks remain supported. For a new installation,
+choose the pole you need and add the removable attachment instead.
