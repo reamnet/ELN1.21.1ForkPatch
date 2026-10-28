@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_single_phase_utility_pole": {
+    "has_single_phase_fused_cutout_pole": {
       "conditions": {
         "items": [
           {
-            "items": "eln:single_phase_utility_pole"
+            "items": "eln:single_phase_fused_cutout_pole"
           }
         ]
       },
@@ -21,7 +21,7 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_single_phase_utility_pole"
+      "has_single_phase_fused_cutout_pole"
     ]
   ],
   "rewards": {

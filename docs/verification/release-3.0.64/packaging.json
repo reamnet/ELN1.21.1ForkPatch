@@ -1,0 +1,28 @@
+{
+  "jar": "ElectricalAge-3.0.64.jar",
+  "bytes": 20722658,
+  "version": "3.0.64",
+  "fusedRiserRecipe": {
+    "type": "minecraft:crafting_shapeless",
+    "category": "misc",
+    "ingredients": [
+      {
+        "item": "eln:single_phase_fused_cutout_pole"
+      },
+      {
+        "item": "eln:copper_cable"
+      },
+      {
+        "item": "eln:iron_plate"
+      }
+    ],
+    "result": {
+      "count": 1,
+      "id": "eln:single_phase_underground_feeder_pole"
+    }
+  },
+  "unchangedExistingModelParts": true,
+  "existingModelParts": 73,
+  "addedModelPart": "RiserFuseJumper",
+  "mediaRuntimeArchives": false
+}

@@ -28,7 +28,7 @@ class UndergroundPoleTest {
     @Test fun primaryRiserAndExternalSecondaryStayElectricallyIndependentAndLightNeedsItsLvFeed() {
         val p=pole(DistributionKind.FEEDER_LIGHT_SINGLE)
         assertFalse(p.kind.transformer);assertEquals(0,p.inventory.containerSize)
-        assertSame(p.lines[0],p.getElectricalLoad(Direction.YN,LRDU.Up));assertSame(p.lines[0],p.getElectricalLoad(p.front.left(),LRDU.Down))
+        assertSame(p.outs[0],p.getElectricalLoad(Direction.YN,LRDU.Up));assertSame(p.outs[0],p.getElectricalLoad(p.front.left(),LRDU.Down))
         assertSame(p.services[2],p.getElectricalLoad(Direction.YN,LRDU.Down));assertSame(p.services[0],p.getElectricalLoad(Direction.YN,LRDU.Left));assertSame(p.services[1],p.getElectricalLoad(Direction.YN,LRDU.Right))
         val root=RootSystem(.01,1);p.electricalLoadList.forEach(root::addState);p.electricalComponentList.forEach(root::addComponent)
         val primary=VoltageSource("buried primary",p.lines[0],null).apply { voltage=12470.0 };root.addComponent(primary)

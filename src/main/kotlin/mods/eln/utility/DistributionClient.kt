@@ -65,7 +65,7 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
                 }
             }
             if(kind.singlePhaseTap)PoleLeadVisual.draw(net.minecraft.world.phys.Vec3(0.0,if(display?.phase==1)7.15 else 6.63,((display?.phase ?: 0)-1)*.95),net.minecraft.world.phys.Vec3(-.68,6.4,if(kind.transformer).65 else 0.0))
-            if(kind.primaryRiser)for(i in if(kind.singlePrimaryRiser)listOf(1) else listOf(0,1,2)) { part("Riser$i",.28f,.31f,.32f);part("RiserJumper$i",.13f,.15f,.16f) }
+            if(kind.primaryRiser)for(i in if(kind.singlePrimaryRiser)listOf(1) else listOf(0,1,2)) { part("Riser$i",.28f,.31f,.32f);part(if(kind.singlePrimaryRiser)"RiserFuseJumper" else "RiserJumper$i",.13f,.15f,.16f) }
             if(kind.regulator)repeat(kind.phases) { val i=if(kind.phases==1)1 else it;part("Regulator$i",.64f,.66f,.63f);part("RegulatorPin$i",.44f,.48f,.38f);part("RegulatorLoadPin$i",.44f,.48f,.38f);part("RegulatorFeed$i",.13f,.15f,.16f) }
             if(kind.capacitor) { part("CapacitorRack",.35f,.38f,.40f);repeat(3) { part("Capacitor$it",.76f,.77f,.72f);part("CapacitorPin$it",.4f,.45f,.35f);part("CapacitorFeed$it",.13f,.15f,.16f) } }
             if(kind.recloser) { part("Recloser",.57f,.61f,.58f);part("Control",.60f,.63f,.61f) }
@@ -140,8 +140,9 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
         if(kind.light && !kind.transformer)list.add(tr("Street light draws from the LV rack only; feed it from an upstream transformer"))
         if(kind==DistributionKind.FEEDER_THREE)list.add(tr("Base: left A, right B, rear C; three separate underground cable inputs"))
         if(kind.singlePrimaryRiser) {
-            list.add(tr("Underground primary: bottom Up or left base; one conductor to the pole top"))
+            list.add(tr("Fused underground primary: bottom Up or left base; overhead line stays on the top insulator"))
             list.add(tr("Separate secondary: bottom Left L1, Right L2, Down 240 V; right base is 240 V"))
+            list.add(tr("The cutout isolates the underground primary; the secondary rack stays independent"))
             if(kind.light)list.add(tr("Street light requires an external 120/240 V secondary feed; no transformer is built in"))
         }
         if(kind.buriedSecondary)list.add(tr("12.47 kV nominal primary; bottom Left L1, Right L2, Up/Down 240 V underground service"))
@@ -210,6 +211,7 @@ class DistributionGui(player: Player,private val render: DistributionPoleRender)
     private var target: GuiTextFieldEln?=null;private var applyTarget: GuiButtonEln?=null;private var auto: GuiButtonEln?=null;private var lamp: GuiButtonEln?=null;private var dusk: GuiButtonEln?=null
     private var left: GuiButtonEln?=null;private var right: GuiButtonEln?=null;private var up: GuiButtonEln?=null;private var down: GuiButtonEln?=null;private var tiltUp: GuiButtonEln?=null;private var tiltDown: GuiButtonEln?=null
     private val fuses=ArrayList<GuiButtonEln>()
+    private var attachment: GuiButtonEln?=null
     override fun newHelper()=GuiHelperContainer(this,240,if(kind.light)382 else 310,8,if(kind.light)300 else 228)
     private fun terminals()=buildList { if(!kind.lvOnly) { repeat(kind.phases) { add(32+it) };if(kind.protectedLine)repeat(kind.outputPhases) { add(36+it) } };add(50);addAll(40..42) }
     override fun initGui() {
@@ -218,12 +220,14 @@ class DistributionGui(player: Player,private val render: DistributionPoleRender)
             phase=newGuiButton(8,82,106,"");rating=newGuiButton(118,82,114,"");voltage=newGuiButton(8,106,106,"").apply { setComment(0,tr("Nominal output at 12.47 kV; follows grid voltage proportionally")) }
             operate=newGuiButton(118,106,114,"")
         }
+        if(kind.singlePrimaryRiser && render.poleStreetlight.installed)attachment=newGuiButton(8,160,224,tr("Streetlight attachment settings"))
         if(kind.dualLampVoltage)voltage=newGuiButton(8,82,224,"").apply { setComment(0,tr("Draws directly from the selected LV circuit; does not convert voltage")) }
         if(kind.singlePhaseTap && !kind.transformer)phase=newGuiButton(8,84,224,"")
         if(kind.cutout || kind.transformer || kind.regulator || kind.singlePhaseTap)repeat(kind.fuseCount) { i -> fuses.add(newGuiButton(8+i*75,134,72,"")) }
         if(kind.cutout || kind.recloser) {
-            current=newGuiTextField(8,88,85).apply { text=(if(kind.recloser)d.pickup else d.fuseRating).toString();setComment(0,tr("Trip current in amperes: 1 to 2000 A")) }
-            applyCurrent=newGuiButton(98,84,134,tr("Set trip current"))
+            val currentY=if(kind.singlePrimaryRiser && kind.dualLampVoltage)112 else 88
+            current=newGuiTextField(8,currentY,85).apply { text=(if(kind.recloser)d.pickup else d.fuseRating).toString();setComment(0,tr("Trip current in amperes: 1 to 2000 A")) }
+            applyCurrent=newGuiButton(98,currentY-4,134,tr("Set trip current"))
         }
         if(kind.recloser) {
             retry=newGuiTextField(8,112,85).apply { text=d.delay.toString();setComment(0,tr("Retry delay: 1 to 60 seconds")) };applyRetry=newGuiButton(98,108,134,tr("Set retry delay"))
@@ -257,6 +261,7 @@ class DistributionGui(player: Player,private val render: DistributionPoleRender)
     override fun guiObjectEvent(obj: IGuiObject) {
         super.guiObjectEvent(obj)
         when(obj) {
+            attachment -> PoleStreetlightScreen.open(render.tileEntity.blockPos)
             left -> render.clientSendInt(85,if(net.minecraft.client.gui.screens.Screen.hasShiftDown())1 else 5)
             right -> render.clientSendInt(85,if(net.minecraft.client.gui.screens.Screen.hasShiftDown())-1 else -5)
             down -> render.clientSendInt(84,-1)

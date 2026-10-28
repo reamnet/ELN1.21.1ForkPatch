@@ -1,0 +1,41 @@
+{
+  "passed": true,
+  "observations": {
+    "closed": {
+      "overheadVolts": 12469.982591563461,
+      "buriedVolts": 12469.978591570738,
+      "buriedAmps": 1.9999963618325087,
+      "secondaryVolts": 240.0,
+      "lampWatts": 70.0,
+      "closed": true,
+      "blown": false
+    },
+    "manualOpen": {
+      "overheadVolts": 12470.0,
+      "buriedVolts": 0.0,
+      "buriedAmps": 0.0,
+      "secondaryVolts": 240.0,
+      "lampWatts": 70.0,
+      "closed": false,
+      "blown": false
+    },
+    "reclosed": {
+      "overheadVolts": 12469.982591563461,
+      "buriedVolts": 12469.978591570738,
+      "buriedAmps": 1.9999963618325087,
+      "secondaryVolts": 240.0,
+      "lampWatts": 70.0,
+      "closed": true,
+      "blown": false
+    },
+    "overload": {
+      "overheadVolts": 12470.0,
+      "buriedVolts": 0.0,
+      "buriedAmps": 0.0,
+      "secondaryVolts": 240.0,
+      "lampWatts": 70.0,
+      "closed": false,
+      "blown": true
+    }
+  }
+}

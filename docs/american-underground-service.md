@@ -75,8 +75,10 @@ service taps derive proportional 120 V branches while conserving power.
 
 ## Pole risers and removable streetlights (3.0.63)
 
-**Single Phase Underground Feeder Pole** brings a buried primary cable up to a single overhead
-conductor. The primary cable enters the left side of its base. Its separate secondary rack can
+**Single Phase Underground Feeder Pole** now includes a cutout fuse (3.0.64). The top insulator
+is the overhead line side; the buried primary cable connects to the protected left base port or
+bottom Up terminal. Opening, removing or blowing the fuse isolates that buried circuit in either
+feeding direction. It does not interrupt the overhead line or the independent secondary. Its separate secondary rack can
 carry an upstream 120/240 V service without connecting that service to the primary.
 
 **Single Phase Transformer Pole with Underground Service Riser** accepts the existing physical
@@ -102,3 +104,21 @@ the terrain mesh and Distant Horizons integration.
 Dedicated poles with permanently built-in streetlights are vaulted from new crafting and creative
 selection. Their saved IDs and existing placed blocks remain supported. For a new installation,
 choose the pole you need and add the removable attachment instead.
+
+## Fused primary riser (3.0.64)
+
+Existing single-phase primary risers gain the cutout in place; their item/block IDs and cable
+attachment points are retained. Existing unfused saves migrate with a closed included link. The
+crafting recipe now uses a Single Phase Fused Cutout Pole, Copper Cable and Iron Plate. The vaulted
+legacy riser with a built-in streetlight receives the same primary protection.
+
+Open/close the cutout in the pole GUI. Shift-right-click empty-handed to remove its cartridge;
+right-click with a Pole Fuse Link or rated Pole Fuse to replace a missing/blown cartridge. The
+included generic link defaults to 100 A and uses the GUI trip-current setting. A rated physical
+fuse uses its own rating. A blown fuse requires replacement; opening/closing it does not reset it.
+The fuse door visibly drops open, with the existing fuse/arc sounds.
+
+The 120/240 V rack and any streetlight attached to it remain independent of this primary cutout.
+When a removable light is installed, the riser's normal pole GUI has a **Streetlight attachment
+settings** button, so its controls remain accessible while Shift-empty operates the fuse cartridge.
+Static cutout and jumper geometry use the existing baked terrain and distant-model paths.

@@ -35,7 +35,7 @@ object UtilityRecipes {
             val extra=if(kind.cutout)fuses-1 else if(kind.transformer)0 else fuses
             addShapelessRecipe(findItemStack(kind.title),findItemStack(base),detail,marker,*Array(extra.coerceAtLeast(0)) { findItemStack("Pole Fuse Link") })
         }
-        addShapelessRecipe(findItemStack(DistributionKind.FEEDER_SINGLE.title),findItemStack(DistributionKind.SINGLE.title),findItemStack("Copper Cable"),findItemStack("Iron Plate"))
+        addShapelessRecipe(findItemStack(DistributionKind.FEEDER_SINGLE.title),findItemStack(DistributionKind.CUTOUT_SINGLE.title),findItemStack("Copper Cable"),findItemStack("Iron Plate"))
         addRecipe(findItemStack(PoleStreetlightAttachment.NAME)," II","CPG"," I ",'I',findItemStack("Iron Plate"),'C',findItemStack("Copper Cable"),'P',findItemStack("Basic Lamp Holder"),'G',ItemStack(Blocks.GLASS))
         addShapelessRecipe(findItemStack(DistributionKind.UNDERGROUND_SECONDARY_TRANSFORMER_SINGLE.title),findItemStack(DistributionKind.TRANSFORMER_SINGLE.title),findItemStack("Underground Service Entrance Riser"),findItemStack("Iron Plate"))
         mods.eln.transparentnode.standby.GeneratorTier.entries.drop(1).forEachIndexed { i,tier ->

@@ -3,7 +3,7 @@
   "category": "misc",
   "ingredients": [
     {
-      "item": "eln:single_phase_utility_pole"
+      "item": "eln:single_phase_fused_cutout_pole"
     },
     {
       "item": "eln:copper_cable"

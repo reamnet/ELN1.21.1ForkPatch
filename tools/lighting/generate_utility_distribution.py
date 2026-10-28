@@ -101,6 +101,9 @@ def pole():
   m.cyl('CapacitorPin%d'%i,1,(.34,5.1,z*.7),.2,.045,n=12)
   m.cyl('SwitchInsulator%d'%i,1,(-.35,6.1,z),.40,.07,n=16)
   m.box('Knife%d'%i,-.35,6.51,z-.025,.7,.025,.05)
+ # Protected single-phase riser: lower cutout contact to conduit, routed around the stem.
+ for a,b in [((-.68,5.85,0),(-.38,5.91,.30)),((-.38,5.91,.30),(.26,6.15,.30)),((.26,6.15,.30),(.26,6.34,0))]:
+  lead(m,'RiserFuseJumper',a,b)
  m.box('CapacitorRack',.08,4.2,-.98,.55,.08,1.96)
  m.box('Recloser',-.48,4.5,-.55,.75,.65,1.1)
  m.box('Control',-.29,3.6,-.26,.44,.56,.52)

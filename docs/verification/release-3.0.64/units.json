@@ -1,0 +1,9 @@
+{
+  "command": "./gradlew --no-daemon --max-workers=2 build",
+  "result": "BUILD SUCCESSFUL",
+  "suites": 237,
+  "tests": 987,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0
+}

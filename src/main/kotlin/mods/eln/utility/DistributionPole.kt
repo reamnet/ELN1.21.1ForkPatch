@@ -57,8 +57,8 @@ enum class DistributionKind(val title: String,val phases: Int=3,val transformer:
     UNDERGROUND_LIGHT_SINGLE(I18N.TR_NAME(I18N.Type.NONE,"12.5kV Single Phase Fused Underground Feeder with Street Light"),1,light=true,cutout=true),
     UNDERGROUND_LIGHT_THREE(I18N.TR_NAME(I18N.Type.NONE,"12.5kV Three Phase Fused Underground Feeder with Street Light"),light=true,cutout=true),
     TWIN_SECONDARY_LIGHT(I18N.TR_NAME(I18N.Type.NONE,"Utility Pole Twin LED Street Light"),light=true,lvOnly=true),
-    FEEDER_SINGLE(I18N.TR_NAME(I18N.Type.NONE,"Single Phase Underground Feeder Pole"),1),
-    FEEDER_LIGHT_SINGLE(I18N.TR_NAME(I18N.Type.NONE,"Single Phase Underground Feeder Pole with Secondary Fed Street Light"),1,light=true),
+    FEEDER_SINGLE(I18N.TR_NAME(I18N.Type.NONE,"Single Phase Underground Feeder Pole"),1,cutout=true),
+    FEEDER_LIGHT_SINGLE(I18N.TR_NAME(I18N.Type.NONE,"Single Phase Underground Feeder Pole with Secondary Fed Street Light"),1,light=true,cutout=true),
     UNDERGROUND_SECONDARY_TRANSFORMER_SINGLE(I18N.TR_NAME(I18N.Type.NONE,"Single Phase Transformer Pole with Underground Service Riser"),1,transformer=true);
     val singlePrimaryRiser get()=this==FEEDER_SINGLE || this==FEEDER_LIGHT_SINGLE
     val primaryRiser get()=singlePrimaryRiser || this==FEEDER_THREE
@@ -158,6 +158,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         private set
     private var regulatorClock=0.0
     private var clearancesReady=false
+    private var riserProtectionPending=false
     private val lightRequested get()=kind.light && lampEnabled && (unit?.lampEnabled!=false) &&
         (!(lampAutomatic || unit?.lampAutomatic==true) || (node?.coordinate?.world() as? ServerLevel)?.skyDarken?.let { it>=4 }!=false)
     val terminals get()=buildList {
@@ -191,17 +192,24 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         applyContacts();sound("utility_recloser_bump",.5);needPublish();return true
     }
     private fun applyContacts() {
-        contacts.forEachIndexed { i,c -> c.closed=when {
+        contacts.forEachIndexed { i,c ->
+            val wasClosed=c.closed
+            c.closed=when {
             kind.pedestal -> fuses[0].closed
             kind.singlePhaseTap -> transformerPhase==i && fuses[kind.tapFuseIndex].closed
             kind.transformer -> installed && transformerPhase==i && fuses[0].closed
             kind.cutout || kind.regulator -> fuses[i].closed
             kind.recloser -> recloser.closed
             else -> gangClosed
-        } }
+            }
+            if(kind.singlePrimaryRiser && c.closed && !wasClosed)riserProtectionPending=true
+        }
         transformerContacts.forEachIndexed { i,c -> c.closed=installed && transformerPhase==i && fuses[0].closed }
     }
     private fun step(dt: Double) {
+        // Protection runs before MNA. After closing, the old open-contact voltage
+        // difference is not a measured current; wait for the first closed solve.
+        val sampleRiser=!riserProtectionPending;riserProtectionPending=false
         secondary?.update();undergroundSplit?.update();riserServiceSplit?.update()
         if(kind.transformer) {
             val limited=unit!!.outputOverloaded
@@ -211,9 +219,9 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         }
         fuses.forEachIndexed { i,fuse ->
             val amps=fuseCurrent(i)
-            if(fuse.pickup(dt,amps))sound("utility_arc_close",.20)
+            if((!kind.singlePrimaryRiser || sampleRiser) && fuse.pickup(dt,amps))sound("utility_arc_close",.20)
         }
-        if(kind.cutout || kind.regulator)fuses.forEachIndexed { i,fuse -> if(fuse.step(dt,fuseCurrent(i),fuseAmps)) { sound("utility_fuse_blow",.8);applyContacts();needPublish() } }
+        if((kind.cutout || kind.regulator) && (!kind.singlePrimaryRiser || sampleRiser))fuses.forEachIndexed { i,fuse -> if(fuse.step(dt,fuseCurrent(i),fuseAmps)) { sound("utility_fuse_blow",.8);applyContacts();needPublish() } }
         if(kind.singlePhaseTap && fuses[kind.tapFuseIndex].step(dt,fuseCurrent(kind.tapFuseIndex),fuseAmps)) { sound("utility_fuse_blow",.8);applyContacts();needPublish() }
         if(kind.recloser && recloser.step(dt,contacts.map { it.current })) { applyContacts();sound("utility_recloser_bump",.7);needPublish() }
         if(kind.regulator && regulatorAutomatic) {
@@ -336,7 +344,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
     private fun phaseZ(index: Int)=if(kind.phases==1)0.0 else (index-1)*.95
     override fun getElectricalLoad(side: Direction,lrdu: LRDU): ElectricalLoad? {
         if(side==Direction.YN) {
-            if(kind.singlePrimaryRiser && lrdu==LRDU.Up)return lines[0]
+            if(kind.singlePrimaryRiser && lrdu==LRDU.Up)return outs[0]
             return (if(kind.pedestal)undergroundInput else services)[UndergroundService.circuit(lrdu)]
         }
         if(kind.underground && !kind.pedestal) {
@@ -348,7 +356,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
         if(lrdu!=LRDU.Down || side.isY)return null
         val i=when(side) { front.left()->0;front.right()->1;front.inverse->2;else->return null }
         return if(kind==DistributionKind.FEEDER_THREE)lines[i] else if(kind.singlePrimaryRiser) {
-            when(i) { 0->lines[0];1->services[2];else->services[0] }
+            when(i) { 0->outs[0];1->services[2];else->services[0] }
         } else services[i]
     }
     override fun getConnectionMask(side: Direction,lrdu: LRDU)=if(getElectricalLoad(side,lrdu)!=null)NodeBase.maskElectricalPower else 0
@@ -416,7 +424,7 @@ class DistributionPoleElement(node: TransparentNode,descriptor: TransparentNodeD
             87 -> stream.readInt().takeIf { it in terminals }?.let { selectedTerminal=it }
             88 -> stream.readInt().takeIf { it in lines.indices }?.let { transformerPhase=it }
             89 -> operateFuse(stream.readInt())
-            91 -> stream.readDouble().takeIf { it.isFinite() && it in 1.0..2000.0 }?.let { if(kind.recloser)recloser.pickupAmps=it }
+            91 -> stream.readDouble().takeIf { it.isFinite() && it in 1.0..2000.0 }?.let { if(kind.recloser)recloser.pickupAmps=it else if(kind.singlePrimaryRiser)fuseAmps=it }
             92 -> stream.readDouble().takeIf { it.isFinite() && it in 1.0..60.0 }?.let { recloser.retrySeconds=it }
             93 -> stream.readInt().takeIf { it in 1..5 }?.let { recloser.maxFailures=it }
             94 -> { recloser.reset();sound("utility_recloser_bump",.7) }
