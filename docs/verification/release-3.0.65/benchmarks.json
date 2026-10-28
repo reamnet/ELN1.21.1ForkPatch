@@ -1,0 +1,16 @@
+[
+  {
+    "suite": "mods.eln.sim.mna.PortProjectionBenchmarkTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "output": "[22:16:26] [NeoForge Version Check/INFO] [ne.ne.fm.VersionChecker/]: [computercraft] Found status: BETA Current: 1.120.2 Target: null\nPORT_PROJECTION_BENCH nodes=80 ports=16 probes_per_round=8000 baseline_ms=[30.42162, 14.887462, 13.376819, 19.425391, 13.73623, 17.171726] optimized_ms=[12.866174, 13.63155, 37.793585, 27.930163, 22.237145, 15.038279]\nPORT_PROJECTION_BENCH nodes=240 ports=16 probes_per_round=8000 baseline_ms=[32.96676, 26.844626, 29.428465, 48.216984, 55.958253, 49.252109] optimized_ms=[23.488167, 40.860551, 37.916176, 36.066313, 37.911509, 33.708618]\n"
+  },
+  {
+    "suite": "mods.eln.sim.power.ServerTickHotspotBenchmarkTest",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "output": "SERVER_HOTSPOT_BENCH poles=40 baseline_ms={p50=0.160771,p95=711.162817,mean=100.45204677500001} optimized_ms={p50=0.183414,p95=534.785302,mean=83.88045307499999} max_states=242\nSERVER_HOTSPOT_BENCH poles=120 baseline_ms={p50=0.802354,p95=9365.772958,mean=1489.7468818000002} optimized_ms={p50=0.897837,p95=4514.708339,mean=744.0626529250001} max_states=722\n"
+  }
+]

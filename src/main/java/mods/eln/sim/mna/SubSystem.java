@@ -54,6 +54,9 @@ public class SubSystem {
     private final boolean sparseRebuild = !Boolean.getBoolean("eln.disableSparseMnaRebuild");
     private final boolean columnWorksets = !Boolean.getBoolean("eln.disableMnaColumnWorksets");
     private final boolean gaugeCopyReduction = !Boolean.getBoolean("eln.disableMnaGaugeCopyReduction");
+    private final boolean portProjections = !Boolean.getBoolean("eln.disableAffinePortProjections");
+    private AffinePortProjection[] portProjectionRows;
+    private int portProjectionDepth;
     private java.util.BitSet[] symmetryCandidates;
     private boolean symmetricProbeMatrix;
     private double[] probeRhs;
@@ -130,6 +133,7 @@ public class SubSystem {
     public void generateMatrix() {
         probeRhs = null; probeSolution = null; probeUpdates = 0;
         stateCount = states.size();
+        portProjectionRows = null;
 
         Profiler p = new Profiler();
         p.add("Inversse with " + stateCount + " state : ");
@@ -437,6 +441,23 @@ public class SubSystem {
         return sum;
     }
 
+    private DD portCurrent(int index, DD[] row, double[] rhs) {
+        // Tiny secondary systems are cheaper to project directly. The cached row
+        // never outlives its stamped matrix; masks, resistance and topology rebuild it.
+        if (!portProjections || portProjectionDepth == 0 || stateCount < 64) return dot(row, rhs);
+        if (portProjectionRows == null) portProjectionRows = new AffinePortProjection[stateCount];
+        AffinePortProjection projection = portProjectionRows[index];
+        if (projection == null) portProjectionRows[index] = projection = new AffinePortProjection(row);
+        return projection.project(rhs);
+    }
+
+    /** Repeated Newton probes amortize projection setup; ordinary ticks do not. */
+    public void beginPortProjection() { portProjectionDepth++; }
+
+    public void endPortProjection() {
+        if (portProjectionDepth > 0 && --portProjectionDepth == 0) portProjectionRows = null;
+    }
+
     private DD[] solvePrecise(double[] rhs) {
         if (factorization != null) return factorization.solve(rhs);
         DD[] value = new DD[stateCount];
@@ -545,7 +566,7 @@ public class SubSystem {
         }
         int index = pin.getId();
         DD[] portRow = responseRow(index);
-        DD current = dot(portRow, rhs);
+        DD current = portCurrent(index, portRow, rhs);
         if (voltageGauge.getActive()) {
             if (!validProbeRhs()) return result;
         }

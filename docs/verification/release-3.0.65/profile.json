@@ -1,0 +1,14 @@
+{
+  "source": "User-supplied server-thread profile, 2026-10-28",
+  "sharesPercent": {
+    "waitUntilNextTick": 65.53,
+    "tickServer": 34.14,
+    "Simulator.tick": 22.6,
+    "RootSystem.step": 14.07,
+    "ConverterConvergence.correct": 8.23,
+    "SafeTransformerProcess.rootSystemPreStepProcess": 5.16,
+    "LampSocketProcess.process": 3.85,
+    "DecorativeLampLighting.update": 2.47
+  },
+  "interpretation": "Inclusive sampling shares overlap. Waiting is idle time, not computation. This capture alone does not measure worst-case tick duration or establish an exact TPS."
+}

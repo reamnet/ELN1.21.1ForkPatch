@@ -12,6 +12,7 @@ import kotlin.math.max
  * power balance before RootSystem performs the one physical flush.
  */
 class ConverterConvergence {
+    private val localRestores = !java.lang.Boolean.getBoolean("eln.disableLocalConverterRestores")
     private data class Derivative(val sources: List<mods.eln.sim.mna.component.SwitchableVoltageSource>,
         val scales: DoubleArray, val weights: DoubleArray, val regions: List<String>, val matrix: Array<DoubleArray>)
     private val derivatives = mutableMapOf<List<ConservativePowerProcess>, Derivative>()
@@ -142,10 +143,16 @@ class ConverterConvergence {
         // parallel regulators with different targets). Use the simultaneous
         // response when bounded renewable clamps stall that correction. Ordinary
         // shaft/pole grids keep the existing first-order serial path.
-        correctGroup(group, simultaneous = false)
-        group.flatMap { it.connectedSystems() }.distinct().forEach { it.stepCalc() }
-        if (group.any { !it.acceptsCandidate() } && group.any { it.trialVoltageBounds().isNotEmpty() })
-            correctGroup(group, simultaneous = true)
+        val systems=group.flatMap { it.connectedSystems() }.distinct()
+        systems.forEach { it.beginPortProjection() }
+        try {
+            correctGroup(group, simultaneous = false)
+            systems.forEach { it.stepCalc() }
+            if (group.any { !it.acceptsCandidate() } && group.any { it.trialVoltageBounds().isNotEmpty() })
+                correctGroup(group, simultaneous = true)
+        } finally {
+            systems.forEach { it.endPortProjection() }
+        }
     }
 
     private fun correctGroup(group: List<ConservativePowerProcess>, simultaneous: Boolean) {
@@ -174,6 +181,8 @@ class ConverterConvergence {
         val indexes = all.withIndex().associate { it.value to it.index }
         val activeIndexes = active.map { indexes.getValue(it) }
         val owners = group.map { process -> process.controlledSources().map { indexes.getValue(it) } }
+        val systems = group.flatMap { it.connectedSystems() }.distinct()
+        fun sameRegions(regions: List<String>) = group.indices.all { group[it].iterationRegion() == regions[it] }
         val bounds = group.flatMap { it.trialVoltageBounds().entries }.associate { it.key to it.value }
         fun trialVoltage(i: Int, normalized: Double): Double {
             val volts = normalized * scales[i]
@@ -196,10 +205,15 @@ class ConverterConvergence {
             // Differentiate a simultaneous controller response. Sequential updates
             // let each later controller see an already perturbed/clamped neighbour;
             // near parallel source limits that erases the useful bus derivative.
+            if (localRestores) for (i in all.indices) { all[i].voltage = trialVolts[i]; all[i].enabled = savedEnabled[i] }
             for (p in group.indices) {
-                for (i in all.indices) { all[i].voltage = trialVolts[i]; all[i].enabled = savedEnabled[i] }
+                if (!localRestores) for (i in all.indices) { all[i].voltage = trialVolts[i]; all[i].enabled = savedEnabled[i] }
                 group[p].rootSystemPreStepProcess()
                 for (i in owners[p]) { nextVolts[i] = all[i].voltage; nextEnabled[i] = all[i].enabled }
+                // A participant only changes its controlledSources. Restore that
+                // owner before the next trial, rather than rewriting the entire
+                // network once per participant (quadratic on a large source bank).
+                if (localRestores) for (i in owners[p]) { all[i].voltage = trialVolts[i]; all[i].enabled = savedEnabled[i] }
             }
             for (i in all.indices) { all[i].voltage = nextVolts[i]; all[i].enabled = nextEnabled[i] }
             if (all.indices.any { all[it].enabled != savedEnabled[it] }) {
@@ -213,7 +227,7 @@ class ConverterConvergence {
         }
         fun norm(r: DoubleArray) = r.maxOf { abs(it) }
         fun accepted(): Boolean {
-            group.flatMap { it.connectedSystems() }.distinct().forEach { it.stepCalc() }
+            systems.forEach { it.stepCalc() }
             return group.all { it.acceptsCandidate() }
         }
 
@@ -235,7 +249,7 @@ class ConverterConvergence {
                     var derivative: DoubleArray? = null
                     var h = 1e-5 * max(1.0, abs(x[column]))
                     fun sample(shift: Double): DoubleArray? = evaluate(x.copyOf().apply { this[column] += shift })
-                        ?.takeIf { group.map { it.iterationRegion() } == regions }
+                        ?.takeIf { sameRegions(regions) }
                     repeat(5) {
                         if (derivative == null) {
                             val plus = sample(h); val minus = sample(-h)
@@ -268,7 +282,7 @@ class ConverterConvergence {
                         for (direction in doubleArrayOf(1.0, -1.0)) {
                             val signed = direction * h
                             val probe = evaluate(x.copyOf().apply { this[column] += signed })
-                            if (probe != null && group.map { it.iterationRegion() } == regions) {
+                            if (probe != null && sameRegions(regions)) {
                                 response = probe; difference = signed; break
                             }
                         }
