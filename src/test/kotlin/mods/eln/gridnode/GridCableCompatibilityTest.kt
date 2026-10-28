@@ -30,7 +30,8 @@ class GridCableCompatibilityTest {
         mods.eln.utility.DistributionKind.entries.map { it.title } +
         mods.eln.utility.TransmissionKind.entries.map { it.title } +
         mods.eln.utility.ServiceMastStyle.entries.drop(1).map { it.title } +
-        setOf("120/240V Service Weatherhead","North American Meter Base","Twelve Circuit American Breaker Panel","Red Handle Service Disconnect")
+        setOf("120/240V Service Weatherhead","North American Meter Base","Wide Underground Meter Socket",
+            "Twelve Circuit American Breaker Panel","Red Handle Service Disconnect")
 
     private fun devices(): List<GridDescriptor> = Eln.transparentNodeItem.subItemList.values
         .filterIsInstance<GridDescriptor>().distinct().also {
@@ -155,10 +156,13 @@ class GridCableCompatibilityTest {
     }
 
     @Test fun directApiCannotBypassSignalDamageAndSpanValidation() {
-        val a = element(devices().first(), 0)
-        val b = element(devices().last(), 6)
+        // Use known overhead endpoints: registration order can end with a cable-only service device.
+        val descriptor = devices().single { it.name == "Utility Pole" }
+        val a = element(descriptor, 0)
+        val b = element(descriptor, 6)
         val sa = Direction.values().first { a.gridLoads(it.int).isNotEmpty() }
         val sb = Direction.values().first { b.gridLoads(it.int).isNotEmpty() }
+        GridLink.validateNewLink(a, b, sa, sb, hv(), 6)
         val signal = cables().first { it.signalWire }
         for (cable in listOf(signal, checkNotNull(hv().meltedDescriptor))) {
             rejects { GridLink.validateNewLink(a, b, sa, sb, cable, 6) }
@@ -166,6 +170,23 @@ class GridCableCompatibilityTest {
         }
         for (length in listOf(0, -1)) rejects { GridLink.validateNewLink(a, b, sa, sb, hv(), length) }
         rejects { GridLink.validateNewLink(a, a, sa, sa, hv(), 6) }
+    }
+
+    @Test fun undergroundServiceEntriesRejectDirectOverheadLinksInBothDirections() {
+        val descriptors=devices()
+        val pole=element(descriptors.single { it.name=="Utility Pole" },0)
+        val poleSide=Direction.values().first { pole.gridLoads(it.int).isNotEmpty() }
+        for(name in listOf("Wide Underground Meter Socket","Underground Service Entrance Riser")) {
+            val service=element(descriptors.single { it.name==name },6)
+            for(front in listOf(Direction.XN,Direction.XP,Direction.ZN,Direction.ZP)) {
+                service.front=front
+                for(side in Direction.values()) {
+                    rejects { GridLink.validateNewLink(pole,service,poleSide,side,hv(),6) }
+                    rejects { GridLink.validateNewLink(service,pole,side,poleSide,hv(),6) }
+                }
+            }
+            assertTrue(service.gridLinkList.isEmpty() && pole.gridLinkList.isEmpty())
+        }
     }
 
     @Test fun paidLengthAndCableIdentityAreValidatedAndCopiedWithoutAliasing() {

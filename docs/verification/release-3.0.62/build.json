@@ -1,0 +1,22 @@
+{
+  "command": "./gradlew --no-daemon --max-workers=2 build",
+  "status": "BUILD SUCCESSFUL",
+  "elapsed": "5m 11s",
+  "filtered": false,
+  "defaultBenchmarkAndProfilingExclusionsUnchanged": true,
+  "jar": "ElectricalAge-3.0.62.jar",
+  "bytes": 20663366,
+  "sha256": "c63c340f512c9a7ec7f17d4b1a9fd7c619c0dcee1c975cf9fd5d9ba9fdf71ec4",
+  "previousJarRetained": true,
+  "runtimeChangesComparedWith3061": [
+    "META-INF/neoforge.mods.toml",
+    "mods/eln/Tags.class",
+    "mods/eln/misc/Version.class"
+  ],
+  "ordinaryTests": {
+    "tests": 978,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+}
