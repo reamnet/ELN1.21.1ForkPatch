@@ -1,4 +1,4 @@
-# Industrial equipment — 3.0.60
+# Industrial equipment — 3.0.61
 
 All nine core stationary machines have baked terrain bodies. The forklift and pallet are moving
 entities; their reusable OBJ geometry remains in the entity renderer. Existing saved item IDs
@@ -81,3 +81,5 @@ placed machines or their multiblocks.
 The existing 240 V dryer now has its own opaque rectangular loading door, raised rear control
 console, top lint-filter pull, bottom vent and rear exhaust. It retains its existing recipes,
 power requirements and baked body, with no second coplanar roof surface.
+
+The pad transformer now has a rounded green American cabinet and bottom primary/full-secondary/half-secondary cable terminals. All taps share the installed hardware rating and follow primary sag. See [American underground service](american-underground-service.md).

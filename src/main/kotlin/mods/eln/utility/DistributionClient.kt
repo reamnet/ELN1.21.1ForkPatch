@@ -26,6 +26,7 @@ class DistributionPoleDescriptor(val kind: DistributionKind): GridDescriptor(kin
     DistributionPoleElement::class.java,DistributionPoleRender::class.java,"textures/wire.png",Eln.instance.veryHighVoltageCableDescriptor,64) {
     init {
         creativeTab=Eln.creativeTabPowerElectronics
+        if(kind.retiredGroundCabinet)hideFromCreative()
         ghostGroup=GhostGroup().apply {
             for(y in 1..if(kind.underground) { if(kind.light)5 else 1 } else 7)addElement(0,y,0,if(kind.underground && y==1)GhostBlock.tCube else GhostBlock.tClearance)
             if(!kind.lvOnly && !kind.underground)for(y in 6..7)for(x in -1..1)for(z in -1..1)

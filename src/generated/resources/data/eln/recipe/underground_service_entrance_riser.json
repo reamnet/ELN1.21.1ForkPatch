@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "eln:copper_cable"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    " P ",
+    " C ",
+    "ICI"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:underground_service_entrance_riser"
+  }
+}

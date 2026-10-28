@@ -308,6 +308,7 @@ abstract class NodeBase {
             }
         }
         mods.eln.transparentnode.cord.OutletWiring.connect(this)
+        mods.eln.utility.WideMeterWiring.connect(this)
     }
 
     open fun disconnectJob() {
@@ -541,6 +542,7 @@ abstract class NodeBase {
         var beepError = SoundCommand("eln:beep_error").smallRange()
 
         fun tryConnectTwoNode(nodeA: NodeBase, directionA: Direction, lrduA: LRDU, nodeB: NodeBase, directionB: Direction, lrduB: LRDU) {
+            if(mods.eln.utility.WideMeterWiring.separates(nodeA,directionA,lrduA,nodeB,directionB,lrduB))return
             val mskA = nodeA.getSideConnectionMask(directionA, lrduA)
             val mskB = nodeB.getSideConnectionMask(directionB, lrduB)
             if (compareConnectionMask(mskA, mskB)) {

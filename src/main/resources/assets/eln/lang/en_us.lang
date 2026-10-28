@@ -72,6 +72,7 @@ Energy=Energy
 Engaged=Engaged
 Entity_filter_slot=Entity filter slot
 Evaporative_cooling=Evaporative cooling
+Export\:_%1$_kWh=Export: %1$ kWh
 External_control=External control
 Falstad_import\:_clipboard_is_not_valid_Falstad_data.=Falstad import: clipboard is not valid Falstad data.
 Ferromagnetic_core_slot=Ferromagnetic core slot
@@ -90,6 +91,7 @@ Has_a_signal_output.=Has a signal output.
 Has_some_caveats\:=Has some caveats:
 Hold_[ctrl]_for_realism_details=Hold [ctrl] for realism details
 Hold_[shift]_for_details=Hold [shift] for details
+Import\:_%1$_kWh=Import: %1$ kWh
 Inductance=Inductance
 Inductance\:_%1$H=Inductance: %1$H
 Input=Input
@@ -2806,6 +2808,7 @@ Battery_/_pack=Battery / pack
 Battery_/_pack_(one)=Battery / pack (one)
 Bind_address=Bind address
 Blue_left_or_bottom\:_input;_orange_right\:_output=Blue left or bottom: input; orange right: output
+Bottom_entries\:_Down_primary,_Up_full_secondary,_Left_L1,_Right_L2=Bottom entries: Down primary, Up full secondary, Left L1, Right L2
 Case\:_%1$_C;_consumed\:_%2$_kJ=Case: %1$ C; consumed: %2$ kJ
 Charges_removable_vehicle_and_UPS_packs_using_real_input_energy;_94_percent_efficiency=Charges removable vehicle and UPS packs using real input energy; 94 percent efficiency
 Console_supply\:_120_V_/_20_W;_remote_closing_never_resets_a_trip=Console supply: 120 V / 20 W; remote closing never resets a trip
@@ -2816,12 +2819,13 @@ Disable_/_open=Disable / open
 Eight_explicit_targets_within_256_blocks;_loaded_chunks_only=Eight explicit targets within 256 blocks; loaded chunks only
 Enable_/_close=Enable / close
 Finite-energy_shunt_protection;_200_kJ_cartridge;_replace_when_spent=Finite-energy shunt protection; 200 kJ cartridge; replace when spent
+Fixed_ratio_follows_primary_sag;_120/240_V_service_shares_one_transformer_rating=Fixed ratio follows primary sag; 120/240 V service shares one transformer rating
 Front_top\:_trip_signal;_front_bottom\:_control_signal=Front top: trip signal; front bottom: control signal
 Fuse=Fuse
 Input\:_%1$;_%2$=Input: %1$; %2$
-Install_a_pole_transformer_and_fuse;_fixed_ratio_follows_primary_sag=Install a pole transformer and fuse; fixed ratio follows primary sag
 Invalid_electrical_readings=Invalid electrical readings
 Iron_ingot=Iron ingot
+Isolate_before_opening_the_front_cable_compartment=Isolate before opening the front cable compartment
 Left\:_iron_ingot_or_damaged_tool;_middle\:_iron_ingot;_right\:_output=Left: iron ingot or damaged tool; middle: iron ingot; right: output
 Line_contacts\:_left/right_bottom;_return_contacts\:_left/right_right=Line contacts: left/right bottom; return contacts: left/right right
 Output\:_%1$;_%2$=Output: %1$; %2$
@@ -2836,6 +2840,7 @@ Right-click_an_overhead_distribution_pole_to_install;_sneak_empty-handed_to_remo
 Right_terminals\:_left_priority_1,_right_2,_down_3,_up_4;_restore_every_five_healthy_seconds=Right terminals: left priority 1, right 2, down 3, up 4; restore every five healthy seconds
 Session_stored\:_%1$_kJ=Session stored: %1$ kJ
 Shed=Shed
+Single-phase_underground_transformer;_install_a_transformer_and_physical_primary_fuse=Single-phase underground transformer; install a transformer and physical primary fuse
 Surge_capacity_remaining\:_%1$_kJ=Surge capacity remaining: %1$ kJ
 Target_%1$=Target %1$
 Transformer=Transformer
@@ -3432,14 +3437,15 @@ Service\:_%1$_/_%2$_/_%3$=Service: %1$ / %2$ / %3$
 
 # src/main/kotlin/mods/eln/utility/HouseServiceClient.kt
 Analog_meter_installed=Analog meter installed
+Bottom_entries\:_%1$=Bottom entries: %1$
+Bottom_entries_only\:_utility_line_on_the_left,_customer_load_on_the_right=Bottom entries only: utility line on the left, customer load on the right
+Buried_service_enters_below;_continue_upward_to_the_meter_with_placed_cables=Buried service enters below; continue upward to the meter with placed cables
 Cable\:_incoming_service_bundle=Cable: incoming service bundle
 Cable\:_outgoing_service_bundle=Cable: outgoing service bundle
 Cable\:_service_drop_bundle=Cable: service drop bundle
-Export\:_%1$_kWh=Export: %1$ kWh
-Import\:_%1$_kWh=Import: %1$ kWh
 Insert_a_meter_to_connect_service=Insert a meter to connect service
 Insert_an_Analog_Glass_Service_Meter_or_Smart_Digital_Service_Meter=Insert an Analog Glass Service Meter or Smart Digital Service Meter
-North_American_Meter_Base=North American Meter Base
+Meter_serial\:_%1$=Meter serial: %1$
 North_American_Meter_Base.name=North American Meter Base
 Place_between_the_meter_and_panel;_top_is_input,_bottom_is_output=Place between the meter and panel; top is input, bottom is output
 Placed_wall_cables\:_top_service_input,_bottom_service_output;_insert_a_meter_to_connect=Placed wall cables: top service input, bottom service output; insert a meter to connect
@@ -3455,9 +3461,12 @@ Smart_disconnect\:_Open=Smart disconnect: Open
 Smart_meter_has_a_manual_disconnect_and_a_future_remote-control_hook=Smart meter has a manual disconnect and a future remote-control hook
 Smart_meter_installed=Smart meter installed
 Terminate_a_pole_service_drop_here_and_continue_down_the_wall_with_placed_cables=Terminate a pole service drop here and continue down the wall with placed cables
+The_wide_socket_needs_a_solid_wall_behind_both_halves=The wide socket needs a solid wall behind both halves
 Three-wire_service_bundle\:_L1_120_V,_L2_120_V_and_240_V_circuit_equivalents=Three-wire service bundle: L1 120 V, L2 120 V and 240 V circuit equivalents
 Top/bottom_cable\:_%1$=Top/bottom cable: %1$
 Top_and_bottom_cable_terminals_use_the_circuit_selected_in_the_menu=Top and bottom cable terminals use the circuit selected in the menu
+Two_blocks_wide;_downward_input_under_the_left_half,_downward_output_under_the_right=Two blocks wide; downward input under the left half, downward output under the right
+Wide_Underground_Meter_Socket.name=Wide Underground Meter Socket
 
 # src/main/kotlin/mods/eln/utility/LegacyPoleGui.kt
 Nominal_output\:_%1$_V=Nominal output: %1$ V
@@ -3503,6 +3512,7 @@ Load_%1$\:_%2$=Load %1$: %2$
 Compact_Side_Entry_Service_Mast.name=Compact Side Entry Service Mast
 Gooseneck_Service_Mast.name=Gooseneck Service Mast
 Through_Roof_Service_Mast.name=Through Roof Service Mast
+Underground_Service_Entrance_Riser.name=Underground Service Entrance Riser
 
 # src/main/kotlin/mods/eln/utility/TransmissionClient.kt
 %1$\:_%2$_/_%3$=%1$: %2$ / %3$
@@ -3532,11 +3542,18 @@ Use_bare_overhead_conductors_or_cables_rated_for_the_applied_voltage=Use bare ov
 69_kV_Three_Phase_Substation_Disconnect.name=69 kV Three Phase Substation Disconnect
 69_kV_to_12.5_kV_Substation_Transformer.name=69 kV to 12.5 kV Substation Transformer
 
+# src/main/kotlin/mods/eln/utility/UndergroundHandhole.kt
+120/240V_Underground_Service_Handhole.name=120/240V Underground Service Handhole
+Bury_flush_with_grade;_four_side_cable_entries_and_one_bottom_entry=Bury flush with grade; four side cable entries and one bottom entry
+Splices_one_240_V_service_equivalent;_the_downstream_socket/panel_derives_proportional_120_V_legs=Splices one 240 V service equivalent; the downstream socket/panel derives proportional 120 V legs
+Use_insulated_service_cables_and_upstream_overcurrent_protection=Use insulated service cables and upstream overcurrent protection
+
 # src/main/kotlin/mods/eln/utility/UtilityItems.kt
 Analog_Glass_Service_Meter.name=Analog Glass Service Meter
-Fits_the_North_American_Meter_Base;_records_imported_and_exported_energy=Fits the North American Meter Base; records imported and exported energy
+Fits_compact_and_wide_service_sockets;_readings_and_serial_stay_with_this_meter=Fits compact and wide service sockets; readings and serial stay with this meter
 Pole_Fuse_Link.name=Pole Fuse Link
 Right-click_a_fused_pole_to_replace_its_first_blown_link=Right-click a fused pole to replace its first blown link
+Serial\:_%1$=Serial: %1$
 Smart_Digital_Service_Meter.name=Smart Digital Service Meter
 
 # src/main/kotlin/mods/eln/utility/insulator/LineInsulator.kt

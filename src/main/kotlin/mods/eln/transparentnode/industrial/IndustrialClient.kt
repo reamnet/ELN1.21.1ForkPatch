@@ -22,9 +22,13 @@ class IndustrialDescriptor(val kind: IndustrialKind): TransparentNodeDescriptor(
             GL11.glDisable(GL11.GL_TEXTURE_2D)
             fun p(name: String,r: Float,g: Float,b: Float) { GL11.glColor3f(r,g,b);model.getPart(name)?.drawNoBind() }
             p("Base",.18f,.20f,.22f);p("Case",if(kind==IndustrialKind.PAD).18f else .58f,if(kind==IndustrialKind.PAD).37f else .62f,if(kind==IndustrialKind.PAD).23f else .65f)
+            if(kind==IndustrialKind.PAD) { p("Pad",.42f,.44f,.41f);p("Lugs",.65f,.48f,.25f);p("Elbows",.10f,.12f,.13f);p("Ground",.35f,.49f,.32f) }
             p("Trim",.12f,.14f,.16f);p("Screen",.025f,.10f,.12f);p("Input",.13f,.38f,.8f);p("Output",.96f,.48f,.07f);p("Terminal",.66f,.46f,.20f)
             p("Ceramic",.67f,.53f,.39f);p("Red",.74f,.06f,.04f)
-            preserveMatrix { if(open) { GL11.glTranslated(-.40,0.0,.37);GL11.glRotated(-100.0,0.0,1.0,0.0);GL11.glTranslated(.40,0.0,-.37) };p("Door",.17f,.35f,.22f) }
+            preserveMatrix {
+                if(open) { GL11.glTranslated(-.40,0.0,.37);GL11.glRotated(-100.0,0.0,1.0,0.0);GL11.glTranslated(.40,0.0,-.37) }
+                p("Door",.17f,.35f,.22f);p("DoorHardware",.12f,.14f,.16f);p("Nameplate",.75f,.78f,.71f);p("Warning",.95f,.65f,.08f);p("WarningMark",.05f,.06f,.04f)
+            }
             if(on || fault)UtilsClient.disableLight()
             p("Indicator",if(fault).95f else .06f,if(on && !fault).8f else .14f,.06f)
             if(on || fault)UtilsClient.enableLight()
@@ -41,7 +45,12 @@ class IndustrialDescriptor(val kind: IndustrialKind): TransparentNodeDescriptor(
             IndustrialKind.SCADA->{ list.add(tr("Eight explicit targets within 256 blocks; loaded chunks only"));list.add(tr("Control smart meters, service disconnects, breakers, reclosers and industrial devices"));list.add(tr("Console supply: 120 V / 20 W; remote closing never resets a trip")) }
             IndustrialKind.RELAY->{ list.add(tr("Line contacts: left/right bottom; return contacts: left/right right"));list.add(tr("Differential protection requires both forward and return conductors; 0 disables it")) }
             IndustrialKind.ARRESTER->{ list.add(tr("Finite-energy shunt protection; 200 kJ cartridge; replace when spent"));list.add(tr("Right-click an overhead distribution pole to install; sneak empty-handed to remove")) }
-            IndustrialKind.PAD->list.add(tr("Install a pole transformer and fuse; fixed ratio follows primary sag"))
+            IndustrialKind.PAD->{
+                list.add(tr("Single-phase underground transformer; install a transformer and physical primary fuse"))
+                list.add(tr("Fixed ratio follows primary sag; 120/240 V service shares one transformer rating"))
+                list.add(tr("Bottom entries: Down primary, Up full secondary, Left L1, Right L2"))
+                list.add(tr("Isolate before opening the front cable compartment"))
+            }
             IndustrialKind.DRIVE->{ list.add(tr("Ramped 0-60 Hz motor voltage control; passive current-limited output"));list.add(tr("Output impedance limits short-circuit current; loaded voltage falls with current")) }
             IndustrialKind.SHEDDER->list.add(tr("Right terminals: left priority 1, right 2, down 3, up 4; restore every five healthy seconds"))
             IndustrialKind.CHARGER->list.add(tr("Charges removable vehicle and UPS packs using real input energy; 94 percent efficiency"))

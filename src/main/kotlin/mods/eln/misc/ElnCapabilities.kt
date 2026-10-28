@@ -29,7 +29,8 @@ object ElnCapabilities {
     fun register(event: RegisterCapabilitiesEvent) {
         for (type in listOf(TransparentNodeEntity.TYPE.get(), TransparentNodeEntityWithFluid.TYPE.get())) {
             event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, type) { entity, side ->
-                (entity.node as? mods.eln.node.transparent.TransparentNode)?.element?.getEnergyStorage(side)
+                // Overlay mods query capabilities on the client as well; simulation nodes exist only on the server.
+                if(entity.level?.isClientSide==false)(entity.node as? mods.eln.node.transparent.TransparentNode)?.element?.getEnergyStorage(side) else null
             }
             event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, type) { entity, side ->
                 if (side != null) SidedInvWrapper(entity as WorldlyContainer, side) else NodeItemHandler(entity)
@@ -54,7 +55,7 @@ private class NodeItemHandler(private val entity: TransparentNodeEntity): IItemH
     private val ordinary=InvWrapper(entity)
     private val service=SidedInvWrapper(entity,Direction.DOWN)
     private fun handler(): IItemHandlerModifiable=
-        if((entity.node as? mods.eln.node.transparent.TransparentNode)?.element is mods.eln.transparentnode.growing.GrowingBedElement)service else ordinary
+        if(entity.level?.isClientSide==false && (entity.node as? mods.eln.node.transparent.TransparentNode)?.element is mods.eln.transparentnode.growing.GrowingBedElement)service else ordinary
     override fun getSlots()=handler().slots
     override fun getStackInSlot(slot: Int)=handler().getStackInSlot(slot)
     override fun insertItem(slot: Int,stack: ItemStack,simulate: Boolean)=handler().insertItem(slot,stack,simulate)

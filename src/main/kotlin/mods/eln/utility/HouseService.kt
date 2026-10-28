@@ -29,6 +29,7 @@ import java.io.DataOutputStream
 /** Wall service devices use the same independent service channels as the pole secondary rack. */
 open class ServiceWallDescriptor(name: String,model: String,element: Class<*>,render: Class<*>): GridDescriptor(name,Eln.obj.getObj(model),element,render,
     "textures/wire.png",Eln.instance.veryHighVoltageCableDescriptor,64) {
+    open val serviceWidth get()=1
     override val frontType get()=TransparentNode.FrontType.BlockSideInv
     override fun mustHaveFloor()=false
     override fun mustHaveWallFrontInverse()=true
@@ -38,9 +39,11 @@ open class ServiceWallDescriptor(name: String,model: String,element: Class<*>,re
     fun checkSupport(element: TransparentNodeElement) {
         val origin=element.node?.coordinate ?: return
         val world=origin.world() as? ServerLevel ?: return
-        val at=origin.pos.relative(element.front.inverse.toFacing())
-        if(world.chunkSource.getChunkNow(at.x shr 4,at.z shr 4)==null)return
-        if(!world.getBlockState(at).isSolidRender(world,at))element.selfDestroy()
+        for(i in 0 until serviceWidth) {
+            val at=origin.pos.relative(element.front.right().toFacing(),i).relative(element.front.inverse.toFacing())
+            if(world.chunkSource.getChunkNow(at.x shr 4,at.z shr 4)==null)continue
+            if(!world.getBlockState(at).isSolidRender(world,at)) { element.selfDestroy();return }
+        }
     }
     override fun addCollisionBoxesToList(query: AABB,list: MutableList<AABB?>,world: Level?,x: Int,y: Int,z: Int) {
         val tile=world?.getBlockEntity(BlockPos(x,y,z)) as? TransparentNodeEntity ?: return
@@ -48,7 +51,7 @@ open class ServiceWallDescriptor(name: String,model: String,element: Class<*>,re
         val box=when(front) {
             Direction.XN->AABB(.67,0.0,.08,1.0,1.0,.92);Direction.XP->AABB(0.0,0.0,.08,.33,1.0,.92)
             Direction.ZN->AABB(.08,0.0,.67,.92,1.0,1.0);else->AABB(.08,0.0,0.0,.92,1.0,.33)
-        }.move(x.toDouble(),y.toDouble(),z.toDouble())
+        }.expandTowards(front.right().toFacing().stepX*(serviceWidth-1).toDouble(),0.0,front.right().toFacing().stepZ*(serviceWidth-1).toDouble()).move(x.toDouble(),y.toDouble(),z.toDouble())
         if(query.intersects(box))list.add(box)
     }
 }
@@ -71,20 +74,33 @@ class ServiceEnergy {
 }
 
 class HouseServiceElement(node: TransparentNode,descriptor: TransparentNodeDescriptor): GridElement(node,descriptor,64) {
-    override val serviceDropEndpoint get()=!(transparentNodeDescriptor as HouseServiceDescriptor).meter && !(transparentNodeDescriptor as HouseServiceDescriptor).disconnect
+    override val serviceDropEndpoint get()=!desc.meter && !desc.disconnect && !desc.mast.underground
     val meter=(descriptor as HouseServiceDescriptor).meter
     val serviceDisconnect=(descriptor as HouseServiceDescriptor).disconnect
     private val switched get()=meter || serviceDisconnect
-    override val allowsNewGridLinks get()=!switched
+    override val allowsNewGridLinks get()=!switched && !desc.mast.underground
     override fun aimedGridTerminal(side: Direction,localHit: Vec3)=ServiceTerminals.BUNDLE
     private val desc get()=transparentNodeDescriptor as HouseServiceDescriptor
     override val inventory=object: TransparentNodeElementInventory(if(meter)1 else 0,1,this@HouseServiceElement) {
         override fun canPlaceItemThroughFace(slot: Int,stack: ItemStack?,side: Int)=meter && slot==0 && UtilityItems.part(stack) in 1..2
         override fun getAccessibleSlotsFromSide(side: Int)=if(meter)intArrayOf(0) else intArrayOf()
         override fun canTakeItemThroughFace(slot: Int,stack: ItemStack?,side: Int)=meter && slot==0
+        override fun setItem(slot: Int,stack: ItemStack) {
+            val previous=getItem(slot)
+            if(meter && previous!==stack) {
+                ServiceMeters.store(previous,energy,disconnected)
+                super.setItem(slot,stack)
+                if(UtilityItems.part(stack) in 1..2) {
+                    energy.read(ServiceMeters.data(stack) ?: CompoundTag())
+                    disconnected=UtilityItems.part(stack)==2 && ServiceMeters.data(stack)?.getBoolean("meterDisconnected")==true
+                    ServiceMeters.store(stack,energy,disconnected)
+                }
+            } else super.setItem(slot,stack)
+        }
+        override fun clearContent() { if(meter)ServiceMeters.store(getItem(0),energy,disconnected);super.clearContent() }
     }
     val line=List(3) { NbtElectricalLoad("serviceLine$it").apply { serialResistance=.00001 } }
-    private val wiredService=if(meter || serviceDisconnect)WiredServiceSplit(this,line) else null
+    private val wiredService=if(meter || serviceDisconnect || desc.mast.underground)WiredServiceSplit(this,line) else null
     val load=if(switched)List(3) { NbtElectricalLoad("serviceLoad$it").apply { serialResistance=.00001 } } else line
     private val contacts=if(switched)List(3) { TransferContact(line[it],load[it]) } else emptyList()
     val energy=ServiceEnergy()
@@ -95,6 +111,9 @@ class HouseServiceElement(node: TransparentNode,descriptor: TransparentNodeDescr
     var disconnected=false
         private set
     val meterType get()=if(meter)UtilityItems.part(inventory.getItem(0))?.takeIf { it in 1..2 } ?: 0 else 0
+    val meterSerial get()=if(meter)ServiceMeters.data(inventory.getItem(0))?.getString("serial") ?: "" else ""
+    fun syncMeter() { if(meter)ServiceMeters.store(inventory.getItem(0),energy,disconnected) }
+    override fun onBreakElement() { syncMeter();super.onBreakElement() }
     val terminals get()=if(meter)listOf(50,51,40,41,42) else listOf(50,40,41,42)
     init {
         electricalLoadList.addAll(line);if(switched)electricalLoadList.addAll(load);electricalComponentList.addAll(contacts)
@@ -109,10 +128,12 @@ class HouseServiceElement(node: TransparentNode,descriptor: TransparentNodeDescr
     /** Stable hook for a future remote metering integration; analog meters have no disconnect. */
     fun setRemoteDisconnect(open: Boolean): Boolean {
         if(!serviceDisconnect && meterType!=2)return false
-        if(disconnected!=open) { disconnected=open;configure();play(mods.eln.sound.SoundCommand("eln:circuit_breaker_close").smallRange().mulVolume(.25));needPublish() }
+        if(disconnected!=open) { disconnected=open;configure();val c=node?.coordinate
+            if(c!=null && DimensionIds.serverLevel(c.dimension)?.chunkSource?.getChunkNow(c.x shr 4,c.z shr 4)!=null)play(mods.eln.sound.SoundCommand("eln:circuit_breaker_close").smallRange().mulVolume(.25))
+            needPublish() }
         return true
     }
-    override fun initialize() { configure();super.initialize() }
+    override fun initialize() { configure();super.initialize();if(desc.wide)WideMeterWiring.refreshCables(this) }
     override fun inventoryChange(inventory: Container?) { if(meter && meterType!=2)disconnected=false;configure();needPublish() }
     override fun onBlockActivated(player: Player,side: Direction,vx: Float,vy: Float,vz: Float): Boolean {
         if(serviceDisconnect && player.mainHandItem.isEmpty && !player.isShiftKeyDown) { setRemoteDisconnect(!disconnected);return true }
@@ -135,6 +156,14 @@ class HouseServiceElement(node: TransparentNode,descriptor: TransparentNodeDescr
         return Vec3(if(!meter)desc.mast.headX else .36,if(!meter)desc.mast.headY else if(terminal==50).38 else -.40,if(!meter)desc.mast.headZ+(i-1)*desc.mast.spacing else (i-1)*.17)
     }
     override fun getElectricalLoad(side: Direction,lrdu: LRDU): ElectricalLoad? {
+        if(desc.wide) {
+            if(side!=Direction.YN)return null
+            return when(lrdu) {
+                WideMeterWiring.port(this,false)->line[selectedCircuit]
+                WideMeterWiring.port(this,true)->load[selectedCircuit]
+                else->null
+            }
+        }
         if(!desc.acceptsCable(front,side,lrdu))return null
         return when(side) {
             Direction.YP->line[selectedCircuit]
@@ -143,6 +172,12 @@ class HouseServiceElement(node: TransparentNode,descriptor: TransparentNodeDescr
             front.right()->load[1]
             else->null
         }
+    }
+    override fun getElectricalLoad(side: Direction,lrdu: LRDU,remoteEndpoint: mods.eln.node.NodeConnectionEndpoint): ElectricalLoad? {
+        if(!desc.wide)return super.getElectricalLoad(side,lrdu,remoteEndpoint)
+        val output=lrdu==WideMeterWiring.port(this,true)
+        if(remoteEndpoint.node.coordinate.pos!=WideMeterWiring.cableCell(this,output) || remoteEndpoint.elementSide!=front.inverse)return null
+        return getElectricalLoad(side,lrdu)
     }
     override fun getConnectionMask(side: Direction,lrdu: LRDU)=if(getElectricalLoad(side,lrdu)!=null)NodeBase.maskElectricalPower else 0
     override fun getThermalLoad(side: Direction,lrdu: LRDU)=null
@@ -158,13 +193,13 @@ class HouseServiceElement(node: TransparentNode,descriptor: TransparentNodeDescr
     }
     private fun writeSettings(nbt: CompoundTag) { energy.write(nbt);nbt.putInt("serviceTerminal",selectedTerminal);nbt.putInt("serviceCircuit",selectedCircuit);nbt.putBoolean("meterDisconnected",disconnected) }
     private fun readSettings(nbt: CompoundTag) { energy.read(nbt);selectedTerminal=nbt.getInt("serviceTerminal").takeIf { it in terminals } ?: 50;selectedCircuit=nbt.getInt("serviceCircuit").takeIf { it in 0..2 } ?: 2;disconnected=nbt.getBoolean("meterDisconnected");configure() }
-    override fun writeToNBT(nbt: CompoundTag) { super.writeToNBT(nbt);writeSettings(nbt) }
-    override fun readFromNBT(nbt: CompoundTag) { super.readFromNBT(nbt);readSettings(nbt) }
+    override fun writeToNBT(nbt: CompoundTag) { syncMeter();super.writeToNBT(nbt);writeSettings(nbt) }
+    override fun readFromNBT(nbt: CompoundTag) { super.readFromNBT(nbt);readSettings(nbt);syncMeter() }
     override fun getItemStackNBT()=CompoundTag().also(::writeSettings)
     override fun readItemStackNBT(nbt: CompoundTag?) { if(nbt!=null)readSettings(nbt) }
     override fun networkSerialize(stream: DataOutputStream) {
-        super.networkSerialize(stream);stream.writeInt(selectedTerminal);stream.writeInt(selectedCircuit);stream.writeInt(meterType);stream.writeBoolean(disconnected);stream.writeDouble(energy.importedKwh);stream.writeDouble(energy.exportedKwh)
-        load.forEach { stream.writeDouble(it.voltage) };stream.writeDouble(contacts.indices.sumOf { i->line[i].voltage*contacts[i].current });stream.writeBoolean(line.any { it.voltage>20 });node!!.lrduCubeMask.getTranslate(front.inverse).serialize(stream)
+        syncMeter();super.networkSerialize(stream);stream.writeInt(selectedTerminal);stream.writeInt(selectedCircuit);stream.writeInt(meterType);stream.writeBoolean(disconnected);stream.writeDouble(energy.importedKwh);stream.writeDouble(energy.exportedKwh)
+        load.forEach { stream.writeDouble(it.voltage) };stream.writeDouble(contacts.indices.sumOf { i->line[i].voltage*contacts[i].current });stream.writeBoolean(line.any { it.voltage>20 });node!!.lrduCubeMask.getTranslate(front.inverse).serialize(stream);stream.writeUTF(meterSerial);stream.writeDouble(line[2].voltage)
     }
     override fun networkUnserialize(stream: DataInputStream): Byte {
         val id=super.networkUnserialize(stream)

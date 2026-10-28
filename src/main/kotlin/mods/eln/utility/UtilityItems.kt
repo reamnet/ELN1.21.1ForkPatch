@@ -11,7 +11,14 @@ class UtilityPartDescriptor(name: String,val part: Int): GenericItemUsingDamageD
     init { creativeTab=Eln.creativeTabPowerElectronics;setDefaultIcon(when(part) { 0->"polefuselink";1->"analogservicemeter";else->"smartservicemeter" }) }
     override fun addInformation(itemStack: ItemStack?,entityPlayer: Player?,list: MutableList<String>,par4: Boolean) {
         if(part==0)list.add(tr("Right-click a fused pole to replace its first blown link"))
-        else list.add(tr("Fits the North American Meter Base; records imported and exported energy"))
+        else {
+            list.add(tr("Fits compact and wide service sockets; readings and serial stay with this meter"))
+            ServiceMeters.data(itemStack ?: ItemStack.EMPTY)?.let { data ->
+                list.add(tr("Serial: %1$",data.getString("serial")))
+                list.add(tr("Import: %1$ kWh",String.format(java.util.Locale.ROOT,"%.3f",data.getDouble("meterImportKwh"))))
+                list.add(tr("Export: %1$ kWh",String.format(java.util.Locale.ROOT,"%.3f",data.getDouble("meterExportKwh"))))
+            }
+        }
     }
 }
 object UtilityItems {

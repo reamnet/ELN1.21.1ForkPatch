@@ -1,0 +1,16 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:false"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:barrier"
+    }
+  ],
+  "result": {
+    "id": "eln:12.5kv_three_phase_fused_underground_feeder"
+  }
+}

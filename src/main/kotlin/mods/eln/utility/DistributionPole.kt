@@ -57,6 +57,7 @@ enum class DistributionKind(val title: String,val phases: Int=3,val transformer:
     UNDERGROUND_LIGHT_SINGLE(I18N.TR_NAME(I18N.Type.NONE,"12.5kV Single Phase Fused Underground Feeder with Street Light"),1,light=true,cutout=true),
     UNDERGROUND_LIGHT_THREE(I18N.TR_NAME(I18N.Type.NONE,"12.5kV Three Phase Fused Underground Feeder with Street Light"),light=true,cutout=true),
     TWIN_SECONDARY_LIGHT(I18N.TR_NAME(I18N.Type.NONE,"Utility Pole Twin LED Street Light"),light=true,lvOnly=true);
+    val retiredGroundCabinet get()=this==UNDERGROUND_THREE || this==UNDERGROUND_LIGHT_THREE
     val twinLight get()=this==TWIN_SECONDARY_LIGHT
     val lampWatts get()=if(twinLight)120.0 else 70.0
     val lampHeads get()=if(twinLight)listOf(Vec3(-1.15,5.2,-.62),Vec3(-1.15,5.2,.62)) else listOf(Vec3(-1.15,5.2,0.0))

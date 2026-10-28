@@ -53,6 +53,8 @@ tools; core ELN needs none of those large payloads. See the addon's
 
 **Utility street lighting:** the Utility Pole Street Light takes a removable Mains Step-down Unit, which can also be placed on its own. Select 120 V or 240 V with up to 10 kW shared output. See the [street-light and converter-recovery guide](docs/utility-street-light-and-recovery.md) for ratings, terminals and controls, and the [pole-converter performance checks](docs/pole-converter-performance.md) for long-line tests and measured improvements.
 
+**Underground residential service:** green single-phase pad transformers, buried service entrances and handholes, and compact or two-wide bottom-entry meter sockets. See the [American service guide](docs/american-underground-service.md).
+
 **Meters and monitor paper:** sneak-click two terminals with a Multimeter/AllMeter to measure their voltage difference. Right-click a printed monitor sheet to read its saved chart. Press **P** for the new circuit exercises, or read the [printout and diagnostics guide](docs/monitor-print-and-diagnostics.md).
 
 **Wire overloads:** AWG/kcmil conductors now account for electrical heat, material heat capacity and conductor failure. Damaged insulation can still conduct until the metal breaks. See the [thermal model, assumptions and tests](docs/wire-thermal-model.md). Existing overloaded builds may fail after updating; back up your world first.

@@ -1,0 +1,15 @@
+{
+  "file": "ElectricalAge-3.0.61.jar",
+  "bytes": 20663365,
+  "sha256": "bd3c1e571952b387023089e485b3d1594b58eac1b106078a82c3bac5ffb3d1f1",
+  "newRecipesAndItemModels": [
+    "wide_underground_meter_socket",
+    "underground_service_entrance_riser",
+    "120_240v_underground_service_handhole"
+  ],
+  "retiredRecipesDisabled": true,
+  "retiredAdvancementsDisabled": true,
+  "newModelsAndFacesPackaged": true,
+  "mediaBackendsAbsent": true,
+  "finalModelBytesMatchSource": true
+}

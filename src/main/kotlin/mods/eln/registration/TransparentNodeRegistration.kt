@@ -1525,13 +1525,16 @@ object TransparentNodeRegistration {
         transparentNodeItem.addDescriptor(8+(125 shl 6),mods.eln.transparentnode.pump.IndustrialPumpDescriptor().apply { setCreativeTab(Eln.creativeTabMachines) })
         transparentNodeItem.addDescriptor(50+(124 shl 6),mods.eln.utility.HouseServiceDescriptor(false))
         transparentNodeItem.addDescriptor(51+(124 shl 6),mods.eln.utility.HouseServiceDescriptor(true))
+        // New underground service entries are appended in an unused save group.
+        transparentNodeItem.addDescriptor(0+(127 shl 6),mods.eln.utility.HouseServiceDescriptor(true,wide=true))
+        transparentNodeItem.addDescriptor(2+(127 shl 6),mods.eln.utility.UndergroundHandholeDescriptor())
         transparentNodeItem.addDescriptor(52+(124 shl 6),mods.eln.utility.BreakerPanelDescriptor())
         transparentNodeItem.addDescriptor(56+(124 shl 6),mods.eln.utility.HouseServiceDescriptor(false,disconnect=true))
         mods.eln.transparentnode.standby.GeneratorTier.entries.filter { it!=mods.eln.transparentnode.standby.GeneratorTier.SMALL }.forEach { tier ->
             transparentNodeItem.addDescriptor(tier.subId+(125 shl 6),mods.eln.transparentnode.standby.BackupDescriptor(tier.title,true,tier=tier).apply { creativeTab=Eln.creativeTabMachines })
         }
         mods.eln.utility.ServiceMastStyle.entries.drop(1).forEachIndexed { i,style ->
-            transparentNodeItem.addDescriptor(28+i+(125 shl 6),mods.eln.utility.HouseServiceDescriptor(false,mast=style))
+            transparentNodeItem.addDescriptor(if(style.underground)1+(127 shl 6) else 28+i+(125 shl 6),mods.eln.utility.HouseServiceDescriptor(false,mast=style))
         }
         transparentNodeItem.addDescriptor(31+(125 shl 6),mods.eln.utility.ColorCableTrayDescriptor())
         transparentNodeItem.addDescriptor(60+(125 shl 6),mods.eln.integration.electroenergetics.CeeBridgeDescriptor())

@@ -134,27 +134,11 @@ def cabinets():
  m.cyl('Hood',1,(0,.90,-.40),.10,.12,.08,24)
  for i in range(3):m.cyl('Terminal%d'%i,2,(-.17+i*.17,.80,-.42),.14,.037,n=16)
  m.save('serviceweatherhead')
- m=Mesh();m.box('Case',-.30,-.47,-.49,.60,.88,.18)
- m.cyl('Socket',2,(0,.05,-.31),.04,.235,n=48)
- m.cyl('MeterFace',2,(0,.05,-.27),.13,.205,n=48)
- m.cyl('Glass',2,(0,.05,-.14),.09,.213,.195,48)
- # An optically clear front has no opaque cap. Retain the curved glass shell
- # and narrow lip; shader alpha handling cannot hide the meter face.
- m.p['Glass']=[face for face in m.p['Glass'] if max(v[2] for v in face)-min(v[2] for v in face)>1e-6]
- from generate_fans_and_outlet import ring
- ring(m,'Glass',0,.05,-.052,.191,.195,.003,48)
- m.box('Readout',-.135,.075,-.133,.27,.085,.006)
- # Meter revolutions visibly move a marked aluminium disk inside the glass.
- m.cyl('Disk',1,(0,-.065,-.18),.014,.155,n=40)
- m.box('DiskMark',-.16,-.066,-.189,.075,.016,.022)
- for i in range(5):
-  x=-.132+i*.066;m.cyl('Dial%d'%i,2,(x,.05,-.129),.006,.027,n=24)
-  m.box('Needle%d'%i,x-.0015,.05,-.12,.003,.022,.003)
- m.box('SmartScreen',-.15,.01,-.129,.3,.12,.007)
- m.box('Disconnect',-.025,-.23,-.305,.05,.07,.006)
- for i in range(3):m.cyl('Terminal%d'%i,1,(-.16+i*.16,-.49,-.40),.04,.035,n=12)
- for i in range(3):m.cyl('TopTerminal%d'%i,1,(-.16+i*.16,.40,-.36),.04,.035,n=12)
- m.save('northamericanmeterbase')
+ import sys
+ from pathlib import Path
+ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'utility'))
+ from generate_underground_service import generate_meters
+ generate_meters()
  m=Mesh();m.box('Case',-.36,-.49,-.49,.72,.98,.21)
  m.box('Black',-.31,-.43,-.27,.62,.83,.008)
  m.box('Door',.32,-.45,-.26,.025,.9,.15)

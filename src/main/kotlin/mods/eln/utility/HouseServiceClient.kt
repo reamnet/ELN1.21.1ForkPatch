@@ -17,11 +17,24 @@ import java.io.DataInputStream
 import java.util.Locale
 import kotlin.math.pow
 
-class HouseServiceDescriptor(val meter: Boolean,val disconnect: Boolean=false,val mast: ServiceMastStyle=ServiceMastStyle.STANDARD): ServiceWallDescriptor(
-    if(disconnect)I18N.TR_NAME(I18N.Type.NONE,"Red Handle Service Disconnect") else if(meter)I18N.TR_NAME(I18N.Type.NONE,"North American Meter Base") else mast.title,
-    if(disconnect)"redhandleservicedisconnect" else if(meter)"northamericanmeterbase" else mast.model,HouseServiceElement::class.java,HouseServiceRender::class.java) {
-    init { creativeTab=Eln.creativeTabPowerElectronics;if(!meter && !disconnect && mast==ServiceMastStyle.STANDARD)ghostGroup=GhostGroup().apply { addElement(0,1,0,GhostBlock.tClearance) } }
-    fun drawService(front: Direction,meterType: Int=0,energy: Double=0.0,disconnect: Boolean=false,powered: Boolean=false,disk: Double=0.0)=preserveMatrix {
+class HouseServiceDescriptor(val meter: Boolean,val disconnect: Boolean=false,val mast: ServiceMastStyle=ServiceMastStyle.STANDARD,val wide: Boolean=false): ServiceWallDescriptor(
+    if(disconnect)I18N.TR_NAME(I18N.Type.NONE,"Red Handle Service Disconnect") else if(wide)I18N.TR_NAME(I18N.Type.NONE,"Wide Underground Meter Socket") else if(meter)I18N.TR_NAME(I18N.Type.NONE,"North American Meter Base") else mast.title,
+    if(disconnect)"redhandleservicedisconnect" else if(wide)"wideundergroundmetersocket" else if(meter)"northamericanmeterbase" else mast.model,HouseServiceElement::class.java,HouseServiceRender::class.java) {
+    override val serviceWidth get()=if(wide)2 else 1
+    init {
+        creativeTab=Eln.creativeTabPowerElectronics
+        if(wide)ghostGroup=GhostGroup().apply { addElement(0,0,1,GhostBlock.tCube) }
+        else if(!meter && !disconnect && mast==ServiceMastStyle.STANDARD)ghostGroup=GhostGroup().apply { addElement(0,1,0,GhostBlock.tClearance) }
+    }
+    override fun checkCanPlace(coord: Coordinate?,front: Direction): String? {
+        val reason=super.checkCanPlace(coord,front);if(reason!=null)return reason
+        if(wide && coord!=null) {
+            val support=coord.pos.relative(front.right().toFacing()).relative(front.inverse.toFacing())
+            if(!coord.world().getBlockState(support).isSolidRender(coord.world(),support))return tr("The wide socket needs a solid wall behind both halves")
+        }
+        return null
+    }
+    fun drawService(front: Direction,meterType: Int=0,energy: Double=0.0,disconnect: Boolean=false,powered: Boolean=false,disk: Double=0.0,exported: Double=0.0,watts: Double=0.0,volts: Double=240.0)=preserveMatrix {
         if(this.disconnect) { ServiceDisconnectVisual.draw(front,disconnect,obj);return@preserveMatrix }
         front.inverse.glRotateZnRef();GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
@@ -29,55 +42,21 @@ class HouseServiceDescriptor(val meter: Boolean,val disconnect: Boolean=false,va
             fun part(name: String,r: Float,g: Float,b: Float) { GL11.glColor3f(r,g,b);obj.getPart(name)?.drawNoBind() }
             part("Case",.55f,.57f,.57f)
             if(!meter) { part("Pipe",.49f,.51f,.52f);part("Hood",.40f,.43f,.45f);repeat(3) { part("Terminal$it",.61f,.64f,.58f) };return@preserveMatrix }
-            part("Socket",.10f,.12f,.13f);repeat(3) { part("Terminal$it",.62f,.48f,.26f);part("TopTerminal$it",.62f,.48f,.26f) }
-            if(meterType==0)return@preserveMatrix
-            part("MeterFace",.85f,.86f,.80f)
-            if(meterType==1) {
-                part("Readout",.16f,.17f,.15f)
-                repeat(5) { i ->
-                    part("Dial$i",.91f,.91f,.83f)
-                    val x=-.132+i*.066
-                    preserveMatrix {
-                        GL11.glTranslated(x,.05,-.12);GL11.glRotated((energy/10.0.pow(4-i)%10)*36*(if(i%2==0)-1 else 1),0.0,0.0,1.0);GL11.glTranslated(-x,-.05,.12)
-                        part("Needle$i",.12f,.13f,.11f)
-                    }
-                }
-                preserveMatrix { GL11.glTranslated(0.0,-.06,-.18);GL11.glRotated(disk,0.0,1.0,0.0);GL11.glTranslated(0.0,.06,.18);part("Disk",.68f,.69f,.66f);part("DiskMark",.06f,.07f,.06f) }
-            } else {
-                part("SmartScreen",.16f,.24f,.20f)
-                if(powered)UtilsClient.disableLight()
-                GL11.glColor3f(if(powered).42f else .06f,if(powered).84f else .12f,if(powered).52f else .08f)
-                mods.eln.client.terrain.TerrainModels.dynamic { drawMeterDigits(energy) }
-                if(powered)UtilsClient.enableLight()
-                part("Disconnect",if(disconnect).8f else .12f,if(disconnect).08f else .60f,.09f)
-            }
-            // Keep shader-sensitive transparent glass out of opaque terrain batches.
-            mods.eln.client.terrain.TerrainModels.dynamic {
-                GL11.glEnable(GL11.GL_BLEND);GL11.glBlendFunc(GL11.GL_SRC_ALPHA,GL11.GL_ONE_MINUS_SRC_ALPHA);GL11.glDepthMask(false)
-                GL11.glDisable(GL11.GL_CULL_FACE)
-                GL11.glColor4f(.82f,.90f,.94f,.075f);obj.getPart("Glass")?.drawNoBind()
-            }
+            part("Socket",.10f,.12f,.13f);part("GutterCover",.55f,.57f,.57f)
+            part("EntryLine",.13f,.27f,.48f);part("EntryLoad",.55f,.32f,.12f)
+            part("Bond",.48f,.58f,.47f);part("Screws",.72f,.74f,.73f)
+            repeat(3) { part("Terminal$it",.62f,.48f,.26f);part("TopTerminal$it",.62f,.48f,.26f) }
+            if(meterType==0) { part("JawInsulator",.12f,.14f,.15f);part("Jaws",.75f,.52f,.29f);return@preserveMatrix }
+            ServiceMeterVisual.draw(obj,meterType,energy,exported,watts,volts,disconnect,powered,disk)
         } finally { GL11.glPopAttrib() }
-    }
-    private fun drawMeterDigits(energy: Double) {
-        val text=String.format(Locale.ROOT,"%06d",(energy*100).toLong().coerceIn(0,999999))
-        val masks=intArrayOf(0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f)
-        fun rect(x: Double,y: Double,w: Double,h: Double) {
-            GL11.glBegin(GL11.GL_QUADS);GL11.glNormal3f(0f,0f,1f)
-            GL11.glVertex3d(x,y,-.120);GL11.glVertex3d(x+w,y,-.120);GL11.glVertex3d(x+w,y+h,-.120);GL11.glVertex3d(x,y+h,-.120);GL11.glEnd()
-        }
-        text.forEachIndexed { i,c ->
-            val x=-.137+i*.044;val y=.028;val mask=masks[c-'0'];val w=.031;val h=.070;val t=.004
-            val segments=arrayOf(doubleArrayOf(x,y+h-t,w,t),doubleArrayOf(x+w-t,y+h/2,t,h/2),doubleArrayOf(x+w-t,y,t,h/2),doubleArrayOf(x,y,w,t),doubleArrayOf(x,y,t,h/2),doubleArrayOf(x,y+h/2,t,h/2),doubleArrayOf(x,y+h/2-t/2,w,t))
-            repeat(7) { k -> if(mask and (1 shl k)!=0)segments[k].let { rect(it[0],it[1],it[2],it[3]) } }
-            if(i==3)rect(x+w+.003,y,.005,.005)
-        }
     }
     override fun renderItem(type: IItemRenderer.ItemRenderType,item: ItemStack,vararg data: Any)=drawService(Direction.ZP,if(meter)1 else 0)
     override fun addInformation(itemStack: ItemStack?,entityPlayer: Player?,list: MutableList<String>,par4: Boolean) {
         if(disconnect) { list.add(tr("Place between the meter and panel; top is input, bottom is output"));list.add(tr("Red handle manually opens all service circuits; use placed wall cables"));return }
         list.add(tr("Three-wire service bundle: L1 120 V, L2 120 V and 240 V circuit equivalents"))
-        if(meter) { list.add(tr("Insert an Analog Glass Service Meter or Smart Digital Service Meter"));list.add(tr("Placed wall cables: top service input, bottom service output; insert a meter to connect"));list.add(tr("Smart meter has a manual disconnect and a future remote-control hook")) }
+        if(wide)list.add(tr("Two blocks wide; downward input under the left half, downward output under the right"))
+        if(meter) { list.add(tr("Insert an Analog Glass Service Meter or Smart Digital Service Meter"));list.add(if(wide)tr("Bottom entries only: utility line on the left, customer load on the right") else tr("Placed wall cables: top service input, bottom service output; insert a meter to connect"));list.add(tr("Smart meter has a manual disconnect and a future remote-control hook")) }
+        else if(mast.underground)list.add(tr("Buried service enters below; continue upward to the meter with placed cables"))
         else list.add(tr("Terminate a pole service drop here and continue down the wall with placed cables"))
         list.add(tr("Top and bottom cable terminals use the circuit selected in the menu"))
     }
@@ -87,18 +66,18 @@ class HouseServiceRender(entity: TransparentNodeEntity,descriptor: TransparentNo
     val serviceDisconnect=(descriptor as HouseServiceDescriptor).disconnect
     override val inventory=TransparentNodeElementInventory(if(meter)1 else 0,1,this)
     var terminal=50;var circuit=2;var type=0;var disconnected=false;var imported=0.0;var exported=0.0;var volts=listOf(0.0,0.0,0.0);var watts=0.0
-    var disk=0.0
+    var disk=0.0;var serial="";var lineVoltage=0.0
     private var powered=false
     private val connections=LRDUMask()
     private var cable: mods.eln.cable.CableRenderType?=null
     override fun draw() {
         drawCables();mods.eln.client.terrain.TerrainModels.body(this,listOf(front,type,disconnected,powered),setOf("Disk","DiskMark","Glass")+(0..4).map { "Needle$it" }) {
-            (transparentNodeDescriptor as HouseServiceDescriptor).drawService(front ?: Direction.XN,type,imported,disconnected,powered,disk)
+            (transparentNodeDescriptor as HouseServiceDescriptor).drawService(front ?: Direction.XN,type,imported,disconnected,powered,disk,exported,watts,lineVoltage)
         }
-        cable=drawCable(front!!.inverse,Eln.instance.stdCableRender200V,connections,cable)
+        if(!(transparentNodeDescriptor as HouseServiceDescriptor).wide)cable=drawCable(front!!.inverse,Eln.instance.stdCableRender200V,connections,cable)
     }
-    override fun refresh(deltaT: Float) { super.refresh(deltaT);disk=(disk+watts*deltaT.coerceIn(0f,.25f)*.01)%360 }
-    override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream);terminal=stream.readInt();circuit=stream.readInt();type=stream.readInt();disconnected=stream.readBoolean();imported=stream.readDouble();exported=stream.readDouble();volts=List(3) { stream.readDouble() };watts=stream.readDouble();powered=stream.readBoolean();connections.deserialize(stream);cable=null }
+    override fun refresh(deltaT: Float) { super.refresh(deltaT);disk=(disk+ServiceMeters.diskDegrees(watts*deltaT.coerceIn(0f,.25f)))%360 }
+    override fun networkUnserialize(stream: DataInputStream) { super.networkUnserialize(stream);terminal=stream.readInt();circuit=stream.readInt();type=stream.readInt();disconnected=stream.readBoolean();imported=stream.readDouble();exported=stream.readDouble();volts=List(3) { stream.readDouble() };watts=stream.readDouble();powered=stream.readBoolean();connections.deserialize(stream);serial=stream.readUTF();lineVoltage=stream.readDouble();disk=ServiceMeters.diskPosition(imported,exported);cable=null }
     override fun newGuiDraw(side: Direction,player: Player)=HouseServiceGui(player,this)
 }
 class HouseServiceGui(player: Player,private val r: HouseServiceRender): GuiContainerEln(HouseServiceContainer(player,r.inventory,r.meter)) {
@@ -118,11 +97,12 @@ class HouseServiceGui(player: Player,private val r: HouseServiceRender): GuiCont
     }
     override fun postDraw(f: Float,x: Int,y: Int) {
         super.postDraw(f,x,y)
-        drawString(8,8,if(r.serviceDisconnect)tr("Red Handle Service Disconnect") else if(r.meter)tr("North American Meter Base") else tr((r.transparentNodeDescriptor as HouseServiceDescriptor).mast.title))
+        drawString(8,8,if(r.serviceDisconnect)tr("Red Handle Service Disconnect") else if(r.meter)tr((r.transparentNodeDescriptor as HouseServiceDescriptor).name) else tr((r.transparentNodeDescriptor as HouseServiceDescriptor).mast.title))
         if(r.meter)drawString(32,35,when(r.type) { 1->tr("Analog meter installed");2->tr("Smart meter installed");else->tr("Insert a meter to connect service") })
+        if(r.meter && r.serial.isNotBlank())drawString(32,46,tr("Meter serial: %1$",r.serial))
         terminal.enabled=!r.meter && !r.serviceDisconnect
         terminal.displayString=if(r.meter || r.serviceDisconnect)tr("Placed wall cables only") else when(r.terminal) { 50->if(r.meter)tr("Cable: incoming service bundle") else tr("Cable: service drop bundle");51->tr("Cable: outgoing service bundle");else->tr("Cable: %1$",ServiceTerminals.label(r.terminal)) }
-        circuit.displayString=tr("Top/bottom cable: %1$",ServiceTerminals.label(40+r.circuit))
+        circuit.displayString=if((r.transparentNodeDescriptor as HouseServiceDescriptor).wide)tr("Bottom entries: %1$",ServiceTerminals.label(40+r.circuit)) else tr("Top/bottom cable: %1$",ServiceTerminals.label(40+r.circuit))
         disconnect?.apply { enabled=r.serviceDisconnect || r.type==2;displayString=if(r.serviceDisconnect) { if(r.disconnected)tr("Service: OFF") else tr("Service: ON") } else if(r.disconnected)tr("Smart disconnect: Open") else tr("Smart disconnect: Closed") }
         if(r.meter) {
             drawString(8,136,tr("Import: %1$ kWh",String.format(Locale.ROOT,"%.3f",r.imported)))

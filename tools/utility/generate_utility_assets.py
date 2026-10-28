@@ -43,3 +43,6 @@ for index,name in enumerate(['polefuselink','analogservicemeter','smartserviceme
   d.arc((4,3,28,28),190,280,fill=(228,243,247),width=2)
  im.save(root/'textures/items'/(name+'.png'))
 print('Generated four operating sounds and three item icons.')
+
+from generate_underground_service import generate_meter_icons
+generate_meter_icons()

@@ -74,7 +74,7 @@ class UtilityModelAndChannelsTest {
         assertTrue(streetCopy.fuse.blown);assertFalse(streetCopy.installed)
     }
     @Test fun movedMeterBasesKeepTheirEnergyRegistersAndNeverCopyTheRemovableMeterItem() {
-        val d=Eln.transparentNodeItem.subItemList.values.filterIsInstance<HouseServiceDescriptor>().single { it.meter }
+        val d=Eln.transparentNodeItem.subItemList.values.filterIsInstance<HouseServiceDescriptor>().single { it.meter && !it.wide }
         val a=HouseServiceElement(mods.eln.node.transparent.TransparentNode(),d);a.energy.step(3600.0,1200.0)
         val b=HouseServiceElement(mods.eln.node.transparent.TransparentNode(),d);b.readItemStackNBT(a.getItemStackNBT())
         assertEquals(1.2,b.energy.importedKwh,1e-12);assertEquals(0,b.meterType);assertTrue(b.gridLinkList.isEmpty())

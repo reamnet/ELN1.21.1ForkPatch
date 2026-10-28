@@ -20,7 +20,7 @@ class UtilityServiceInteractionTest {
     private fun pole(kind: DistributionKind)=DistributionPoleElement(TransparentNode(),
         Eln.transparentNodeItem.subItemList.values.filterIsInstance<DistributionPoleDescriptor>().single { it.kind==kind })
     private fun meter()=HouseServiceElement(TransparentNode(),
-        Eln.transparentNodeItem.subItemList.values.filterIsInstance<HouseServiceDescriptor>().single { it.meter })
+        Eln.transparentNodeItem.subItemList.values.filterIsInstance<HouseServiceDescriptor>().single { it.meter && !it.wide })
     private fun panel()=BreakerPanelElement(TransparentNode(),
         Eln.transparentNodeItem.subItemList.values.filterIsInstance<BreakerPanelDescriptor>().single())
 

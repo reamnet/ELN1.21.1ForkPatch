@@ -73,6 +73,7 @@ class IndustrialElement(node: TransparentNode,descriptor: TransparentNodeDescrip
     private var consoleClock=0.0
     val outputCurrent get()=if(kind==IndustrialKind.PAD || kind==IndustrialKind.DRIVE)abs(tap.currentState.state) else contacts.sumOf { abs(it.current) }
     val inputWatts get()=max(0.0,input.voltage*(if(tap.enabled)tap.current else contacts.sumOf { it.current })+resistor.power)
+    val padSecondary=if(kind==IndustrialKind.PAD)ServiceSecondary(this,outputs[0]) { 240.0 } else null
     init {
         electricalLoadList.addAll(listOf(input,tapPin,returnIn,returnOut,signal,tripSignal)+outputs)
         electricalComponentList.addAll(contacts+listOf(returnContact,resistor,tap,winding,tripSource))
@@ -104,6 +105,7 @@ class IndustrialElement(node: TransparentNode,descriptor: TransparentNodeDescrip
             IndustrialKind.SHEDDER->contacts.forEachIndexed { i,c->c.closed=enabled && shed.closed[i] }
             else->Unit
         }
+        padSecondary?.update()
         tripSource.state(protection.tripped || kind==IndustrialKind.ARRESTER && surgeRemaining<=0)
     }
     override fun inventoryChange(inventory: Container?) { configure();prepare();needPublish() }
@@ -226,6 +228,12 @@ class IndustrialElement(node: TransparentNode,descriptor: TransparentNodeDescrip
         needPublish();return accepted
     }
     override fun getElectricalLoad(side: Direction,lrdu: LRDU): mods.eln.sim.ElectricalLoad? = when {
+        kind==IndustrialKind.PAD && side==Direction.YN->when(lrdu) {
+            LRDU.Down->input // Preserve the legacy buried primary entry.
+            LRDU.Up->outputs[0]
+            LRDU.Left->padSecondary!!.loads[0]
+            LRDU.Right->padSecondary!!.loads[1]
+        }
         side==front && lrdu==LRDU.Up->tripSignal
         side==front && lrdu==LRDU.Down->signal
         kind==IndustrialKind.RELAY && lrdu==LRDU.Right && side==front.left()->returnIn

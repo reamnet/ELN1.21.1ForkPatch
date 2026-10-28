@@ -1,0 +1,11 @@
+{
+  "minecraft": "1.21.1",
+  "neoforge": "21.1.249",
+  "version": "3.0.61",
+  "coreOnly": true,
+  "bind": "127.0.0.1:25575",
+  "stopAfterTicks": 40,
+  "reachedReady": true,
+  "stoppedCleanly": true,
+  "registryOrRecipeParseFailure": false
+}

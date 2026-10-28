@@ -14,7 +14,7 @@ for kind in ['load_bank','scada','relay','arrester','pad','drive','shedder','cha
   m.box('Trim',.1,.19,-.25,.07,.16,.1);m.box('Terminal',.1,.34,-.25,.30,.05,.1)
   m.box('Red',-.28,-.33,-.31,.12,.12,.03)
  else:
-  m.box('Base',-.44,-.49,-.38,.88,.07,.76)
+  if kind!='pad':m.box('Base',-.44,-.49,-.38,.88,.07,.76)
   if kind=='load_bank':
    m.box('Case',-.4,-.42,-.33,.8,.85,.66)
    for y in range(10):m.box('Trim',-.35,-.35+y*.07,-.342,.70,.03,.02)
@@ -22,10 +22,11 @@ for kind in ['load_bank','scada','relay','arrester','pad','drive','shedder','cha
     m.cyl('Trim',2,(x,.22,.337),.015,.14,n=24)
     for i in range(3):m.box('Terminal',x-.10,.15+i*.06,.35,.20,.025,.015)
   elif kind=='pad':
-   m.box('Case',-.43,-.42,-.35,.86,.77,.68)
-   m.box('Door',-.40,-.38,-.377,.80,.67,.025)
-   for x in [-.36,.33]:m.box('Trim',x,-.34,-.38,.03,.54,.035)
-   for y in range(8):m.box('Trim',.434,-.30+y*.065,-.23,.014,.025,.44)
+   import sys
+   from pathlib import Path
+   sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'utility'))
+   from generate_underground_service import pad_transformer
+   pad_transformer(m)
   elif kind=='scada':
    m.box('Case',-.42,-.42,-.32,.84,.55,.64);m.box('Screen',-.34,-.10,-.34,.68,.18,.025)
    m.box('Trim',-.36,-.32,-.35,.72,.15,.04)
@@ -36,8 +37,9 @@ for kind in ['load_bank','scada','relay','arrester','pad','drive','shedder','cha
    if kind=='charger':m.box('Red',.34,-.14,-.08,.05,.24,.16)
    if kind=='drive':
     for x in range(9):m.box('Trim',-.3+x*.07,-.32,.24,.025,.60,.08)
- m.box('Input',-.47,-.39,-.08,.05,.15,.16);m.box('Output',.42,-.39,-.08,.05,.15,.16)
- m.box('Indicator',-.02,.36,-.25,.04,.035,.025)
+ if kind!='pad':
+  m.box('Input',-.47,-.39,-.08,.05,.15,.16);m.box('Output',.42,-.39,-.08,.05,.15,.16)
+  m.box('Indicator',-.02,.36,-.25,.04,.035,.025)
  # Electrical front uses local +Z. Reflect only front/back so the blue input
  # stays on the existing left terminal; reverse winding to preserve outward normals.
  m.p={part:[[(x,y,-z) for x,y,z in reversed(face)] for face in faces] for part,faces in m.p.items()}

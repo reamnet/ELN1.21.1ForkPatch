@@ -41,7 +41,7 @@ object UtilityRecipes {
                 addRecipe(findItemStack(tier.title),"GGG","PMP","CCC",'G',findItemStack(previous),'P',ItemStack(Blocks.IRON_BLOCK),'M',findItemStack("Electrical Motor"),'C',findItemStack("Copper Cable"))
             else addRecipe(findItemStack(tier.title),"GPG","CMC","PPP",'G',findItemStack(previous),'P',findItemStack("Iron Plate"),'M',findItemStack("Electrical Motor"),'C',findItemStack("Copper Cable"))
         }
-        for(kind in DistributionKind.entries.filter { it.underground }) {
+        for(kind in DistributionKind.entries.filter { it.underground && !it.retiredGroundCabinet }) {
             val base=when {
                 kind.light->findItemStack(if(kind.phases==1)DistributionKind.UNDERGROUND_SINGLE.title else DistributionKind.UNDERGROUND_THREE.title)
                 kind.pedestal->findItemStack("120/240V Service Weatherhead")
@@ -77,7 +77,7 @@ object UtilityRecipes {
                     'R',findItemStack(relay),'I',findItemStack("Iron Plate"),'W',findItemStack("Copper Cable"))
             }
         }
-        ServiceMastStyle.entries.drop(1).forEachIndexed { i,mast ->
+        ServiceMastStyle.entries.drop(1).filterNot { it.underground }.forEachIndexed { i,mast ->
             addShapelessRecipe(findItemStack(mast.title),findItemStack("120/240V Service Weatherhead"),*Array(i+1) { ItemStack(Items.IRON_INGOT) })
         }
         addRecipe(findItemStack("Ceiling Color Segregated Cable Tray",4),"C C","BBB","PPP",'C',ItemStack(Items.CHAIN),'B',ItemStack(Blocks.IRON_BARS),'P',findItemStack("Iron Plate"))
@@ -97,6 +97,9 @@ object UtilityRecipes {
         }
         addRecipe(findItemStack("Pole Fuse Link",3)," C "," P "," C ",'C',findItemStack("Copper Cable"),'P',findItemStack("Iron Plate"))
         addRecipe(findItemStack("120/240V Service Weatherhead"),"PPP"," C "," C ",'P',findItemStack("Iron Plate"),'C',findItemStack("Copper Cable"))
+        addRecipe(findItemStack("Underground Service Entrance Riser")," P "," C ","ICI",'P',findItemStack("Iron Plate"),'I',ItemStack(Items.IRON_INGOT),'C',findItemStack("Copper Cable"))
+        addRecipe(findItemStack("120/240V Underground Service Handhole"),"IPI","CBC","III",'I',ItemStack(Blocks.STONE_BRICKS),'P',findItemStack("Iron Plate"),'C',findItemStack("Copper Cable"),'B',ItemStack(Blocks.IRON_BARS))
+        addRecipe(findItemStack("Wide Underground Meter Socket"),"PPP","MCC","P P",'P',findItemStack("Iron Plate"),'M',findItemStack("North American Meter Base"),'C',findItemStack("Copper Cable"))
         addRecipe(findItemStack("North American Meter Base"),"P P","PCP","P P",'P',findItemStack("Iron Plate"),'C',findItemStack("Copper Cable"))
         addRecipe(findItemStack("Analog Glass Service Meter")," G ","CMC"," P ",'G',ItemStack(Blocks.GLASS),'C',findItemStack("Copper Cable"),'M',findItemStack("Electrical Motor"),'P',findItemStack("Iron Plate"))
         addShapelessRecipe(findItemStack("Smart Digital Service Meter"),findItemStack("Analog Glass Service Meter"),ItemStack(Items.COMPARATOR),ItemStack(Items.REDSTONE))

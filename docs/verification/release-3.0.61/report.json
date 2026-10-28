@@ -1,0 +1,34 @@
+{
+  "passed": [
+    "Client overlay capability queries do not access server-only simulation nodes",
+    "All service bodies and printed meter faces compile into nonempty baked terrain meshes",
+    "Same-color downward entries supply real 2.4 kW loads in both cable/cabinet placement orders",
+    "Actual smart-meter GUI opens the customer lead while the utility side remains energized",
+    "Removing and reinstalling the physical smart meter preserves its serial, register and open disconnect",
+    "Analog, smart, open socket and rounded green pad cabinet render with the normal shader stack"
+  ],
+  "measurements": {
+    "bakedVertices": {
+      "256, 82, 256": 5236,
+      "264, 82, 256": 5236,
+      "248, 82, 256": 6196,
+      "252, 82, 256": 3096,
+      "252, 80, 264": 3476,
+      "248, 80, 256": 1368,
+      "255, 79, 264": 240
+    },
+    "wideLoadWatts": [
+      2399.4199654170475,
+      2399.4199654170475
+    ],
+    "carriedMeterKwh": 0.010765078915124663
+  },
+  "environment": {
+    "sodium": "0.8.13+mc1.21.1",
+    "iris": "1.8.14-beta.1+mc1.21.1",
+    "shaders": "BSL_v10.1.8",
+    "distantHorizons": "3.3.3",
+    "rendering": "software OpenGL",
+    "clientServerNodeAccessTraces": 0
+  }
+}

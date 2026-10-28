@@ -112,7 +112,8 @@ class IndustrialDevicesTest {
             val desc=Eln.transparentNodeItem.subItemList[kind.ordinal+(126 shl 6)] as IndustrialDescriptor
             assertEquals(kind,desc.kind);assertFalse(Eln.findItemStack(kind.title,1).isEmpty)
             val mesh=Obj3D().apply { assertTrue(loadFile("${kind.model}/${kind.model}.obj")) }
-            assertNotNull(mesh.getPart("Indicator"));assertNotNull(mesh.getPart("Input"))
+            if(kind==IndustrialKind.PAD) { assertNotNull(mesh.getPart("Elbows"));assertNotNull(mesh.getPart("Pad")) }
+            else { assertNotNull(mesh.getPart("Indicator"));assertNotNull(mesh.getPart("Input")) }
         }
         for(name in listOf(IndustrialItems.FRAME,IndustrialItems.PACK,IndustrialItems.FORKLIFT,IndustrialItems.PALLET))assertFalse(Eln.findItemStack(name,1).isEmpty)
         assertEquals(0.0,IndustrialElement.battery(Eln.findItemStack(IndustrialItems.PACK,1))!!.getEnergy(Eln.findItemStack(IndustrialItems.PACK,1)))

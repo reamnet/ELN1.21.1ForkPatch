@@ -1,4 +1,4 @@
-// 1.21.1	2026-10-27T01:58:02.499937745	Item Models: eln
+// 1.21.1	2026-10-28T02:15:14.846358258	Item Models: eln
 c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/100_a_pole_fuse.json
 a5ac578ee8f459ff5057195ce2b630f75ac6edbb assets/eln/models/item/100_kw_pole_transformer.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/100a_electrical_breaker.json
@@ -17,6 +17,7 @@ a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/12.5kv_three_pha
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/120_240v_secondary_street_light_pole.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/120_240v_secondary_utility_pole.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/120_240v_service_weatherhead.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/120_240v_underground_service_handhole.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/120v_basic_floodlight.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/120v_battery_charger.json
 d104bd8ced30aa2f141c66ce964a5c0ae2c38bb4 assets/eln/models/item/120v_carbon_light_bulb.json
@@ -836,6 +837,7 @@ a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/twin_adjustable_
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/twin_parking_lot_light.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/two_pole_changeover_relay.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/under_cabinet_led_strip.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/underground_service_entrance_riser.json
 4eb0d0401c45ffec7c6ee2e4778539bd9c2f8f18 assets/eln/models/item/unreleasedium.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/up_down_cylinder_wall_sconce.json
 215c26abfb995596347c11a1743bb792b1ce447a assets/eln/models/item/ups_agm_battery_cell.json
@@ -873,6 +875,7 @@ c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/water_turbine.js
 fe680fb953398132b3b82e94a8ddbd2052d6d4ba assets/eln/models/item/welded_machine_frame.json
 60944bc528cfdef884a10a20c275b5170f74722b assets/eln/models/item/white_brush.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/white_fairy_lights_on_green_wire.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/wide_underground_meter_socket.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/wind_turbine.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/window_air_conditioner.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/window_candle_light.json
