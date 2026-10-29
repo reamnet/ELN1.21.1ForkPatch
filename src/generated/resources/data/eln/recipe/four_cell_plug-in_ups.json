@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "eln:copper_cable"
+    },
+    "D": {
+      "item": "eln:dc-dc_converter"
+    },
+    "O": {
+      "item": "eln:six_socket_power_strip"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    "POP",
+    "CDC",
+    "PPP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:four_cell_plug-in_ups"
+  }
+}

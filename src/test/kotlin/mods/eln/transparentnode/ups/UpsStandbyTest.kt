@@ -15,7 +15,7 @@ import kotlin.test.*
 
 class UpsStandbyTest {
     private class Circuit(fraction: Double,nominal: Double=240.0,val target: Double=120.0,cells: Int=24) {
-        val ups=UpsElement(TransparentNode(),Eln.transparentNodeItem.subItemList.values.filterIsInstance<UpsDescriptor>().single { !it.wallMounted })
+        val ups=UpsElement(TransparentNode(),Eln.transparentNodeItem.subItemList.values.filterIsInstance<UpsDescriptor>().single { !it.wallMounted && !it.compact })
         val gen=StandbyGeneratorElement(TransparentNode(),Eln.transparentNodeItem.subItemList[7+(124 shl 6)]!!)
         val root=RootSystem(.05,1)
         val load=Resistor(ups.unit.secondary,null).apply { resistance=target*target/1000.0 }

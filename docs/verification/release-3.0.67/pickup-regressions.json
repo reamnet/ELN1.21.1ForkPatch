@@ -1,0 +1,35 @@
+{
+  "tests": 26,
+  "suites": [
+    {
+      "name": "mods.eln.transparentnode.ups.CompactUpsTest",
+      "tests": "7",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:37:54.676Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.287"
+    },
+    {
+      "name": "mods.eln.transparentnode.ups.UpsTest",
+      "tests": "16",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:37:55.680Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.135"
+    },
+    {
+      "name": "mods.eln.transparentnode.ups.UpsStandbyTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:37:54.965Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.713"
+    }
+  ]
+}

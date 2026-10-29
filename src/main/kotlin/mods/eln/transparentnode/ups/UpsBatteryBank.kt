@@ -11,7 +11,7 @@ fun upsBattery(stack: ItemStack): BatteryItem? =
         ?.takeIf { it.getPriority(stack) == 2 && it.getEnergyMax(stack).isFinite() && it.getEnergyMax(stack) > 0 }
 
 /** Flush cached cell energy before reading, removing, saving or replacing an actual item. */
-class UpsInventory(owner: TransparentNodeElement) : TransparentNodeElementInventory(48,1,owner) {
+class UpsInventory(owner: TransparentNodeElement,val cells: Int=48,val rackSize: Int=24) : TransparentNodeElementInventory(cells,1,owner) {
     var bank: UpsBatteryBank? = null
     fun rawItem(slot: Int) = super.getItem(slot)
     override fun getItem(slot: Int): ItemStack { bank?.flushSlot(slot); return rawItem(slot) }
@@ -19,7 +19,7 @@ class UpsInventory(owner: TransparentNodeElement) : TransparentNodeElementInvent
         bank?.flush(); super.setItem(slot,stack); bank?.invalidate()
     }
     override fun clearContent() { bank?.flush(); super.clearContent(); bank?.invalidate() }
-    override fun getAccessibleSlotsFromSide(side: Int) = IntArray(48) { it }
+    override fun getAccessibleSlotsFromSide(side: Int) = IntArray(cells) { it }
     override fun canPlaceItemThroughFace(slot: Int, stack: ItemStack?, side: Int) = stack != null && upsBattery(stack) != null
     override fun canTakeItemThroughFace(slot: Int, stack: ItemStack?, side: Int) = true
 }
@@ -36,7 +36,7 @@ class UpsBatteryBank(private val inventory: UpsInventory) {
     private fun refresh() {
         if (!invalid) return
         flush()
-        cells=(0 until 48).mapNotNull { slot ->
+        cells=(0 until inventory.cells).mapNotNull { slot ->
             val stack=inventory.rawItem(slot)
             val type=upsBattery(stack) ?: return@mapNotNull null
             val capacity=type.getEnergyMax(stack)
@@ -45,7 +45,7 @@ class UpsBatteryBank(private val inventory: UpsInventory) {
                 type.getChargePower(stack).coerceAtLeast(0.0),type.getDischagePower(stack).coerceAtLeast(0.0),
                 !raw.isFinite() || raw !in 0.0..capacity)
         }
-        active=cells.groupBy { it.slot/24 }.values.filter { it.size==24 }.flatten()
+        active=cells.groupBy { it.slot/inventory.rackSize }.values.filter { it.size==inventory.rackSize }.flatten()
         invalid=false
     }
     val installed: Int get() { refresh();return cells.size }

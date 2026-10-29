@@ -1,0 +1,36 @@
+{
+  "tests": 10,
+  "failures": 0,
+  "suites": [
+    {
+      "name": "mods.eln.transparentnode.ups.CompactUpsTest",
+      "tests": "6",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:17:29.787Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.158"
+    },
+    {
+      "name": "mods.eln.transparentnode.WallPowerCabinetTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:17:29.692Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.094"
+    },
+    {
+      "name": "mods.eln.lighting.GumdropParkingTest",
+      "tests": "1",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:17:29.578Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.107"
+    }
+  ]
+}

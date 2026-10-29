@@ -13,7 +13,7 @@ import java.io.*
 import kotlin.test.*
 
 class UpsTest {
-    private fun element()=UpsElement(TransparentNode(),Eln.transparentNodeItem.subItemList.values.filterIsInstance<UpsDescriptor>().single { !it.wallMounted })
+    private fun element()=UpsElement(TransparentNode(),Eln.transparentNodeItem.subItemList.values.filterIsInstance<UpsDescriptor>().single { !it.wallMounted && !it.compact })
     private fun fill(e: UpsElement,count: Int=24,fraction: Double=.5,name: String="Portable Battery Pack") {
         repeat(count) { i ->
             val stack=Eln.findItemStack(name,1);val type=upsBattery(stack)!!

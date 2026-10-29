@@ -215,9 +215,20 @@ enum class DecorativeLampStyle(val model: String, val itemName: String, val bulb
     STONE_SQUARE("squarestonewalllight",I18N.TR_NAME(I18N.Type.NONE,"Recessed Square Patio Wall Light"),1,0.6,4,
         listOf(Vec3(0.065,0.0,0.0)),Vec3(1.0,0.0,0.0)),
     STONE_WASH("stonewallwashlight",I18N.TR_NAME(I18N.Type.NONE,"Stone Wall Wash Light"),1,0.7,4,
-        listOf(Vec3(0.1,0.0,0.0)),Vec3(1.0,0.0,0.0));
+        listOf(Vec3(0.1,0.0,0.0)),Vec3(1.0,0.0,0.0)),
+    PARKING_SHOEBOX("shoeboxparkinglight",I18N.TR_NAME(I18N.Type.NONE,"Shoebox Parking Lot Light"),1,6.0,12,
+        listOf(Vec3(5.65,.92,0.0)),Vec3(-1.0,0.0,0.0)),
+    PARKING_TWIN_AREA("twinareaparkinglight",I18N.TR_NAME(I18N.Type.NONE,"Twin Wide Area Parking Lot Light"),2,6.0,12,
+        listOf(Vec3(5.65,-.95,0.0),Vec3(5.65,.95,0.0)),Vec3(-1.0,0.0,0.0)),
+    PARKING_TRI_ARM("triarmparkinglight",I18N.TR_NAME(I18N.Type.NONE,"Three Arm Parking Lot Light"),3,6.0,12,
+        (0..2).map { Vec3(5.65,1.1*cos(it*2*PI/3),1.1*sin(it*2*PI/3)) },Vec3(-1.0,0.0,0.0)),
+    SIDEWALK_GUMDROP("gumdropsidewalklight",I18N.TR_NAME(I18N.Type.NONE,"Gumdrop Sidewalk Light"),1,3.9,7,
+        listOf(Vec3(3.50,0.0,0.0)),Vec3(-1.0,0.0,0.0)),
+    SIDEWALK_DUAL_GUMDROP("dualgumdropsidewalklight",I18N.TR_NAME(I18N.Type.NONE,"Dual Gumdrop Sidewalk Light"),2,3.9,7,
+        listOf(Vec3(3.50,-.63,0.0),Vec3(3.50,.63,0.0)),Vec3(-1.0,0.0,0.0));
 
-    val outdoorFloor get()=this in PATH_LOUVER..PATH_ARCH || this==PIER_BOLLARD || this==PIER_LANTERN
+    val gumdrop get()=this==SIDEWALK_GUMDROP || this==SIDEWALK_DUAL_GUMDROP
+    val outdoorFloor get()=gumdrop || this in PATH_LOUVER..PATH_ARCH || this==PIER_BOLLARD || this==PIER_LANTERN
     val pierWall get()=this==PIER_BULKHEAD || this==PIER_GOOSE || this==PIER_DOCK
     val stoneWall get()=this in STONE_BRICK..STONE_WASH
     val hangingWarehouse get()=this==WAREHOUSE_HIGH_BAY
@@ -244,7 +255,7 @@ enum class DecorativeLampStyle(val model: String, val itemName: String, val bulb
     fun newAim()=LightAim(aimHeadCount,defaultTilt,parking || street)
 
     val tableLamp get() = this==DECK_POST_CAP || this == DESK || this == TABLE_DRUM || this == TABLE_BANKER || this == TABLE_TASK || this == WINDOW_CANDLE || this == HALLOWEEN_JACK
-    val parking get()=this==PARKING || this in PARKING_QUAD..PARKING_OFFSET
+    val parking get()=this==PARKING || this in PARKING_QUAD..PARKING_OFFSET || this in PARKING_SHOEBOX..PARKING_TRI_ARM
     val pool get()=this in POOL_ROUND..POOL_STEP
     val partyString get()=this==PARTY_FESTOON || this==PARTY_GLOBE
     val wideBeam get()=hangingWarehouse || parking || street || pool || this==AREA_FLOOD || this==PARTY_WASH

@@ -1,0 +1,16 @@
+{
+  "tests": 1004,
+  "suites": 243,
+  "passed": 1002,
+  "failures": [
+    {
+      "test": "LampClearanceTest",
+      "issue": "Old fixture count expected 103; five fixtures were appended."
+    },
+    {
+      "test": "WallPowerCabinetTest",
+      "issue": "New rear trim reached -0.52 and entered the supporting wall."
+    }
+  ],
+  "resolution": "Updated fixture count and bounded wall enclosure geometry; rerun results recorded separately."
+}

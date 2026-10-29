@@ -26,7 +26,7 @@ class LightingExpansionTest {
         .invoke(e,null,Direction.XN,0f,0f,0f)
 
     @Test fun appendedFixturesNeverOverwriteLampSuppliesOrExistingIdentities() {
-        assertEquals(103,DecorativeLampStyle.entries.size)
+        assertEquals(108,DecorativeLampStyle.entries.size)
         val ids=DecorativeLampStyle.entries.map(DecorativeLightRegistration::idFor)
         assertEquals(ids.size,ids.toSet().size)
         assertTrue(ids.subList(30,88).all { it shr 6==68 });assertTrue(ids.drop(88).all { it shr 6==70 })
@@ -60,7 +60,7 @@ class LightingExpansionTest {
         }
     }
     @Test fun mixedLargeCellRacksStartEmptyAndKeepChargeOnRemoval() {
-        val e=UpsElement(TransparentNode(),Eln.transparentNodeItem.subItemList.values.filterIsInstance<UpsDescriptor>().single { !it.wallMounted })
+        val e=UpsElement(TransparentNode(),Eln.transparentNodeItem.subItemList.values.filterIsInstance<UpsDescriptor>().single { !it.wallMounted && !it.compact })
         val types=Eln.sharedItemStackOne.subItemList.values.filterIsInstance<UpsLargeCell>().sortedBy { it.size }
         assertEquals(3,types.size)
         repeat(48) { e.inventory.setItem(it,types[it%3].newItemStack()) }

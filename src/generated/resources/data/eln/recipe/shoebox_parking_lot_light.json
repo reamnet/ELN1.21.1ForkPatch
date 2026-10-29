@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": {
+      "item": "minecraft:white_dye"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "L": {
+      "item": "eln:basic_lamp_holder"
+    },
+    "P": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    " D ",
+    "GLG",
+    " P "
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:shoebox_parking_lot_light"
+  }
+}

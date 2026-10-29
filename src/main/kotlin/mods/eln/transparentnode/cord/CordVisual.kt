@@ -93,7 +93,7 @@ class CordDisplay {
         private set
     var rating=CordRating.V120
         private set
-    var socket=0;var horizontal=false;var strip=false;var recessed=false
+    var socket=0;var horizontal=false;var strip=false;var recessed=false;var cabinet=false
     var state="UNPLUGGED"
         private set
     private var cached: List<Vec3> = emptyList()
@@ -105,17 +105,19 @@ class CordDisplay {
     fun read(input: DataInputStream) {
         val next=if(input.readBoolean())BlockPos(input.readInt(),input.readInt(),input.readInt()) to Direction.fromInt(input.readUnsignedByte())!! else null
         if(next!=endpoint)destroy()
-        if(next!=null) { rating=CordRating.entries[input.readUnsignedByte()];socket=input.readUnsignedByte();horizontal=input.readBoolean();strip=input.readBoolean();recessed=input.readBoolean() }
+        if(next!=null) { rating=CordRating.entries[input.readUnsignedByte()];socket=input.readUnsignedByte();horizontal=input.readBoolean();strip=input.readBoolean();recessed=input.readBoolean();cabinet=input.readBoolean() }
         endpoint=next;state=input.readUTF()
     }
     fun draw(world: Level,pos: BlockPos,front: Direction,entry: Vec3?=null) {
         val (target,facing)=endpoint ?: return
         val origin=Vec3.atCenterOf(pos)
-        val outlet=(world.getBlockEntity(target) as? mods.eln.node.transparent.TransparentNodeEntity)?.elementRender as? OutletRender
-        // No synthetic plug at a missing outlet. Unloaded endpoints resume when their renderer returns.
-        if(outlet==null)return
-        val turned=outlet.horizontal
-        val start=Vec3.atCenterOf(target).add(mods.eln.transparentnode.worklight.WorkLightOptics.world(facing,OutletGeometry.tipLocal(socket,turned,strip,!outlet.wallState.isAir)))
+        val targetRender=(world.getBlockEntity(target) as? mods.eln.node.transparent.TransparentNodeEntity)?.elementRender
+        val outlet=targetRender as? OutletRender
+        val ups=targetRender as? mods.eln.transparentnode.ups.UpsRender
+        if(if(cabinet)ups?.compact!=true else outlet==null)return
+        val turned=outlet?.horizontal ?: false
+        val start=Vec3.atCenterOf(target).add(mods.eln.transparentnode.worklight.WorkLightOptics.world(facing,
+            if(cabinet)CompactSocketGeometry.tip(socket) else OutletGeometry.tipLocal(socket,turned,strip,outlet?.wallState?.isAir==false)))
         val end=origin.add(entry ?: mods.eln.transparentnode.worklight.WorkLightOptics.world(front,Vec3(0.0,-.43,-.25)))
         if(start.distanceTo(end)>ApplianceCord.MAX_REACH+1)return
         if(cached.isEmpty() || start!=cachedStart || end!=cachedEnd || world.gameTime>=nextUpdate) {
@@ -128,7 +130,7 @@ class CordDisplay {
             }
             cachedStart=start;cachedEnd=end
         }
-        if(((world.getBlockEntity(target) as? mods.eln.node.transparent.TransparentNodeEntity)?.elementRender as? OutletRender)?.occupied!=true)NemaPlug.draw(facing,rating,target.subtract(pos),socket,turned,strip,!outlet.wallState.isAir)
+        if(!cabinet && outlet?.occupied!=true)NemaPlug.draw(facing,rating,target.subtract(pos),socket,turned,strip,outlet?.wallState?.isAir==false)
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try { GL11.glDisable(GL11.GL_TEXTURE_2D);GL11.glCallList(mesh) } finally { GL11.glPopAttrib() }
     }

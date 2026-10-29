@@ -8,7 +8,8 @@ import net.neoforged.fml.ModList
 /** Stable save identifiers, not playable media implementations. Never renumber these slots. */
 enum class ReservedMediaDevice(val title: String,val subId: Int) {
     JUKEBOX(I18N.TR_NAME(I18N.Type.NONE,"Powered Web Jukebox"),9),
-    TV(I18N.TR_NAME(I18N.Type.NONE,"Powered Browser Television"),10);
+    TV(I18N.TR_NAME(I18N.Type.NONE,"Powered Browser Television"),10),
+    WALL_TV(I18N.TR_NAME(I18N.Type.NONE,"Wall-mounted Browser Television"),11);
     val legacyId get()=(126 shl 6)+subId
 }
 
@@ -35,10 +36,11 @@ object MediaAddons {
         }
     }
     val available get()=provider!=null
+    private fun wallTvAvailable()=runCatching { provider?.javaClass?.getMethod("supportsWallTelevision")?.invoke(provider)==true }.getOrDefault(false)
     fun registerReservedDevices() {
         for(device in ReservedMediaDevice.entries) {
-            val descriptor=provider?.descriptor(device) ?: MissingMediaDescriptor(device)
-            if(provider==null)Eln.transparentNodeItem.addWithoutRegistry(device.legacyId,descriptor)
+            val descriptor=if(device==ReservedMediaDevice.WALL_TV && !wallTvAvailable())MissingMediaDescriptor(device) else provider?.descriptor(device) ?: MissingMediaDescriptor(device)
+            if(provider==null || descriptor is MissingMediaDescriptor)Eln.transparentNodeItem.addWithoutRegistry(device.legacyId,descriptor)
             else Eln.transparentNodeItem.addDescriptor(device.legacyId,descriptor)
         }
     }

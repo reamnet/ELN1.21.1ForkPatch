@@ -15,13 +15,16 @@ import net.minecraft.world.entity.player.Player
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class UpsElement(node: TransparentNode, descriptor: TransparentNodeDescriptor) : TransparentNodeElement(node,descriptor), IConfigurable,mods.eln.transparentnode.cord.CordDevice {
-    override val inventory=UpsInventory(this)
+open class UpsElement(node: TransparentNode, descriptor: TransparentNodeDescriptor) : TransparentNodeElement(node,descriptor), IConfigurable,mods.eln.transparentnode.cord.CordDevice {
+    val compact=(descriptor as UpsDescriptor).compact
+    override val inventory=UpsInventory(this,if(compact)4 else 48,if(compact)1 else 24)
     val bank=UpsBatteryBank(inventory)
-    val unit=UpsPowerUnit(this,bank)
+    val unit: UpsPowerUnit=UpsPowerUnit(this,bank,compact,::inputNominal)
+    private fun inputNominal(): Double=cord.anchor?.rating?.volts ?: if(unit.primary.voltage<180.0)120.0 else 240.0
     override val cord=mods.eln.transparentnode.cord.ApplianceCord(this,unit.primary)
     override val cordVoltage get()=cord.anchor?.rating?.volts ?: 120.0
-    override fun acceptsCord(rating: mods.eln.transparentnode.cord.CordRating)=true
+    override fun acceptsCord(rating: mods.eln.transparentnode.cord.CordRating)=!compact || rating==mods.eln.transparentnode.cord.CordRating.V120 || rating==mods.eln.transparentnode.cord.CordRating.V240
+    override val cordPortable get()=compact
     private val alarm=UpsAlarm()
     init {
         slowProcessList.add(NodePeriodicPublishProcess(node,.5,0.0))
@@ -42,12 +45,15 @@ class UpsElement(node: TransparentNode, descriptor: TransparentNodeDescriptor) :
     }
     override fun getConnectionMask(side: Direction, lrdu: LRDU)=if(getElectricalLoad(side,lrdu)!=null)NodeBase.maskElectricalPower else 0
     override fun getThermalLoad(side: Direction, lrdu: LRDU)=if(getElectricalLoad(side,lrdu)!=null)unit.thermal else null
-    override fun newContainer(side: Direction, player: Player)=UpsContainer(player,inventory)
+    override fun newContainer(side: Direction, player: Player)=UpsContainer(player,inventory,compact=compact)
     override fun hasGui()=true
     override fun inventoryChange(inventory: Container?) { bank.invalidate();needPublish() }
     override fun readFromNBT(nbt: CompoundTag) { super.readFromNBT(nbt);bank.invalidate();unit.settings(nbt) }
     override fun writeToNBT(nbt: CompoundTag) { bank.flush();super.writeToNBT(nbt);unit.write(nbt) }
-    override fun readItemStackNBT(nbt: CompoundTag?) { if(nbt!=null)unit.settings(nbt) }
+    override fun readItemStackNBT(nbt: CompoundTag?) {
+        super.readItemStackNBT(nbt)
+        if(nbt!=null && !nbt.contains("carriedAppliance"))unit.settings(nbt)
+    }
     override fun getItemStackNBT()=CompoundTag().also(unit::write)
     override fun readConfigTool(compound: CompoundTag, invoker: Player) {
         if(compound.contains("upsOutputVoltage")) { unit.settings(compound);needPublish() }
@@ -70,8 +76,8 @@ class UpsElement(node: TransparentNode, descriptor: TransparentNodeDescriptor) :
     }
     override fun multiMeterString(side: Direction)=tr("Input: %1$; output: %2$",Utils.plotVolt("",unit.primary.voltage),Utils.plotVolt("",unit.secondary.voltage))
     override fun getWaila()=linkedMapOf(
-        tr("UPS status") to upsStatusText(unit.status),
-        tr("Installed batteries") to tr("%1$/48 (%2$ active)",bank.installed,bank.activeCount),
+        tr("UPS status") to upsStatusText(unit.status,compact),
+        tr("Installed batteries") to tr("%1$/%2$ (%3$ active)",bank.installed,inventory.cells,bank.activeCount),
         tr("Stored energy") to Utils.plotEnergy("",bank.energy),
         tr("Output voltage") to Utils.plotVolt("",unit.secondary.voltage),
         tr("Output power") to Utils.plotPower("",unit.outputWatts))

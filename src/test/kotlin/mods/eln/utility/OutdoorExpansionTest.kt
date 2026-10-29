@@ -106,7 +106,7 @@ class OutdoorExpansionTest {
         c.EC.forEach(Eln.simulator::removeElectricalComponent)
     }
     @Test fun allFifteenFixturesAndThreeMastsUseDistinctOriginalAssetsWithoutChangingOldIds() {
-        val fixtures=DecorativeLampStyle.entries.drop(88)
+        val fixtures=DecorativeLampStyle.entries.drop(88).take(15)
         assertEquals(15,fixtures.size);assertEquals(15,fixtures.map { it.model }.toSet().size)
         for(style in fixtures) {
             assertTrue(style.heads.all { it.x>0 && it.x<=style.depth },style.name)

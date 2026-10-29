@@ -27,14 +27,14 @@ interface CordDevice {
     fun cordChanged() {}
 }
 
-data class CordAnchor(val dimension: Int,val pos: BlockPos,val id: UUID,val front: Direction,val rating: CordRating = CordRating.V120,val socket: Int=0,val horizontal: Boolean=false,val strip: Boolean=false,val recessed: Boolean=false) {
-    fun tip()=Vec3.atCenterOf(pos).add(mods.eln.transparentnode.worklight.WorkLightOptics.world(front,OutletGeometry.tipLocal(socket,horizontal,strip,recessed)))
-    fun write(): CompoundTag=CompoundTag().apply { putInt("dimension",dimension);putLong("position",pos.asLong());putUUID("outletId",this@CordAnchor.id);putInt("facing",front.int);putString("rating",rating.name);putInt("socket",socket);putBoolean("horizontal",horizontal);putBoolean("strip",strip);putBoolean("recessed",recessed) }
+data class CordAnchor(val dimension: Int,val pos: BlockPos,val id: UUID,val front: Direction,val rating: CordRating = CordRating.V120,val socket: Int=0,val horizontal: Boolean=false,val strip: Boolean=false,val recessed: Boolean=false,val cabinet: Boolean=false) {
+    fun tip()=Vec3.atCenterOf(pos).add(mods.eln.transparentnode.worklight.WorkLightOptics.world(front,if(cabinet)CompactSocketGeometry.tip(socket) else OutletGeometry.tipLocal(socket,horizontal,strip,recessed)))
+    fun write(): CompoundTag=CompoundTag().apply { putInt("dimension",dimension);putLong("position",pos.asLong());putUUID("outletId",this@CordAnchor.id);putInt("facing",front.int);putString("rating",rating.name);putInt("socket",socket);putBoolean("horizontal",horizontal);putBoolean("strip",strip);putBoolean("recessed",recessed);putBoolean("cabinet",cabinet) }
     companion object {
         fun read(tag: CompoundTag): CordAnchor? {
             if(!tag.hasUUID("outletId"))return null
             val front=Direction.fromInt(tag.getInt("facing"))?.takeIf { it.isNotY } ?: return null
-            return CordAnchor(tag.getInt("dimension"),BlockPos.of(tag.getLong("position")),tag.getUUID("outletId"),front,CordRating.read(tag.getString("rating")),tag.getInt("socket").coerceIn(0,5),tag.getBoolean("horizontal"),tag.getBoolean("strip"),tag.getBoolean("recessed"))
+            return CordAnchor(tag.getInt("dimension"),BlockPos.of(tag.getLong("position")),tag.getUUID("outletId"),front,CordRating.read(tag.getString("rating")),tag.getInt("socket").coerceIn(0,5),tag.getBoolean("horizontal"),tag.getBoolean("strip"),tag.getBoolean("recessed"),tag.getBoolean("cabinet"))
         }
     }
 }
@@ -55,7 +55,7 @@ class ApplianceCord(val owner: INodeElement,val input: NbtElectricalLoad,returnL
         private set
     val conductor=Resistor(null,null)
     private val returnConductor=returnLoad?.let { Resistor(it,null).apply { resistance=.005 } }
-    private var outlet: OutletElement?=null
+    private var outlet: CordSocketSource?=null
     private var timer=0.0
     private fun coordinate()=when(owner) { is TransparentNodeElement -> owner.coordinate();is SixNodeElement -> owner.coordinate!!;else -> error("Unsupported cord owner") }
     private val device get()=CordDevices.get(owner) ?: error("Unsupported cord device")
@@ -67,7 +67,7 @@ class ApplianceCord(val owner: INodeElement,val input: NbtElectricalLoad,returnL
     fun attach(a: CordAnchor,consumed: Boolean): Boolean {
         if(!device.acceptsCord(a.rating) || plugged || !inReach(a))return false
         val target=find(a) ?: return false
-        if(owner is OutletElement && owner.wouldLoop(target))return false
+        if(cordWouldLoop(owner,target))return false
         if(!target.reserve(this,a.socket))return false
         anchor=a;paid=consumed;device.cordChanged();owner.reconnect();timer=0.0;poll();owner.needPublish();return true
     }
@@ -127,6 +127,9 @@ class ApplianceCord(val owner: INodeElement,val input: NbtElectricalLoad,returnL
     fun carry(player: ServerPlayer): Boolean {
         if(!plugged || !device.cordPortable || !player.mainHandItem.isEmpty)return false
         if(owner is mods.eln.transparentnode.kitchen.KitchenElement && owner.detonating)return false
+        // Release downstream cords before taking a portable source snapshot; otherwise
+        // carried NBT would keep reservations for appliances that were just unplugged.
+        if(owner is CordSocketSource)repeat(owner.capacity) { owner.disconnectSocket(it) }
         val snapshot=CompoundTag()
         val stack=when(owner) {
             is TransparentNodeElement -> { owner.writeToNBT(snapshot);owner.descriptor!!.newItemStack(1) }
@@ -154,14 +157,14 @@ class ApplianceCord(val owner: INodeElement,val input: NbtElectricalLoad,returnL
     fun write(tag: CompoundTag) { anchor?.let { tag.put("applianceCord",it.write().apply { putBoolean("paid",paid);putUUID("cordId",token) }) } }
     fun writeNetwork(out: DataOutputStream) {
         val a=anchor;out.writeBoolean(a!=null)
-        if(a!=null) { out.writeInt(a.pos.x);out.writeInt(a.pos.y);out.writeInt(a.pos.z);out.writeByte(a.front.int);out.writeByte(a.rating.ordinal);out.writeByte(a.socket);out.writeBoolean(a.horizontal);out.writeBoolean(a.strip);out.writeBoolean(a.recessed) }
+        if(a!=null) { out.writeInt(a.pos.x);out.writeInt(a.pos.y);out.writeInt(a.pos.z);out.writeByte(a.front.int);out.writeByte(a.rating.ordinal);out.writeByte(a.socket);out.writeBoolean(a.horizontal);out.writeBoolean(a.strip);out.writeBoolean(a.recessed);out.writeBoolean(a.cabinet) }
         out.writeUTF(state)
     }
     companion object {
         const val MAX_REACH=8.0
-        fun findOutlet(a: CordAnchor): OutletElement? {
+        fun findOutlet(a: CordAnchor): CordSocketSource? {
             val node=NodeManager.instance?.getNodeFromCoordonate(Coordinate(a.pos.x,a.pos.y,a.pos.z,a.dimension)) as? TransparentNode
-            return (node?.element as? OutletElement)?.takeIf { it.id==a.id && it.rating==a.rating && !node.isDestructing }
+            return (node?.element as? CordSocketSource)?.takeIf { it.id==a.id && it.rating==a.rating && !node.isDestructing }
         }
     }
 }

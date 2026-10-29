@@ -1525,6 +1525,7 @@ object TransparentNodeRegistration {
         transparentNodeItem.addDescriptor(8+(125 shl 6),mods.eln.transparentnode.pump.IndustrialPumpDescriptor().apply { setCreativeTab(Eln.creativeTabMachines) })
         transparentNodeItem.addDescriptor(50+(124 shl 6),mods.eln.utility.HouseServiceDescriptor(false))
         transparentNodeItem.addDescriptor(51+(124 shl 6),mods.eln.utility.HouseServiceDescriptor(true))
+        transparentNodeItem.addDescriptor(12+(126 shl 6),mods.eln.transparentnode.ups.UpsDescriptor(TR_NAME(I18N.Type.NONE,"Four Cell Plug-in UPS"),compact=true).apply { setCreativeTab(Eln.creativeTabPowerElectronics) })
         // New underground service entries are appended in an unused save group.
         transparentNodeItem.addDescriptor(0+(127 shl 6),mods.eln.utility.HouseServiceDescriptor(true,wide=true))
         transparentNodeItem.addDescriptor(2+(127 shl 6),mods.eln.utility.UndergroundHandholeDescriptor())

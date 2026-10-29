@@ -67,11 +67,25 @@ class BackupDescriptor(name: String,val generator: Boolean,wallMounted: Boolean=
             GL11.glColor3f(.1f,.35f,.85f);model.getPart("Mains")?.drawNoBind()
             GL11.glColor3f(1f,.65f,.06f);model.getPart("Backup")?.drawNoBind()
             GL11.glColor3f(.95f,.33f,.05f);model.getPart("Output")?.drawNoBind()
-            val lit=display?.status in listOf("RUNNING","COOLDOWN","MAINS","GENERATOR")
-            if(lit)UtilsClient.disableLight()
-            GL11.glColor3f(if(lit).08f else .02f,if(lit).8f else .08f,.12f);model.getPart("Indicator")?.drawNoBind()
-            GL11.glColor3f(.035f,if(lit).35f else .05f,if(lit).42f else .06f);model.getPart("Display")?.drawNoBind()
-            if(lit)UtilsClient.enableLight()
+            val generatorLit=generator && display?.status in listOf("RUNNING","COOLDOWN")
+            if(generatorLit)UtilsClient.disableLight()
+            GL11.glColor3f(if(generatorLit).035f else .015f,if(generatorLit).35f else .045f,if(generatorLit).42f else .055f)
+            model.getPart("Display")?.drawNoBind()
+            if(generatorLit)UtilsClient.enableLight()
+            val panel=mods.eln.client.power.PowerPanelDisplay
+            if(generator)panel.lamp(model,"Indicator",display?.status in listOf("RUNNING","COOLDOWN"),.08f,.8f,.12f)
+            else {
+                panel.lamp(model,"MainsLed",display?.mains?.let { it>=display.target*.8 }==true,.1f,.8f,.2f)
+                panel.lamp(model,"BackupLed",display?.backup?.let { it>=display.target*.8 }==true,1f,.6f,.05f)
+                panel.lamp(model,"ChargeLed",display?.status=="MAINS" || display?.status=="GENERATOR",.1f,.5f,1f)
+                panel.lamp(model,"FaultLed",display?.status=="BACKUP_FEED_FAULT",1f,.08f,.04f)
+                panel.lamp(model,"BypassLed",display?.request==true,.8f,.3f,1f)
+                if(display!=null && (display.mains>10 || display.backup>10)) {
+                    val z=if(wallMounted)-.169 else .288
+                    panel.number(display.output,-.21,.205,z)
+                    panel.number(display.watts/100.0,.04,.205,z,3)
+                }
+            }
         } finally { GL11.glPopAttrib() }
     }
     override fun handleRenderType(item: ItemStack,type: IItemRenderer.ItemRenderType)=true
@@ -109,7 +123,7 @@ class BackupRender(entity: TransparentNodeEntity,descriptor: TransparentNodeDesc
     }
     override fun draw() {
         cable=drawCable((transparentNodeDescriptor as BackupDescriptor).connectionPlane(front ?: Direction.ZP),Eln.instance.stdCableRender3200V,display.connections,cable)
-        mods.eln.client.terrain.TerrainModels.body(this,listOf(front,display.status in listOf("RUNNING","COOLDOWN","MAINS","GENERATOR"))) {
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(front,(transparentNodeDescriptor as BackupDescriptor).generator && display.status in listOf("RUNNING","COOLDOWN")),mods.eln.client.power.PowerPanelDisplay.PARTS) {
             (transparentNodeDescriptor as BackupDescriptor).draw(front ?: Direction.ZP,display)
         }
     }

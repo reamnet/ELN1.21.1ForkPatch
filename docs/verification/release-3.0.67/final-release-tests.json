@@ -1,0 +1,235 @@
+{
+  "tests": 111,
+  "suites": [
+    {
+      "name": "mods.eln.lighting.PartialLampMountingTest",
+      "tests": "2",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:55.877Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.002"
+    },
+    {
+      "name": "mods.eln.transparentnode.ups.CompactUpsTest",
+      "tests": "6",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:56.164Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.102"
+    },
+    {
+      "name": "mods.eln.lighting.DecorativeLightingTest",
+      "tests": "6",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:54.163Z",
+      "hostname": "6925a30a6f6e",
+      "time": "1.108"
+    },
+    {
+      "name": "mods.eln.transparentnode.ups.UpsTest",
+      "tests": "16",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:56.992Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.079"
+    },
+    {
+      "name": "mods.eln.lighting.LampLightingQueriesTest",
+      "tests": "2",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:55.604Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.013"
+    },
+    {
+      "name": "mods.eln.lighting.TransmissionAndLightingTest",
+      "tests": "7",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:55.904Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.17"
+    },
+    {
+      "name": "mods.eln.lighting.PoolPartyAndShadingTest",
+      "tests": "5",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:55.880Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.024"
+    },
+    {
+      "name": "mods.eln.lighting.OutletWiringAndCordPathTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:55.842Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.034"
+    },
+    {
+      "name": "mods.eln.transparentnode.ups.UpsStandbyTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:56.267Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.724"
+    },
+    {
+      "name": "mods.eln.lighting.LightingExpansionTest",
+      "tests": "6",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:55.618Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.065"
+    },
+    {
+      "name": "mods.eln.lighting.MeshNormalsTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:55.806Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.005"
+    },
+    {
+      "name": "mods.eln.utility.HouseholdDistributionTest",
+      "tests": "1",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:57.072Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.001"
+    },
+    {
+      "name": "mods.eln.lighting.NewFixtureControlsTest",
+      "tests": "7",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:55.812Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.029"
+    },
+    {
+      "name": "mods.eln.lighting.FairyAndCordLifecycleTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:55.276Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.037"
+    },
+    {
+      "name": "mods.eln.transparentnode.WallPowerCabinetTest",
+      "tests": "3",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:56.135Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.026"
+    },
+    {
+      "name": "mods.eln.lighting.LampClearanceTest",
+      "tests": "2",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:55.571Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.032"
+    },
+    {
+      "name": "mods.eln.transparentnode.industrial.OptionalMediaTest",
+      "tests": "1",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:56.162Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.001"
+    },
+    {
+      "name": "mods.eln.lighting.FixtureControlsTest",
+      "tests": "7",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:55.391Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.153"
+    },
+    {
+      "name": "mods.eln.lighting.FanAndCordTest",
+      "tests": "7",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:55.315Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.075"
+    },
+    {
+      "name": "mods.eln.lighting.LightingRegressionTest",
+      "tests": "7",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:55.684Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.081"
+    },
+    {
+      "name": "mods.eln.lighting.UniversalCordTest",
+      "tests": "6",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:56.074Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.06"
+    },
+    {
+      "name": "mods.eln.lighting.MachineCordTest",
+      "tests": "5",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:55.766Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.039"
+    },
+    {
+      "name": "mods.eln.lighting.GumdropParkingTest",
+      "tests": "1",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-29T22:26:55.545Z",
+      "hostname": "6925a30a6f6e",
+      "time": "0.025"
+    }
+  ]
+}

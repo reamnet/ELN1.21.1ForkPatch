@@ -86,9 +86,15 @@ object UtilityRecipes {
         addRecipe(findItemStack("Ceiling Color Segregated Cable Tray",4),"C C","BBB","PPP",'C',ItemStack(Items.CHAIN),'B',ItemStack(Blocks.IRON_BARS),'P',findItemStack("Iron Plate"))
         // Each style has a distinct dye marker; no ambiguous identical recipes.
         val dyes=listOf(Items.WHITE_DYE,Items.ORANGE_DYE,Items.MAGENTA_DYE,Items.LIGHT_BLUE_DYE,Items.YELLOW_DYE,Items.LIME_DYE,Items.PINK_DYE,Items.GRAY_DYE,Items.LIGHT_GRAY_DYE,Items.CYAN_DYE,Items.PURPLE_DYE,Items.BLUE_DYE,Items.BROWN_DYE,Items.GREEN_DYE,Items.RED_DYE)
-        mods.eln.sixnode.lampsocket.DecorativeLampStyle.entries.drop(88).forEachIndexed { i,lamp ->
+        mods.eln.sixnode.lampsocket.DecorativeLampStyle.entries.drop(88).take(15).forEachIndexed { i,lamp ->
             addRecipe(findItemStack(lamp.itemName)," D ","GLG"," P ",'D',ItemStack(dyes[i]),'G',ItemStack(Blocks.GLASS_PANE),'L',findItemStack("Basic Lamp Holder"),'P',ItemStack(if(lamp.stoneWall)Blocks.STONE_BRICKS else Blocks.IRON_BLOCK))
         }
+        mods.eln.sixnode.lampsocket.DecorativeLampStyle.entries.takeLast(5).forEachIndexed { i,lamp ->
+            addRecipe(findItemStack(lamp.itemName)," D ","GLG"," P ",'D',ItemStack(listOf(Items.WHITE_DYE,Items.BLUE_DYE,Items.BLACK_DYE,Items.GREEN_DYE,Items.RED_DYE)[i]),
+                'G',ItemStack(Blocks.GLASS),'L',findItemStack("Basic Lamp Holder"),'P',findItemStack("Iron Plate"))
+        }
+        addRecipe(findItemStack("Four Cell Plug-in UPS"),"POP","CDC","PPP",'P',findItemStack("Iron Plate"),'O',findItemStack("Six Socket Power Strip"),
+            'C',findItemStack("Copper Cable"),'D',findItemStack("DC-DC Converter"))
         addShapelessRecipe(findItemStack("Six Socket Power Strip"),findItemStack("Experimental Wall Outlet"),findItemStack("Experimental Wall Outlet"),findItemStack("Experimental Wall Outlet"),findItemStack("Iron Plate"))
         PoleHardware.transformerNames.forEachIndexed { i,name ->
             // Each successive transformer consumes the previous one and more copper/iron.

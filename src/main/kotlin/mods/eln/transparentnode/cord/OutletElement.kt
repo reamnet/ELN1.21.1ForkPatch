@@ -14,11 +14,12 @@ import java.io.*
 import java.util.UUID
 
 /** Passive receptacles: overcurrent protection belongs to the upstream branch breaker. */
-class OutletElement(node: TransparentNode,descriptor: TransparentNodeDescriptor): TransparentNodeElement(node,descriptor),CordDevice {
+class OutletElement(node: TransparentNode,descriptor: TransparentNodeDescriptor): TransparentNodeElement(node,descriptor),CordDevice,CordSocketSource {
+    override val socketOwner get()=this
     private val desc get()=transparentNodeDescriptor as OutletDescriptor
     override val inventory=TransparentNodeElementInventory(0,1,this)
-    val rating=(descriptor as OutletDescriptor).rating
-    val capacity get()=desc.sockets
+    override val rating=(descriptor as OutletDescriptor).rating
+    override val capacity get()=desc.sockets
     var wallState=net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()
         private set
     val recessed get()=!wallState.isAir
@@ -27,14 +28,14 @@ class OutletElement(node: TransparentNode,descriptor: TransparentNodeDescriptor)
         if(nbt?.contains("outletWall")==true)wallState=net.minecraft.nbt.NbtUtils.readBlockState(net.minecraft.core.registries.BuiltInRegistries.BLOCK.asLookup(),nbt.getCompound("outletWall"))
     }
     override fun checkCanStay(onCreate: Boolean) { if(!recessed)super.checkCanStay(onCreate) }
-    var horizontal=false
+    override var horizontal=false
         private set
     var wireless=false
     var channel=mods.eln.sixnode.lampsocket.LampChannelMemory.DEFAULT_CHANNEL
     val wirelessPower=WirelessOutletPower(this)
     private var supplyTimer=0.0
     val input=NbtElectricalLoad("outletInput").apply { serialResistance=.002 }
-    val output=NbtElectricalLoad("outletOutput").apply { serialResistance=.002 }
+    override val output=NbtElectricalLoad("outletOutput").apply { serialResistance=.002 }
     val contact=Resistor(input,output).apply { resistance=.005 }
     // Retain the internal accessor for integrations; it no longer implements a breaker.
     val breaker get()=contact
@@ -43,7 +44,7 @@ class OutletElement(node: TransparentNode,descriptor: TransparentNodeDescriptor)
     override val cordVoltage get()=rating.volts
     override fun acceptsCord(rating: CordRating)=desc.strip && rating==this.rating
     override fun cordChanged() { wirelessPower.disconnect();reconnect();supplyTimer=0.0 }
-    var id=UUID.randomUUID()
+    override var id=UUID.randomUUID()
         private set
     private val revoked=HashSet<UUID>()
     private val attached=java.util.Collections.newSetFromMap(java.util.IdentityHashMap<ApplianceCord,Boolean>())
@@ -55,23 +56,23 @@ class OutletElement(node: TransparentNode,descriptor: TransparentNodeDescriptor)
     var reserved: UUID?
         get()=reservations[0]
         set(value) { reservations[0]=value }
-    fun isOccupied(slot: Int)=slot in occupants.indices && (occupants[slot]!=null || reservations[slot]!=null)
-    fun freeSocket()=(0 until capacity).firstOrNull { !isOccupied(it) }
-    fun canClaim(cord: ApplianceCord,slot: Int=cord.anchor?.socket ?: 0)=slot in occupants.indices && cord.token !in revoked &&
+    override fun isOccupied(slot: Int)=slot in occupants.indices && (occupants[slot]!=null || reservations[slot]!=null)
+    override fun freeSocket()=(0 until capacity).firstOrNull { !isOccupied(it) }
+    override fun canClaim(cord: ApplianceCord,slot: Int)=slot in occupants.indices && cord.token !in revoked &&
         (reservations[slot]==null || reservations[slot]==cord.token) && (occupants[slot]==null || occupants[slot]===cord)
-    fun reserve(cord: ApplianceCord,slot: Int): Boolean {
+    override fun reserve(cord: ApplianceCord,slot: Int): Boolean {
         if(!canClaim(cord,slot))return false
         attached.removeIf { it!==cord && it.token==cord.token }
         attached.add(cord);reservations[slot]=cord.token;needPublish();return true
     }
-    fun claim(cord: ApplianceCord,slot: Int) { check(reserve(cord,slot));occupants[slot]=cord;needPublish() }
-    fun release(cord: ApplianceCord,forget: Boolean=false) {
+    override fun claim(cord: ApplianceCord,slot: Int) { check(reserve(cord,slot));occupants[slot]=cord;needPublish() }
+    override fun release(cord: ApplianceCord,forget: Boolean) {
         for(i in occupants.indices) {
             if(occupants[i]===cord)occupants[i]=null
             if(forget && reservations[i]==cord.token)reservations[i]=null
         };if(forget)attached.remove(cord);needPublish()
     }
-    fun disconnectSocket(slot: Int,player: net.minecraft.server.level.ServerPlayer?=null) {
+    override fun disconnectSocket(slot: Int,player: net.minecraft.server.level.ServerPlayer?) {
         if(slot !in occupants.indices)return
         attached.filter { it.anchor?.socket==slot }.toList().forEach { if(it.moving)revoked.add(it.token);it.detach(player) }
         reservations[slot]=null;needPublish()
@@ -84,14 +85,7 @@ class OutletElement(node: TransparentNode,descriptor: TransparentNodeDescriptor)
         slowProcessList.add(NodePeriodicPublishProcess(node,.5,0.0))
     }
     override fun initialize() { connect() }
-    fun anchor(socket: Int=freeSocket() ?: 0)=CordAnchor(coordinate().dimension,coordinate().pos,id,front,rating,socket,horizontal,desc.strip,recessed)
-    fun wouldLoop(upstream: OutletElement): Boolean {
-        val visited=HashSet<UUID>();var next: OutletElement?=upstream
-        while(next!=null) {
-            if(next===this || !visited.add(next.id))return true
-            next=next.cord.anchor?.let { ApplianceCord.findOutlet(it) }
-        };return false
-    }
+    override fun anchor(socket: Int)=CordAnchor(coordinate().dimension,coordinate().pos,id,front,rating,socket,horizontal,desc.strip,recessed)
     override fun disconnectJob() { occupants.filterNotNull().toList().forEach { it.disconnect() };cord.disconnect();wirelessPower.disconnect();super.disconnectJob() }
     override fun getElectricalLoad(side: Direction,lrdu: LRDU)=if(!wireless && !cord.plugged &&
         (desc.acceptsCable(front,side,lrdu) || recessed && side==front && OutletWiring.surfaceEndpoint(this,lrdu)!=null))input else null
