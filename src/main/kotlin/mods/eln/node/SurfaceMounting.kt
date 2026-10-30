@@ -3,7 +3,6 @@ package mods.eln.node
 import mods.eln.misc.Direction
 import net.minecraft.core.BlockPos
 import net.minecraft.world.level.BlockGetter
-import net.minecraft.world.level.Level
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 
@@ -25,8 +24,7 @@ object SurfaceMounting {
     @JvmStatic fun supports(world: BlockGetter, target: BlockPos, side: Direction): Boolean {
         val at=target.relative(side.toFacing())
         // A neighboring chunk is unknown during loading, not evidence of missing support.
-        if(world is Level && !world.hasChunkAt(at))return true
-        val state=world.getBlockState(at)
+        val state=LoadedBlockStates.get(world,at) ?: return true
         if(state.isAir)return false
         if(state.isSolidRender(world,at))return true
         return surface(state.getCollisionShape(world,at).toAabbs(),side)!=null
@@ -34,8 +32,7 @@ object SurfaceMounting {
 
     @JvmStatic fun inset(world: BlockGetter, target: BlockPos, side: Direction): Double {
         val at=target.relative(side.toFacing())
-        if(world is Level && !world.hasChunkAt(at))return 0.0
-        val state=world.getBlockState(at)
+        val state=LoadedBlockStates.get(world,at) ?: return 0.0
         if(state.block is NodeBlock || state.block is mods.eln.ghost.GhostBlock || state.isSolidRender(world,at))return 0.0
         val edge=surface(state.getCollisionShape(world,at).toAabbs(),side) ?: return 0.0
         val negative=side.toFacing().axisDirection==net.minecraft.core.Direction.AxisDirection.NEGATIVE

@@ -116,11 +116,22 @@ class VoltageGauge @JvmOverloads constructor(matrix: Array<DoubleArray>, states:
         return accepted
     }
 
-    private val probeColumns: IntArray by lazy {
-        discardedRows.flatMap { row->row.indices.filter { row[it]!=0.0 } }.distinct().toIntArray()
+    private class ProbeRows(val columns: IntArray,val coefficients: Array<DoubleArray>,val solution: DoubleArray)
+    private var probeRows: ProbeRows?=null
+    // The subsystem is server-thread confined. Defer setup until repeated probes need it,
+    // then use a plain local reference instead of a synchronized lazy getter in inner loops.
+    private fun rowsForProbe(): ProbeRows {
+        probeRows?.let { return it }
+        val columns=discardedRows.flatMap { row->row.indices.filter { row[it]!=0.0 } }.distinct().sorted().toIntArray()
+        val coefficients=if(columns.size<=8)Array(discardedRows.size) { row->DoubleArray(columns.size) { discardedRows[row][columns[it]] } } else emptyArray()
+        return ProbeRows(columns,coefficients,DoubleArray(if(columns.size<=8)columns.size else 0)).also { probeRows=it }
     }
+    private var compactColumns=IntArray(0)
+    private var compactValues=DoubleArray(0)
+    private var compactCount=-1
+    private var compactValid=false
 
-    val sparseProbeEligible get()=probeColumns.size<=8
+    val sparseProbeEligible get()=rowsForProbe().columns.size<=8
 
     /** Validate exactly the discarded KCL equations, using only their referenced
      * solution variables. The caller must first establish a finite bound for ALL
@@ -128,6 +139,7 @@ class VoltageGauge @JvmOverloads constructor(matrix: Array<DoubleArray>, states:
      * Dense discarded rows fall back instead of forming many inverse rows.
      */
     fun validProbeRows(physicalRhs: DoubleArray,response: IntFunction<Array<DD>>): Boolean? {
+        val probeColumns=rowsForProbe().columns
         if(probeColumns.size>8)return null
         for(i in rows.indices)savedRhs[i]=physicalRhs[rows[i]]
         if(lastProbeRhs?.contentEquals(physicalRhs)==true)return lastProbeValid
@@ -143,6 +155,46 @@ class VoltageGauge @JvmOverloads constructor(matrix: Array<DoubleArray>, states:
         }
         val accepted=valid(solution)
         lastProbeRhs=physicalRhs.copyOf();lastProbeValid=accepted
+        return accepted
+    }
+
+    /** The caller collected ALL nonzero physical RHS entries while checking its finite
+     * solve bound. Keep reference-row currents in this key too: an unbalanced floating
+     * island must still fail. No dense solution vector or full RHS snapshot is needed.
+     * This cache is independent of full-solve validation and belongs to this matrix only. */
+    fun validProbeRowsCompact(physicalRhs: DoubleArray,nonzero: IntArray,count: Int,response: IntFunction<Array<DD>>): Boolean? {
+        val data=rowsForProbe();val probeColumns=data.columns;val compactSolution=data.solution
+        if(probeColumns.size>8)return null
+        for(i in rows.indices)savedRhs[i]=physicalRhs[rows[i]]
+        var identical=compactCount==count
+        if(identical)for(i in 0 until count) {
+            if(compactColumns[i]!=nonzero[i] || compactValues[i]!=physicalRhs[nonzero[i]]) { identical=false;break }
+        }
+        if(identical)return compactValid
+        if(probeRhsChanges<Int.MAX_VALUE)probeRhsChanges++
+        for(column in probeColumns.indices) {
+            val inverse=response.apply(probeColumns[column]);var sum=DD.ZERO
+            for(i in 0 until count) {
+                val at=nonzero[i]
+                if(!referenceRows[at] && !inverse[at].isZero)sum=sum.add(inverse[at].multiply(physicalRhs[at]))
+            }
+            val value=sum.toDouble()
+            if(!value.isFinite())return null
+            compactSolution[column]=value
+        }
+        var accepted=true
+        for(i in rows.indices) {
+            val coefficients=data.coefficients[i];var sum=0.0;var magnitude=0.0
+            for(column in probeColumns.indices) {
+                val term=coefficients[column]*compactSolution[column]
+                sum+=term;magnitude+=abs(term)
+            }
+            val rhs=savedRhs[i]
+            if(!(abs(sum-rhs)<=1e-10+1e-8*max(abs(rhs),magnitude))) { accepted=false;break }
+        }
+        if(compactColumns.size<count) { compactColumns=IntArray(count);compactValues=DoubleArray(count) }
+        for(i in 0 until count) { compactColumns[i]=nonzero[i];compactValues[i]=physicalRhs[nonzero[i]] }
+        compactCount=count;compactValid=accepted
         return accepted
     }
 

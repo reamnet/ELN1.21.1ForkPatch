@@ -1,0 +1,46 @@
+{
+  "url": "https://spark.lucko.me/246EuUDWaH",
+  "durationSeconds": 60.402,
+  "ticks": 1200,
+  "tps": {
+    "last1m": 19.99986131029508,
+    "last5m": 19.99991921492631,
+    "last15m": 20.01185897192709,
+    "gameTargetTps": 0
+  },
+  "mspt": {
+    "last1m": {
+      "mean": 1.3641434033333333,
+      "max": 2.96585,
+      "min": 0.977182,
+      "median": 1.338767,
+      "percentile95": 1.651312
+    },
+    "last5m": {
+      "mean": 1.4798208161666666,
+      "max": 216.788321,
+      "min": 0.977182,
+      "median": 1.402186,
+      "percentile95": 1.786609
+    },
+    "gameMaxIdealMspt": 0
+  },
+  "players": 0,
+  "cpu": {
+    "threads": 12,
+    "processUsage": {
+      "last1m": 0.03454873178097497,
+      "last15m": 0.049974862370336395
+    },
+    "systemUsage": {
+      "last1m": 0.028286450091488877,
+      "last15m": 0.04671362509471984
+    },
+    "modelName": "AMD Ryzen 9 5950X 16-Core Processor"
+  },
+  "estimatedProcessCores": 0.41458478137169963,
+  "mainJavaServerStackMs": 59900,
+  "waitUntilNextTickMs": 48576,
+  "elnSimulatorMs": 9556,
+  "interpretation": "This minute does not reproduce sustained core saturation; main Java server stack mostly waits."
+}

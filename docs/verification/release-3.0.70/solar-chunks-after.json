@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "observations": {
+    "roofLookup": {
+      "loadedChunks": 0,
+      "loadEvents": 0,
+      "milliseconds": 4.942571
+    },
+    "roofSupport": {
+      "loadedChunks": 0,
+      "loadEvents": 0,
+      "milliseconds": 0.030995
+    },
+    "solarSimulation": {
+      "loadedChunks": 0,
+      "loadEvents": 0,
+      "milliseconds": 13.414308
+    },
+    "legacySolarRestore": {
+      "loadedChunks": 0,
+      "loadEvents": 0,
+      "milliseconds": 8.999142
+    },
+    "partialSupport": {
+      "loadedChunks": 0,
+      "loadEvents": 0,
+      "milliseconds": 0.050999
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "states": 384,
+  "ports": 8,
+  "probesPerRound": 12800,
+  "rounds": 7,
+  "discardedWarmupRounds": 2,
+  "previousMedianMs": 62.944296,
+  "compactMedianMs": 35.242669,
+  "compactValidations": 92544,
+  "timeReductionPercent": 44.009749509312165,
+  "scope": "Repeated transformer port probe validation; not whole-server performance"
+}

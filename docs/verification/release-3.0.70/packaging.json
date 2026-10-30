@@ -1,0 +1,10 @@
+{
+  "version": "3.0.70",
+  "file": "ElectricalAge-3.0.70.jar",
+  "bytes": 20895912,
+  "sha256": "d75134bd865cc7d1da82aa32555c7d5c31286177ca5e81f7d383f9d78f6af496",
+  "passiveBlockStateHelper": true,
+  "compactGaugeValidator": true,
+  "dedicatedDiagnosticFlagGated": true,
+  "uploadedAssets": 0
+}

@@ -416,8 +416,12 @@ public class SubSystem {
     }
 
     private final boolean sparseGaugeRows = !Boolean.getBoolean("eln.disableSparseGaugeProbeRows");
+    private final boolean compactGaugeProbes = !Boolean.getBoolean("eln.disableCompactGaugeProbes");
+    private int[] probeNonzeroColumns;
     private long sparseGaugeValidations;
+    private long compactGaugeValidations;
     public long getSparseGaugeValidations() { return sparseGaugeValidations; }
+    public long getCompactGaugeValidations() { return compactGaugeValidations; }
 
     private boolean validProbeRhs() {
         // Tiny systems are already cheap; sparse-row setup can cost more than
@@ -427,10 +431,17 @@ public class SubSystem {
                 && voltageGauge.getProbeRhsChanges() >= 256 && voltageGauge.getSparseProbeEligible()) {
             double limit = factorization.getSafeProbeRhsLimit();
             double maximum = 0.0;
-            for (double value : Idata) maximum = Math.max(maximum, Math.abs(value));
+            int nonzeroCount=0;
+            if(compactGaugeProbes && (probeNonzeroColumns==null || probeNonzeroColumns.length!=stateCount))probeNonzeroColumns=new int[stateCount];
+            for(int i=0;i<Idata.length;i++) {
+                double value=Idata[i];maximum=Math.max(maximum,Math.abs(value));
+                if(compactGaugeProbes && value!=0.0)probeNonzeroColumns[nonzeroCount++]=i;
+            }
             if (Double.isFinite(maximum) && maximum < limit) {
-                Boolean valid = voltageGauge.validProbeRows(Idata, this::responseRow);
-                if (valid != null) { sparseGaugeValidations++; return valid; }
+                Boolean valid = compactGaugeProbes
+                    ? voltageGauge.validProbeRowsCompact(Idata,probeNonzeroColumns,nonzeroCount,this::responseRow)
+                    : voltageGauge.validProbeRows(Idata,this::responseRow);
+                if (valid != null) { sparseGaugeValidations++;if(compactGaugeProbes)compactGaugeValidations++;return valid; }
             }
         }
         return voltageGauge.validProbe(Idata, values -> asDoubles(solveProbePrecise(values)));

@@ -62,7 +62,7 @@ class SolarRoofMountTest {
         }
         val old=SolarPanelElement(mods.eln.node.transparent.TransparentNode(),descriptor)
         old.readFromNBT(net.minecraft.nbt.CompoundTag())
-        assertFalse(old.roofMountKnown);assertEquals(PI/2,old.panelAlpha)
+        assertTrue(old.roofMountKnown);assertEquals(SolarRoofMount(),old.roofMount);assertEquals(PI/2,old.panelAlpha)
         assertEquals(SolarRoofMount(),SolarRoofMount.fromId(100))
     }
 }

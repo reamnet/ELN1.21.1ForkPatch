@@ -187,8 +187,10 @@ public class SolarPanelElement extends TransparentNodeElement {
         super.readFromNBT(nbt);
         enforceGroundingMode();
         powerSource.readFromNBT(nbt, "powerSource");
-        roofMountKnown=nbt.contains("roofUphill");
-        roofMount=roofMountKnown ? SolarRoofMount.fromId(nbt.getInt("roofUphill")) : new SolarRoofMount(null);
+        // Pre-roof saves are flat. Resolving their support during global node restore
+        // would synchronously load every saved panel's chunk before any player joins.
+        roofMount=nbt.contains("roofUphill") ? SolarRoofMount.fromId(nbt.getInt("roofUphill")) : new SolarRoofMount(null);
+        roofMountKnown=true;
         panelAlpha = nbt.contains("panelAlpha") && Double.isFinite(nbt.getDouble("panelAlpha")) ? descriptor.alphaTrunk(nbt.getDouble("panelAlpha")) : Math.PI/2;
     }
 

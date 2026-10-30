@@ -1,6 +1,5 @@
 package mods.eln.transparentnode.solarpanel;
 
-import mods.eln.misc.McBridge;
 import mods.eln.misc.Coordinate;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
@@ -41,13 +40,13 @@ public class SolarPannelSlowProcess implements IProcess {
         //	Utils.print("solarAlpha : " + solarAlpha + "  ");
         if (solarAlpha >= Math.PI) return 0.0;
 
+        SolarRoofMount roof=solarPannel.roofMount;
         if (!solarPannel.getInventory().getItem(SolarPanelContainer.trackerSlotId).isEmpty()) {
-            solarPannel.panelAlpha = solarPannel.descriptor.alphaTrunk(SolarRoofMount.at(solarPannel.node.coordinate.world(),solarPannel.node.coordinate.getPos()).targetAlpha(solarAlpha));
+            solarPannel.panelAlpha = solarPannel.descriptor.alphaTrunk(roof.targetAlpha(solarAlpha));
         }
 
 
         Coordinate coordinate = solarPannel.node.coordinate;
-        SolarRoofMount roof=SolarRoofMount.at(coordinate.world(),coordinate.getPos());
         double[] offset={solarPannel.descriptor.solarOffsetX,solarPannel.descriptor.solarOffsetY,solarPannel.descriptor.solarOffsetZ};
         solarPannel.front.rotateFromXN(offset);
         Vec3 sample=roof.point(new Vec3(offset[0],offset[1],offset[2]));
@@ -74,8 +73,11 @@ public class SolarPannelSlowProcess implements IProcess {
         }
         int count = 0;
         ///world.getChunkProvider().chunkExists(var1, var2)
-        while (world.isLoaded(new BlockPos((int) x, (int) y, (int) z))) {
-            double opacity = McBridge.getBlockState(world, (int) x, (int) y, (int) z).getLightBlock(world, new BlockPos((int) x, (int) y, (int) z));
+        while (true) {
+            BlockPos samplePos=BlockPos.containing(x,y,z);
+            var state=mods.eln.node.LoadedBlockStates.get(world,samplePos);
+            if(state==null)break;
+            double opacity = state.getLightBlock(world,samplePos);
             light *= (255 - opacity) / 255;
             if (light == 0.0) {
                 break;

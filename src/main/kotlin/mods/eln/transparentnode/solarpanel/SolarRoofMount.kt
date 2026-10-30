@@ -46,15 +46,20 @@ data class SolarRoofMount(val uphill: net.minecraft.core.Direction?=null) {
 
     companion object {
         @JvmStatic fun at(world: BlockGetter,pos: BlockPos): SolarRoofMount {
-            val entity=world.getBlockEntity(pos) as? mods.eln.node.transparent.TransparentNodeEntity
-            val element=if(entity?.level?.isClientSide==false)(entity.node as? mods.eln.node.transparent.TransparentNode)?.element as? SolarPanelElement else null
-            if(element?.roofMountKnown==true)return element.roofMount
+            if(world is net.minecraft.world.level.Level && !world.isClientSide) {
+                // ELN nodes continue simulating after vanilla unloads their chunks. Fetch
+                // the saved mount from that node, rather than force-loading its block entity.
+                val element=mods.eln.node.NodeManager.instance?.getTransparentNodeFromCoordinate(Coordinate(pos.x,pos.y,pos.z,world)) as? SolarPanelElement
+                if(element?.roofMountKnown==true)return element.roofMount
+                return fromSupport(world,pos)
+            }
+            val entity=mods.eln.node.LoadedBlockEntities.get(world,pos) as? mods.eln.node.transparent.TransparentNodeEntity
             val render=entity?.elementRender as? SolarPanelRender
             if(render?.roofMountKnown==true)return render.roofMount
             return fromSupport(world,pos)
         }
         @JvmStatic fun fromSupport(world: BlockGetter,pos: BlockPos): SolarRoofMount {
-            val state=world.getBlockState(pos.below())
+            val state=mods.eln.node.LoadedBlockStates.get(world,pos.below()) ?: return SolarRoofMount()
             return if(state.block is StairBlock && state.getValue(StairBlock.HALF)==Half.BOTTOM)
                 SolarRoofMount(state.getValue(StairBlock.FACING)) else SolarRoofMount()
         }
