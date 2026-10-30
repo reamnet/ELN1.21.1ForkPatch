@@ -42,20 +42,19 @@ public class SolarPannelSlowProcess implements IProcess {
         if (solarAlpha >= Math.PI) return 0.0;
 
         if (!solarPannel.getInventory().getItem(SolarPanelContainer.trackerSlotId).isEmpty()) {
-            solarPannel.panelAlpha = solarPannel.descriptor.alphaTrunk(solarAlpha);
+            solarPannel.panelAlpha = solarPannel.descriptor.alphaTrunk(SolarRoofMount.at(solarPannel.node.coordinate.world(),solarPannel.node.coordinate.getPos()).targetAlpha(solarAlpha));
         }
 
 
         Coordinate coordinate = solarPannel.node.coordinate;
-        Vec3 v = Utils.getVec05(coordinate);
-        double x = v.x + solarPannel.descriptor.solarOffsetX, y = v.y + solarPannel.descriptor.solarOffsetY, z = v.z + solarPannel.descriptor.solarOffsetZ;
-
-
-        double lightAlpha = solarPannel.panelAlpha - solarAlpha;
-        double light = Math.cos(lightAlpha);
-
-
-        if (light < 0.0) light = 0.0;
+        SolarRoofMount roof=SolarRoofMount.at(coordinate.world(),coordinate.getPos());
+        double[] offset={solarPannel.descriptor.solarOffsetX,solarPannel.descriptor.solarOffsetY,solarPannel.descriptor.solarOffsetZ};
+        solarPannel.front.rotateFromXN(offset);
+        Vec3 sample=roof.point(new Vec3(offset[0],offset[1],offset[2]));
+        Vec3 mount=solarPannel.descriptor.mountingOffset(coordinate.world(),coordinate.getPos(),solarPannel.front);
+        Vec3 v=Utils.getVec05(coordinate).add(sample).add(mount);
+        double x=v.x,y=v.y,z=v.z;
+        double light=roof.incidence(solarPannel.panelAlpha,solarAlpha);
 
         if (coordinate.getWorldExist() == false) return light;
 
@@ -85,7 +84,7 @@ public class SolarPannelSlowProcess implements IProcess {
             x += xD;
             y += yD;
             count++;
-            if (y > 256.0) break;
+            if (y >= world.getMaxBuildHeight()) break;
         }
 //		Utils.print("count : " + count + "   ");
         return light;

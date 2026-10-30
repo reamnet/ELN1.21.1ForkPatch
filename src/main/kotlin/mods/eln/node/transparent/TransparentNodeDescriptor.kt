@@ -12,7 +12,6 @@ import mods.eln.misc.UtilsClient.drawIcon
 import mods.eln.misc.VoltageLevelColor
 import mods.eln.node.transparent.TransparentNode.FrontType
 import net.minecraft.world.level.block.Block
-import net.minecraft.world.level.block.HopperBlock
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.phys.AABB
@@ -81,30 +80,31 @@ open class TransparentNodeDescriptor @JvmOverloads constructor(
     }
 
     open fun checkCanPlace(coord: Coordinate?, front: Direction): String? {
-        // 1.8+: opacity is a property of the block state, not the block.
-        fun opaqueAt(direction: Direction): Boolean {
-            val temp = Coordinate(coord!!)
-            temp.move(direction)
-            return temp.blockState.isSolidRender(temp.world(), temp.pos)
-        }
-        if (mustHaveFloor()) {
-            val temp = Coordinate(coord!!)
-            temp.move(Direction.YN)
-            if (!temp.blockState.isSolidRender(temp.world(), temp.pos) && temp.block !is HopperBlock) return tr("You can't place this block at this side")
-        }
-        if (mustHaveCeiling()) {
-            if (!opaqueAt(Direction.YP)) return tr("You can't place this block at this side")
-        }
-        if (mustHaveWallFrontInverse()) {
-            if (!opaqueAt(front.inverse)) return tr("You can't place this block at this side")
-        }
-        if (mustHaveWall()) {
-            val wall = opaqueAt(Direction.XN) || opaqueAt(Direction.XP) || opaqueAt(Direction.ZN) || opaqueAt(Direction.ZP)
-            if (!wall) return tr("You can't place this block at this side")
-        }
-        val ghostGroup = getGhostGroupFront(front)
-        return if (ghostGroup != null && !ghostGroup.canBePloted(coord!!)) tr("Not enough space for this block") else null
+        if (coord==null) return tr("Needs a supporting surface")
+        if (!hasMountingSupport(coord,front)) return tr("You can't place this block at this side")
+        val ghostGroup = getGhostGroupAt(coord,front)
+        return if (ghostGroup != null && !ghostGroup.canBePloted(coord)) tr("Not enough space for this block") else null
     }
+
+    open fun hasMountingSupport(coord: Coordinate, front: Direction): Boolean {
+        fun supported(side: Direction)=mods.eln.node.SurfaceMounting.supports(coord.world(),coord.pos,side)
+        return (!mustHaveFloor() || supported(Direction.YN)) &&
+            (!mustHaveCeiling() || supported(Direction.YP)) &&
+            (!mustHaveWallFrontInverse() || supported(front.inverse)) &&
+            (!mustHaveWall() || listOf(Direction.XN,Direction.XP,Direction.ZN,Direction.ZP).any(::supported))
+    }
+
+    open fun mountingOffset(world: net.minecraft.world.level.BlockGetter, pos: net.minecraft.core.BlockPos, front: Direction): net.minecraft.world.phys.Vec3 = when {
+        mustHaveFloor() -> mods.eln.node.SurfaceMounting.offset(world,pos,Direction.YN)
+        mustHaveCeiling() -> mods.eln.node.SurfaceMounting.offset(world,pos,Direction.YP)
+        mustHaveWallFrontInverse() -> mods.eln.node.SurfaceMounting.offset(world,pos,front.inverse)
+        else -> net.minecraft.world.phys.Vec3.ZERO
+    }
+
+    /** Most footprints only rotate horizontally. Sloped arrays also reserve their uphill cells. */
+    open fun getGhostGroupAt(coord: Coordinate, front: Direction): GhostGroup?=getGhostGroupFront(front)
+
+    open fun mountingFront(world: Level, pos: net.minecraft.core.BlockPos, proposed: Direction)=proposed
 
     open fun getFrontFromPlace(side: Direction, entityLiving: LivingEntity?): Direction? {
         var front = Direction.XN

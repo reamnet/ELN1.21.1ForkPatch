@@ -34,11 +34,13 @@ object TerrainModels {
     /** Separate static surface owned by the same node, with a key distinct from its pole body. */
     internal class CableOwner(val render: mods.eln.gridnode.GridRender)
     internal class AttachmentOwner(val render: mods.eln.gridnode.GridRender)
-    private data class MeshKey(val descriptor: Any,val side: Any?,val appearance: Any)
+    private data class MeshKey(val descriptor: Any,val side: Any?,val appearance: Any,val mount: net.minecraft.world.phys.Vec3)
     private class Body(val node: NodeBlockEntity,val key: MeshKey,val mesh: TerrainMesh,
         val sections: Map<Long,List<TerrainSlice>>,var light: Int)
     private data class Snapshot(val slices: List<TerrainSlice>,val light: Int)
     private val bodies=IdentityHashMap<Any,Body>()
+    private class MountPose(var tick: Long,var offset: net.minecraft.world.phys.Vec3)
+    private val mountPoses=IdentityHashMap<Any,MountPose>()
     private val nodeBodies=IdentityHashMap<NodeBlockEntity,MutableSet<Any>>()
     private val lastUpdate=IdentityHashMap<NodeBlockEntity,Long>()
     private val sections=HashMap<Long,IdentityHashMap<Any,Body>>()
@@ -78,7 +80,7 @@ object TerrainModels {
             is TransparentNodeElementRender -> { descriptor=owner.transparentNodeDescriptor;side=null }
             else -> error("Unknown terrain model owner")
         }
-        val key=MeshKey(descriptor,side,appearance)
+        val key=MeshKey(descriptor,side,appearance,mountOffset(owner))
         val previous=bodies[owner]
         if (previous?.key==key) return
         if(unsupported.isNotEmpty() && key in unsupported) { removeBody(owner);return }
@@ -110,9 +112,40 @@ object TerrainModels {
         for (section in split.keys) { sections.getOrPut(section) { IdentityHashMap() }[owner]=body;dirty(section) }
     }
 
-    /** Old renderers describe visual state in their draw commands. Fingerprint cached batches
-     * and transforms, without expanding or transforming their vertices every client tick. */
+    /** Cache physical mounting offsets once per tick, shared by terrain and live rendering. */
+    private fun mountOffset(owner: Any): net.minecraft.world.phys.Vec3 {
+        val entity=when(owner) { is SixNodeElementRender->owner.tileEntity;is TransparentNodeElementRender->owner.tileEntity;else->return net.minecraft.world.phys.Vec3.ZERO }
+        val tick=entity.level?.gameTime ?: return net.minecraft.world.phys.Vec3.ZERO
+        val previous=mountPoses[owner]
+        if(previous?.tick==tick)return previous.offset
+        val offset=computeMountOffset(owner)
+        if(previous==null)mountPoses[owner]=MountPose(tick,offset) else { previous.tick=tick;previous.offset=offset }
+        return offset
+    }
+
+    private fun computeMountOffset(owner: Any): net.minecraft.world.phys.Vec3 = when(owner) {
+        is SixNodeElementRender -> {
+            val level=owner.tileEntity.level
+            if(level==null || mods.eln.sixnode.lampsocket.LampMounting.partialAllowed(owner.sixNodeDescriptor,owner.side)) net.minecraft.world.phys.Vec3.ZERO
+            else net.minecraft.world.phys.Vec3(-mods.eln.node.SurfaceMounting.inset(level,owner.tileEntity.blockPos,owner.side),0.0,0.0)
+        }
+        is TransparentNodeElementRender -> owner.tileEntity.level?.let {
+            owner.transparentNodeDescriptor.mountingOffset(it,owner.tileEntity.blockPos,owner.front ?: Direction.ZP)
+        } ?: net.minecraft.world.phys.Vec3.ZERO
+        else -> net.minecraft.world.phys.Vec3.ZERO
+    }
+
     fun drawElement(owner: Any,draw: ()->Unit) {
+        val offset=mountOffset(owner)
+        GL11.glPushMatrix()
+        try {
+            GL11.glTranslated(offset.x,offset.y,offset.z)
+            drawMountedElement(owner,draw)
+        } finally { GL11.glPopMatrix() }
+    }
+
+    /** Fingerprint old renderers without expanding their vertices on each client tick. */
+    private fun drawMountedElement(owner: Any,draw: ()->Unit) {
         if(explicit(owner) || !enabled) { draw();return }
         val moving=LegacyMovingParts.names(owner)
         if(discovering==null) {
@@ -189,7 +222,14 @@ object TerrainModels {
             FixedFunction.setMeshSink(null);FixedFunction.finish();discovering=null;capture=null;visited.clear()
         }
     }
-    fun remove(node: NodeBlockEntity) { nodeBodies[node]?.toList()?.forEach(::removeBody);lastUpdate.remove(node) }
+    fun remove(node: NodeBlockEntity) {
+        nodeBodies[node]?.toList()?.forEach { mountPoses.remove(it);removeBody(it) }
+        when(node) {
+            is SixNodeEntity->node.elementRenderList.filterNotNull().forEach { mountPoses.remove(it) }
+            is TransparentNodeEntity->node.elementRender?.let { mountPoses.remove(it) }
+        }
+        lastUpdate.remove(node)
+    }
     private fun removeBody(owner: Any) {
         val old=bodies.remove(owner) ?: return
         nodeBodies[old.node]?.let { it.remove(owner);if(it.isEmpty())nodeBodies.remove(old.node) }
@@ -198,7 +238,7 @@ object TerrainModels {
     private fun dirty(key: Long) {
         val s=SectionPos.of(key);mc.levelRenderer.setSectionDirty(s.x(),s.y(),s.z())
     }
-    private fun clear() { bodies.clear();nodeBodies.clear();lastUpdate.clear();sections.clear();pool.clear();unsupported.clear();world=null }
+    private fun clear() { mountPoses.clear();bodies.clear();nodeBodies.clear();lastUpdate.clear();sections.clear();pool.clear();unsupported.clear();world=null }
     private fun explicit(render: Any): Boolean = if(render is mods.eln.sixnode.lampsocket.LampSocketRender)
         render.descriptor.fixture!=null else render is BakedNodeRenderer || render.javaClass.simpleName in SUPPORTED || render is mods.eln.transparentnode.festive.FairyLightsRender
     private val SUPPORTED=setOf("IndustrialRender","CeeBridgeRender","AlarmRender","LineInsulatorRender","SwitchgearRender","ColorCableTrayRender","TransmissionRender","GrowingBedRender","MatterMachineRender","KitchenRender","FanRender","RenewableRender","IndustrialPumpRender","UpsRender",

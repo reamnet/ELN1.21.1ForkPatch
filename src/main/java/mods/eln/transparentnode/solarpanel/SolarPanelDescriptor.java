@@ -144,13 +144,39 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
-    public void addCollisionBoxesToList(AABB par5AxisAlignedBB, List<AABB> list, Level world, int x, int y, int z) {
-        if (canRotate) {
-            super.addCollisionBoxesToList(par5AxisAlignedBB, list, world, x, y, z);
-            return;
+    public mods.eln.misc.Direction mountingFront(Level world, net.minecraft.core.BlockPos pos, Direction proposed) {
+        SolarRoofMount roof = SolarRoofMount.at(world,pos);
+        return roof.getUphill()==null ? proposed : Direction.fromFacing(roof.getUphill().getOpposite());
+    }
+
+    @Override
+    public GhostGroup getGhostGroupAt(Coordinate coord, Direction front) {
+        return SolarRoofMount.at(coord.world(),coord.getPos()).footprint(ghostGroup,front);
+    }
+
+    @Override
+    public void addCollisionBoxesToList(AABB query, List<AABB> list, Level world, int x, int y, int z) {
+        net.minecraft.core.BlockPos pos=new net.minecraft.core.BlockPos(x,y,z);
+        var ghost = world==null ? null : mods.eln.Eln.ghostManager.getGhost(new Coordinate(x,y,z,world));
+        if(ghost!=null)pos=ghost.getObservatorCoordonate().getPos();
+        SolarRoofMount roof=world==null ? new SolarRoofMount(null) : SolarRoofMount.at(world,pos);
+        // Narrow strips follow the sloped panel instead of leaving a full cube over the roof.
+        double base=x-pos.getX();
+        double bz=z-pos.getZ();
+        if(roof.getPitched()) {
+            for(int strip=0;strip<8;strip++) {
+                double a=strip/8.0,b=(strip+1)/8.0;
+                var up=roof.getUphill();
+                double h0=up.getStepX()*(base+a-.5)+up.getStepZ()*(bz+a-.5);
+                double h1=up.getStepX()*(base+b-.5)+up.getStepZ()*(bz+b-.5);
+                AABB bb=up.getAxis()==net.minecraft.core.Direction.Axis.X
+                    ? new AABB(x+a,pos.getY()+Math.min(h0,h1),z,x+b,pos.getY()+Math.max(h0,h1)+.16,z+1)
+                    : new AABB(x,pos.getY()+Math.min(h0,h1),z+a,x+1,pos.getY()+Math.max(h0,h1)+.16,z+b);
+                if(query.intersects(bb))list.add(bb);
+            }
+        } else {
+            AABB bb=new AABB(x,y,z,x+1,y+(canRotate?1:.5),z+1);
+            if(query.intersects(bb))list.add(bb);
         }
-        // Half-height cube at (x, y, z); 1.12 boxes are block-local and immutable.
-        AABB bb = new AABB(x, y, z, x + 1, y + 0.5, z + 1);
-        if (par5AxisAlignedBB.intersects(bb)) list.add(bb);
     }
 }

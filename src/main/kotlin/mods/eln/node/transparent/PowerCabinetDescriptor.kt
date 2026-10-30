@@ -35,7 +35,7 @@ open class PowerCabinetDescriptor(
             world.chunkSource.getChunkNow(support.x shr 4, support.z shr 4) == null) return
         // Legacy neighborOpaque caches mark every side opaque, including air.
         // Check the actual supporting block for these new wall variants.
-        if (!world.getBlockState(support).isSolidRender(world, support)) element.selfDestroy()
+        if (!mods.eln.node.SurfaceMounting.supports(world,origin.pos,element.front.inverse)) element.selfDestroy()
     }
 
     /** Local block coordinates: back plate touches the support; the case projects 0.33 blocks. */

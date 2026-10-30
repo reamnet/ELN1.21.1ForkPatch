@@ -109,3 +109,28 @@ For native placement, powered wall wiring, GUI, collision and reload checks, run
 the client with `-Deln.wallCabinetChecks=true`. The isolated test world exercises
 all three cabinets on four walls and writes `wall-cabinet-checks.json` under the
 client run directory.
+
+## Slabs and sloped roofs (3.0.69)
+
+All four original solar panels accept bottom/top slabs, glass and other physical
+supporting shapes. Bottom-slab mounts sit half a block lower. Cables, ground
+connections and other mounted ELN equipment also accept partial supporting blocks;
+ordinary cable runs ramp between different mounting heights. Empty space still
+fails the support check, and multiblock clearance is still required.
+
+A panel placed on an upright stair automatically faces downhill and follows the
+roof at 45 degrees. The 2x3 array reserves its second row one block uphill, leaving
+the roof stairs intact. Its positive connection is at the downhill mounting block;
+its separate return connection is at the right edge of the next uphill row, one
+block higher. Place
+ordinary cables/grounds beside these terminal cells, on the matching roof course.
+Small panels retain their left/right terminals. Existing rotating panels keep their
+manual angle control and solar tracker, relative to the pitched mount. Solar output
+uses the actual pitched normal, and the tracker projects the sun onto its rotation
+axis. The roof orientation is saved with the panel. Upside-down stairs have a flat upper mounting surface.
+
+Mounting uses collision shapes rather than opacity, so modded slabs and stair
+subclasses work too. Arbitrary decorative meshes without collision surfaces cannot
+provide support. Freestanding devices and existing floor/ceiling/wall orientation
+rules retain their intended mounting direction. Stationary bodies remain baked into
+the terrain; tracking panels retain their animated sections.

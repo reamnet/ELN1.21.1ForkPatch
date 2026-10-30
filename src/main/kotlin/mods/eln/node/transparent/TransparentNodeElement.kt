@@ -203,27 +203,8 @@ abstract class TransparentNodeElement(@JvmField var node: TransparentNode?, @Jvm
     }
 
     open fun checkCanStay(@Suppress("UNUSED_PARAMETER") onCreate: Boolean) {
-        var needDestroy = false
-        if (transparentNodeDescriptor.mustHaveFloor()) {
-            if (!node!!.isBlockOpaque(Direction.YN)) needDestroy = true
-        }
-        if (transparentNodeDescriptor.mustHaveCeiling()) {
-            if (!node!!.isBlockOpaque(Direction.YP)) needDestroy = true
-        }
-        if (transparentNodeDescriptor.mustHaveWallFrontInverse()) {
-            if (!node!!.isBlockOpaque(front.inverse)) needDestroy = true
-        }
-        if (transparentNodeDescriptor.mustHaveWall()) {
-            var wall = false
-            if (node!!.isBlockOpaque(Direction.XN)) wall = true
-            if (node!!.isBlockOpaque(Direction.XP)) wall = true
-            if (node!!.isBlockOpaque(Direction.ZN)) wall = true
-            if (node!!.isBlockOpaque(Direction.ZP)) wall = true
-            if (!wall) needDestroy = true
-        }
-        if (needDestroy) {
-            selfDestroy()
-        }
+        val origin=node?.coordinate ?: return
+        if (!transparentNodeDescriptor.hasMountingSupport(origin,front)) selfDestroy()
     }
 
     open fun selfDestroy() {

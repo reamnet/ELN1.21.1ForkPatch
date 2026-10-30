@@ -1,6 +1,7 @@
 package mods.eln.cable
 
 class CableRenderType {
+    val rise = FloatArray(4)
     var method = arrayOfNulls<CableRenderTypeMethodType>(4)
     var endAt = FloatArray(4)
     @JvmField

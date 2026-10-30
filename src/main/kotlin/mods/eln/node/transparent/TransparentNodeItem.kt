@@ -77,7 +77,7 @@ class TransparentNodeItem(b: Supplier<Block>) : GenericItemBlockUsingDamage<Tran
         if (world.isClientSide) return false
         val descriptor = getDescriptor(stack) ?: return false
         val direction = fromIntMinecraftSide(side.get3DDataValue())!!.inverse
-        val front = descriptor.getFrontFromPlace(direction, player)
+        val front = descriptor.getFrontFromPlace(direction, player)?.let { descriptor.mountingFront(world,pos,it) }
         val v = intArrayOf(descriptor.spawnDeltaX, descriptor.spawnDeltaY, descriptor.spawnDeltaZ)
         front!!.rotateFromXN(v)
         x += v[0]
@@ -89,8 +89,9 @@ class TransparentNodeItem(b: Supplier<Block>) : GenericItemBlockUsingDamage<Tran
             sendMessage(player, error)
             return false
         }
-        val ghostgroup = descriptor.getGhostGroupFront(front)
-        ghostgroup?.plot(coord, coord, descriptor.ghostGroupUuid)
+        if (!recessed && !world.getBlockState(coord.pos).canBeReplaced()) return false
+        val ghostgroup = descriptor.getGhostGroupAt(coord,front)
+        if (ghostgroup!=null && !ghostgroup.plot(coord, coord, descriptor.ghostGroupUuid)) return false
         val node = TransparentNode()
         node.onBlockPlacedBy(coord, front, player, stack)
         val block = this.block.get() as NodeBlock

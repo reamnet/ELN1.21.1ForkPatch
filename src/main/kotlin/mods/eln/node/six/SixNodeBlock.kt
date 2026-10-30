@@ -124,7 +124,8 @@ class SixNodeBlock : NodeBlock(Properties.of().strength(0.3f, 1.0f).dynamicShape
                     Direction.ZN->Shapes.box(.35,.35,0.0,.65,.65,.07)
                     Direction.ZP->Shapes.box(.35,.35,.93,.65,.65,1.0)
                 } else faceSlab(direction)
-                shape=Shapes.or(shape,slab)
+                val offset=mods.eln.node.SurfaceMounting.offset(world,pos,direction)
+                shape=Shapes.or(shape,slab.move(offset.x,offset.y,offset.z))
             }
         }
         return shape
@@ -399,8 +400,7 @@ class SixNodeBlock : NodeBlock(Properties.of().strength(0.3f, 1.0f).dynamicShape
         val controlSupport = state.block as? mods.eln.generic.SignalWireSupport
         if (controlSupport != null) return controlSupport.acceptsSignalWire(state, direction.inverse.toFacing())
         if(state.isSolidRender(world, other))return true
-        val fixture=descriptor ?: ((world.getBlockEntity(BlockPos(x,y,z)) as? SixNodeEntity)?.node as? SixNode)?.getElement(direction)?.sixNodeElementDescriptor
-        return mods.eln.sixnode.lampsocket.LampMounting.supports(world,BlockPos(x,y,z),direction,fixture)
+        return mods.eln.node.SurfaceMounting.supports(world,BlockPos(x,y,z),direction)
     }
 
     /**

@@ -198,7 +198,7 @@ abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeEntit
             }
         }
 
-        val ghostGroup = transparentNodeDescriptor.getGhostGroupFront(front)
+        val ghostGroup = transparentNodeDescriptor.getGhostGroupAt(coordinate(),front ?: Direction.ZP)
         if (ghostGroup != null) {
             for (element in ghostGroup.elementList) {
                 val x = tileEntity.xCoord + element.x
@@ -216,7 +216,8 @@ abstract class TransparentNodeElementRender(var tileEntity: TransparentNodeEntit
             }
         }
 
-        return merged.inflate(0.25, 0.25, 0.25)
+        val offset=tileEntity.level?.let { transparentNodeDescriptor.mountingOffset(it,tileEntity.blockPos,front ?: Direction.ZP) } ?: net.minecraft.world.phys.Vec3.ZERO
+        return merged.minmax(merged.move(offset)).inflate(0.25, 0.25, 0.25)
     }
 
     open fun getCableRenderSide(side: Direction, lrdu: LRDU): CableRenderDescriptor? {

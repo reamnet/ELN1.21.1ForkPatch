@@ -45,12 +45,17 @@ object CableRender {
                 val sixNodeEntity = otherTileEntity
                 if (sixNodeEntity.elementRenderList[side.int] != null) {
                     val otherSide = side.applyLRDU(lrdu)
+                    connectionTypeBuild.rise[lrdu.dir]=mountRise(entity,sixNodeEntity,side)
                     connectionTypeBuild.otherdry[lrdu.dir] =
                         sixNodeEntity.getCableDry(otherSide, otherSide.getLRDUGoingTo(side))
                     connectionTypeBuild.otherRender[lrdu.dir] =
                         sixNodeEntity.getCableRender(otherSide, otherSide.getLRDUGoingTo(side)!!)
                     continue
                 }
+            }
+
+            if(otherTileEntity is mods.eln.node.transparent.TransparentNodeEntity) {
+                connectionTypeBuild.rise[lrdu.dir]=mountRise(entity,otherTileEntity,side)
             }
 
             //no wrappeConection ?
@@ -163,12 +168,17 @@ object CableRender {
             if (otherTileEntity is SixNodeEntity) {
                 val sixNodeEntity = otherTileEntity
                 if (sixNodeEntity.elementRenderList[side.int] != null) {
+                    connectionTypeBuild.rise[lrdu.dir]=mountRise(element.tileEntity,sixNodeEntity,side)
                     connectionTypeBuild.otherdry[lrdu.dir] =
                         sixNodeEntity.elementRenderList[side.int]!!.getCableDry(lrdu.inverse())
                     connectionTypeBuild.otherRender[lrdu.dir] =
                         sixNodeEntity.elementRenderList[side.int]!!.getCableRender(lrdu.inverse())
                     continue
                 }
+            }
+
+            if(otherTileEntity is mods.eln.node.transparent.TransparentNodeEntity) {
+                connectionTypeBuild.rise[lrdu.dir]=mountRise(element.tileEntity,otherTileEntity,side)
             }
 
             //no wrappeConection ?
@@ -229,6 +239,44 @@ object CableRender {
         return connectionTypeBuild
     }
 
+    private fun planeInset(entity: NodeBlockEntity,side: Direction): Double {
+        val world=entity.level ?: return 0.0
+        if(entity is SixNodeEntity) {
+            val descriptor=entity.elementRenderList[side.int]?.sixNodeDescriptor
+            if(mods.eln.sixnode.lampsocket.LampMounting.partialAllowed(descriptor,side))return 0.0
+            return mods.eln.node.SurfaceMounting.inset(world,entity.blockPos,side)
+        }
+        val render=(entity as? mods.eln.node.transparent.TransparentNodeEntity)?.elementRender ?: return 0.0
+        val offset=render.transparentNodeDescriptor.mountingOffset(world,entity.blockPos,render.front ?: Direction.ZP)
+        return offset.dot(net.minecraft.world.phys.Vec3.atLowerCornerOf(side.toFacing().normal))
+    }
+
+    private fun mountRise(a: NodeBlockEntity,b: NodeBlockEntity,side: Direction)=
+        mods.eln.node.SurfaceMounting.cableRise(planeInset(a,side),planeInset(b,side))
+
+    /** Rectangular lead with a rising end. Normal floor wiring still uses the original mesh. */
+    private fun drawRisingLeg(cable: CableRenderDescriptor,port: LRDU,start: Float,rise: Float) {
+        GL11.glPushMatrix()
+        val angle=when(port) { LRDU.Left->180f;LRDU.Right->0f;LRDU.Down->90f;LRDU.Up->-90f }
+        GL11.glRotatef(angle,1f,0f,0f)
+        val w=cable.widthDiv2;val h=cable.height
+        val points=arrayOf(floatArrayOf(0f,-w,start),floatArrayOf(h,-w,start),floatArrayOf(h,w,start),floatArrayOf(0f,w,start),
+            floatArrayOf(rise,-w,.5f),floatArrayOf(rise+h,-w,.5f),floatArrayOf(rise+h,w,.5f),floatArrayOf(rise,w,.5f))
+        val faces=arrayOf(intArrayOf(0,1,2,3),intArrayOf(4,7,6,5),intArrayOf(0,4,5,1),intArrayOf(3,2,6,7),intArrayOf(1,5,6,2),intArrayOf(0,3,7,4))
+        GL11.glBegin(GL11.GL_QUADS)
+        for(face in faces) {
+            val a=points[face[0]];val b=points[face[1]];val c=points[face[2]]
+            val n=net.minecraft.world.phys.Vec3((b[0]-a[0]).toDouble(),(b[1]-a[1]).toDouble(),(b[2]-a[2]).toDouble())
+                .cross(net.minecraft.world.phys.Vec3((c[0]-a[0]).toDouble(),(c[1]-a[1]).toDouble(),(c[2]-a[2]).toDouble())).normalize()
+            GL11.glNormal3f(n.x.toFloat(),n.y.toFloat(),n.z.toFloat())
+            for((i,v) in face.withIndex()) {
+                GL11.glTexCoord2f(if(i==1 || i==2).3f else .2f,if(i>=2).5f else start)
+                val p=points[v];GL11.glVertex3f(p[0],p[1],p[2])
+            }
+        }
+        GL11.glEnd();GL11.glPopMatrix()
+    }
+
     @JvmStatic
     fun drawCable(
         cable: CableRenderDescriptor,
@@ -237,6 +285,16 @@ object CableRender {
         deltaStart: Float = cable.widthDiv2 / 2f,
         drawBottom: Boolean = false
     ) {
+        val rising=LRDU.entries.filter { connection[it] && connectionType.rise[it.dir]>.0001f }
+        if(rising.isNotEmpty()) {
+            val remaining=LRDUMask(connection.mask)
+            for(port in rising) {
+                drawRisingLeg(cable,port,maxOf(deltaStart,connectionType.startAt[port.dir]),connectionType.rise[port.dir])
+                remaining.set(remaining.mask and (1 shl port.dir).inv())
+            }
+            if(remaining.mask!=0)drawCable(cable,remaining,connectionType,deltaStart,drawBottom)
+            return
+        }
         var endLeft = -deltaStart
         var endRight = deltaStart
         var endUp = deltaStart

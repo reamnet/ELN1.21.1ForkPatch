@@ -84,7 +84,19 @@ abstract class SixNodeElementRender(open var tileEntity: SixNodeEntity, @JvmFiel
         }
     }
 
+    private val mountSupports = (listOf(tileEntity.blockPos)+LRDU.entries.map { tileEntity.blockPos.relative(side.applyLRDU(it).toFacing()) })
+        .map { it.relative(side.toFacing()) }
+    private val previousSupports=arrayOfNulls<net.minecraft.world.level.block.state.BlockState>(5)
+    private var mountCheckTick=Long.MIN_VALUE
     open fun draw() {
+        val world=tileEntity.level!!
+        if(mountCheckTick!=world.gameTime) {
+            mountCheckTick=world.gameTime
+            for((index,pos) in mountSupports.withIndex()) {
+                val state=world.getBlockState(pos)
+                if(previousSupports[index]!==state) { previousSupports[index]=state;needRedraw=true }
+            }
+        }
         if (needRedraw) {
             needRedraw = false
             connectionType = CableRender.connectionType(this, side)
@@ -313,7 +325,9 @@ abstract class SixNodeElementRender(open var tileEntity: SixNodeEntity, @JvmFiel
     }
 
     open fun getRenderBoundingBox(@Suppress("UNUSED_PARAMETER") tileEntity: SixNodeEntity): AABB? {
-        return null
+        val world=tileEntity.level ?: return null
+        val offset=mods.eln.node.SurfaceMounting.offset(world,tileEntity.blockPos,side)
+        return if(offset==net.minecraft.world.phys.Vec3.ZERO)null else AABB(tileEntity.blockPos).minmax(AABB(tileEntity.blockPos).move(offset))
     }
 
     @Throws(IOException::class)

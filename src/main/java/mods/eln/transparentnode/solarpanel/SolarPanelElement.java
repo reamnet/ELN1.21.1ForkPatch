@@ -46,6 +46,8 @@ public class SolarPanelElement extends TransparentNodeElement {
     SolarPannelSlowProcess slowProcess = new SolarPannelSlowProcess(this);
 
     public double panelAlpha = Math.PI / 2;
+    public SolarRoofMount roofMount = new SolarRoofMount(null);
+    public boolean roofMountKnown = false;
     private GhostPowerNode groundNode = null;
 
     public SolarPanelElement(TransparentNode transparentNode,
@@ -147,11 +149,12 @@ public class SolarPanelElement extends TransparentNodeElement {
 
     @Override
     public void initialize() {
+        if(!roofMountKnown) { roofMount=SolarRoofMount.fromSupport(node.coordinate.world(),node.coordinate.getPos());roofMountKnown=true; }
         descriptor.applyTo(positiveLoad);
         descriptor.applyTo(negativeLoad);
 
         if (descriptor.groundCoordinate != null) {
-            GhostPowerNode n = new GhostPowerNode(node.coordinate, front, descriptor.groundCoordinate, negativeLoad, NodeBase.maskElectricalPower);
+            GhostPowerNode n = new GhostPowerNode(node.coordinate, front, roofMount.groundOffset(descriptor.groundCoordinate), negativeLoad, NodeBase.maskElectricalPower);
             n.initialize();
             groundNode = n;
         }
@@ -176,6 +179,7 @@ public class SolarPanelElement extends TransparentNodeElement {
         super.writeToNBT(nbt);
         powerSource.writeToNBT(nbt, "powerSource");
         nbt.putDouble("panelAlpha", panelAlpha);
+        if(roofMountKnown)nbt.putInt("roofUphill",roofMount.getUphill()==null ? -1 : roofMount.getUphill().get3DDataValue());
     }
 
     @Override
@@ -183,7 +187,9 @@ public class SolarPanelElement extends TransparentNodeElement {
         super.readFromNBT(nbt);
         enforceGroundingMode();
         powerSource.readFromNBT(nbt, "powerSource");
-        panelAlpha = nbt.getDouble("panelAlpha");
+        roofMountKnown=nbt.contains("roofUphill");
+        roofMount=roofMountKnown ? SolarRoofMount.fromId(nbt.getInt("roofUphill")) : new SolarRoofMount(null);
+        panelAlpha = nbt.contains("panelAlpha") && Double.isFinite(nbt.getDouble("panelAlpha")) ? descriptor.alphaTrunk(nbt.getDouble("panelAlpha")) : Math.PI/2;
     }
 
 
@@ -193,6 +199,7 @@ public class SolarPanelElement extends TransparentNodeElement {
             stream.writeBoolean(!getInventory().getItem(SolarPanelContainer.trackerSlotId).isEmpty());
             stream.writeFloat((float) panelAlpha);
             node.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);
+            stream.writeByte(roofMount.getUphill()==null ? -1 : roofMount.getUphill().get3DDataValue());
         } catch (IOException e) {
 
             e.printStackTrace();
@@ -208,8 +215,11 @@ public class SolarPanelElement extends TransparentNodeElement {
         try {
             switch (packetType) {
                 case unserializePannelAlpha:
-                    panelAlpha = stream.readFloat();
-                    needPublish();
+                    float requested=stream.readFloat();
+                    if(Float.isFinite(requested)) {
+                        panelAlpha = descriptor.alphaTrunk(requested);
+                        needPublish();
+                    }
                     break;
 
                 default:

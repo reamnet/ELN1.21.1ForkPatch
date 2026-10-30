@@ -41,19 +41,40 @@ object PartialLampPicking {
         val checked=HashSet<BlockPos>()
         for(step in 0..24) {
             val at=BlockPos.containing(start.lerp(end,step/24.0))
-            for(dy in -1..1) {
-                val pos=at.offset(0,dy,0)
+            val candidates=listOf(at)+net.minecraft.core.Direction.entries.map { at.relative(it) }
+            for(pos in candidates) {
                 if(!checked.add(pos))continue
-                val entity=world.getBlockEntity(pos) as? SixNodeEntity ?: continue
-                for(side in listOf(Direction.YN,Direction.YP)) {
-                    val render=entity.elementRenderList[side.int] as? LampSocketRender ?: continue
-                    val inset=LampMounting.inset(world,pos,side,render.descriptor)
-                    if(inset==0.0)continue
-                    val hit=bounds(render,pos,inset).clip(start,end).orElse(null) ?: continue
+                val entity=world.getBlockEntity(pos)
+                fun accept(box: AABB,side: Direction) {
+                    val hit=box.clip(start,end).orElse(null) ?: return
                     val distance=hit.distanceToSqr(start)
-                    if(distance>=nearest)continue
+                    if(distance>=nearest)return
                     nearest=distance
                     result=BlockHitResult(hit,side.inverse.toFacing(),pos,false)
+                }
+                if(entity is SixNodeEntity)for(side in Direction.entries) {
+                    val render=entity.elementRenderList[side.int] ?: continue
+                    val inset=mods.eln.node.SurfaceMounting.inset(world,pos,side)
+                    if(inset==0.0)continue
+                    if(render is LampSocketRender)accept(bounds(render,pos,inset),side)
+                    else {
+                        val offset=mods.eln.node.SurfaceMounting.offset(world,pos,side)
+                        accept(mods.eln.node.six.SixNodeBlock.faceSlab(side).bounds().move(Vec3.atLowerCornerOf(pos)).move(offset),side)
+                    }
+                }
+                if(entity is mods.eln.node.transparent.TransparentNodeEntity) {
+                    val render=entity.elementRender ?: continue
+                    val offset=render.transparentNodeDescriptor.mountingOffset(world,pos,render.front ?: Direction.ZP)
+                    val pitched=render is mods.eln.transparentnode.solarpanel.SolarPanelRender && mods.eln.transparentnode.solarpanel.SolarRoofMount.at(world,pos).pitched
+                    if(offset==Vec3.ZERO && !pitched)continue
+                    val mountSide=when {
+                        render.transparentNodeDescriptor.mustHaveCeiling()->Direction.YP
+                        render.transparentNodeDescriptor.mustHaveWallFrontInverse()->(render.front ?: Direction.ZP).inverse
+                        else->Direction.YN
+                    }
+                    val boxes=mutableListOf<AABB?>()
+                    entity.addCollisionBoxesToList(AABB(pos).inflate(4.0),boxes,null)
+                    for(box in boxes)if(box!=null)accept(box,mountSide)
                 }
             }
         }

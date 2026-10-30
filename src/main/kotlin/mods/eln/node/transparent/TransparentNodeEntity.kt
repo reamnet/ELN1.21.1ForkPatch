@@ -148,7 +148,12 @@ open class TransparentNodeEntity(type: BlockEntityType<*>, pos: BlockPos, state:
             val bb = AABB(pos)
             if (par5AxisAlignedBB.intersects(bb)) list.add(bb)
         } else {
-            desc.addCollisionBoxesToList(par5AxisAlignedBB, list, world, x, y, z)
+            val front=if(world.isClientSide)elementRender?.front ?: mods.eln.misc.Direction.ZP
+                else (node as? TransparentNode)?.element?.front ?: mods.eln.misc.Direction.ZP
+            val offset=desc.mountingOffset(world,blockPos,front)
+            val boxes=ArrayList<AABB?>()
+            desc.addCollisionBoxesToList(par5AxisAlignedBB.move(offset.scale(-1.0)), boxes, world, x, y, z)
+            boxes.forEach { box->box?.move(offset)?.let(list::add) }
         }
     }
 
