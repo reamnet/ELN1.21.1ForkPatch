@@ -33,6 +33,8 @@ public class Obj3D {
     public static class FaceGroup {
         String mtlName = null;
         public ResourceLocation textureResource;
+        // Opt-in materials on the original 3.0 equipment refresh. Legacy OBJ behavior stays intact.
+        private float[] detailTint;
         List<Face> face = new ArrayList<Face>();
         boolean listReady = false;
         int glList;
@@ -126,7 +128,19 @@ public class Obj3D {
                 GL11.glEndList();
             }
 
-            GL11.glCallList(glList);
+            boolean finish = textureResource != null && mtlName != null
+                && (mtlName.startsWith("eln_finish_") || mtlName.startsWith("eln_detail_"));
+            if (finish) GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+            try {
+                if (finish) {
+                    GL11.glEnable(GL11.GL_TEXTURE_2D);
+                    bindTexture();
+                    if (detailTint != null) GL11.glColor3f(detailTint[0], detailTint[1], detailTint[2]);
+                }
+                GL11.glCallList(glList);
+            } finally {
+                if (finish) GL11.glPopAttrib();
+            }
         }
     }
 
@@ -402,6 +416,8 @@ public class Obj3D {
      */
     public ResourceLocation getModelResourceLocation(String name) {
         if (name == null) return null;
+        // Explicit namespaced resources let refreshed meshes share one atlas-ready finish sheet.
+        if (name.startsWith("eln:textures/")) return ResourceLocation.parse(name);
         String file = name.replace('\\', '/');
         file = file.substring(file.lastIndexOf('/') + 1);
         return ResourceLocation.fromNamespaceAndPath("eln", ("model/" + dirPath + "/" + file).toLowerCase(java.util.Locale.ROOT));
@@ -545,6 +561,14 @@ public class Obj3D {
                     String[] words = line.split(" ");
                     if (words[0].equals("newmtl")) {
                         mtlName = words[1];
+                    } else if (words[0].equals("Kd") && mtlName.startsWith("eln_detail_") && words.length == 4) {
+                        for (Obj3DPart partPtr : nameToPartHash.values()) {
+                            for (FaceGroup fgroup : partPtr.faceGroup) {
+                                if (mtlName.equals(fgroup.mtlName)) fgroup.detailTint = new float[] {
+                                    Float.parseFloat(words[1]), Float.parseFloat(words[2]), Float.parseFloat(words[3])
+                                };
+                            }
+                        }
                     } else if (words[0].equals("map_Kd")) {
                         for (Obj3DPart partPtr : nameToPartHash.values()) {
                             for (FaceGroup fgroup : partPtr.faceGroup) {

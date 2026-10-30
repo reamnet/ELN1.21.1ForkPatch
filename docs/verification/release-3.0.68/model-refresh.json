@@ -1,0 +1,2014 @@
+{
+  "models": [
+    {
+      "model": "adjustablewarehousehighbay/adjustablewarehousehighbay.obj",
+      "originalFaces": 276,
+      "faces": 308,
+      "sha256": "100e1d2b7593ea83fc6f180bf47120ecfdd63d8fa0d1e710c676050dde378780",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "appliancewalloutlet/appliancewalloutlet.obj",
+      "originalFaces": 452,
+      "faces": 452,
+      "sha256": "ab7e410e825f54829c40489fc8c2f0122172befdec314c8707fcb97b420e354a",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "archedwalkwaylight/archedwalkwaylight.obj",
+      "originalFaces": 348,
+      "faces": 348,
+      "sha256": "d70da690679859006a0409b2fd410ba24681a8a0e9b881ef13b65b6025dc521f",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "armoredbulkheadlight/armoredbulkheadlight.obj",
+      "originalFaces": 468,
+      "faces": 468,
+      "sha256": "5e351f3c36524263055661c7eb8197718611368cfd50c49294916e5b18c9f966",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "articulatedtablelamp/articulatedtablelamp.obj",
+      "originalFaces": 860,
+      "faces": 860,
+      "sha256": "f548a0ead00d25b1fa86a1f95d1b9c46645738b419586387190733d7701b17ef",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "auraceilingfan/auraceilingfan.obj",
+      "originalFaces": 9008,
+      "faces": 9008,
+      "sha256": "2fd4aeeddeff20776e02ff2f619270427f4ca91d9a5b3e7b4d12e97a8b5b410b",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "automatictransferswitch/automatictransferswitch.obj",
+      "originalFaces": 1028,
+      "faces": 1060,
+      "sha256": "a34c046dd6acdd49238d9f1d806858f5afb93df728abe1bb30accb38db78865e",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "bankerstablelamp/bankerstablelamp.obj",
+      "originalFaces": 452,
+      "faces": 452,
+      "sha256": "bd41245d1a1a620f2dab335f6dff470953b2a7c1cc081ff468eabcabbd10541d",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "basicchandelier/basicchandelier.obj",
+      "originalFaces": 3632,
+      "faces": 3632,
+      "sha256": "77ffb0106fbed81c5817f84569bc22c5d534d30fa0250e58e6569ed6f1b5a45c",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "basiclampholder/basiclampholder.obj",
+      "originalFaces": 728,
+      "faces": 728,
+      "sha256": "f3eab49be5ef7eca0722eb68923b7c29e401da23fab1904501ff9084f8b16350",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "boulevardlanternstreetlight/boulevardlanternstreetlight.obj",
+      "originalFaces": 848,
+      "faces": 848,
+      "sha256": "9ef83068e185a9fda8cbbbc4f8119f5bbc7adf0cf0b035bf00f1e8b661605bba",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "cagewallsconce/cagewallsconce.obj",
+      "originalFaces": 576,
+      "faces": 576,
+      "sha256": "1295fe7e96c258efd17fa72dc92f016110e0dfa80f4ec2f246d852ff12244d99",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "candlefoyerchandelier/candlefoyerchandelier.obj",
+      "originalFaces": 2500,
+      "faces": 2500,
+      "sha256": "ebcd69e04ff00402b4fc26bfbf5b5b5173b258a34366f5b88866e6d58f11ed55",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "candlewallsconce/candlewallsconce.obj",
+      "originalFaces": 964,
+      "faces": 964,
+      "sha256": "c4a2f647e276b6fe9188c620a5de54a4a2888c4034a6166a945640d4fff1a5ec",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "ceepowerbridge/ceepowerbridge.obj",
+      "originalFaces": 248,
+      "faces": 398,
+      "sha256": "15c8e5c654ea6b50f8c029bdff029cd1dbe2fd30073c8412edf0958c47404bdd",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "ceilingcolorcabletray/ceilingcolorcabletray.obj",
+      "originalFaces": 900,
+      "faces": 900,
+      "sha256": "467764f2d8f3bd7d4843c9f9bc072f4b380a0df33429d779c3bb243ae8b264ba",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "ceramicdrumtablelamp/ceramicdrumtablelamp.obj",
+      "originalFaces": 880,
+      "faces": 880,
+      "sha256": "54b8a28ab7b915f19bcdcbeb890fbe4eda0cc053488818ecb4806b84b087f431",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "christmasfairylights/christmasfairylights.obj",
+      "originalFaces": 884,
+      "faces": 884,
+      "sha256": "fff88d0d8cb8c7a9881fe7354f2951427ea6027b30ca095bc2e15d85845805ce",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "christmasiciclelights/christmasiciclelights.obj",
+      "originalFaces": 884,
+      "faces": 884,
+      "sha256": "900af6963d945c2383ea7c2cdcdd7a4dd90fbd9b5b34224d20fadd55e058a6c3",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "christmasstarlight/christmasstarlight.obj",
+      "originalFaces": 284,
+      "faces": 284,
+      "sha256": "8794032def157311db05161c12dc094ea046245ba1049613f54afa8ea0f7fbb5",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "classicboxfan/classicboxfan.obj",
+      "originalFaces": 1508,
+      "faces": 1508,
+      "sha256": "ad9129aedd6925bf84446afbffee42fdcfb60d1f3447a61c8234ca4816753918",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "classicceilingfan/classicceilingfan.obj",
+      "originalFaces": 544,
+      "faces": 544,
+      "sha256": "4a931dbb78a9d55586a1d887baaa16e22b9e804a76aa01916f495c5676b0e541",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "compactboxfan/compactboxfan.obj",
+      "originalFaces": 1496,
+      "faces": 1496,
+      "sha256": "b48fbb69071fd917afde14005f4292e1750cabf346ae5bd81b02a6e464676b24",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "compactservicemast/compactservicemast.obj",
+      "originalFaces": 220,
+      "faces": 252,
+      "sha256": "7fc8b887cd7099c72459bf80fd7313c25a4a359a47897ebaa4f1dfe0a6071ff6",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "compactups/compactups.obj",
+      "originalFaces": 2468,
+      "faces": 2500,
+      "sha256": "ff3c891501c3762820fee74f08cb3e56ec2bf7a6438a2636624568f27fb1ec1a",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "cornerfireplacestand/cornerfireplacestand.obj",
+      "originalFaces": 132,
+      "faces": 164,
+      "sha256": "373012e843ea88e02701db988b0af27ff8c92ddbe5eac9f52dcbc16c4b342dc7",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "coveledstrip/coveledstrip.obj",
+      "originalFaces": 84,
+      "faces": 84,
+      "sha256": "d4aa381b1bf5949cb2e7e55a49fd4ea87a6521dcdfa35755d6aa3aa3535617ee",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "crystalcascadechandelier/crystalcascadechandelier.obj",
+      "originalFaces": 9704,
+      "faces": 9704,
+      "sha256": "0b9f065a900d0ec0a8f5bc2a63ae9d1e387b546480434fe0831e10e5bdca19da",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "crystaltierchandelier/crystaltierchandelier.obj",
+      "originalFaces": 5200,
+      "faces": 5200,
+      "sha256": "1677aeec5669536d4b968ff82932318d42f9fc21bf18274e9176ece94c78a727",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "cylinderwallsconce/cylinderwallsconce.obj",
+      "originalFaces": 508,
+      "faces": 508,
+      "sha256": "66b96d46fac0785ba403ab4c574316c66f763d81d7766500ea3e1ebd66755fe3",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "deckelectricgrill/deckelectricgrill.obj",
+      "originalFaces": 420,
+      "faces": 452,
+      "sha256": "a5b245ff8d9fd1afd7d4fcfceb630f8201bdf902dec084c1de05f2b82fee89c5",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "deckpatioheater/deckpatioheater.obj",
+      "originalFaces": 812,
+      "faces": 812,
+      "sha256": "1f28b6bd5d244af9220de11cd9f626943eb0014e9773a09cec34efbf880d5130",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "deckpostcaplight/deckpostcaplight.obj",
+      "originalFaces": 88,
+      "faces": 120,
+      "sha256": "9124fca76fcd8f06d540ad88655368fd531365252887608f1a52aa15036a8cb6",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "decksteplight/decksteplight.obj",
+      "originalFaces": 48,
+      "faces": 48,
+      "sha256": "e67dde10cead659fed35eeb95858c1eaeb881434428274f11f8dac5f1006c610",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "deepbafflepotlight/deepbafflepotlight.obj",
+      "originalFaces": 540,
+      "faces": 540,
+      "sha256": "3dc8ab0bc963121d187bebbf8815c31adb64c520c9376e39d0e08c81c9cdc0be",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "distributionpole/distributionpole.obj",
+      "originalFaces": 5272,
+      "faces": 5346,
+      "sha256": "130cb6a3ffb2635ac3a1f365f6681bfaee067cac076fbe95bd7ffe735355ec53",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": true
+    },
+    {
+      "model": "dryeroutlet30/dryeroutlet30.obj",
+      "originalFaces": 460,
+      "faces": 460,
+      "sha256": "a2dbeacf0105f6fb28ca97e137f0912ef91d7d8124839198ad5d71a03e74e2ab",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "dualgumdropsidewalklight/dualgumdropsidewalklight.obj",
+      "originalFaces": 1628,
+      "faces": 1660,
+      "sha256": "ca7a13e66fb20208a42c74a2254c24596556e7fec71e249cdb6e1474c2bd5072",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "electricdryer/electricdryer.obj",
+      "originalFaces": 820,
+      "faces": 1002,
+      "sha256": "3f999fdda80a7ac3dc22f57f0a9deb747d15eef2dee79700d55b0730250e4f85",
+      "beveledBoxes": 2,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "electricwasher/electricwasher.obj",
+      "originalFaces": 1900,
+      "faces": 2050,
+      "sha256": "9e6e96469aa9f5e13b644c0e9066af90f7d673217fcf045850d50f2acf3a8365",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "fabricwallsconce/fabricwallsconce.obj",
+      "originalFaces": 420,
+      "faces": 420,
+      "sha256": "b9d3ff8040993e096e5fd14bcab16e3226422c9cf9bddeab83157d3fc219c892",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "farmhousefireplacestand/farmhousefireplacestand.obj",
+      "originalFaces": 144,
+      "faces": 176,
+      "sha256": "5957aa19fadb2db5f023824fc4c7a6df65f7a14c5b773521d8b8404e11ef6357",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "firealarm_bell/firealarm_bell.obj",
+      "originalFaces": 212,
+      "faces": 244,
+      "sha256": "fea1d131936ecdc1c4f312e0e6065a27d7a4a7ac8cca7f3e227aa1882e67e11f",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "firealarm_heat/firealarm_heat.obj",
+      "originalFaces": 352,
+      "faces": 352,
+      "sha256": "af9a2d04b6cbecfd17151893f2f1367bce3a94195a0b80eebeed647b4eb23fba",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "firealarm_horn/firealarm_horn.obj",
+      "originalFaces": 108,
+      "faces": 140,
+      "sha256": "97289b51762ccd236e5728ff563a06afdfb0e75ab4a5d9480b42ae6b1ab302ee",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "firealarm_panel/firealarm_panel.obj",
+      "originalFaces": 84,
+      "faces": 116,
+      "sha256": "3b3c1ad6f1b54246804a3c8b3966d473a27b12037ca201b3126f012611800363",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "firealarm_pull/firealarm_pull.obj",
+      "originalFaces": 60,
+      "faces": 92,
+      "sha256": "85dc0c71fb5a362d49ee62ce75fca56304248f444f9755477ff93be8e66be8bc",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "firealarm_smoke/firealarm_smoke.obj",
+      "originalFaces": 280,
+      "faces": 280,
+      "sha256": "929803f6beaa8ffe9e58e949f0bf22f0a710272f17ad7981ba625dcbdd06af8c",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "firealarm_strobe/firealarm_strobe.obj",
+      "originalFaces": 48,
+      "faces": 80,
+      "sha256": "854961655bfc1528e001ff2c0539ac736103d84f0d9e828f55f0f27ccb971d1a",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "flexneonledstrip/flexneonledstrip.obj",
+      "originalFaces": 1356,
+      "faces": 1356,
+      "sha256": "3a6496cccf59a94a455bda3755b701c1554e0445492f4dacd1742380e4ccd529",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "fusionmatterreactor/fusionmatterreactor.obj",
+      "originalFaces": 2752,
+      "faces": 3126,
+      "sha256": "0b4e2ccd0c1d1f54629a898b400a3e691b87e84853cc0d12c6b2c0988225c1fc",
+      "beveledBoxes": 8,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "gardenbollardlight/gardenbollardlight.obj",
+      "originalFaces": 400,
+      "faces": 400,
+      "sha256": "a6dff40a79cb76b0d3592d341e60e2c802cfd15a2fe9d003165fdca8b3e1637d",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "gasworklight/gasworklight.obj",
+      "originalFaces": 962,
+      "faces": 1058,
+      "sha256": "a69348a3da14b08f609b656b3633436e454c5e812a13d54fb6a68419dc532ee6",
+      "beveledBoxes": 3,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "gimbalpotlight/gimbalpotlight.obj",
+      "originalFaces": 480,
+      "faces": 480,
+      "sha256": "425c6d391b964759417fdb1ad17f236a243af39190c464d1696cd36f60477084",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "globewallsconce/globewallsconce.obj",
+      "originalFaces": 716,
+      "faces": 716,
+      "sha256": "4d9dc29d0af3adafb3e6d1361c6ee0d178e978d37e3fde8e7b7bf83178940812",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "gooseneckbarnlight/gooseneckbarnlight.obj",
+      "originalFaces": 556,
+      "faces": 556,
+      "sha256": "15ba8d65c739f0a6d359f58b40641a9d5c63c1ba38e1ee467eeabc456c926994",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "gooseneckservicemast/gooseneckservicemast.obj",
+      "originalFaces": 220,
+      "faces": 252,
+      "sha256": "975f0b63c653eb087ca871661d5c854737f88ad5e21b840de641415fd60ab7af",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "grandempirechandelier/grandempirechandelier.obj",
+      "originalFaces": 13164,
+      "faces": 13164,
+      "sha256": "f528fa0df64ab65d405b2e65579dc680b01cd9889fb2b38b57e36a9ed97ed6f1",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "grandhalochandelier/grandhalochandelier.obj",
+      "originalFaces": 2760,
+      "faces": 2760,
+      "sha256": "cfafe27e92c4af5727e104a97ee8419b3cf83fb259572777c27cdaa3fe9adc0e",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "growingbed/growingbed.obj",
+      "originalFaces": 9220,
+      "faces": 9220,
+      "sha256": "d7d586956809fed25749266bda3ba10738d5766155825367749403dfffed5b0a",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "gumdropsidewalklight/gumdropsidewalklight.obj",
+      "originalFaces": 932,
+      "faces": 964,
+      "sha256": "b54c5186dd4084aa9be0b761fffa1d95fea02368f319fc62a477ed6796b64eb7",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "halloweenbatlight/halloweenbatlight.obj",
+      "originalFaces": 104,
+      "faces": 104,
+      "sha256": "01e1a37a5e5ad74b265a230c0d70a761d3135cb14708a5bfbb612a6908ed17c0",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "halloweenghoststring/halloweenghoststring.obj",
+      "originalFaces": 1036,
+      "faces": 1036,
+      "sha256": "31b9b0dab51e3d73dcdccc1b930fa1e1f4015ef7d3ca4946f3d11bc382befd48",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "halloweenpumpkinstring/halloweenpumpkinstring.obj",
+      "originalFaces": 748,
+      "faces": 748,
+      "sha256": "3919317fb07adb7c8e23a9e6fe7a6992069fc84fb369fc0fdb4fe080950c5701",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "hangingfactorylight/hangingfactorylight.obj",
+      "originalFaces": 476,
+      "faces": 508,
+      "sha256": "081dde8a6d8b85aa5dcec273d597d05050f19155d27c5954a1ee1e8be5c781f9",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "harborgooseneck/harborgooseneck.obj",
+      "originalFaces": 268,
+      "faces": 268,
+      "sha256": "4c8691fba1a5a79826ede33f5a3ee36cb234088a66480c9e2c60a2b930e19892",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "householddesklamp/householddesklamp.obj",
+      "originalFaces": 796,
+      "faces": 796,
+      "sha256": "4dcc71c6c796df03edac7bbf16281a4db169efa427c235b074489fd6bdd7d0e7",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "industrial_arrester/industrial_arrester.obj",
+      "originalFaces": 784,
+      "faces": 784,
+      "sha256": "73dec011b6f732691415d1714bd8486c3275271035f79914f48981fefdee338b",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "industrial_charger/industrial_charger.obj",
+      "originalFaces": 156,
+      "faces": 306,
+      "sha256": "d99d36b568d42bea68dcdacad32be42945122dd3f5b3f77da4b486db984ed177",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "industrial_drive/industrial_drive.obj",
+      "originalFaces": 252,
+      "faces": 402,
+      "sha256": "98e52842674f77bf1296c24fcae9e35fecbbd27ab9397116f0f5b1b930d62fbf",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "industrial_forklift/industrial_forklift.obj",
+      "originalFaces": 568,
+      "faces": 632,
+      "sha256": "a492389beb54355073b45e016f3e2efa2a78664a1a1273ad4c740780c02c42d0",
+      "beveledBoxes": 2,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "industrial_load_bank/industrial_load_bank.obj",
+      "originalFaces": 444,
+      "faces": 594,
+      "sha256": "60f42c78febee4d34c9bee11d8b99f43fed3e0db9ca73e3410eb7d3228d728d7",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "industrial_pad/industrial_pad.obj",
+      "originalFaces": 1253,
+      "faces": 1371,
+      "sha256": "988654800bfc709bce8886f83a0c25733973d167d669d2cd92fb242dd77a1815",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "industrial_pallet/industrial_pallet.obj",
+      "originalFaces": 108,
+      "faces": 108,
+      "sha256": "cdf6ce173b53cf7f6d4907d7bd22ec58ca92fb70ba3ce7d5127fa52838e7679b",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "industrial_relay/industrial_relay.obj",
+      "originalFaces": 144,
+      "faces": 294,
+      "sha256": "bc5329046bb1bb374fff3a4fd282cffc3ecd222dec1eb371d89674cef3a2a4ed",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "industrial_scada/industrial_scada.obj",
+      "originalFaces": 204,
+      "faces": 316,
+      "sha256": "e95a3a8c89ee058e25daa6fcec1421c3be8e0b6d3cb80161ac21dc35bd680a0b",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "industrial_shedder/industrial_shedder.obj",
+      "originalFaces": 144,
+      "faces": 294,
+      "sha256": "bc5329046bb1bb374fff3a4fd282cffc3ecd222dec1eb371d89674cef3a2a4ed",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "industrial_welder/industrial_welder.obj",
+      "originalFaces": 144,
+      "faces": 294,
+      "sha256": "ffb5d95932e80e924143af40d8ee1eb163eda2c156b0d4131ef03f05f1440fe3",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "industrialceilingfan/industrialceilingfan.obj",
+      "originalFaces": 632,
+      "faces": 632,
+      "sha256": "93a61c4fac61af68921e74e8ca9135abeac05dfa1a21bc00e2af2a7c88d55516",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "industrialfloorfan/industrialfloorfan.obj",
+      "originalFaces": 1336,
+      "faces": 1336,
+      "sha256": "fc98f8757370cb5ca6d4718efe3390cd79de1a2c993f4c3a8576ac4f5d85f4e7",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "industrialmachineoutlet/industrialmachineoutlet.obj",
+      "originalFaces": 948,
+      "faces": 948,
+      "sha256": "19a494231e9b5d6d519666ff199adac3e46d7dd22585dd8c275701ff9e3e78bc",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "industrialmachineplug/industrialmachineplug.obj",
+      "originalFaces": 616,
+      "faces": 616,
+      "sha256": "502ef4ae71cb360651b161a689576b24f226f095d69ed10de1fcad5d42d7337e",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "industrialpump/industrialpump.obj",
+      "originalFaces": 1109,
+      "faces": 1173,
+      "sha256": "5ff333ad8ad7298d5defca3eba0648abfc17c2f2ced3ea3e8d7fd568f14c7675",
+      "beveledBoxes": 2,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "industrialwallpacklight/industrialwallpacklight.obj",
+      "originalFaces": 60,
+      "faces": 92,
+      "sha256": "c85ca6b4719042c0a06250cba494dcf2ebc43a51bb03ca194ed4993793a0f8c2",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "industrialyardlight/industrialyardlight.obj",
+      "originalFaces": 136,
+      "faces": 136,
+      "sha256": "f97a5d7ddb7e05fc1483a254b4c7fd4c9668985a738f8fc24d98a9eb688504fc",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "jackolanternlamp/jackolanternlamp.obj",
+      "originalFaces": 390,
+      "faces": 390,
+      "sha256": "f8dc4ba43ad409d57cf2ff56a02dc42e67ed60a27d3b00eede13b7b3166cb3a8",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "kitchenblender/kitchenblender.obj",
+      "originalFaces": 324,
+      "faces": 356,
+      "sha256": "6876a121e9485836d5744740ea773ddca132e8224167c22ed4493baa24c38d3d",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "kitchencoffeemaker/kitchencoffeemaker.obj",
+      "originalFaces": 524,
+      "faces": 706,
+      "sha256": "7d77c19a9f39c3ae381519c000d97da0745e932483e2a443393a6005f4089d53",
+      "beveledBoxes": 2,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "kitchenflatstove/kitchenflatstove.obj",
+      "originalFaces": 980,
+      "faces": 1012,
+      "sha256": "4920b95dc63ac492cd1705b5598489a6c01b5614997cca455d771248f90a84a3",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "kitchenfridge/kitchenfridge.obj",
+      "originalFaces": 0,
+      "faces": 666,
+      "sha256": "af55c226b92f5bd9cc8a921f026875b8d5cde5ba2c525456267146105706c4af",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "kitchenkettle/kitchenkettle.obj",
+      "originalFaces": 324,
+      "faces": 404,
+      "sha256": "69484294035dcec157447f859bfc59ffcb412e74034a94013791bb9fae0895b8",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "kitchenmicrowave/kitchenmicrowave.obj",
+      "originalFaces": 132,
+      "faces": 244,
+      "sha256": "755cb820ac494b7318ec09273049cb3225b90ed44d04248c06a7f9edb8a5e9f2",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "kitchenminifridge/kitchenminifridge.obj",
+      "originalFaces": 0,
+      "faces": 618,
+      "sha256": "2178ea9e0383d0875b18c385077d36d7c11c30d7beb2b114c26d687b1f6dd9b4",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "kitchenminioven/kitchenminioven.obj",
+      "originalFaces": 852,
+      "faces": 964,
+      "sha256": "8119573ef6d8574a7b91d3c451f6895521fa2f83d304ecd43f0740067848029d",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "kitchenricecooker/kitchenricecooker.obj",
+      "originalFaces": 312,
+      "faces": 392,
+      "sha256": "94989358ba673a5288ccfa036da273ed12f41b032eee901fbba56a754c587d93",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "kitchentoaster/kitchentoaster.obj",
+      "originalFaces": 284,
+      "faces": 364,
+      "sha256": "ec76bdd440d4e28bd8e0c04573a930e976d7b265a346b139dbb42cfa0105428e",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "lanternfoyerchandelier/lanternfoyerchandelier.obj",
+      "originalFaces": 1396,
+      "faces": 1396,
+      "sha256": "09d96abc4be176d6a8893bb350f67626cadf32db7858a29d9445bc0e6ad2e57a",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "lineinsulator12500/lineinsulator12500.obj",
+      "originalFaces": 376,
+      "faces": 376,
+      "sha256": "6384e1e248e0d02c1f80596e2c1c57a80fbb6d62d966210f59f68171688075b1",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "lineinsulator230000/lineinsulator230000.obj",
+      "originalFaces": 568,
+      "faces": 568,
+      "sha256": "207f1e11b79626c38c931a5891a47c8f6ba1c64d4c30d043bc5cb42f64529956",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "lineinsulator3200/lineinsulator3200.obj",
+      "originalFaces": 376,
+      "faces": 376,
+      "sha256": "ef0d0f84329a4c9f233dcbe217096de3c01fa76edaf392080da7b800f139d3f8",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "lineinsulator69000/lineinsulator69000.obj",
+      "originalFaces": 568,
+      "faces": 568,
+      "sha256": "fd4da1541c1ebbaac418f3526e1d79029d8f9a3ec65cbb918206e4877485c436",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "lineinsulator800/lineinsulator800.obj",
+      "originalFaces": 296,
+      "faces": 296,
+      "sha256": "5c53cc48f2a1c0df44d1ccef58a9e07b7dd8e744b8bea11c90dd31fd9351a691",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "louveredpathbollard/louveredpathbollard.obj",
+      "originalFaces": 828,
+      "faces": 828,
+      "sha256": "558ad33ac4e2aed6bb92473e6b0cbce5a281571c3bca1c00e9cd1e956a84d68e",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "lowprofiledocklight/lowprofiledocklight.obj",
+      "originalFaces": 36,
+      "faces": 36,
+      "sha256": "544f8311a2479b176bf8279ac5942887b9f87590d917386459ba361152ba63cf",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "marinepierbulkhead/marinepierbulkhead.obj",
+      "originalFaces": 304,
+      "faces": 304,
+      "sha256": "9ec5a99b94d04e13802fe2d6bb83219bcedd2730f8ffccbff7aa9badc177ca3e",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "metalboxfan/metalboxfan.obj",
+      "originalFaces": 1508,
+      "faces": 1508,
+      "sha256": "9e13fd2e753ec3b89dda5ecdd30321e184197f65b4f7d26df1cbb88689b57062",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "minibezeldot/minibezeldot.obj",
+      "originalFaces": 480,
+      "faces": 480,
+      "sha256": "c783a9b13d7ed449235e9cc0847c53ffa31f2b2f14978070f0cafc78baebbbe7",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "minideepbaffledot/minideepbaffledot.obj",
+      "originalFaces": 768,
+      "faces": 768,
+      "sha256": "067f421ee0544bd2e2bacdbcae5bc419ead7e70b0fea23e0b67006889562eb31",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "minidotspotlight/minidotspotlight.obj",
+      "originalFaces": 536,
+      "faces": 536,
+      "sha256": "cee503475988e94d4b51036c455a245dda693dd716862d9e53e1e889facf9606",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "minieyeballdot/minieyeballdot.obj",
+      "originalFaces": 576,
+      "faces": 576,
+      "sha256": "a2858c79afb647735ed9b7b1e644f648a2a197fead7885c232d75921ac64cdba",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "minipinholedot/minipinholedot.obj",
+      "originalFaces": 480,
+      "faces": 480,
+      "sha256": "488bf02d8927aafdc3f663cfb280847af26815e720dcefa2ac1e79370d6249ac",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "minitwindot/minitwindot.obj",
+      "originalFaces": 768,
+      "faces": 768,
+      "sha256": "e3100da5f71a0778ca73c213215ef68ce6079eb96cfe48f1a231bb4d49f74cbe",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "modernbladewalklight/modernbladewalklight.obj",
+      "originalFaces": 220,
+      "faces": 252,
+      "sha256": "a691b1c6827702ac71b3b911661711bc8e9555dfec96a9194b3f0a09d1126ae6",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "modernceilingfan/modernceilingfan.obj",
+      "originalFaces": 528,
+      "faces": 528,
+      "sha256": "9df83c659d86cb72d1a888695d05c5a6292b1d1174d16fe8620261d971dea6a0",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "modernfireplacestand/modernfireplacestand.obj",
+      "originalFaces": 120,
+      "faces": 152,
+      "sha256": "4d804d30ee4710ca7744c980d0e3a95bc4b7b22c2df1570e6a37d35c5ea9c93b",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "modernledstreetlight/modernledstreetlight.obj",
+      "originalFaces": 248,
+      "faces": 248,
+      "sha256": "7ca7007cea028c627827691dcac7ea498bd62b14210055a5c8c3d8d79a0d81cf",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "multicolorchristmaslights/multicolorchristmaslights.obj",
+      "originalFaces": 884,
+      "faces": 884,
+      "sha256": "fff88d0d8cb8c7a9881fe7354f2951427ea6027b30ca095bc2e15d85845805ce",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "mushroompathlight/mushroompathlight.obj",
+      "originalFaces": 368,
+      "faces": 368,
+      "sha256": "8f717491459b6bf0040cde56ac5292de71be533d572eb66849fc9dff8a1880f2",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "nauticalpierbollard/nauticalpierbollard.obj",
+      "originalFaces": 828,
+      "faces": 828,
+      "sha256": "389b5283ef6a9b549f1bc7fa4deda4620998a57879bfe1256ad36609982ec426",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "nema1030plug/nema1030plug.obj",
+      "originalFaces": 372,
+      "faces": 372,
+      "sha256": "12fb6b3c1f47daca289de9573856084939ebdf0b08bb62f611466294dca4acc6",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "nema520plug/nema520plug.obj",
+      "originalFaces": 676,
+      "faces": 676,
+      "sha256": "ba8d45ad8973b862fb878b58cc29f33f9b1f8e3a2a4bb59a2b28b2519b8e6ffe",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "nema620plug/nema620plug.obj",
+      "originalFaces": 676,
+      "faces": 676,
+      "sha256": "21834fe2efd57e3206171494eceb1698b6a68588df1af90949ea7108abe006f9",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "nema630plug/nema630plug.obj",
+      "originalFaces": 100,
+      "faces": 132,
+      "sha256": "682796ce15866b3b5bb97f97a4d97bb8b41069c885314f09b9156b02e0068f22",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "northamericanmeterbase/northamericanmeterbase.obj",
+      "originalFaces": 3528,
+      "faces": 3560,
+      "sha256": "db1c9552960d5f396faf99e64d2b9ea2281c58dc933bc211da42d5ac59d385e1",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "offsetparkinglight/offsetparkinglight.obj",
+      "originalFaces": 372,
+      "faces": 404,
+      "sha256": "4419eec9b11fd87aaff437c5153f3d68aab4b84fe61e341715c14075278f760c",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "offshorecagedwellglass/offshorecagedwellglass.obj",
+      "originalFaces": 632,
+      "faces": 632,
+      "sha256": "2d0eefa16c19eccc1f5381d87d7d762faeda7204aeaec184521ea99de6b5afe0",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "offshoreplatformfloodlight/offshoreplatformfloodlight.obj",
+      "originalFaces": 144,
+      "faces": 144,
+      "sha256": "5d73b15bc6adf4f2904f2a9939c44b6d629825abbcb824007d3fcf2123db640e",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "offshoresealedlinearlight/offshoresealedlinearlight.obj",
+      "originalFaces": 252,
+      "faces": 284,
+      "sha256": "83e72fb0fcefc837cd1ea984d86db1f63b4b44cf2bb31846535cc52c14876308",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "outdoormotionlight/outdoormotionlight.obj",
+      "originalFaces": 556,
+      "faces": 556,
+      "sha256": "b2062386a9217052bbd5d3620414a8f9639a312417bdd4e24d647de2b1265d28",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "partyfestoonlights/partyfestoonlights.obj",
+      "originalFaces": 804,
+      "faces": 804,
+      "sha256": "5444c8461fede7f828c12c91192c3ed68f495f0dc952acadb41d7877f791d775",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "partywashlight/partywashlight.obj",
+      "originalFaces": 472,
+      "faces": 504,
+      "sha256": "96aa9bd5e59753b441e23f0936d3443b9d37613d4aac075b52bf1c562a56bc8b",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "patioglobestring/patioglobestring.obj",
+      "originalFaces": 704,
+      "faces": 704,
+      "sha256": "b163fb2a19d5c846989bf8ba0e67faf03d1fae2d8b64001d2e28553383d2de0c",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "patiotropicalfan/patiotropicalfan.obj",
+      "originalFaces": 500,
+      "faces": 500,
+      "sha256": "41c9c0e2fc1088238849a8836fc0139572b78aee482fd430c255da042ab31e21",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "pierlanternpost/pierlanternpost.obj",
+      "originalFaces": 696,
+      "faces": 696,
+      "sha256": "599c7d205a813b97916a8bd745fb717eda4ce4a036d98747f4b9d26d3331a160",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "poolcornerlight/poolcornerlight.obj",
+      "originalFaces": 332,
+      "faces": 332,
+      "sha256": "c7928a588ef905236b5b8b6872f48ff82869189011cba08ce418659926c62d3b",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "poollinearlight/poollinearlight.obj",
+      "originalFaces": 60,
+      "faces": 60,
+      "sha256": "6511d0ba3c0bc6148ada989183b733a38674e7c84d0027086b10291a37f27463",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "poolnichelight/poolnichelight.obj",
+      "originalFaces": 592,
+      "faces": 592,
+      "sha256": "54666ecce202848e5452a9f5cc93c2289099d50d25ff13fd3d5e4fd2acb585d0",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "poolsidepartylantern/poolsidepartylantern.obj",
+      "originalFaces": 364,
+      "faces": 364,
+      "sha256": "21bfda8b6fdf2f6d22aa70b32a18aa34fefb06147e4ee8b6da521eee947b996a",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "poolsidetikilight/poolsidetikilight.obj",
+      "originalFaces": 492,
+      "faces": 524,
+      "sha256": "63d8281e1343c135fa8e69a937f54b656044d7c2612372f3ba553e015d3d93bf",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "poolsquarelight/poolsquarelight.obj",
+      "originalFaces": 48,
+      "faces": 48,
+      "sha256": "76aed69b695dbc4afb527a1c0cfd2e1543e72f3e9c50dde9488ad42769c2a2a9",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "poolsteplight/poolsteplight.obj",
+      "originalFaces": 48,
+      "faces": 48,
+      "sha256": "5b2631333f409e61a8076c027d0feca8f618c4cabd3a27f492e63b2d7dc1ea78",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "porchlanternsconce/porchlanternsconce.obj",
+      "originalFaces": 568,
+      "faces": 568,
+      "sha256": "fbbce0a9ff0794cb2996a7f528704cef7d1c3e8033047c5f621b4a900590b5e3",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "portablespaceheater/portablespaceheater.obj",
+      "originalFaces": 168,
+      "faces": 318,
+      "sha256": "96c8166713ec38f403c3e971cea4f6ed4089911f9fe10b3a30f796da729c238f",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "powerpole/utilitypoletall.obj",
+      "retainedLegacyTexture": true,
+      "beveledBoxes": 0
+    },
+    {
+      "model": "programmableups/programmableups.obj",
+      "originalFaces": 1016,
+      "faces": 1048,
+      "sha256": "98c7798e2006e72d5816015eb0e4501ba8672a56a96b1ec854ee10d45e3ccd24",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "quadparkinglight/quadparkinglight.obj",
+      "originalFaces": 572,
+      "faces": 604,
+      "sha256": "ea23b65da9f828a54e8219d0f11b512999bf68e9fc0b48ff541af5bf954446cb",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "recessedbrickwalllight/recessedbrickwalllight.obj",
+      "originalFaces": 36,
+      "faces": 36,
+      "sha256": "3318ca5f6464c59458893bbb7a0b812586ad15517bcf1d2148514548fb75bfc8",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "recessedledchannel/recessedledchannel.obj",
+      "originalFaces": 60,
+      "faces": 60,
+      "sha256": "96f4582f5e7a8100e53a7ac07608952ce48d84c3034f87f2f6d3858161234a80",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "redhandleservicedisconnect/redhandleservicedisconnect.obj",
+      "originalFaces": 556,
+      "faces": 556,
+      "sha256": "a6cdc473b9647f1408a48a4cc89be2fd5c72f2335348c2c76e258370760a6ba1",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "roofservicemast/roofservicemast.obj",
+      "originalFaces": 208,
+      "faces": 240,
+      "sha256": "b99508d176e3988a61de67993015283ff95e6af2d3ed3d7b844965695dc57640",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "roundparkinglight/roundparkinglight.obj",
+      "originalFaces": 684,
+      "faces": 716,
+      "sha256": "61f3f1f64565f0d5e20d7ec8bd5dc77ae94cb641508d670062d172b805362988",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "roundrecessedlight/roundrecessedlight.obj",
+      "originalFaces": 348,
+      "faces": 348,
+      "sha256": "401eb3aec9574c9fa42c4cdf0b9283de600c0c4cfae299e684b9590e1b0b081b",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "roundstonewalllight/roundstonewalllight.obj",
+      "originalFaces": 276,
+      "faces": 276,
+      "sha256": "bd1a3008cc7d82aba15c2e3c28fb2d33a99c566b206ff2df4b2a00c6a9cfce58",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "ruggedcanopylight/ruggedcanopylight.obj",
+      "originalFaces": 120,
+      "faces": 152,
+      "sha256": "e4adaf093c86b261db1db428508471a7d4c62f6eeb962a4a55adca489eb3369c",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "sculpturalbranchchandelier/sculpturalbranchchandelier.obj",
+      "originalFaces": 5116,
+      "faces": 5116,
+      "sha256": "2e92ce3f61ef9200ee1b560693e3bcd914122fe7bfe5fe093713d0b7352f9cbc",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "serviceweatherhead/serviceweatherhead.obj",
+      "originalFaces": 364,
+      "faces": 396,
+      "sha256": "e08fac96dc5b704a270d146fecd4aaa338c5482f6b8dc9e29f471f41f8574d0c",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "shieldedpathlight/shieldedpathlight.obj",
+      "originalFaces": 288,
+      "faces": 320,
+      "sha256": "aa6bb2722736806965feffa1e816bbea45354efac3f2e277dde97a5c558d6bad",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "shoeboxparkinglight/shoeboxparkinglight.obj",
+      "originalFaces": 284,
+      "faces": 316,
+      "sha256": "f0119d0acbb09012755cdfe84db5fbf4c63200203162591d7dbee0f43db0c2af",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "sixsocketpowerstrip/sixsocketpowerstrip.obj",
+      "originalFaces": 252,
+      "faces": 284,
+      "sha256": "cbdefb65a909b06689c63987c9482565e0eaa09ce32d924cf71367e4d88e524d",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "slottedstonewalllight/slottedstonewalllight.obj",
+      "originalFaces": 84,
+      "faces": 84,
+      "sha256": "99a9e6eef3d91e5df093088c89843b458be91ba61847fa52aa7576f481bd2b98",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "solarhybrid/solarhybrid.obj",
+      "originalFaces": 192,
+      "faces": 342,
+      "sha256": "0ad65d2d5dc859bbe695e09fc695162c3ee3a028ab33ce409da5cd3a3ab6d307",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "solarmppt/solarmppt.obj",
+      "originalFaces": 180,
+      "faces": 330,
+      "sha256": "5f197a65436fc72b4f24a7bc3100a487eaf3a6f0d913012658f50627f1288e90",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "spiralrainchandelier/spiralrainchandelier.obj",
+      "originalFaces": 3568,
+      "faces": 3568,
+      "sha256": "1eb9d8380213e12c5d404dd5b8a1552b4509cbecdf5c8bde7285d3ece3c8ed8f",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "sputnikchandelier/sputnikchandelier.obj",
+      "originalFaces": 2012,
+      "faces": 2012,
+      "sha256": "544423a5903dc882402af0d3ef112f5c822fe73dcc8c019721a8d3f84c5cc866",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "squarestonewalllight/squarestonewalllight.obj",
+      "originalFaces": 36,
+      "faces": 36,
+      "sha256": "e4b6f63b8f654c7ed550625ad6dcdcdfdf7f88b44465ea4af3607c122e3f79c3",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "stadiumwallfloodlight/stadiumwallfloodlight.obj",
+      "originalFaces": 168,
+      "faces": 168,
+      "sha256": "6620412fbfafc538f0fd699ac79ac77459ec3147956c43224040ff7dda48cad3",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "standbygenerator/standbygenerator.obj",
+      "originalFaces": 420,
+      "faces": 570,
+      "sha256": "cba83d9600e40424f9e6c344c0f5bf923524fda4c30392ac7219eea3bdbd8eec",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "standbygenerator_extra_large/standbygenerator_extra_large.obj",
+      "originalFaces": 468,
+      "faces": 618,
+      "sha256": "07cf1671093dd90947bd97336075db0ad3602892d0698ccf4a1a05442d2a86cb",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "standbygenerator_extreme/standbygenerator_extreme.obj",
+      "originalFaces": 660,
+      "faces": 810,
+      "sha256": "e2fe24b9a211461ab4e438db3621da6b0bb99a40bf41d1c9bf45e9d64d05573f",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "standbygenerator_large/standbygenerator_large.obj",
+      "originalFaces": 372,
+      "faces": 522,
+      "sha256": "7415fff5e94b8f7d565a6d2047c13b9cade62f2f336543270d1e525c7eb24800",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "standbygenerator_medium/standbygenerator_medium.obj",
+      "originalFaces": 372,
+      "faces": 522,
+      "sha256": "a67a00342491ec18d5e25f4e20519ca2e5447a30d0cb4f979933712fa41bb2fe",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "standingdrumfloorlamp/standingdrumfloorlamp.obj",
+      "originalFaces": 432,
+      "faces": 432,
+      "sha256": "b7623d12e93e324a3876fbd6a16b78c3e63525761dea9e74f5f50c8b9a440231",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "steelriser230/steelriser230.obj",
+      "originalFaces": 5100,
+      "faces": 5462,
+      "sha256": "3d52fefdcdbb7dce7e38249d9e989401aa45aae4a2b2b44aa3808900b208f420",
+      "beveledBoxes": 7,
+      "cabinetDetailPass": false,
+      "poleDetailPass": true
+    },
+    {
+      "model": "steelriser69/steelriser69.obj",
+      "originalFaces": 3980,
+      "faces": 4342,
+      "sha256": "6d79569841586c15d6e7e69f1c0fb6cc364690870be0cfd705a3d185b018a432",
+      "beveledBoxes": 7,
+      "cabinetDetailPass": false,
+      "poleDetailPass": true
+    },
+    {
+      "model": "steeltransmission230/steeltransmission230.obj",
+      "originalFaces": 4896,
+      "faces": 5162,
+      "sha256": "958a2a8ee3bc901925a51000b8b8ff30a2cf499be078c7bd0be437df721957e3",
+      "beveledBoxes": 4,
+      "cabinetDetailPass": false,
+      "poleDetailPass": true
+    },
+    {
+      "model": "steeltransmission69/steeltransmission69.obj",
+      "originalFaces": 3776,
+      "faces": 4042,
+      "sha256": "295afc9836a170925569e74d8f8dcd6d29000dca192e94f2a8d2a25ce9685aad",
+      "beveledBoxes": 4,
+      "cabinetDetailPass": false,
+      "poleDetailPass": true
+    },
+    {
+      "model": "stonewallwashlight/stonewallwashlight.obj",
+      "originalFaces": 84,
+      "faces": 84,
+      "sha256": "37a97583739e0e40dbe748142ea6efb3f5a9e35c6f140d64ca3b00706d2d7ea1",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "substation23069/substation23069.obj",
+      "originalFaces": 9344,
+      "faces": 9408,
+      "sha256": "12d4809a7231266be4640c27a863701f18aad13dbf4f809a8bcc2c16598216a6",
+      "beveledBoxes": 2,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "substation69125/substation69125.obj",
+      "originalFaces": 9128,
+      "faces": 9192,
+      "sha256": "8516d46f529ed51ad9fc561c2627cae24ccc0fe97efe4ab4f8fb5bf4b8b60e64",
+      "beveledBoxes": 2,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "substationdisconnect230/substationdisconnect230.obj",
+      "originalFaces": 6392,
+      "faces": 6424,
+      "sha256": "85d889108746e64b4b5c79c59a8fd4deb391d8c923a991671517dafc08a18331",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "substationdisconnect69/substationdisconnect69.obj",
+      "originalFaces": 6392,
+      "faces": 6424,
+      "sha256": "a4db2418e966e6009c9a3b31a3acc2b1d80b6b80b66082a244069c83dd035244",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "surfacelinearledstrip/surfacelinearledstrip.obj",
+      "originalFaces": 84,
+      "faces": 84,
+      "sha256": "0db68cddce307952c7893c1c3910591e2375650849c6920847f46dcf5609bfa2",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "switchgear_contactor/switchgear_contactor.obj",
+      "originalFaces": 348,
+      "faces": 380,
+      "sha256": "86b2cbb42f2ba93f4580062a1196016722fb760b1f2cc6b772c6e94edfd740b6",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "switchgear_contactor_three/switchgear_contactor_three.obj",
+      "originalFaces": 556,
+      "faces": 588,
+      "sha256": "d90e7e917edeb40a288fac370cc633cbcb93b8781de43c27f68d42e1d01e0b15",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "switchgear_relay_four/switchgear_relay_four.obj",
+      "originalFaces": 868,
+      "faces": 900,
+      "sha256": "42bdb13753234cd26e37cfee6b96325b3fc6ba10abf7c52348fd9a419db7cca9",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "switchgear_relay_two/switchgear_relay_two.obj",
+      "originalFaces": 556,
+      "faces": 588,
+      "sha256": "c83df8879129073e0fc1721135db2877490985f1f7aed05f4da4ef8a2474b8c5",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "switchgear_ssr/switchgear_ssr.obj",
+      "originalFaces": 352,
+      "faces": 384,
+      "sha256": "84cb8cec8968250709bb59e2ab60eeaca0e2e3bf6cdb34028190e33bc2ac1968",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "switchgear_ssr_three/switchgear_ssr_three.obj",
+      "originalFaces": 560,
+      "faces": 592,
+      "sha256": "d0814ead87a50c3bcb3aac6dc0a3d9d38e0a3c68064783f1069faae69c3005b4",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "thinshoplight/thinshoplight.obj",
+      "originalFaces": 184,
+      "faces": 184,
+      "sha256": "30b9ba299d8b52f88155e054a4ee39ea0c4e6ad892e05a95d66ebd97ca887807",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "traditionallanternpost/traditionallanternpost.obj",
+      "originalFaces": 628,
+      "faces": 628,
+      "sha256": "39d04a92aefa20e5d1c680d9894b4681a7ff5462e2761d23e13381621e97935b",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "transmissiontower/transmissiontowertall.obj",
+      "retainedLegacyTexture": true,
+      "beveledBoxes": 0
+    },
+    {
+      "model": "triarmparkinglight/triarmparkinglight.obj",
+      "originalFaces": 508,
+      "faces": 540,
+      "sha256": "dd94d8d45638b9a1e0137891f9f41c40c6e05fbb988240a13d7410c2c5232c71",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "trimlesspotlight/trimlesspotlight.obj",
+      "originalFaces": 348,
+      "faces": 348,
+      "sha256": "a864be732e47dd62dc4cbbc002514a48e820204025199dbe40a314bbf5c963b8",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "twelvecircuitpanel/twelvecircuitpanel.obj",
+      "originalFaces": 624,
+      "faces": 714,
+      "sha256": "907daa4f54202b70e4289ad81b0a18b47e633019c74c368874c5b6c6faed66c0",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "twinareaparkinglight/twinareaparkinglight.obj",
+      "originalFaces": 396,
+      "faces": 428,
+      "sha256": "75abd2f51ff4107ed65032801c0507ecad86162500ef13412fa5827d4c20eda9",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "twineavefloodlight/twineavefloodlight.obj",
+      "originalFaces": 696,
+      "faces": 696,
+      "sha256": "f9871babbe12afc2e94c05c2d831e86a5e75340730549b15ca427d1cc5cfacb9",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "twinparkinglight/twinparkinglight.obj",
+      "originalFaces": 544,
+      "faces": 544,
+      "sha256": "26308becb2e3883de95210b75fe2d7c00e23d47e19291ba2dda8f8a15c4fe87a",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "undercabinetledstrip/undercabinetledstrip.obj",
+      "originalFaces": 60,
+      "faces": 60,
+      "sha256": "dab2cff27d7ff73fa2cd9a7a07d3fad2c3b972c52967376cb533790d2fccad66",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "undergroundfused1/undergroundfused1.obj",
+      "originalFaces": 96,
+      "faces": 128,
+      "sha256": "c408367d5f0f3c449c072ec541efbb3b1c31b857b4e9e0b012449438eb353e25",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "undergroundfused1light/undergroundfused1light.obj",
+      "originalFaces": 180,
+      "faces": 212,
+      "sha256": "761fd5c777f9cb929722c89e87bdf50549bf3a71e51a9cbca90694092066051b",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "undergroundfused3/undergroundfused3.obj",
+      "originalFaces": 144,
+      "faces": 176,
+      "sha256": "23b050b578813af915a9eea9ddd4debfb6dbc5217091f0e37b73820d28c96bbb",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "undergroundfused3light/undergroundfused3light.obj",
+      "originalFaces": 228,
+      "faces": 260,
+      "sha256": "8abf1e7aab8a6c083a5fb02b17193c1f718d22f3eb3b9e3b6312e6ea268bca41",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "undergroundserviceentrance/undergroundserviceentrance.obj",
+      "originalFaces": 468,
+      "faces": 500,
+      "sha256": "8fe9349aa87927e9631ebc41dd3fc16b5591f8b6fc3df478c5eb487bedb7012a",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "undergroundservicehandhole/undergroundservicehandhole.obj",
+      "originalFaces": 120,
+      "faces": 152,
+      "sha256": "7b93fc829790d1a786bbef98fa6ab0381c6f3df96992718eb51f1d8bd226a3db",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "undergroundservicepedestal/undergroundservicepedestal.obj",
+      "originalFaces": 96,
+      "faces": 128,
+      "sha256": "c408367d5f0f3c449c072ec541efbb3b1c31b857b4e9e0b012449438eb353e25",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "utilitycobrahead/utilitycobrahead.obj",
+      "originalFaces": 332,
+      "faces": 364,
+      "sha256": "e785fffa0744991467477b7dbf841bd29ad3437acc2d6525aef2eb2cc775e425",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "utilitystreetlamp/utilitystreetlamp.obj",
+      "originalFaces": 508,
+      "faces": 572,
+      "sha256": "a18416bfe07b1b948431ea4e24995d858a280153b27b0d8ca96c625eaf3ed5f2",
+      "beveledBoxes": 2,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "utilitytwinled/utilitytwinled.obj",
+      "originalFaces": 180,
+      "faces": 212,
+      "sha256": "06279c03891ceb80a00e3bdfe5c228fc497511c906660dd11ae13822b51581f3",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "utilitywatermill/utilitywatermill.obj",
+      "originalFaces": 912,
+      "faces": 1616,
+      "sha256": "32f51fbfc85eafa9d0d153c61183ac3f54f467d62d3281ee006319cfb28fbb51",
+      "beveledBoxes": 4,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "utilitywind/utilitywind.obj",
+      "originalFaces": 216,
+      "faces": 948,
+      "sha256": "d765c71d437ab240e72c29ab74e1686bb89f2fc869d3546f0cdffb105d59a3d9",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "wagonwheelchandelier/wagonwheelchandelier.obj",
+      "originalFaces": 2208,
+      "faces": 2208,
+      "sha256": "e8b4184a24ec38493da41a9ba71b8cbeb1b5601034fecdc69d805bc93d59b271",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "wallats/wallats.obj",
+      "originalFaces": 1004,
+      "faces": 1036,
+      "sha256": "c85ecad50b5f6cef47c3d304630c0b1bf311607bd5ab49843ca80e7a71dcbf28",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "wallhybrid/wallhybrid.obj",
+      "originalFaces": 252,
+      "faces": 402,
+      "sha256": "27699c7c85f29d27041c3de6a5fc9c653bdc6f958229b0eb1337d2b22651ce7e",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "wallminisplit/wallminisplit.obj",
+      "originalFaces": 144,
+      "faces": 294,
+      "sha256": "2cbe7102b0e66bf162f07e4110cbea6a5332ab300cd82751f7c3d64d30028139",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "wallmppt/wallmppt.obj",
+      "originalFaces": 240,
+      "faces": 390,
+      "sha256": "b1d4ddf39a31dc875e0ada6a775e68b1f78d27b8e85565d0a9b01821fc341d61",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "walloutlet240/walloutlet240.obj",
+      "originalFaces": 452,
+      "faces": 452,
+      "sha256": "2b26ba6baa5dc9ed5e9d2acf07202d088389c9f28560540e080dc9c457042041",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "wallups/wallups.obj",
+      "originalFaces": 992,
+      "faces": 1024,
+      "sha256": "4f91f8a5c88fde57d74d9b4c96925642034e2874b3ecdb8317fb0ae4fd210b30",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "warehousewalllight/warehousewalllight.obj",
+      "originalFaces": 132,
+      "faces": 132,
+      "sha256": "b82b44fd51163c96b1c371fac913038ccae6000605e4a766787712e701aa6fa6",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "wideareafloodlight/wideareafloodlight.obj",
+      "originalFaces": 624,
+      "faces": 656,
+      "sha256": "261b3f06c91f08213458de950774888594df333039ef8e309c555a68271eac77",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "wideundergroundmetersocket/wideundergroundmetersocket.obj",
+      "originalFaces": 3840,
+      "faces": 3872,
+      "sha256": "576e3b9031a0c8e11d231344d7eafcac8e0dc70f34593ebe0fdfcca5824f39e5",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "windowairconditioner/windowairconditioner.obj",
+      "originalFaces": 156,
+      "faces": 306,
+      "sha256": "c31c77d89f4449e1e0b165582268edec5e485c78d2ce56412c3de604e0645394",
+      "beveledBoxes": 1,
+      "cabinetDetailPass": true,
+      "poleDetailPass": false
+    },
+    {
+      "model": "windowcandlelamp/windowcandlelamp.obj",
+      "originalFaces": 456,
+      "faces": 456,
+      "sha256": "1e80349ce2f047b6af77ae2497ecb8cd25512e0b9f0e988ad90f1feb48f02960",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "wirelesspaddleswitch/wirelesspaddleswitch.obj",
+      "originalFaces": 92,
+      "faces": 92,
+      "sha256": "4278a3cdd53c4917ca53f3b565f8e1ffe189006c137b55e3cd5e3c2927698a5f",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    },
+    {
+      "model": "wirelesstoggleswitch/wirelesstoggleswitch.obj",
+      "originalFaces": 120,
+      "faces": 120,
+      "sha256": "43277a33d0a3ebe46637f8e60aaedb363699707763b3e11b0afbcc365368420b",
+      "beveledBoxes": 0,
+      "cabinetDetailPass": false,
+      "poleDetailPass": false
+    }
+  ],
+  "meshCount": 224,
+  "beveledBoxes": 135
+}

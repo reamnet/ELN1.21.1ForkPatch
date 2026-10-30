@@ -16,7 +16,7 @@ class IndustrialDescriptor(val kind: IndustrialKind): TransparentNodeDescriptor(
     private val model by lazy { Eln.obj.getObj(kind.model) }
     init { creativeTab=if(kind==IndustrialKind.WELDER || kind==IndustrialKind.LOAD_BANK)Eln.creativeTabMachines else Eln.creativeTabPowerElectronics }
     override fun mustHaveFloor()=false
-    fun draw(front: Direction=Direction.ZP,on: Boolean=false,fault: Boolean=false,open: Boolean=false)=preserveMatrix {
+    fun draw(front: Direction=Direction.ZP,on: Boolean=false,fault: Boolean=false,open: Boolean=false,volts: Double?=null)=preserveMatrix {
         front.inverse.glRotateZnRef();GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
             GL11.glDisable(GL11.GL_TEXTURE_2D)
@@ -32,6 +32,7 @@ class IndustrialDescriptor(val kind: IndustrialKind): TransparentNodeDescriptor(
             if(on || fault)UtilsClient.disableLight()
             p("Indicator",if(fault).95f else .06f,if(on && !fault).8f else .14f,.06f)
             if(on || fault)UtilsClient.enableLight()
+            if(volts!=null)mods.eln.client.power.PowerPanelDisplay.equipmentNumber(model,volts,volts>1,"Screen")
         } finally { GL11.glPopAttrib() }
     }
     override fun handleRenderType(item: ItemStack,type: IItemRenderer.ItemRenderType)=true
@@ -83,7 +84,7 @@ class IndustrialRender(entity: TransparentNodeEntity,descriptor: TransparentNode
 
 
     override fun draw()=mods.eln.client.terrain.TerrainModels.body(this,listOf(front,enabled),setOf("Indicator")) {
-        (transparentNodeDescriptor as IndustrialDescriptor).draw(front ?: Direction.ZP,working,trip || kind==IndustrialKind.ARRESTER && stats[9]<=0,!enabled && kind==IndustrialKind.PAD)
+        (transparentNodeDescriptor as IndustrialDescriptor).draw(front ?: Direction.ZP,working,trip || kind==IndustrialKind.ARRESTER && stats[9]<=0,!enabled && kind==IndustrialKind.PAD,stats[0])
     }
     override fun networkUnserialize(input: DataInputStream) {
         super.networkUnserialize(input);settings.indices.forEach { settings[it]=input.readDouble() };enabled=input.readBoolean();trip=input.readBoolean();working=input.readBoolean();stats.indices.forEach { stats[it]=input.readDouble() }

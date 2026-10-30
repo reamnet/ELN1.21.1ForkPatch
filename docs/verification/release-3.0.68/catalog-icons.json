@@ -1,0 +1,1041 @@
+{
+  "count": 148,
+  "icons": [
+    {
+      "item": "eln:12.5kv_three_phase_fused_underground_feeder_with_street_light",
+      "icon": "textures/blocks/catalog/12.5kvthreephasefusedundergroundfeederwithstreetlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "44c35af8da0c3c6839b8430541624e3e25f74a3a425878385ef4b19317cd1c21"
+    },
+    {
+      "item": "eln:12.5kv_single_phase_fused_underground_feeder_with_street_light",
+      "icon": "textures/blocks/catalog/12.5kvsinglephasefusedundergroundfeederwithstreetlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "44c35af8da0c3c6839b8430541624e3e25f74a3a425878385ef4b19317cd1c21"
+    },
+    {
+      "item": "eln:12.5kv_three_phase_fused_underground_feeder",
+      "icon": "textures/blocks/catalog/12.5kvthreephasefusedundergroundfeeder.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "a8859bff28c8b2fc22e414702d18d6b754d48a0dd08d0ec5c488f9bd4f2a36e9"
+    },
+    {
+      "item": "eln:12.5kv_single_phase_fused_underground_feeder",
+      "icon": "textures/blocks/catalog/12.5kvsinglephasefusedundergroundfeeder.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "a8859bff28c8b2fc22e414702d18d6b754d48a0dd08d0ec5c488f9bd4f2a36e9"
+    },
+    {
+      "item": "eln:fused_underground_120_240v_service_pedestal",
+      "icon": "textures/blocks/catalog/fusedunderground120/240vservicepedestal.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "a8859bff28c8b2fc22e414702d18d6b754d48a0dd08d0ec5c488f9bd4f2a36e9"
+    },
+    {
+      "item": "eln:three_phase_transformer_street_light_pole_with_fused_single_phase_tap",
+      "icon": "textures/blocks/catalog/threephasetransformerstreetlightpolewithfusedsinglephasetap.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "d49ab461e1967ad21e7235185e53e5fc54b94605434505c7a05281754fd4751f"
+    },
+    {
+      "item": "eln:three_phase_fused_tap_secondary_fed_street_light_pole",
+      "icon": "textures/blocks/catalog/threephasefusedtapsecondaryfedstreetlightpole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "4255e99e927ab56311f3a1bd26b91bbae68cf949100bf94259d3c13d0d470ad8"
+    },
+    {
+      "item": "eln:230_kv_three_phase_cable_riser_tower",
+      "icon": "textures/blocks/catalog/230kvthreephasecablerisertower.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "fc05bc88767745616d9cb58d1b65d61e2f23ba8d5fe4b27fead7835c49e3ca52"
+    },
+    {
+      "item": "eln:69_kv_three_phase_cable_riser_pole",
+      "icon": "textures/blocks/catalog/69kvthreephasecableriserpole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "a497dddbd6c5f90baba5a6167d0f55dc167929b58150eb434cba137586dfc868"
+    },
+    {
+      "item": "eln:230_kv_three_phase_substation_disconnect",
+      "icon": "textures/blocks/catalog/230kvthreephasesubstationdisconnect.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "755a3dca83cd009a2971ded049958a72657fbf3cbdce984e45bc770c235728fc"
+    },
+    {
+      "item": "eln:69_kv_three_phase_substation_disconnect",
+      "icon": "textures/blocks/catalog/69kvthreephasesubstationdisconnect.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "2e49f2b1712145ca346e71a6ea8ae498b6505829cb2348c708df9c7c6a297a03"
+    },
+    {
+      "item": "eln:230_kv_to_69_kv_substation_transformer",
+      "icon": "textures/blocks/catalog/230kvto69kvsubstationtransformer.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "92ff6a0855de710a639a9a7b32cd67ea59e0365b1b0cace6b223570a378b352b"
+    },
+    {
+      "item": "eln:69_kv_to_12.5_kv_substation_transformer",
+      "icon": "textures/blocks/catalog/69kvto12.5kvsubstationtransformer.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "694f59b3db26d918a3754a1bf561477280a3848a31d478be44cb16e585b42231"
+    },
+    {
+      "item": "eln:230_kv_steel_transmission_tower",
+      "icon": "textures/blocks/catalog/230kvsteeltransmissiontower.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "82638fde3d95e51cd9af2703cbcb1cf06e11e7467864586096ef8cc8cd9497f8"
+    },
+    {
+      "item": "eln:69_kv_steel_transmission_pole",
+      "icon": "textures/blocks/catalog/69kvsteeltransmissionpole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "72cd6f28fad58253c4f5d12dfebd9b5e17c468a2c14e68bf135d70cc1055b432"
+    },
+    {
+      "item": "eln:three_phase_pole_with_fused_single_phase_tap",
+      "icon": "textures/blocks/catalog/threephasepolewithfusedsinglephasetap.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "c2eed4386534cfa3a295ef5fbcce3639201cf4e006300fe61bf26c5294d77d20"
+    },
+    {
+      "item": "eln:three_phase_secondary_fed_street_light_pole",
+      "icon": "textures/blocks/catalog/threephasesecondaryfedstreetlightpole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "d6920a67f440cd20d115b190a957c5b791222758b562e1fded0dd680aa40f8ba"
+    },
+    {
+      "item": "eln:single_phase_secondary_fed_street_light_pole",
+      "icon": "textures/blocks/catalog/singlephasesecondaryfedstreetlightpole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "b0a1956890aaab8c4f6f8baf27828d4de721a0fd0c2ea84876a9087846caf9f9"
+    },
+    {
+      "item": "eln:three_phase_transformer_street_light_pole",
+      "icon": "textures/blocks/catalog/threephasetransformerstreetlightpole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "8bb5d7fb9e06287a5159bfcf40d299fcd8d42ccabc3d1a6d8c95f488bf4d807a"
+    },
+    {
+      "item": "eln:single_phase_transformer_street_light_pole",
+      "icon": "textures/blocks/catalog/singlephasetransformerstreetlightpole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "7fab11c0460b8a21a0a242e6a83f8fa901648050f24c36a89d0e73dac565d323"
+    },
+    {
+      "item": "eln:three_phase_gang_operated_air_break_switch_pole",
+      "icon": "textures/blocks/catalog/threephasegangoperatedairbreakswitchpole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "a9be22dcf4758cf802ee3f4ce96d3094d80574a85269bd17c86fb003d31c00c8"
+    },
+    {
+      "item": "eln:three_phase_automatic_voltage_regulator_pole",
+      "icon": "textures/blocks/catalog/threephaseautomaticvoltageregulatorpole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "913bac5e6cff44a32ac48af6fd5f581f080490dca6594518380676b075bb850d"
+    },
+    {
+      "item": "eln:single_phase_automatic_voltage_regulator_pole",
+      "icon": "textures/blocks/catalog/singlephaseautomaticvoltageregulatorpole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "310bf3bc5dbacb9dd24ae919992d555c98f531a7511b445efcabbb900f90b862"
+    },
+    {
+      "item": "eln:three_phase_pole_mounted_capacitor_bank",
+      "icon": "textures/blocks/catalog/threephasepolemountedcapacitorbank.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "a8645bb7fb69758a67ca54e97cbbcac0e0030cdf42e9f7a702a218afb5608e39"
+    },
+    {
+      "item": "eln:120_240v_secondary_street_light_pole",
+      "icon": "textures/blocks/catalog/120/240vsecondarystreetlightpole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "ab9bdbadd3ccf02185fc581a4a819b912f697664cb00b561e57f62f2545e0681"
+    },
+    {
+      "item": "eln:120_240v_secondary_utility_pole",
+      "icon": "textures/blocks/catalog/120/240vsecondaryutilitypole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "d620043fcff5e4769fc38a1a76a2e999defd069cac9ab93ff391a51cc5f76702"
+    },
+    {
+      "item": "eln:three_phase_recloser_pole",
+      "icon": "textures/blocks/catalog/threephaserecloserpole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "6a774348712d8bab4ce23467678d8b53dc914bcd45e94d05092f8aec68ce0d0c"
+    },
+    {
+      "item": "eln:three_phase_fused_cutout_pole",
+      "icon": "textures/blocks/catalog/threephasefusedcutoutpole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "c7f0fab00b26fd6b578733e69ba04b1c17c9b0272dc8f52d44e08a048f654ea0"
+    },
+    {
+      "item": "eln:single_phase_fused_cutout_pole",
+      "icon": "textures/blocks/catalog/singlephasefusedcutoutpole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "d8b12c2a16c11dc3f49b968f0ea8d6cc4eb97bc9c15c39c7b2900881c6785459"
+    },
+    {
+      "item": "eln:three_phase_underground_feeder_pole",
+      "icon": "textures/blocks/catalog/threephaseundergroundfeederpole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "d320130e52bcd39b4ed2edab997bf9a272e661ebfb4e04cbbb3196bfff61cec6"
+    },
+    {
+      "item": "eln:three_phase_transformer_pole",
+      "icon": "textures/blocks/catalog/threephasetransformerpole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "0cda8d0fb2570080aa949bf6da42ca82ea8341538eb7a6ccbbcab104dcc34e4b"
+    },
+    {
+      "item": "eln:single_phase_transformer_pole",
+      "icon": "textures/blocks/catalog/singlephasetransformerpole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "181eeb1c028ee70eefa39f6c8f70da789a8142adc9f2b8937b2cd6d2971b0d11"
+    },
+    {
+      "item": "eln:three_phase_utility_pole",
+      "icon": "textures/blocks/catalog/threephaseutilitypole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "e377e82a79eccc6a755ee84f45102769c9c6bb0e50d88793ef701847fd7b93d3"
+    },
+    {
+      "item": "eln:single_phase_utility_pole",
+      "icon": "textures/blocks/catalog/singlephaseutilitypole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "e589d890789523d2784e2ccc882f19cd56cd80943c3cb400151598a21ab6b237"
+    },
+    {
+      "item": "eln:utility_pole_twin_led_street_light",
+      "icon": "textures/blocks/catalog/utilitypoletwinledstreetlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "a0d1d2942bfd8d1f28674604c00473f4f373421848e09c4e50395df2f2ca9945"
+    },
+    {
+      "item": "eln:utility_pole_cobrahead_street_light",
+      "icon": "textures/blocks/catalog/utilitypolecobraheadstreetlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "ac3bf91993fbf10382e05ae4cfa9f04cae87e9d93f09192dbf893b8d32183bc8"
+    },
+    {
+      "item": "eln:utility_pole_street_light",
+      "icon": "textures/blocks/catalog/utilitypolestreetlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "25ba4bafe71ec3c02cffe7265c2f4fd75006726d789da87cb6381058f2f27e2d"
+    },
+    {
+      "item": "eln:single_phase_transformer_pole_with_underground_service_riser",
+      "icon": "textures/blocks/catalog/singlephasetransformerpolewithundergroundserviceriser.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "26f9b742a0483cc75ef12b36f643bcd2db5b9b7ae1992e849c09c51ce89e95dc"
+    },
+    {
+      "item": "eln:single_phase_underground_feeder_pole_with_secondary_fed_street_light",
+      "icon": "textures/blocks/catalog/singlephaseundergroundfeederpolewithsecondaryfedstreetlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "3b9485f26d571e19adb0e3c42b1f3cc0342db7e8e0533c4fc2b52080dc221881"
+    },
+    {
+      "item": "eln:single_phase_underground_feeder_pole",
+      "icon": "textures/blocks/catalog/singlephaseundergroundfeederpole.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "ad0eba986dc1f44aaa7ba52ee2e1bba4e85008c78128aa899964b7ac459a3ae8"
+    },
+    {
+      "item": "eln:dual_gumdrop_sidewalk_light",
+      "icon": "textures/blocks/catalog/dualgumdropsidewalklight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "fe16417067de5a9fed3a8d9f1c3889df38209488d5e573050826aeeb5ae4e3c4"
+    },
+    {
+      "item": "eln:gumdrop_sidewalk_light",
+      "icon": "textures/blocks/catalog/gumdropsidewalklight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "57b3201803dc6a4d29c176e978b403d40f635444690207c65527b7ed33e05be8"
+    },
+    {
+      "item": "eln:three_arm_parking_lot_light",
+      "icon": "textures/blocks/catalog/threearmparkinglotlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "c8d234425dadd6062944047a619f788d756312c20503b95d879944b279d087c0"
+    },
+    {
+      "item": "eln:twin_wide_area_parking_lot_light",
+      "icon": "textures/blocks/catalog/twinwideareaparkinglotlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "26aa7e7227a888c008bc10c532702a67534d719e3e1f43724c00a77766b4af6c"
+    },
+    {
+      "item": "eln:shoebox_parking_lot_light",
+      "icon": "textures/blocks/catalog/shoeboxparkinglotlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "431e4ebf6ec7cab9f29fa514f967ca92a4ebfa8b705eba3e256304a6a1e1ed8b"
+    },
+    {
+      "item": "eln:stone_wall_wash_light",
+      "icon": "textures/blocks/catalog/stonewallwashlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "d3597720927267626ccacd2b90535ee9fdc893e3805029715d52c057d608db58"
+    },
+    {
+      "item": "eln:recessed_square_patio_wall_light",
+      "icon": "textures/blocks/catalog/recessedsquarepatiowalllight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "76993e15a0e2d7817c9043cce1beffa6464b647595c7ae29bd6f4be08d0a7def"
+    },
+    {
+      "item": "eln:slotted_patio_wall_light",
+      "icon": "textures/blocks/catalog/slottedpatiowalllight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "b2283c92da7e11b5d54c639ab4bfe920cb3554e13c607faa83953e374fb82dc9"
+    },
+    {
+      "item": "eln:round_stone_wall_light",
+      "icon": "textures/blocks/catalog/roundstonewalllight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "b5ff2d0b9ef8bc72f1c06a7118bfe58ef602b385348ba93fd5857c79be317b88"
+    },
+    {
+      "item": "eln:recessed_brick_patio_wall_light",
+      "icon": "textures/blocks/catalog/recessedbrickpatiowalllight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "4404f7e6ec2d65c9f950ddbf0dc5634559b18e2e94e7c22f2f62099727aa9586"
+    },
+    {
+      "item": "eln:arched_walkway_light",
+      "icon": "textures/blocks/catalog/archedwalkwaylight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "453b6caef7877552c793e4fd3cfa4f7818f6d203cc6797a6158d10c5b9e3069a"
+    },
+    {
+      "item": "eln:mushroom_walkway_light",
+      "icon": "textures/blocks/catalog/mushroomwalkwaylight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "4088fdd2b238094354271d175ccc259145d31d6f3af1da8c831bf73f244daf9f"
+    },
+    {
+      "item": "eln:modern_blade_walkway_light",
+      "icon": "textures/blocks/catalog/modernbladewalkwaylight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "91c881e7faf5026dade462cef659d7f9c17cf7072bfb213390e9ba56da698169"
+    },
+    {
+      "item": "eln:shielded_walkway_light",
+      "icon": "textures/blocks/catalog/shieldedwalkwaylight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "b49fc7260314d17c54b1fbfd25426fce3fb58dc5e128512b906f54299ded1b3b"
+    },
+    {
+      "item": "eln:louvered_walkway_bollard",
+      "icon": "textures/blocks/catalog/louveredwalkwaybollard.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "21dd0617a182a0cc908a41fa58708fe305600daf9c2f2c63bca81c2dc956204b"
+    },
+    {
+      "item": "eln:low_profile_dock_light",
+      "icon": "textures/blocks/catalog/lowprofiledocklight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "41bf5361e2d0d8201b59032089dc976cbf789f2aacbd1d70934b75a54a674d6a"
+    },
+    {
+      "item": "eln:pier_lantern_post_light",
+      "icon": "textures/blocks/catalog/pierlanternpostlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "c86a8c76212edb4995ceec518f9157c0c3b8cff2b636ac51c757a71e5b10ade2"
+    },
+    {
+      "item": "eln:harbor_gooseneck_pier_light",
+      "icon": "textures/blocks/catalog/harborgooseneckpierlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "e6b2cdcc40156447a79c10ba473873598dd72e3ae436226ac6ae5873e6128a77"
+    },
+    {
+      "item": "eln:marine_pier_bulkhead_light",
+      "icon": "textures/blocks/catalog/marinepierbulkheadlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "d1ec50e82972548084f13072f1fe7b69d9b8a0d9671fda0ce3e5e76d7ea8032f"
+    },
+    {
+      "item": "eln:nautical_pier_bollard_light",
+      "icon": "textures/blocks/catalog/nauticalpierbollardlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "056faee8cc5da05343b483818423440051f3f5d795b33b97c961f7e661780d2c"
+    },
+    {
+      "item": "eln:adjustable_suspended_warehouse_light",
+      "icon": "textures/blocks/catalog/adjustablesuspendedwarehouselight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "8c7bf64040b05c9cb5be39ed2cefca86961ef6b991210c3efdec8f80f22d469e"
+    },
+    {
+      "item": "eln:tropical_patio_ceiling_fan",
+      "icon": "textures/blocks/catalog/tropicalpatioceilingfan.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "eb37fa58338e9c58acb192032c652414012ccfa9331f802852f55ad665a16bec"
+    },
+    {
+      "item": "eln:deck_step_riser_light",
+      "icon": "textures/blocks/catalog/deckstepriserlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "c146520277800e214341852a8a5938db0e5ea5a4b4cafa3ded123831636336b0"
+    },
+    {
+      "item": "eln:deck_post_cap_light",
+      "icon": "textures/blocks/catalog/deckpostcaplight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "3f57190ebb58ad17284815093b6e9e664d9f349b7c88e14574e71022b5e1ba38"
+    },
+    {
+      "item": "eln:poolside_party_lantern",
+      "icon": "textures/blocks/catalog/poolsidepartylantern.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "0fb6bea407dbb67d05c54c8b4d9eed7780ce47b34cefa0898cdb3ac3fce690bc"
+    },
+    {
+      "item": "eln:poolside_globe_string_lights",
+      "icon": "textures/blocks/catalog/poolsideglobestringlights.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "ec9d5af2d9118af09ccbf3aeb5eb42669a581a4403e8fee94ad217542fe50806"
+    },
+    {
+      "item": "eln:multicolor_party_wash_light",
+      "icon": "textures/blocks/catalog/multicolorpartywashlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "274500238a0b01d3a53d2b0bb641c70720d3e3afcb91c17a1771f4159a77f7bf"
+    },
+    {
+      "item": "eln:electric_poolside_tiki_light",
+      "icon": "textures/blocks/catalog/electricpoolsidetikilight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "4c97b6c1e957f58f4cc671aef3cfb5812807bccffa460280012068984468f190"
+    },
+    {
+      "item": "eln:patio_festoon_party_lights",
+      "icon": "textures/blocks/catalog/patiofestoonpartylights.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "978fac2d8fc8d6ba489092e22792d0dad7fa1bbf0a2211a5118e69f73abd4f38"
+    },
+    {
+      "item": "eln:pool_step_marker_light",
+      "icon": "textures/blocks/catalog/poolstepmarkerlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "167d14b125c9d766d804904febd48875fe85dfa00f4abf6bd23846b6bbd0092d"
+    },
+    {
+      "item": "eln:pool_corner_wash_light",
+      "icon": "textures/blocks/catalog/poolcornerwashlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "07a6f8ae66021219ff574f1b44019a6b33fe30d478a4b3efe221b5c1b48381e5"
+    },
+    {
+      "item": "eln:square_recessed_pool_light",
+      "icon": "textures/blocks/catalog/squarerecessedpoollight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "a7c2d3b4665886408819873a4beab8b4caaf4d0d23ec68991c49fe53e180b062"
+    },
+    {
+      "item": "eln:linear_pool_wall_light",
+      "icon": "textures/blocks/catalog/linearpoolwalllight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "40cc45975a29bbad70215359517d1bc223052d12fd08592389cd8cc627456f83"
+    },
+    {
+      "item": "eln:round_niche_pool_light",
+      "icon": "textures/blocks/catalog/roundnichepoollight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "ee030f473051bdc4b1572bf586116c420179d0c6841affbca70e46623955b6e0"
+    },
+    {
+      "item": "eln:offset_twin_arm_parking_lot_light",
+      "icon": "textures/blocks/catalog/offsettwinarmparkinglotlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "1a625cd5c36040ce6d089290d031567e0b9a77f461a340d7f47b2ccd7b936fc9"
+    },
+    {
+      "item": "eln:round_canopy_parking_lot_light",
+      "icon": "textures/blocks/catalog/roundcanopyparkinglotlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "8820fb63caefd1c29dd3f461d804d50395c81445611e78aabf259c01f5f8a49e"
+    },
+    {
+      "item": "eln:quad_head_parking_lot_light",
+      "icon": "textures/blocks/catalog/quadheadparkinglotlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "5d3868073489d2d769bafe63eaa074110ca40983aa86481a147e9b5043eefca1"
+    },
+    {
+      "item": "eln:large_area_floodlight",
+      "icon": "textures/blocks/catalog/largeareafloodlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "af39500c9f87c4213d110b904cccce3526ec831b3b6170f3d2fe0ae2ec35dbf9"
+    },
+    {
+      "item": "eln:aura_five_blade_ceiling_fan",
+      "icon": "textures/blocks/catalog/aurafivebladeceilingfan.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "37492ab7b947325bc63bf2294afa38805295a9bcd3ca48991c7f18f77c5920d1"
+    },
+    {
+      "item": "eln:industrial_five_block_ceiling_fan",
+      "icon": "textures/blocks/catalog/industrialfiveblockceilingfan.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "39031621b8cce79435c6f8c364b8fa4332099813b28ca80f0e361498adf131fe"
+    },
+    {
+      "item": "eln:modern_three_blade_ceiling_fan",
+      "icon": "textures/blocks/catalog/modernthreebladeceilingfan.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "c5ea9cdf8ce129cd5ca7405178b9d1ba48eeddbc812463a4681563642939bbd0"
+    },
+    {
+      "item": "eln:classic_four_blade_ceiling_fan",
+      "icon": "textures/blocks/catalog/classicfourbladeceilingfan.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "d5df3f0faf4955a0fe0837e164c9398d9f88feb4a859b45bad82d1cc758fe470"
+    },
+    {
+      "item": "eln:twin_adjustable_eave_floodlight",
+      "icon": "textures/blocks/catalog/twinadjustableeavefloodlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "bb6ea526cd06ea59e2bcb79eaaecec83b10d50a220676086020bb999641d366d"
+    },
+    {
+      "item": "eln:mini_twin_dot_light",
+      "icon": "textures/blocks/catalog/minitwindotlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "58b51077233c9acd20479dd8c0f5e23c742917f663041a389c4d74055b73ebe5"
+    },
+    {
+      "item": "eln:mini_deep_baffle_dot_light",
+      "icon": "textures/blocks/catalog/minideepbaffledotlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "084ebcb710179602d3653d22ef4ec66177241586c4dc6e3957db008a6069f2e4"
+    },
+    {
+      "item": "eln:mini_eyeball_dot_spotlight",
+      "icon": "textures/blocks/catalog/minieyeballdotspotlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "8483e32eb27baa259c833d3bfa603d654f3cdb77e85f7c98faf7acd9ae8badc1"
+    },
+    {
+      "item": "eln:mini_bezel_dot_spotlight",
+      "icon": "textures/blocks/catalog/minibezeldotspotlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "6ace10a9af8d0d5e6f47dcbc44ef8065a787df473abe0ad2e7843d7fd3f00fd2"
+    },
+    {
+      "item": "eln:mini_pinhole_dot_light",
+      "icon": "textures/blocks/catalog/minipinholedotlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "d0d389f5dc5f57712f2cc1337ed1a4992b01103895babfc0bfb7556e48af2591"
+    },
+    {
+      "item": "eln:jack_o_lantern_table_lamp",
+      "icon": "textures/blocks/catalog/jackolanterntablelamp.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "e286a78036bf61949a058fe35d7d7cf35369ba2e6ad91584b0ae7d291995c46e"
+    },
+    {
+      "item": "eln:halloween_bat_wall_light",
+      "icon": "textures/blocks/catalog/halloweenbatwalllight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "d0e402337d83d2a847ca7c790778b8e4b4fb832d6bbe8e38dfe3bc9a95ab63cf"
+    },
+    {
+      "item": "eln:halloween_ghost_string_lights",
+      "icon": "textures/blocks/catalog/halloweenghoststringlights.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "8cdc3ed485f7b2a62101d040cde58fdc672ba569815ae85cf2ea45669056f23c"
+    },
+    {
+      "item": "eln:halloween_pumpkin_string_lights",
+      "icon": "textures/blocks/catalog/halloweenpumpkinstringlights.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "6bb1d018b08897ab62795ddb67ec8bb7852c744846cadfd3747bfb2b34770a12"
+    },
+    {
+      "item": "eln:christmas_star_wall_light",
+      "icon": "textures/blocks/catalog/christmasstarwalllight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "7a7fc0720a0feacedcab4a619f2f5676b57f7694acf9e7f22dd1ba5026576c7c"
+    },
+    {
+      "item": "eln:christmas_icicle_lights",
+      "icon": "textures/blocks/catalog/christmasiciclelights.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "4ed0d293f2966d1b37619b07900dd618755c495bdd9b422bcd60c86996980fae"
+    },
+    {
+      "item": "eln:multicolor_christmas_string_lights",
+      "icon": "textures/blocks/catalog/multicolorchristmasstringlights.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "3dca940da649610817dc6b9149de22e44ce6d13d2f88d7195d647555cec0ee32"
+    },
+    {
+      "item": "eln:warm_white_christmas_fairy_lights",
+      "icon": "textures/blocks/catalog/warmwhitechristmasfairylights.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "7a028d3b78433385f434d84b58686e076baec6c3d77b14bfa7f5c1801c877e84"
+    },
+    {
+      "item": "eln:boulevard_lantern_street_light",
+      "icon": "textures/blocks/catalog/boulevardlanternstreetlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "0c1afe20e3c980cb80db53d324d7e1636930321804f079af8f67b49465dfca0d"
+    },
+    {
+      "item": "eln:modern_led_street_light",
+      "icon": "textures/blocks/catalog/modernledstreetlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "a73d5cf7e071d89688ef705979e9876037453220b20438ece65c23111656eb44"
+    },
+    {
+      "item": "eln:offshore_platform_floodlight",
+      "icon": "textures/blocks/catalog/offshoreplatformfloodlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "ad74ca0a265bfefa2fa2f6fcb0d9c657bceab70de1c5f335a393e1b082ec6431"
+    },
+    {
+      "item": "eln:offshore_sealed_linear_light",
+      "icon": "textures/blocks/catalog/offshoresealedlinearlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "62fb3b7c64ae6445071284e269d1a5fd1d3639528f35ab5aeddd5bc4bc86da54"
+    },
+    {
+      "item": "eln:offshore_caged_wellglass_light",
+      "icon": "textures/blocks/catalog/offshorecagedwellglasslight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "1c632294796e98e8539420eaab4d52ac599779cd49d00732b39b40568859c6e9"
+    },
+    {
+      "item": "eln:industrial_yard_area_light",
+      "icon": "textures/blocks/catalog/industrialyardarealight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "958da4f0c24a15e214ba18f0ea8ce5d7bf99516787d6e08f4fb92b3e03366211"
+    },
+    {
+      "item": "eln:rugged_outdoor_canopy_light",
+      "icon": "textures/blocks/catalog/ruggedoutdoorcanopylight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "15baec600ac8758bbcd5736c64c2b9c9284b5f9430d37e71a53df5097133e4ff"
+    },
+    {
+      "item": "eln:industrial_wall_pack_light",
+      "icon": "textures/blocks/catalog/industrialwallpacklight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "98653a40d4b1479e13ccb76b92edbadec7475f3ac933bc12ccd7c669b88eee3d"
+    },
+    {
+      "item": "eln:armored_oval_bulkhead_light",
+      "icon": "textures/blocks/catalog/armoredovalbulkheadlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "2f2795a8dfabc8ae8403b235310cc58b5e5b1476c5cc1ff2bbeae7959e7ba13c"
+    },
+    {
+      "item": "eln:heavy_duty_stadium_wall_floodlight",
+      "icon": "textures/blocks/catalog/heavydutystadiumwallfloodlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "1068f52899c0c90a071eba874065a179d2833dafc95806fac0ee1e1b443fa5c2"
+    },
+    {
+      "item": "eln:grand_empire_chandelier",
+      "icon": "textures/blocks/catalog/grandempirechandelier.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "dad8ab148c68c4c538913ca2318d9ae27bb09288ea52c7431d9192e5ce0a1dfb"
+    },
+    {
+      "item": "eln:spiral_rain_chandelier",
+      "icon": "textures/blocks/catalog/spiralrainchandelier.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "e81c913d5e892b96a54447908870ff005f4cf0b8ef09965f57643ffe2c494b58"
+    },
+    {
+      "item": "eln:sculptural_branch_chandelier",
+      "icon": "textures/blocks/catalog/sculpturalbranchchandelier.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "41587e579adcef9dcee78cce4dbe72a0f4d453269034af048418324ec6f056e6"
+    },
+    {
+      "item": "eln:grand_crystal_cascade_chandelier",
+      "icon": "textures/blocks/catalog/grandcrystalcascadechandelier.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "32fe97ddeda295895b048238253a821c623145a1efc19bb97095e74fc1edda78"
+    },
+    {
+      "item": "eln:grand_halo_ring_chandelier",
+      "icon": "textures/blocks/catalog/grandhaloringchandelier.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "3df700a812121e696c807765ad7d3d3f49461fd95df9924c95538a278ffcee64"
+    },
+    {
+      "item": "eln:flexible_neon_led_strip",
+      "icon": "textures/blocks/catalog/flexibleneonledstrip.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "3541a31edff77842e7037df58847eb0f75cacd393caae3ef8493db842b9be7c0"
+    },
+    {
+      "item": "eln:surface_linear_led_strip",
+      "icon": "textures/blocks/catalog/surfacelinearledstrip.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "71c095a86c748bc6899c95668369ea0d015ba5c01b0eb2b33b314297be72fc13"
+    },
+    {
+      "item": "eln:indirect_cove_led_strip",
+      "icon": "textures/blocks/catalog/indirectcoveledstrip.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "aa22bebb6fd6131c98143e2b9a793abeafdd3131021c8f087f38dfda56302b90"
+    },
+    {
+      "item": "eln:recessed_led_channel",
+      "icon": "textures/blocks/catalog/recessedledchannel.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "ca2841fa1084adb3b4a16900033bed78f8c72f8e5a709ea6ef0fe9b7ba040284"
+    },
+    {
+      "item": "eln:under_cabinet_led_strip",
+      "icon": "textures/blocks/catalog/undercabinetledstrip.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "74671a024420da4a6114ddd296c664943bcc95e41f0621cb9a31e52729b87833"
+    },
+    {
+      "item": "eln:standing_drum_floor_lamp",
+      "icon": "textures/blocks/catalog/standingdrumfloorlamp.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "fd64128a88c44dce77d83876287edba52733c3085537826fff60500243b7d1a3"
+    },
+    {
+      "item": "eln:window_candle_light",
+      "icon": "textures/blocks/catalog/windowcandlelight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "60cb678d96849350c8c8b393c0841104d67a86ef4f1533013ad905417d99cd85"
+    },
+    {
+      "item": "eln:traditional_lantern_post_light",
+      "icon": "textures/blocks/catalog/traditionallanternpostlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "09ea76b5bce246cb23cbc9a6b8d3b479169d75e534925abe39703d9f0b3e04d3"
+    },
+    {
+      "item": "eln:gooseneck_barn_light",
+      "icon": "textures/blocks/catalog/gooseneckbarnlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "63477e8ff2e0767c0db57c97f86f81bf28d07fec592ffedff8a21378358825e2"
+    },
+    {
+      "item": "eln:garden_bollard_light",
+      "icon": "textures/blocks/catalog/gardenbollardlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "0e792420a7c881d714e70b97ed7f577bb9f837315ca8cf663287f3f54d07ca82"
+    },
+    {
+      "item": "eln:adjustable_gimbal_recessed_light",
+      "icon": "textures/blocks/catalog/adjustablegimbalrecessedlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "a4c56c9dcc8bb7be52d2d613468cdc7f1640e1c4932528ae417f093e91a9382e"
+    },
+    {
+      "item": "eln:trimless_recessed_downlight",
+      "icon": "textures/blocks/catalog/trimlessrecesseddownlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "c23b4db3dc13358b0171bba406362b03b5c4903e6afb1bc3052b2be6fedad3f6"
+    },
+    {
+      "item": "eln:deep_baffle_recessed_light",
+      "icon": "textures/blocks/catalog/deepbafflerecessedlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "61b38002b0286a3e7901129b4ebb8e404bd3068271821cbb4ac00265ae5864ae"
+    },
+    {
+      "item": "eln:articulated_task_table_lamp",
+      "icon": "textures/blocks/catalog/articulatedtasktablelamp.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "7686bfb377fcf84eca0fa4a52d893bf0fc659f02ab6b3739dfeadf0b3fa45fbc"
+    },
+    {
+      "item": "eln:green_banker_table_lamp",
+      "icon": "textures/blocks/catalog/greenbankertablelamp.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "3da198b672ef665e3cf61f52cea501114f3fb31e88ca7684679b21c439496939"
+    },
+    {
+      "item": "eln:ceramic_drum_table_lamp",
+      "icon": "textures/blocks/catalog/ceramicdrumtablelamp.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "0209fba1135366f94af0477ecad67cbce6f9b56a61f22e085d64fc17ab346ed9"
+    },
+    {
+      "item": "eln:double_candle_wall_sconce",
+      "icon": "textures/blocks/catalog/doublecandlewallsconce.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "57e66e2d6205cd62b4022601d5b96b72e03faf8209fe4a00161dc9396d667079"
+    },
+    {
+      "item": "eln:industrial_cage_wall_sconce",
+      "icon": "textures/blocks/catalog/industrialcagewallsconce.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "f76f9c8f626449cdd1a44402e97c3efea966cf1e9c6876829bdca977c0a5495f"
+    },
+    {
+      "item": "eln:glass_globe_wall_sconce",
+      "icon": "textures/blocks/catalog/glassglobewallsconce.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "f6f97c0b44679a054cd2dbc70ef728b9f0eebe7e9f24bdf2ddf2d432f9cdf189"
+    },
+    {
+      "item": "eln:fabric_shade_wall_sconce",
+      "icon": "textures/blocks/catalog/fabricshadewallsconce.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "03a4b05f22e88c96b2a32c66ac5d49cd30821cb4244936252171b9a67317737f"
+    },
+    {
+      "item": "eln:up_down_cylinder_wall_sconce",
+      "icon": "textures/blocks/catalog/updowncylinderwallsconce.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "4be8cf22195f6af3c0b1bbba49aa85aabfba5bb7c816064c49328fb5eb363953"
+    },
+    {
+      "item": "eln:modern_sputnik_foyer_chandelier",
+      "icon": "textures/blocks/catalog/modernsputnikfoyerchandelier.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "cd50bfe28f241a92d1ad1d48bf75347f5f8a315c96575c8b2b6d63c442081430"
+    },
+    {
+      "item": "eln:lantern_cage_foyer_chandelier",
+      "icon": "textures/blocks/catalog/lanterncagefoyerchandelier.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "78ba80e0b1f65f29d2b5e8122caa33bca98638c0a14a933cefbe1460881d6544"
+    },
+    {
+      "item": "eln:wagon_wheel_foyer_chandelier",
+      "icon": "textures/blocks/catalog/wagonwheelfoyerchandelier.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "0487ab0f40f5ee8526c63a81f06f5e36ad6f911f61a1f7ac1458d4facdbdd5dc"
+    },
+    {
+      "item": "eln:crystal_tier_foyer_chandelier",
+      "icon": "textures/blocks/catalog/crystaltierfoyerchandelier.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "694efe0935cffbc7539e6307b4d5148036c61b85647f278c09533377b72d72d4"
+    },
+    {
+      "item": "eln:candle_arm_foyer_chandelier",
+      "icon": "textures/blocks/catalog/candlearmfoyerchandelier.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "bf59f2471fd5ba805294ac0f4eb3b71181974859418313bc11f807335c184a92"
+    },
+    {
+      "item": "eln:outdoor_motion_floodlight",
+      "icon": "textures/blocks/catalog/outdoormotionfloodlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "9d298b0f6d3817f4839331bca0f9c255c0c44f3ce4c6a488cfffc28c2583db41"
+    },
+    {
+      "item": "eln:suspended_factory_fluorescent_light",
+      "icon": "textures/blocks/catalog/suspendedfactoryfluorescentlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "eb01a4fe97fe4f2d66d0c8515b97a6f3ff65ca3651abcfe4e1301254965d9e91"
+    },
+    {
+      "item": "eln:thin_fluorescent_shop_light",
+      "icon": "textures/blocks/catalog/thinfluorescentshoplight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "6685c8821028a5bc33d2a02497b06bb45ae4d493489ec6b89471c05f7d49b8f4"
+    },
+    {
+      "item": "eln:basic_lamp_holder",
+      "icon": "textures/blocks/catalog/basiclampholder.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "70a7613f99fbfa437651bedfeb2f187f1c367bbd84ba8975eb072c126d15ba55"
+    },
+    {
+      "item": "eln:porch_lantern_sconce",
+      "icon": "textures/blocks/catalog/porchlanternsconce.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "c2bec8ae56380de6a14bba406338e03f7466e778c97fd1d2b0da01f906f1937f"
+    },
+    {
+      "item": "eln:mini_dot_spotlight",
+      "icon": "textures/blocks/catalog/minidotspotlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "2d8fef85dde0d46849d5be7bb956d94a2436cccf1de398e95a390aa46b8dac0f"
+    },
+    {
+      "item": "eln:basic_chandelier",
+      "icon": "textures/blocks/catalog/basicchandelier.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "d0856e8527ee406791aa9bd91baaf74809f141fa31d4cecd69a6ecb7b32fff91"
+    },
+    {
+      "item": "eln:round_recessed_ceiling_light",
+      "icon": "textures/blocks/catalog/roundrecessedceilinglight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "f3ce52d67dcd91eb602e12d295ee62e1f0f1972cb0e2359241e2020a8f5704a9"
+    },
+    {
+      "item": "eln:household_desk_lamp",
+      "icon": "textures/blocks/catalog/householddesklamp.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "203fd8967c846de4c4588fb2c0086c76e4d9ee5e3a843221b717951927b2f181"
+    },
+    {
+      "item": "eln:warehouse_wall_floodlight",
+      "icon": "textures/blocks/catalog/warehousewallfloodlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "f6abe2c9311403675a5700de59b07121fd95de96eacf8cc0d06b0532232d284c"
+    },
+    {
+      "item": "eln:twin_parking_lot_light",
+      "icon": "textures/blocks/catalog/twinparkinglotlight.png",
+      "width": 32,
+      "height": 32,
+      "sha256": "7f72bb2b95e8152802dfc6e46d1a63ab74275e7d52fd92dc4fae08e42bf2e0cf"
+    }
+  ]
+}

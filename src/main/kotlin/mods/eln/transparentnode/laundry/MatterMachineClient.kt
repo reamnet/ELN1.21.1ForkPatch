@@ -36,7 +36,7 @@ class MatterMachineDescriptor(val kind: MatterMachineKind): TransparentNodeDescr
             addRectangle(0,1,0,1,-2,3);removeElement(0,0,0)
         }
     }
-    fun draw(front: Direction)=preserveMatrix {
+    fun draw(front: Direction,progress: Double?=null,powered: Boolean=false)=preserveMatrix {
         if(kind==MatterMachineKind.FUSION)front.glRotateXnRef() else front.inverse.glRotateZnRef()
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
         try {
@@ -47,6 +47,7 @@ class MatterMachineDescriptor(val kind: MatterMachineKind): TransparentNodeDescr
             GL11.glColor3f(.10f,.35f,.47f);model.getPart("Glass")?.drawNoBind()
             GL11.glColor3f(.14f,.48f,.62f);model.getPart("Display")?.drawNoBind()
             GL11.glColor3f(.80f,.45f,.12f);model.getPart("Coils")?.drawNoBind()
+            if(progress!=null)mods.eln.client.power.PowerPanelDisplay.equipmentNumber(model,progress,powered)
             if(kind==MatterMachineKind.DRYER) {
                 GL11.glColor3f(.83f,.81f,.76f);model.getPart("Door")?.drawNoBind()
                 GL11.glColor3f(.72f,.72f,.68f);model.getPart("Lint")?.drawNoBind()
@@ -108,7 +109,7 @@ class MatterMachineRender(entity: TransparentNodeEntity,descriptor: TransparentN
     override fun draw() {
         cable=drawCable(Direction.YN,Eln.instance.meduimVoltageCableDescriptor.render,connections,cable)
         // The whole stationary body is baked. Network progress updates do not rebuild geometry.
-        TerrainModels.body(this,front ?: Direction.ZP) { (transparentNodeDescriptor as MatterMachineDescriptor).draw(front ?: Direction.ZP) }
+        TerrainModels.body(this,front ?: Direction.ZP) { (transparentNodeDescriptor as MatterMachineDescriptor).draw(front ?: Direction.ZP,if(required>0)100*joules/required else 0.0,enabled && volts>kind.volts*.8) }
     }
     override fun cameraDrawOptimisation()=false
     override fun networkUnserialize(stream: DataInputStream) {

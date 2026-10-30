@@ -73,6 +73,7 @@ class BackupDescriptor(name: String,val generator: Boolean,wallMounted: Boolean=
             model.getPart("Display")?.drawNoBind()
             if(generatorLit)UtilsClient.enableLight()
             val panel=mods.eln.client.power.PowerPanelDisplay
+            if(generator && display!=null)panel.equipmentNumber(model,display.output,generatorLit)
             if(generator)panel.lamp(model,"Indicator",display?.status in listOf("RUNNING","COOLDOWN"),.08f,.8f,.12f)
             else {
                 panel.lamp(model,"MainsLed",display?.mains?.let { it>=display.target*.8 }==true,.1f,.8f,.2f)

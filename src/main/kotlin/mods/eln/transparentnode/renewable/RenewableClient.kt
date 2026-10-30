@@ -66,7 +66,7 @@ class RenewableDescriptor(name: String,val kind: RenewableKind,wallMounted: Bool
             }
         }
     }
-    fun draw(front: Direction,angle: Float=0f)=preserveMatrix {
+    fun draw(front: Direction,angle: Float=0f,display: SolarDisplay?=null)=preserveMatrix {
         // The source mesh faces +Z. Ghosts and sampling use the node's canonical -X front.
         front.inverse.glRotateZnRef()
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
@@ -79,6 +79,7 @@ class RenewableDescriptor(name: String,val kind: RenewableKind,wallMounted: Bool
             GL11.glColor3f(.08f,.24f,.55f);model.getPart("Grid")?.drawNoBind()
             GL11.glColor3f(.97f,.37f,.05f);model.getPart("Output")?.drawNoBind()
             GL11.glColor3f(.1f,.12f,.14f);model.getPart("Return")?.drawNoBind()
+            if(!large && display!=null)mods.eln.client.power.PowerPanelDisplay.equipmentNumber(model,display.output,display.pv>1 || display.grid>1)
             if(large)preserveMatrix {
                 GL11.glTranslatef(0f,if(kind==RenewableKind.WIND)9.5f else 3.5f,if(kind==RenewableKind.WIND).8f else -.65f)
                 GL11.glRotatef(angle,0f,0f,1f)
@@ -135,7 +136,7 @@ class RenewableRender(entity: TransparentNodeEntity,descriptor: TransparentNodeD
     private val renewable get()=transparentNodeDescriptor as RenewableDescriptor
     override fun draw() {
         cable=drawCable(renewable.connectionPlane(front ?: Direction.ZP),Eln.instance.stdCableRender3200V,display.connections,cable)
-        mods.eln.client.terrain.TerrainModels.body(this,listOf(front),if(renewable.large)setOf("Rotor") else emptySet()) { renewable.draw(front ?: Direction.ZP,angle) }
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(front),if(renewable.large)setOf("Rotor") else emptySet()) { renewable.draw(front ?: Direction.ZP,angle,display) }
     }
     override fun refresh(deltaT: Float) { super.refresh(deltaT);if(renewable.large)angle=(angle+deltaT*if(available>.01)35f else 0f)%360f }
     override fun cameraDrawOptimisation()=false

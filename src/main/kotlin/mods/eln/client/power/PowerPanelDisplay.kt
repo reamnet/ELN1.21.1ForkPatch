@@ -9,13 +9,24 @@ import mods.eln.misc.preserveMatrix
 object PowerPanelDisplay {
     val PARTS=setOf("Indicator","MainsLed","BackupLed","ChargeLed","FaultLed","BypassLed")
     private val digits=intArrayOf(0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f)
+    /** Fit a live readout into an existing front display without rebaking the enclosure. */
+    fun equipmentNumber(model: mods.eln.misc.Obj3D,value: Double,powered: Boolean,part: String="Display") {
+        if(!powered)return
+        val box=model.getPart(part)?.boundingBox() ?: return
+        val width=box.max.x-box.min.x;val height=box.max.y-box.min.y
+        if(width<.065 || height<.025)return
+        val count=if(value>9999)6 else 4
+        val size=minOf(height*.62,width/(count*.675)*.78)
+        number(value,(box.min.x+box.max.x)*.5-size*count*.675*.5,(box.min.y+box.max.y)*.5-size*.5,box.max.z+.0015,count,size)
+    }
     fun number(value: Double,x: Double,y: Double,z: Double,count: Int=4,height: Double=.065)=TerrainModels.dynamic {
         preserveMatrix {
             GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS)
             try {
                 GL11.glDisable(GL11.GL_TEXTURE_2D);UtilsClient.disableLight()
                 GL11.glColor3f(.24f,.92f,.74f)
-                val n=if(value.isFinite())value.toInt().coerceIn(0,9999) else 0
+                val maximum=when(count) { 1->9;2->99;3->999;4->9999;5->99999;else->999999 }
+                val n=if(value.isFinite())value.toInt().coerceIn(0,maximum) else 0
                 val text=n.toString().padStart(count,' ').takeLast(count)
                 val w=height*.5;val t=height*.09
                 fun rect(a: Double,b: Double,c: Double,d: Double) {

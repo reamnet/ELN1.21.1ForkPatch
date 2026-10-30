@@ -27,6 +27,12 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
         }
         override fun removeItem(slot: Int,amt: Int): ItemStack { preserveFood();return super.removeItem(slot,amt).also(mods.eln.compat.RefrigeratorPreservation::release) }
         override fun removeItemNoUpdate(slot: Int): ItemStack { preserveFood();return super.removeItemNoUpdate(slot).also(mods.eln.compat.RefrigeratorPreservation::release) }
+        override fun startOpen(player: Player) {
+            if(type.refrigerator && player is net.minecraft.server.level.ServerPlayer && viewers.add(player.uuid))needPublish()
+        }
+        override fun stopOpen(player: Player) {
+            if(player is net.minecraft.server.level.ServerPlayer && viewers.remove(player.uuid))needPublish()
+        }
         override fun getAccessibleSlotsFromSide(side: Int)=IntArray(containerSize) { it }
         override fun canPlaceItemThroughFace(slot: Int,stack: ItemStack?,side: Int)=stack!=null && KitchenRecipe.allowed(type,slot,stack)
         override fun canTakeItemThroughFace(slot: Int,stack: ItemStack?,side: Int)=slot==2 || slot==1 && (stack?.`is`(net.minecraft.world.item.Items.BUCKET)==true || stack?.`is`(net.minecraft.world.item.Items.GLASS_BOTTLE)==true) || slot>=3
@@ -47,6 +53,10 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
         private set
     var temperature=20.0
         private set
+    private val viewers=HashSet<java.util.UUID>()
+    val doorOpen get()=type.refrigerator && viewers.isNotEmpty()
+    private var ambient=20.0
+    private var roomClock=0.0
     var status="IDLE"
         private set
     val coldStorage get()=type.refrigerator && temperature<=5.0
@@ -95,8 +105,19 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
         val power=if(active)resistor.power.coerceIn(0.0,type.watts*1.1) else 0.0
         preserveFood()
         if(type.refrigerator) {
-            val cooling=(power/type.watts).coerceIn(0.0,1.0)*.85
-            temperature=(temperature+seconds*(.025-cooling)).coerceIn(3.5,20.0)
+            roomClock-=seconds
+            if(roomClock<=0.0) {
+                roomClock=1.0
+                val world=node?.coordinate?.world() as? ServerLevel
+                if(world!=null) {
+                    if(viewers.removeIf { id ->
+                        val p=world.server.playerList.getPlayer(id)
+                        p==null || p.level()!==world || (p.containerMenu as? KitchenContainer)?.deviceInventory!==inventory
+                    })needPublish()
+                    ambient=getAmbientTemperatureCelsius()
+                }
+            }
+            temperature=RefrigeratorThermal.advance(temperature,ambient,power/type.watts,doorOpen,seconds)
         }
         if(batteryJob && active && power>0 && batteryHeat.advance(seconds,power))detonateBattery()
         val job=recipe
@@ -105,6 +126,7 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
             !enabled -> "OFF"
             abs(load.voltage)>type.volts*1.2 -> "OVERVOLTAGE"
             requested && abs(load.voltage)<type.volts*.8 -> "NO_POWER"
+            doorOpen -> "DOOR_OPEN"
             batteryJob && batteryHeat.hissing -> "HISSING"
             batteryJob -> "HEATING_BATTERY"
             job!=null && !job.canFit(inventory) -> "BLOCKED"
@@ -166,12 +188,14 @@ class KitchenElement(node: TransparentNode,descriptor: TransparentNodeDescriptor
         stream.writeBoolean(enabled);stream.writeBoolean(active);stream.writeDouble(if(batteryJob)batteryHeat.joules/MicrowaveBatteryHeat.BLAST_JOULES else work.joules/(type.watts*type.seconds))
         stream.writeDouble(load.voltage);stream.writeDouble(resistor.power);stream.writeDouble(temperature);stream.writeUTF(status)
         node!!.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);
+        stream.writeBoolean(doorOpen)
     }
     override fun readFromNBT(nbt: CompoundTag) {
         super.readFromNBT(nbt)
         enabled=!nbt.contains("kitchenEnabled") || nbt.getBoolean("kitchenEnabled")
         work.joules=nbt.getDouble("kitchenJoules").takeIf { it.isFinite() }?.coerceIn(0.0,type.watts*type.seconds) ?: 0.0
-        temperature=if(nbt.contains("kitchenTemperature"))nbt.getDouble("kitchenTemperature").takeIf { it.isFinite() }?.coerceIn(3.5,20.0) ?: 20.0 else 20.0
+        temperature=if(nbt.contains("kitchenTemperature"))nbt.getDouble("kitchenTemperature").takeIf { it.isFinite() }?.coerceIn(3.5,80.0) ?: 20.0 else 20.0
+        viewers.clear();roomClock=0.0
         batteryHeat.read(nbt);cacheReady=false
         foodClock=if(nbt.contains("fridgeFoodClock"))nbt.getLong("fridgeFoodClock") else -1L
         foodWasCold=nbt.getBoolean("fridgeFoodWasCold")

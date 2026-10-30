@@ -1,0 +1,5 @@
+newmtl Neutral
+Kd 1 1 1
+newmtl eln_finish_wood
+Kd 1.000 1.000 1.000
+map_Kd eln:textures/block/equipment_finishes.png

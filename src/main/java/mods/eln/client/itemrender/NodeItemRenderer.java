@@ -45,6 +45,8 @@ public final class NodeItemRenderer extends BlockEntityWithoutLevelRenderer {
      * The data generator gives those items a block's GUI display transform.
      */
     public static boolean inventoryAsBlock(GenericItemBlockUsingDamageDescriptor descriptor, ItemStack stack, java.util.function.Predicate<ResourceLocation> textureExists) {
+        ResourceLocation catalogIcon = CatalogItemPresentation.icon(descriptor);
+        if (catalogIcon != null && textureExists.test(catalogIcon)) return false;
         if (!(descriptor instanceof IItemRenderer renderer)) return false;
         if (renderer.shouldUseRenderHelper(IItemRenderer.ItemRenderType.INVENTORY, stack, IItemRenderer.ItemRendererHelper.INVENTORY_BLOCK)) return true;
         String icon = descriptor.getIconName();
@@ -77,7 +79,9 @@ public final class NodeItemRenderer extends BlockEntityWithoutLevelRenderer {
         try {
             // Forge's inventory render of a flat custom icon turned GL_LIGHTING off around it: the sprite at its own colours
             if (flatIcon) mods.eln.client.gl.GL11.glDisable(mods.eln.client.gl.GL11.GL_LIGHTING);
-            renderer.renderItem(type, stack);
+            ResourceLocation catalogIcon = flatIcon ? CatalogItemPresentation.icon(item.descriptor) : null;
+            if (catalogIcon != null) mods.eln.misc.UtilsClient.drawIcon(type, catalogIcon);
+            else renderer.renderItem(type, stack);
         } finally {
             FixedFunction.finish();
             poseStack.popPose();
