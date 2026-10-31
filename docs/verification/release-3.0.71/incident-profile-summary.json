@@ -1,0 +1,12 @@
+{
+  "url": "https://spark.lucko.me/hnCjg2VTO1",
+  "version": "3.0.70",
+  "durationSeconds": 600.152,
+  "includedSlowTicks": 22,
+  "thresholdMicroseconds": 100000,
+  "retainedSampleMilliseconds": 4828.0,
+  "lightUpdateMilliseconds": 1284.0,
+  "lightUpdateSelfMilliseconds": 1256.0,
+  "lightUpdateSharePercent": 26.594863297431647,
+  "scope": "Java server-thread samples from retained slow ticks; not overall process CPU."
+}

@@ -18,7 +18,7 @@ import kotlin.math.abs
 import mods.eln.misc.xCoord
 import mods.eln.misc.yCoord
 import mods.eln.misc.zCoord
-import mods.eln.misc.getBlockState
+import mods.eln.node.LoadedBlockStates
 import mods.eln.misc.isNothing
 import mods.eln.misc.rand
 
@@ -193,7 +193,7 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
             val lbPos = BlockPos(lbCoordinate.x, lbCoordinate.y, lbCoordinate.z)
             val lbWorld = lbCoordinate.world()
             // 1.7.10 ticked the lit block by hand; the light block schedules nothing (its entity ticks), so the state read suffices.
-            lbWorld.getBlockState(lbPos)
+            LoadedBlockStates.get(lbWorld, lbPos)
         }
     }
 
@@ -215,7 +215,8 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
 
     private fun raytrace(rotationVector: Vec3, vectorLengthModifier: Int): Coordinate {
         val mounting=element.sixNode!!.coordinate
-        val inset=LampMounting.inset(mounting.world(),mounting.pos,element.side,element.descriptor)
+        val world=mounting.world()
+        val inset=LampMounting.inset(world,mounting.pos,element.side,element.descriptor)
         val origin = mounting.toVec3().add(element.side.rotateFromXN(Vec3(-inset,0.0,0.0)))
         val lbCoordinate = Coordinate(origin, element.sixNode!!.coordinate.dimension)
 
@@ -237,7 +238,8 @@ class LampSocketProcess(var element: LampSocketElement) : IProcess {
             lightZ += rotationVector.z
             placeAt(lightX, lightY, lightZ)
 
-            if (!lbCoordinate.blockExist || lbCoordinate.blockState.isSolidRender(lbCoordinate.world(), lbCoordinate.pos)) {
+            val state = LoadedBlockStates.get(world, lbCoordinate.pos)
+            if (state == null || state.isSolidRender(world, lbCoordinate.pos)) {
                 // Step back so the light lands in the last open block, not inside the wall.
                 placeAt(lightX - rotationVector.x, lightY - rotationVector.y, lightZ - rotationVector.z)
                 break

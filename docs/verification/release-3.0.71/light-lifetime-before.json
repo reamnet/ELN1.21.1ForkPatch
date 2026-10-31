@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "observations": {
+    "pausedRefresh": {
+      "refreshes": 150000,
+      "pendingEntries": 150001,
+      "refreshMilliseconds": 218.532167,
+      "resumeMilliseconds": 1717.842054
+    },
+    "overlappingWaterLight": {
+      "levels": [
+        15,
+        8,
+        8
+      ],
+      "waterRestored": true
+    },
+    "absentLightRefresh": {
+      "chunkEntries": 575,
+      "loadEvents": 3
+    },
+    "legacySpotBeam": {
+      "chunkEntries": 0,
+      "loadEvents": 0
+    },
+    "floodlightBeam": {
+      "chunkEntries": 46,
+      "loadEvents": 2
+    }
+  }
+}

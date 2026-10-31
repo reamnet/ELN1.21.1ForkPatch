@@ -6,6 +6,7 @@ import mods.eln.lightblock.LightBlockEntity
 import mods.eln.misc.Coordinate
 import mods.eln.misc.Utils.getItemObject
 import mods.eln.sim.IProcess
+import mods.eln.node.LoadedBlockStates
 import net.minecraft.world.item.ItemStack
 import kotlin.math.*
 import mods.eln.misc.isNothing
@@ -93,6 +94,7 @@ class FloodlightProcess(val element: FloodlightElement) : IProcess {
     }
 
     private fun placeSpots(lightValue: Int, lightRange: Int) {
+        val world = element.node!!.coordinate.world()
         val origin = element.node!!.coordinate.toVec3()
         val lbCoordinate = Coordinate(origin, element.node!!.coordinate.dimension)
         val rays = FloodlightOptics.rays(element.swivelAngle, element.headAngle, element.beamWidth,
@@ -106,8 +108,8 @@ class FloodlightProcess(val element: FloodlightElement) : IProcess {
                 position[1] = origin.y + step.y * distance
                 position[2] = origin.z + step.z * distance
                 lbCoordinate.setPosition(position)
-                if (!lbCoordinate.blockExist ||
-                    lbCoordinate.blockState.isSolidRender(lbCoordinate.world(), lbCoordinate.pos)) {
+                val state = LoadedBlockStates.get(world, lbCoordinate.pos) ?: break
+                if (state.isSolidRender(world, lbCoordinate.pos)) {
                     position[0] -= step.x
                     position[1] -= step.y
                     position[2] -= step.z

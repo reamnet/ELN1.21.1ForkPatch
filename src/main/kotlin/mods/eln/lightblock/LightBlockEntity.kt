@@ -2,25 +2,18 @@ package mods.eln.lightblock
 
 import mods.eln.Eln
 import mods.eln.misc.Coordinate
-import mods.eln.misc.INBTTReady
 import mods.eln.misc.Utils
-import net.minecraft.nbt.CompoundTag
+import mods.eln.node.LoadedBlockEntities
+import mods.eln.node.LoadedBlockStates
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.core.BlockPos
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 import java.util.function.Supplier
 import net.minecraft.world.level.Level
-import mods.eln.misc.getBlock
-import mods.eln.misc.getBlockMetadata
-import mods.eln.misc.getBlockEntity
-import mods.eln.misc.setBlock
-import mods.eln.misc.setBlockToAir
 import mods.eln.misc.xCoord
 import mods.eln.misc.yCoord
 import mods.eln.misc.zCoord
-import mods.eln.misc.getBlockState
-import mods.eln.misc.writeToNBT
 
 class LightBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(TYPE.get(), pos, state) {
 
@@ -38,18 +31,17 @@ class LightBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(TYPE.get(
 
         @JvmStatic
         fun addLight(w: Level, x: Int, y: Int, z: Int, light: Int, timeout: Int) {
-            val block = w.getBlock(x, y, z)
-
-            if (block !== Eln.lightBlock) {
-                val pos=BlockPos(x,y,z)
-                val old=w.getBlockState(pos)
+            if (w.isClientSide || w.isOutsideBuildHeight(y)) return
+            val pos = BlockPos(x, y, z)
+            val old = LoadedBlockStates.get(w, pos) ?: return
+            if (old.block !== Eln.lightBlock) {
                 val water=old.block===net.minecraft.world.level.block.Blocks.WATER && old.fluidState.isSource
                 if (!old.isAir && !water) return
                 if(light<=0)return
-                w.setBlock(pos,Eln.lightBlock.stateForMeta(light).setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED,water),2)
+                if (!w.setBlock(pos,Eln.lightBlock.stateForMeta(light).setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED,water),2)) return
             }
 
-            val t = w.getBlockEntity(x, y, z)
+            val t = LoadedBlockEntities.get(w, pos)
 
             if (t is LightBlockEntity) t.addLight(light, timeout)
             else Utils.println("Error in setting light at %d %d %d", x, y, z)
@@ -67,49 +59,24 @@ class LightBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(TYPE.get(
 
     }
 
-    private val lightList: MutableList<LightHandle> = mutableListOf()
+    private val leases = LightLeases()
 
     private fun addLight(light: Int, timeout: Int) {
-        // block light is 0..15 (a state property now; 1.7.10's metadata nibble silently wrapped 25 to 9)
-        lightList.add(LightHandle(light.coerceIn(0, 15), timeout))
-    }
-
-    internal class LightHandle(var value: Int = 0, var timeout: Int = 0) : INBTTReady {
-
-        override fun readFromNBT(nbt: CompoundTag, str: String) {
-            value = nbt.getInt(str + "value")
-            timeout = nbt.getInt(str + "timeout")
-        }
-
-        override fun writeToNBT(nbt: CompoundTag, str: String) {
-            nbt.putInt(str + "value", value)
-            nbt.putInt(str + "timeout", timeout)
-        }
-
+        leases.refresh(light, timeout)
     }
 
     /** Ticked by the block's BlockEntityTicker (server only). */
     fun update() {
         if (world.isClientSide) return
 
-        if (lightList.isEmpty()) {
+        val light = leases.advance()
+        if (light == null) {
             world.setBlock(blockPos,world.getBlockState(blockPos).fluidState.createLegacyBlock(),3)
             Utils.println("Destroy light at %d %d %d", xCoord, yCoord, zCoord)
             return
         }
 
-        var light = 0
-        val iterator: MutableIterator<LightHandle> = lightList.iterator()
-
-        while (iterator.hasNext()) {
-            val l = iterator.next()
-            if (light < l.value) light = l.value
-            l.timeout--
-            if (l.timeout <= 0) iterator.remove()
-        }
-
         val state = world.getBlockState(blockPos)
-        light = light.coerceIn(0, 15)
         if (state.block === Eln.lightBlock && light != state.getValue(LightBlock.LIGHT)) {
             // The light level is a blockstate property, not a metadata nibble; the light engine follows the state change.
             world.setBlock(blockPos, state.setValue(LightBlock.LIGHT, light), 2)

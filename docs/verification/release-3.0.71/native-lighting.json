@@ -1,0 +1,11 @@
+{
+  "world": "utility-distribution-1793419427149",
+  "passed": [
+    "Pool, party and deck fixtures light from wired and wireless feeds, aimed heads sync, pool fittings preserve water, and pole bases retain skylight",
+    "Client pole spans retain full geometry bounds outside their owning section: {hvYaw\u003d-45.0, lvYaw\u003d0.0, bounds\u003dAABB[248.44500681058432, 90.0, 239.5] -\u003e [280.5571568898778, 98.5, 258.5545939524837]}",
+    "Underwater lighting restores water; cord-fed workshop machines retain physical power and finish a real recipe; the portable mini fridge cools",
+    "The breaker clips Copper 1/0 AWG Cable 1000V outside its housing in the live client"
+  ],
+  "sounds": {},
+  "phase": 46
+}

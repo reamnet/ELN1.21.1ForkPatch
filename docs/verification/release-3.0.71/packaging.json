@@ -1,0 +1,11 @@
+{
+  "version": "3.0.71",
+  "file": "ElectricalAge-3.0.71.jar",
+  "bytes": 20904458,
+  "sha256": "300539baf5b25f1367ad4d755390de99097a858256852d4aa366b5733208f309",
+  "boundedLightLeases": true,
+  "unboundedLightHandleRemoved": true,
+  "jarInJarDependencies": 3,
+  "nativeFixtureFlagGated": true,
+  "uploadedAssets": 0
+}
