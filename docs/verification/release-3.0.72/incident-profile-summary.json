@@ -1,0 +1,15 @@
+{
+  "source": "User-pasted expanded server-thread Spark stack",
+  "series": 12,
+  "parallel": 8,
+  "panelBlocks": 96,
+  "panelType": "large 2x3 sun-tracking",
+  "condition": "Open circuit, sunlit/daytime; user reports about 17 TPS",
+  "simulatorSamplePercent": 62.11,
+  "rootSamplePercent": 53.25,
+  "legacySweepSamplePercent": 39.93,
+  "solarElectricalSamplePercent": 33.94,
+  "checkedVoltageSamplePercent": 33.64,
+  "solarLightAndTrackingSamplePercent": 0.15,
+  "scope": "Percentages are sampled server-thread wall time, not overall process CPU; mod version was not provided."
+}

@@ -1,0 +1,45 @@
+{
+  "series": 12,
+  "parallel": 8,
+  "panelBlocks": 96,
+  "panelType": "large 2x3 tracking electrical parameters",
+  "lightFactor": 1.0,
+  "legacySweeps": 50,
+  "electricalPeriod": 0.01,
+  "stepsPerRound": 12,
+  "previousMillisecondsPerElectricalStep": [
+    14.905619166666666,
+    12.754845333333334,
+    12.291855166666666,
+    15.233243166666666,
+    9.937564166666666,
+    9.682314416666665,
+    10.393854166666666
+  ],
+  "optimizedMillisecondsPerElectricalStep": [
+    8.078813666666667,
+    7.894532333333333,
+    11.62699825,
+    7.035091583333332,
+    6.869477166666667,
+    6.2608733333333335,
+    5.972780749999999
+  ],
+  "previousMedianMs": 10.393854166666666,
+  "optimizedMedianMs": 6.869477166666667,
+  "openCircuitVoltage": 1331.999963073801,
+  "subsystemSizes": [
+    117,
+    117,
+    17,
+    17,
+    17,
+    17,
+    15,
+    15,
+    15,
+    15
+  ],
+  "differentialProbes": 499200,
+  "commandRhsReuses": 446969
+}

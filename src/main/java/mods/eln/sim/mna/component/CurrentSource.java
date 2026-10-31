@@ -18,6 +18,8 @@ public class CurrentSource extends Bipole implements ISubSystemProcessI, INBTTRe
     }
 
     public CurrentSource setCurrent(double i) {
+        if (Double.doubleToLongBits(current) != Double.doubleToLongBits(i) && getSubSystem() != null)
+            getSubSystem().invalidateSourceRhs();
         current = i;
         return this;
     }
@@ -55,7 +57,7 @@ public class CurrentSource extends Bipole implements ISubSystemProcessI, INBTTRe
     @Override
     public void readFromNBT(CompoundTag nbt, String str) {
         str += name;
-        current = nbt.getDouble(str + "I");
+        setCurrent(nbt.getDouble(str + "I"));
     }
 
     @Override

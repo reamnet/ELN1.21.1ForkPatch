@@ -25,6 +25,8 @@ public class VoltageSource extends Bipole implements ISubSystemProcessI, INBTTRe
     }
 
     public VoltageSource setVoltage(double voltage) {
+        if (Double.doubleToLongBits(this.voltage) != Double.doubleToLongBits(voltage) && getSubSystem() != null)
+            getSubSystem().invalidateSourceRhs();
         this.voltage = voltage;
         return this;
     }

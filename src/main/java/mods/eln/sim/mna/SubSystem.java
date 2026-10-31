@@ -61,6 +61,24 @@ public class SubSystem {
     private final boolean gaugeCopyReduction = !Boolean.getBoolean("eln.disableMnaGaugeCopyReduction");
     private final boolean portProjections = !Boolean.getBoolean("eln.disableAffinePortProjections");
     private AffinePortProjection[] portProjectionRows;
+    private final boolean differentialVoltageProbes = !Boolean.getBoolean("eln.disableDifferentialVoltageProbes");
+    private java.util.HashMap<Long, VoltageDifferenceResponse> voltageDifferenceRows;
+    private static final class VoltageDifferenceResponse {
+        final AffinePortProjection projection;
+        final double safeRhsLimit;
+        VoltageDifferenceResponse(AffinePortProjection projection, double safeRhsLimit) {
+            this.projection = projection;
+            this.safeRhsLimit = safeRhsLimit;
+        }
+    }
+    private boolean commandRhsOnly, commandRhsValid;
+    private double[] commandRhsSnapshot;
+    private double commandRhsMaximum;
+    private long commandRhsReuses;
+    public long getCommandRhsReuses() { return commandRhsReuses; }
+    public void invalidateSourceRhs() { commandRhsValid = false; }
+    private long differentialVoltageProbeCount;
+    public long getDifferentialVoltageProbeCount() { return differentialVoltageProbeCount; }
     private int portProjectionDepth;
     private java.util.BitSet[] symmetryCandidates;
     private boolean symmetricProbeMatrix;
@@ -88,6 +106,7 @@ public class SubSystem {
 
     public void invalidate() {
         matrixValid = false;
+        invalidateSourceRhs();
     }
 
     public void addComponent(Component c) {
@@ -133,9 +152,24 @@ public class SubSystem {
 
     public void addProcess(ISubSystemProcessI p) {
         processI.add(p);
+        commandRhsOnly = false;
+        invalidateSourceRhs();
     }
 
     public void generateMatrix() {
+        voltageDifferenceRows = null;
+        commandRhsSnapshot = null;
+        commandRhsValid = false;
+        commandRhsOnly = true;
+        // Exact classes only: capacitors, inductors, Delay and custom/subclass
+        // callbacks may depend on physical state rather than tracked commands.
+        for (ISubSystemProcessI process : processI) {
+            Class<?> type = process.getClass();
+            if (type != CurrentSource.class && type != VoltageSource.class && type != SwitchableVoltageSource.class) {
+                commandRhsOnly = false;
+                break;
+            }
+        }
         probeRhs = null; probeSolution = null; probeUpdates = 0;
         lastPreciseRhs = null; lastPreciseSolution = null;
         validStepSolution = false;
@@ -573,6 +607,64 @@ public class SubSystem {
         DD[] solution = solvePrecise(solveRhs);
         for (int row = 0; row < stateCount; row++) trial[row] = solution[row].doubleValue();
         return voltageGauge.valid(trial) ? trial[pin.getId()] : Double.NaN;
+    }
+
+    /** Read a terminal-to-terminal voltage without committing physical state. Sample
+     * source callbacks once, validate floating-island KCL, and project the difference
+     * in DD before converting to double. Responses belong to this stamped matrix;
+     * source commands are read on every call and no physical voltage is cached. */
+    public double solveVoltageDifferenceChecked(State a, State b) {
+        if (!differentialVoltageProbes) return solveChecked(a) - solveChecked(b);
+        if (!matrixValid) generateMatrix();
+        if (singularMatrix || a == null || b == null
+                || a.getSubSystem() != this || b.getSubSystem() != this) return Double.NaN;
+        double maximum;
+        if (commandRhsOnly && commandRhsValid) {
+            System.arraycopy(commandRhsSnapshot, 0, Idata, 0, stateCount);
+            maximum = commandRhsMaximum;
+            commandRhsReuses++;
+        } else {
+            java.util.Arrays.fill(Idata, 0.0);
+            for (ISubSystemProcessI process : processI) process.simProcessI(this);
+            maximum = 0.0;
+            for (double value : Idata) maximum = Math.max(maximum, Math.abs(value));
+            if (!Double.isFinite(maximum)) return Double.NaN;
+            if (commandRhsOnly) {
+                if (commandRhsSnapshot == null) commandRhsSnapshot = new double[stateCount];
+                System.arraycopy(Idata, 0, commandRhsSnapshot, 0, stateCount);
+                commandRhsMaximum = maximum;
+                commandRhsValid = true;
+            }
+        }
+        double[] rhs = Idata;
+        if (voltageGauge.getActive()) {
+            if (!validProbeRhs()) return Double.NaN;
+            rhs = Idata.clone();
+            voltageGauge.applyRhs(rhs);
+        }
+        long key = ((long) a.getId() << 32) | (b.getId() & 0xffffffffL);
+        if (voltageDifferenceRows == null) voltageDifferenceRows = new java.util.HashMap<>();
+        VoltageDifferenceResponse response = voltageDifferenceRows.get(key);
+        if (response == null) {
+            DD[] aRow = responseRow(a.getId()), bRow = responseRow(b.getId());
+            DD[] difference = new DD[stateCount];
+            double coefficientMaximum = 1.0;
+            boolean finite = true;
+            for (int i = 0; i < stateCount; i++) {
+                difference[i] = aRow[i].subtract(bRow[i]);
+                finite &= difference[i].isFinite();
+                coefficientMaximum = Math.max(coefficientMaximum, Math.max(aRow[i].abs().doubleValue(), bRow[i].abs().doubleValue()));
+            }
+            // Bound both absolute terminal sums, not just their difference. If
+            // an intermediate might overflow, retain the original checked path.
+            double limit = Double.MAX_VALUE / coefficientMaximum / Math.max(1, stateCount) / 4.0;
+            response = new VoltageDifferenceResponse(finite ? new AffinePortProjection(difference) : null, limit);
+            voltageDifferenceRows.put(key, response);
+        }
+        if (response.projection == null || !(maximum < response.safeRhsLimit)) return solveChecked(a) - solveChecked(b);
+        double value = response.projection.project(rhs).doubleValue();
+        differentialVoltageProbeCount++;
+        return Double.isFinite(value) ? value : Double.NaN;
     }
 
     /**

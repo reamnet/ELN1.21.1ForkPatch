@@ -1,0 +1,9 @@
+{
+  "version": "3.0.72",
+  "file": "ElectricalAge-3.0.72.jar",
+  "bytes": 20906663,
+  "sha256": "702b591a65cca66696495f12cba2b185ea7c359a0d11c4db8eb4045b301490d9",
+  "directSolarVoltageProbe": true,
+  "trackedCommandSnapshots": true,
+  "uploadedAssets": 0
+}

@@ -1,0 +1,11 @@
+{
+  "passed": [
+    "All four single/multiblock and fixed/tracking panels place and survive on bottom slabs",
+    "Stairs in all four directions automatically pitch 2x3 arrays; both terminals connect and the stairs remain intact",
+    "Electrical sources, cables and grounds place on top/bottom slabs and glass, with live neighboring connections",
+    "Air still fails support validation; partial mounting does not allow replacing unrelated blocks",
+    "Every placed panel, cable, source and ground has a baked terrain body on its actual mounting surface",
+    "Baked partial mounts survive resource reload"
+  ],
+  "bakedNodes": 20
+}
