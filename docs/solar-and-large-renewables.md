@@ -49,8 +49,9 @@ output voltage. Hybrid priority modes are:
 MPPT perturbs the solar input impedance and observes real panel power every
 quarter-second. Allow roughly 30 seconds to settle after initial installation;
 it continues tracking when sunlight or the array changes. If the load needs less
-than the panels can supply, harvesting is curtailed. It cannot force surplus power
-into an unloaded output. There is no need to set a panel voltage manually.
+than the panels can supply, harvesting is curtailed. In regulated supply mode it cannot force surplus power
+into an unloaded output. Since 3.0.73 the standalone MPPT also offers an optional
+grid-feed mode; see [grid feed and live panels](power-control-panels-3.0.73.md). There is no need to set a panel voltage manually.
 
 A **5000 J internal DC link** decouples solar tracking from output regulation. It
 starts empty and its real energy is saved with the placed block. This is a short

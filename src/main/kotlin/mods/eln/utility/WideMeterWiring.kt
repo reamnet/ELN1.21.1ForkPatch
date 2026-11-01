@@ -9,6 +9,21 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 
 /** Two real downward cable entries. The right entry is below the reserved second cabinet cell. */
 object WideMeterWiring {
+    /** Migrate saved cube ghosts without replacing the meter or loading its other chunk. */
+    fun syncGhostShape(meter: HouseServiceElement) {
+        if(!wide(meter))return
+        val owner=meter.node?.coordinate ?: return
+        val world=DimensionIds.serverLevel(owner.dimension) ?: return
+        val at=owner.pos.relative(meter.front.right().toFacing())
+        val chunk=world.chunkSource.getChunkNow(at.x shr 4,at.z shr 4) ?: return
+        val ghost=mods.eln.Eln.ghostManager.getGhost(Coordinate(at.x,at.y,at.z,owner.dimension)) ?: return
+        if(ghost.observatorCoordonate!=owner)return
+        val state=chunk.getBlockState(at)
+        if(state.block!==mods.eln.Eln.ghostBlock)return
+        val desired=mods.eln.ghost.GhostBlock.wallServiceMeta(meter.front)
+        if(state.getValue(mods.eln.ghost.GhostBlock.SHAPE)!=desired)
+            world.setBlock(at,mods.eln.Eln.ghostBlock.stateForMeta(desired),net.minecraft.world.level.block.Block.UPDATE_CLIENTS)
+    }
     fun port(meter: HouseServiceElement,output: Boolean): LRDU {
         val input=Direction.YN.getLRDUGoingTo(meter.front.inverse)!!
         return if(output)input.inverse() else input

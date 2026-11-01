@@ -170,14 +170,14 @@ object StandbyChecks {
                 11 -> if(settled()) {
                     server { p ->check(gen(p).fuel.availableMb==fuelBefore);check(!ats(p).mainContact.closed && !ats(p).backupContact.closed)
                         record("A real 20 kW overload stops and latches the generator without repeated restarts or joining the two feeds")
-                        fixture(p).load(atsPos.east(2),240.0*240/1000);gui(p,genPos)
+                        fixture(p).load(atsPos.east(2),240.0*240/1000);gui(p,atsPos)
                     };step(12)
                 }
                 12 -> if(complete() && mc.screen is BackupGui && ticks>20) { button("reset");waitFor(13,160) }
                 13 -> if(settled()) {
                     capture("reset-and-recovered");mc.setScreen(null)
                     server { p ->check(gen(p).running);check(ats(p).watts>990);fuelBefore=gen(p).fuel.availableMb
-                        record("Resetting protection through the actual generator GUI restores the corrected load")
+                        record("Resetting the linked generator through the actual ATS GUI restores the corrected load")
                         check(verifiedBreaks>=2);record("Every sampled source change has at least 0.25 seconds with both contacts open, and no physical solve ever closes both contacts")
                     };step(14)
                 }

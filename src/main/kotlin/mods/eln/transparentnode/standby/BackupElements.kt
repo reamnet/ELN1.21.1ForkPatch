@@ -44,6 +44,15 @@ class AtsElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) : 
             .smallRange().mulVolume(.45f,if(closed)1.1f else 1.2f))
     }
     private fun serverWorld()=node?.coordinate?.let { mods.eln.misc.DimensionIds.serverLevel(it.dimension) }
+    var lastReset="";private set
+    var resetCount=0;private set
+    fun resetLinkedGenerators(world: Any,tick: Long): StandbyLink.ResetResult {
+        val result=StandbyLink.resetGenerators(world,unit.channel,tick)
+        lastReset=when { unit.channel.isBlank()->"UNLINKED";result.linked==0->"MISSING";result.reset==0->"READY";else->"RESET" }
+        resetCount=result.reset
+        if(result.linked>0)unit.control.resetBackupFault()
+        needPublish();return result
+    }
     private fun withdraw() { serverWorld()?.let { StandbyLink.remove(it,this) } }
     init { slowProcessList.add(IProcess { serverWorld()?.let { StandbyLink.update(it,this,unit.channel,it.gameTime,unit.control.request && unit.enabled) } }) }
     private val cabinet get()=transparentNodeDescriptor as BackupDescriptor
@@ -55,15 +64,16 @@ class AtsElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) : 
         else -> null
     }
     override fun disconnectJob() { withdraw();unit.reset(false);super.disconnectJob() }
-    override fun settings(nbt: CompoundTag) { withdraw();unit.read(nbt) }
+    override fun settings(nbt: CompoundTag) { withdraw();unit.read(nbt);lastReset="";resetCount=0 }
     override fun writeSettings(nbt: CompoundTag)=unit.write(nbt)
     override fun networkUnserialize(stream: DataInputStream): Byte {
         val id=super.networkUnserialize(stream)
         try {
             when(id.toInt()) {
                 80 -> { if(unit.setVoltage(stream.readDouble()))withdraw() }
-                81 -> { withdraw();unit.channel=StandbyLink.channel(stream.readUTF());unit.reset() }
+                81 -> { withdraw();unit.channel=StandbyLink.channel(stream.readUTF());unit.reset();lastReset="";resetCount=0 }
                 82 -> { withdraw();unit.setEnabled(!unit.enabled) }
+                83 -> serverWorld()?.let { resetLinkedGenerators(it,it.gameTime) }
             }
         } catch(_: IOException) {}
         needPublish();return id
@@ -73,6 +83,7 @@ class AtsElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) : 
         BackupDisplay().apply {
             target=unit.nominal;channel=unit.channel;status=unit.status;mode=if(unit.enabled)0 else 2
             mains=unit.mains.voltage;backup=unit.backup.voltage;output=unit.output.voltage;watts=unit.watts;request=unit.control.request
+            resetResult=lastReset;resetCount=this@AtsElement.resetCount
             connections=node!!.lrduCubeMask.getTranslate(cabinet.connectionPlane(front))
         }.write(stream)
     }
@@ -85,13 +96,14 @@ class StandbyGeneratorElement(node: TransparentNode,descriptor: TransparentNodeD
     init {
         slowProcessList.add(IProcess {
             val world=node?.coordinate?.world() as? ServerLevel
+            if(world!=null)StandbyLink.updateGenerator(world,this,world.gameTime)
             unit.requested=world!=null && StandbyLink.requested(world,unit.channel,world.gameTime)
         })
     }
     override fun getElectricalLoad(side: Direction,lrdu: LRDU)=if(lrdu==LRDU.Down && (side==front.left() || side==front.right()))unit.output else null
     override fun getFluidHandler()=unit.fuel
     override fun connectJob() { super.connectJob();unit.attach(mods.eln.Eln.simulator.mna) }
-    override fun disconnectJob() { unit.requested=false;unit.detach();super.disconnectJob() }
+    override fun disconnectJob() { (node?.coordinate?.world() as? ServerLevel)?.let { StandbyLink.removeGenerator(it,this) };unit.requested=false;unit.detach();super.disconnectJob() }
     override fun settings(nbt: CompoundTag)=unit.read(nbt)
     override fun writeSettings(nbt: CompoundTag)=unit.write(nbt)
     // Copying settings must never duplicate tank contents.

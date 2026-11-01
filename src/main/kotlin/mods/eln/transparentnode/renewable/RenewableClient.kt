@@ -16,6 +16,13 @@ import java.io.DataOutputStream
 
 enum class RenewableKind { MPPT, HYBRID, WIND, WATER }
 fun solarStatus(s: String)=when(s) {
+    "EXPORTING" -> tr("Feeding solar power into the grid")
+    "WAIT_GRID" -> tr("Grid feed: waiting for a live grid")
+    "GRID_VOLTAGE" -> tr("Grid voltage outside feed range")
+    "GRID_READY" -> tr("Grid feed ready")
+    "CURTAILED" -> tr("No load; solar harvest curtailed")
+    "CHARGING" -> tr("Charging the DC link")
+    "READY" -> tr("Output ready; waiting for a load")
     "DISABLED" -> tr("Switched off")
     "NO_POWER" -> tr("Waiting for solar or grid power")
     "GRID" -> tr("Grid supplies the load")
@@ -36,16 +43,17 @@ fun priorityText(p: Int)=when(p) {
 class SolarDisplay {
     var target=120.0;var enabled=true;var priority=0;var status="IDLE"
     var pv=0.0;var pvWatts=0.0;var grid=0.0;var gridWatts=0.0;var output=0.0;var watts=0.0;var energy=0.0
+    var gridFeed=false;var feedWatts=0.0;var fedJoules=0.0
     var connections=LRDUMask()
     fun write(s: DataOutputStream) {
         s.writeDouble(target);s.writeBoolean(enabled);s.writeInt(priority);s.writeUTF(status)
         for(v in listOf(pv,pvWatts,grid,gridWatts,output,watts,energy))s.writeDouble(v)
-        connections.serialize(s)
+        connections.serialize(s);s.writeBoolean(gridFeed);s.writeDouble(feedWatts);s.writeDouble(fedJoules)
     }
     fun read(s: DataInputStream) {
         target=s.readDouble();enabled=s.readBoolean();priority=s.readInt();status=s.readUTF()
         pv=s.readDouble();pvWatts=s.readDouble();grid=s.readDouble();gridWatts=s.readDouble();output=s.readDouble();watts=s.readDouble();energy=s.readDouble()
-        connections.deserialize(s)
+        connections.deserialize(s);gridFeed=s.readBoolean();feedWatts=s.readDouble();fedJoules=s.readDouble()
     }
 }
 
@@ -74,12 +82,12 @@ class RenewableDescriptor(name: String,val kind: RenewableKind,wallMounted: Bool
             GL11.glDisable(GL11.GL_TEXTURE_2D)
             GL11.glColor3f(.77f,.80f,.82f);model.getPart("Case")?.drawNoBind()
             GL11.glColor3f(.17f,.20f,.23f);model.getPart("Trim")?.drawNoBind()
-            GL11.glColor3f(.04f,.07f,.09f);model.getPart("Display")?.drawNoBind()
+
             GL11.glColor3f(.12f,.55f,.92f);model.getPart("Solar")?.drawNoBind()
             GL11.glColor3f(.08f,.24f,.55f);model.getPart("Grid")?.drawNoBind()
             GL11.glColor3f(.97f,.37f,.05f);model.getPart("Output")?.drawNoBind()
             GL11.glColor3f(.1f,.12f,.14f);model.getPart("Return")?.drawNoBind()
-            if(!large && display!=null)mods.eln.client.power.PowerPanelDisplay.equipmentNumber(model,display.output,display.pv>1 || display.grid>1)
+            if(!large)SolarFrontPanel.draw(model,display,kind==RenewableKind.HYBRID)
             if(large)preserveMatrix {
                 GL11.glTranslatef(0f,if(kind==RenewableKind.WIND)9.5f else 3.5f,if(kind==RenewableKind.WIND).8f else -.65f)
                 GL11.glRotatef(angle,0f,0f,1f)
@@ -99,6 +107,8 @@ class RenewableDescriptor(name: String,val kind: RenewableKind,wallMounted: Bool
             RenewableKind.MPPT -> {
                 list.add(tr("10000 W MPPT solar controller; programmable 12 to 3200 V output"))
                 list.add(tr("Automatically matches solar input impedance for maximum available power"))
+                list.add(tr("Optional grid feed on orange output; match nominal bus voltage first"))
+                list.add(tr("A service meter counts net export after local loads; requires a grid that accepts reverse power"))
             }
             RenewableKind.HYBRID -> {
                 list.add(tr("20000 W hybrid solar inverter; 120 or 240 V output"))
@@ -136,7 +146,7 @@ class RenewableRender(entity: TransparentNodeEntity,descriptor: TransparentNodeD
     private val renewable get()=transparentNodeDescriptor as RenewableDescriptor
     override fun draw() {
         cable=drawCable(renewable.connectionPlane(front ?: Direction.ZP),Eln.instance.stdCableRender3200V,display.connections,cable)
-        mods.eln.client.terrain.TerrainModels.body(this,listOf(front),if(renewable.large)setOf("Rotor") else emptySet()) { renewable.draw(front ?: Direction.ZP,angle,display) }
+        mods.eln.client.terrain.TerrainModels.body(this,listOf(front),if(renewable.large)setOf("Rotor") else SolarFrontPanel.PARTS) { renewable.draw(front ?: Direction.ZP,angle,display) }
     }
     override fun refresh(deltaT: Float) { super.refresh(deltaT);if(renewable.large)angle=(angle+deltaT*if(available>.01)35f else 0f)%360f }
     override fun cameraDrawOptimisation()=false
@@ -155,25 +165,28 @@ class SolarGui(player: Player,private val render: RenewableRender) : GuiContaine
     private lateinit var voltage: GuiTextFieldEln
     private lateinit var apply: GuiButtonEln
     private lateinit var enable: GuiButtonEln
+    private var feed: GuiButtonEln?=null
     private var priority: GuiButtonEln?=null
     private var v120: GuiButtonEln?=null
     private var v240: GuiButtonEln?=null
-    override fun newHelper()=GuiHelperContainer(this,220,286,30,203)
+    override fun newHelper()=GuiHelperContainer(this,300,326,70,243)
     override fun initGui() {
         super.initGui()
-        enable=newGuiButton(8,88,204,"")
+        enable=newGuiButton(8,88,284,"")
         if(hybrid) {
-            priority=newGuiButton(8,112,204,"")
-            v120=newGuiButton(8,138,98,tr("120 V output"));v240=newGuiButton(114,138,98,tr("240 V output"))
+            priority=newGuiButton(8,112,284,"")
+            v120=newGuiButton(8,138,138,tr("120 V output"));v240=newGuiButton(154,138,138,tr("240 V output"))
         }
-        voltage=newGuiTextField(8,if(hybrid)170 else 116,110).apply { text=d.target.toString();setComment(0,if(hybrid)tr("Output must be 120 or 240 V") else tr("Output voltage: 12 to 3200 V")) }
-        apply=newGuiButton(124,if(hybrid)166 else 112,88,tr("Set voltage"))
+        if(!hybrid)feed=newGuiButton(8,140,284,"")
+        voltage=newGuiTextField(8,if(hybrid)170 else 116,174).apply { text=d.target.toString();setComment(0,if(hybrid)tr("Output must be 120 or 240 V") else tr("Output voltage: 12 to 3200 V")) }
+        apply=newGuiButton(188,if(hybrid)166 else 112,104,tr("Set voltage"))
     }
     override fun guiObjectEvent(obj: IGuiObject) {
         super.guiObjectEvent(obj)
         when(obj) {
             enable -> render.clientSendId(81)
             priority -> render.clientSendId(82)
+            feed -> render.clientSendId(83)
             v120 -> { voltage.text="120";render.clientSendDouble(80,120.0) }
             v240 -> { voltage.text="240";render.clientSendDouble(80,240.0) }
             apply -> voltage.text.toDoubleOrNull()?.let { render.clientSendDouble(80,it) }
@@ -182,15 +195,21 @@ class SolarGui(player: Player,private val render: RenewableRender) : GuiContaine
     override fun postDraw(f: Float,x: Int,y: Int) {
         super.postDraw(f,x,y)
         drawString(8,8,if(hybrid)tr("Hybrid Solar Inverter") else tr("MPPT Solar Controller"))
-        drawString(8,22,font.plainSubstrByWidth(solarStatus(d.status),204))
+        drawString(8,22,font.plainSubstrByWidth(solarStatus(d.status),284))
         drawString(8,36,tr("Solar: %1$ / %2$",Utils.plotVolt("",d.pv).trim(),Utils.plotPower("",d.pvWatts).trim()))
-        drawString(8,48,tr("Grid: %1$ / %2$",Utils.plotVolt("",d.grid).trim(),Utils.plotPower("",d.gridWatts).trim()))
+        if(hybrid)drawString(8,48,tr("Grid input: %1$ / %2$",Utils.plotVolt("",d.grid).trim(),Utils.plotPower("",d.gridWatts).trim()))
+        else drawString(8,48,tr("Grid feed: %1$; total %2$ kWh",Utils.plotPower("",d.feedWatts).trim(),"%.3f".format(java.util.Locale.ROOT,d.fedJoules/3.6e6)))
         drawString(8,60,tr("Out: %1$ / %2$",Utils.plotVolt("",d.output).trim(),Utils.plotPower("",d.watts).trim()))
         drawString(8,74,tr("DC link: %1$ / 5000 J",d.energy.toInt()))
         enable.displayString=if(d.enabled)tr("Controller: On") else tr("Controller: Off")
         priority?.displayString=priorityText(d.priority)
-        drawString(8,if(hybrid)190 else 150,tr("Blue: PV+; black: PV-; orange: out"))
-        if(!hybrid)drawString(8,164,tr("No load: solar harvest is curtailed"))
+        feed?.displayString=if(d.gridFeed)tr("Output mode: Grid feed") else tr("Output mode: Regulated supply")
+        drawString(8,if(hybrid)198 else 174,tr("Blue: PV+; black: PV-; orange: out"))
+        if(!hybrid) {
+            drawString(8,188,tr("Grid feed follows a live bus at 80-110% nominal."))
+            drawString(8,202,tr("Meter sell-back = feed minus local consumption."))
+            drawString(8,216,tr("Regulated supply powers isolated loads."))
+        }
         apply.enabled=voltage.text.toDoubleOrNull()?.let { it.isFinite() && if(hybrid)it==120.0 || it==240.0 else it in 12.0..3200.0 }==true
     }
 }

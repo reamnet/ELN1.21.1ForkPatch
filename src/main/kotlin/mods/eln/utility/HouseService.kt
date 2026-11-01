@@ -121,7 +121,7 @@ class HouseServiceElement(node: TransparentNode,descriptor: TransparentNodeDescr
             wiredService?.update()
             if(meter)energy.step(dt,contacts.indices.sumOf { i -> line[i].voltage*contacts[i].current })
         })
-        slowProcessList.add(IProcess { desc.checkSupport(this) })
+        slowProcessList.add(IProcess { desc.checkSupport(this);if(desc.wide)WideMeterWiring.syncGhostShape(this) })
         slowProcessList.add(NodePeriodicPublishProcess(node,1.0,.5))
     }
     private fun configure() { contacts.forEach { it.closed=if(serviceDisconnect)!disconnected else meterType!=0 && !(meterType==2 && disconnected) } }
@@ -133,7 +133,7 @@ class HouseServiceElement(node: TransparentNode,descriptor: TransparentNodeDescr
             needPublish() }
         return true
     }
-    override fun initialize() { configure();super.initialize();if(desc.wide)WideMeterWiring.refreshCables(this) }
+    override fun initialize() { configure();super.initialize();if(desc.wide) { WideMeterWiring.refreshCables(this);WideMeterWiring.syncGhostShape(this) } }
     override fun inventoryChange(inventory: Container?) { if(meter && meterType!=2)disconnected=false;configure();needPublish() }
     override fun onBlockActivated(player: Player,side: Direction,vx: Float,vy: Float,vz: Float): Boolean {
         if(serviceDisconnect && player.mainHandItem.isEmpty && !player.isShiftKeyDown) { setRemoteDisconnect(!disconnected);return true }

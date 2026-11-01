@@ -1,0 +1,9 @@
+{
+  "version": "3.0.73",
+  "command": "./gradlew generateLangFiles build",
+  "suites": 255,
+  "tests": 1055,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0
+}

@@ -36,14 +36,14 @@ class SolarElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) 
     override fun readFromNBT(nbt: CompoundTag) { super.readFromNBT(nbt);unit.read(nbt) }
     override fun writeToNBT(nbt: CompoundTag) { super.writeToNBT(nbt);unit.write(nbt) }
     // A dropped item can retain settings, but cannot copy stored electrical energy.
-    override fun getItemStackNBT()=CompoundTag().also { unit.write(it);it.putDouble("solarJoules",0.0) }
-    override fun readItemStackNBT(nbt: CompoundTag?) { nbt?.copy()?.also { it.putDouble("solarJoules",0.0);unit.read(it) } }
+    override fun getItemStackNBT()=CompoundTag().also { unit.write(it);it.putDouble("solarJoules",0.0);it.putDouble("solarFedJoules",0.0) }
+    override fun readItemStackNBT(nbt: CompoundTag?) { nbt?.copy()?.also { it.putDouble("solarJoules",0.0);it.putDouble("solarFedJoules",0.0);unit.read(it) } }
     override fun writeConfigTool(compound: CompoundTag,invoker: Player) {
-        compound.putDouble("solarTarget",unit.target);compound.putBoolean("solarEnabled",unit.enabled);compound.putInt("solarPriority",unit.priority.ordinal)
+        compound.putDouble("solarTarget",unit.target);compound.putBoolean("solarEnabled",unit.enabled);compound.putInt("solarPriority",unit.priority.ordinal);compound.putBoolean("solarGridFeed",unit.gridFeed)
     }
     override fun readConfigTool(compound: CompoundTag,invoker: Player) {
         unit.setVoltage(compound.getDouble("solarTarget"));unit.enabled=compound.getBoolean("solarEnabled")
-        unit.priority=SolarPriority.entries.getOrNull(compound.getInt("solarPriority")) ?: SolarPriority.SOLAR_FIRST;needPublish()
+        unit.priority=SolarPriority.entries.getOrNull(compound.getInt("solarPriority")) ?: SolarPriority.SOLAR_FIRST;unit.gridFeed=compound.getBoolean("solarGridFeed");needPublish()
     }
     override fun networkUnserialize(stream: DataInputStream): Byte {
         val id=super.networkUnserialize(stream)
@@ -52,6 +52,7 @@ class SolarElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) 
                 80 -> unit.setVoltage(stream.readDouble())
                 81 -> unit.enabled=!unit.enabled
                 82 -> if(unit.hybrid)unit.priority=SolarPriority.entries[(unit.priority.ordinal+1)%SolarPriority.entries.size]
+                83 -> if(!unit.hybrid)unit.gridFeed=!unit.gridFeed
             }
         } catch(_: IOException) {}
         needPublish();return id
@@ -59,12 +60,12 @@ class SolarElement(node: TransparentNode,descriptor: TransparentNodeDescriptor) 
     override fun networkSerialize(stream: DataOutputStream) {
         super.networkSerialize(stream)
         SolarDisplay().apply {
-            target=unit.target;enabled=unit.enabled;priority=unit.priority.ordinal;status=unit.status
+            target=unit.target;enabled=unit.enabled;priority=unit.priority.ordinal;status=unit.displayStatus
             pv=unit.solar.voltage-unit.negative.voltage;pvWatts=unit.pvWatts;grid=unit.grid.voltage;gridWatts=unit.gridWatts
-            output=unit.output.voltage;watts=unit.outputWatts;energy=unit.energy
+            output=unit.output.voltage;watts=unit.outputWatts;energy=unit.energy;gridFeed=unit.gridFeed;feedWatts=unit.feedWatts;fedJoules=unit.fedJoules
             connections=node!!.lrduCubeMask.getTranslate(cabinet.connectionPlane(front))
         }.write(stream)
     }
-    override fun multiMeterString(side: Direction)=tr("Solar: %1$; grid: %2$; output: %3$",Utils.plotPower("",unit.pvWatts),Utils.plotPower("",unit.gridWatts),Utils.plotUIP(unit.output.voltage,unit.outputSource.current))
-    override fun getWaila()=linkedMapOf(tr("Solar power") to Utils.plotPower("",unit.pvWatts),tr("Grid power") to Utils.plotPower("",unit.gridWatts),tr("Output voltage") to Utils.plotVolt("",unit.output.voltage),tr("Operating state") to solarStatus(unit.status))
+    override fun multiMeterString(side: Direction)=tr("Solar: %1$; grid: %2$; output: %3$",Utils.plotPower("",unit.pvWatts),Utils.plotPower("",if(unit.gridFeed)unit.feedWatts else unit.gridWatts),Utils.plotUIP(unit.output.voltage,unit.outputSource.current))
+    override fun getWaila()=linkedMapOf(tr("Solar power") to Utils.plotPower("",unit.pvWatts),(if(unit.gridFeed)tr("Grid feed") else tr("Grid power")) to Utils.plotPower("",if(unit.gridFeed)unit.feedWatts else unit.gridWatts),tr("Output voltage") to Utils.plotVolt("",unit.output.voltage),tr("Operating state") to solarStatus(unit.displayStatus))
 }

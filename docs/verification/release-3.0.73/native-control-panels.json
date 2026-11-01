@@ -1,0 +1,13 @@
+{
+  "passed": [
+    "Real GUI packet enables grid feed through the existing cabled output",
+    "Live solar telemetry switches off while its cabinet remains baked",
+    "Cabled P3 overload sheds P4 then P3 and holds the oversized branch open",
+    "Live relay trip indicators and all six static cabinets survive resource reload",
+    "145 A nominal 240 V load runs on a 50 kW core; a 200 A primary fuse sees about 2.8 A and stays intact",
+    "Changing to an undersized 25 kW core trips capacity protection without blowing the 200 A primary fuse",
+    "All four wide-meter rotations have shallow client/server collision and selection, including a migrated old cube ghost",
+    "The real ATS GUI resets its linked faulted generator and restores the corrected load",
+    "Reset leaves an already healthy linked generator supplying the load"
+  ]
+}

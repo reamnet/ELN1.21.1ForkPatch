@@ -34,14 +34,15 @@ fun backupStatus(value: String)=when(value) {
 class BackupDisplay {
     var target=240.0;var channel="";var status="STANDBY";var mode=0
     var mains=0.0;var backup=0.0;var output=0.0;var watts=0.0;var fuel=0.0;var request=false
+    var resetResult="";var resetCount=0
     var connections=LRDUMask()
     fun write(s: DataOutputStream) {
         s.writeDouble(target);s.writeUTF(channel);s.writeUTF(status);s.writeInt(mode)
-        s.writeDouble(mains);s.writeDouble(backup);s.writeDouble(output);s.writeDouble(watts);s.writeDouble(fuel);s.writeBoolean(request);connections.serialize(s)
+        s.writeDouble(mains);s.writeDouble(backup);s.writeDouble(output);s.writeDouble(watts);s.writeDouble(fuel);s.writeBoolean(request);connections.serialize(s);s.writeUTF(resetResult);s.writeInt(resetCount)
     }
     fun read(s: DataInputStream) {
         target=s.readDouble();channel=s.readUTF();status=s.readUTF();mode=s.readInt()
-        mains=s.readDouble();backup=s.readDouble();output=s.readDouble();watts=s.readDouble();fuel=s.readDouble();request=s.readBoolean();connections.deserialize(s)
+        mains=s.readDouble();backup=s.readDouble();output=s.readDouble();watts=s.readDouble();fuel=s.readDouble();request=s.readBoolean();connections.deserialize(s);resetResult=s.readUTF();resetCount=s.readInt()
     }
 }
 
@@ -158,7 +159,7 @@ class BackupGui(player: Player,private val render: BackupRender) : GuiContainerE
     private lateinit var save: GuiButtonEln
     private lateinit var mode: GuiButtonEln
     private var reset: GuiButtonEln?=null
-    override fun newHelper()=GuiHelperContainer(this,176,280,8,197)
+    override fun newHelper()=GuiHelperContainer(this,176,if(generator)280 else 320,8,if(generator)197 else 237)
     override fun initGui() {
         super.initGui()
         mode=newGuiButton(8,70,160,"")
@@ -166,7 +167,7 @@ class BackupGui(player: Player,private val render: BackupRender) : GuiContainerE
         apply=newGuiButton(84,96,84,tr("Set voltage"))
         channel=newGuiTextField(8,124,106).apply { text=display.channel;setComment(0,tr("Wireless start channel (case-sensitive); blank disables remote starting")) }
         save=newGuiButton(120,120,48,tr("Link"))
-        if(generator)reset=newGuiButton(8,144,160,tr("Reset protection"))
+        reset=newGuiButton(8,144,160,if(generator)tr("Reset protection") else tr("Reset linked generator"))
     }
     override fun guiObjectEvent(obj: IGuiObject) {
         super.guiObjectEvent(obj)
@@ -193,9 +194,16 @@ class BackupGui(player: Player,private val render: BackupRender) : GuiContainerE
             else when(display.mode) { 0->tr("Mode: Auto");1->tr("Mode: Manual run");else->tr("Mode: Off") }
         apply.enabled=voltage.text.toDoubleOrNull()?.let(TransferControl::validVoltage)==true
         if(!generator) {
-            drawString(8,148,tr("Blue: mains; yellow: generator"))
-            drawString(8,160,tr("Orange: load; same voltage"))
+            reset?.enabled=display.channel.isNotBlank()
+            drawString(8,174,tr("Blue: mains; yellow: generator"))
+            drawString(8,186,tr("Orange: load; same voltage"))
         }
-        drawString(8,174,if(display.channel.isBlank())tr("Wireless start: unlinked") else if(display.request)tr("Wireless start: requested") else tr("Wireless start: ready"))
+        drawString(8,if(generator)174 else 200,if(display.channel.isBlank())tr("Wireless start: unlinked") else if(display.request)tr("Wireless start: requested") else tr("Wireless start: ready"))
+        if(!generator && display.resetResult.isNotEmpty())drawString(8,214,font.plainSubstrByWidth(when(display.resetResult) {
+            "RESET"->tr("Reset complete: %1$",display.resetCount)
+            "READY"->tr("Linked generator ready")
+            "MISSING"->tr("No linked generator loaded")
+            else->tr("Set a sync channel first")
+        },160))
     }
 }

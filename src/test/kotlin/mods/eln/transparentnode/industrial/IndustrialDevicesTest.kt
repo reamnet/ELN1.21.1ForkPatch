@@ -173,4 +173,14 @@ class IndustrialDevicesTest {
         assertTrue(d.lifetimeJoules>battery.getEnergy(stack))
     }
 
+    @Test fun shedderMeasuresEveryPhysicalBranchAndDoesNotRestoreAnOversizedLoad() {
+        val d=device(IndustrialKind.SHEDDER);d.applySettings(doubleArrayOf(240.0,1000.0));val c=Circuit(d)
+        c.load.resistance=576.0
+        for(i in 1..3)c.root.addComponent(Resistor(d.outputs[i],null).apply { resistance=if(i==3)72.0 else 576.0 })
+        c.advance(30);assertContentEquals(booleanArrayOf(true,true,true,false),d.shed.closed)
+        assertTrue(d.inputWatts in 299.0..301.0);assertTrue(d.shed.nominalDemand[3] in 799.0..801.0)
+        c.advance(300);assertFalse(d.shed.closed[3]);assertEquals("HEADROOM",d.shed.status)
+        d.applySettings(doubleArrayOf(240.0,1500.0));c.advance(102);assertTrue(d.shed.closed.all { it })
+        assertTrue(d.inputWatts in 1099.0..1101.0)
+    }
 }

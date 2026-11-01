@@ -1,0 +1,10 @@
+{
+  "version": "3.0.73",
+  "file": "ElectricalAge-3.0.73.jar",
+  "bytes": 20992761,
+  "sha256": "9d3bfd6f8a8fab1b3411861278b1f51ee21241bab2b5f54bcbc9cf1e76ea11da",
+  "modelGeneratorIdempotent": true,
+  "livePanelMeshesMatchSource": true,
+  "translatedControlStringsPresent": true,
+  "uploadedAssets": 0
+}

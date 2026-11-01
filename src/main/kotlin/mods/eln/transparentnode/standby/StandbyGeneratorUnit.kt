@@ -53,7 +53,7 @@ class StandbyGeneratorUnit(owner: TransparentNodeElement,val tier: GeneratorTier
     }
     fun detach() { stop();attachedRoot=null }
     fun stop() { attachedRoot?.removeProcess(controller);source.enabled=false;running=false;starting=0.0;cooling=0.0;overload=0.0 }
-    fun reset() { fault="";stop() }
+    fun reset() { fault="";stop();status=if(mode==StandbyMode.OFF)"OFF" else "STANDBY" }
     private fun trip(reason: String) { fault=reason;stop();status=reason }
     fun tick(seconds: Double) {
         if(!seconds.isFinite() || seconds<=0)return

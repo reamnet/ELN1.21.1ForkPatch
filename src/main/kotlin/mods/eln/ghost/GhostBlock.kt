@@ -48,7 +48,7 @@ class GhostBlock : Block(Properties.of().mapColor(MapColor.METAL).strength(0.5f)
         builder.add(SHAPE)
     }
 
-    override fun stateForMeta(meta: Int): BlockState = defaultBlockState().setValue(SHAPE, meta.coerceIn(tCube, tLampClearance))
+    override fun stateForMeta(meta: Int): BlockState = defaultBlockState().setValue(SHAPE, meta.coerceIn(tCube, tWallServiceWest))
 
     override fun metaOfState(state: BlockState): Int = state.getValue(SHAPE)
 
@@ -56,6 +56,7 @@ class GhostBlock : Block(Properties.of().mapColor(MapColor.METAL).strength(0.5f)
 
     override fun getCollisionShape(state: BlockState, world: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape =
         when (shapeOf(state)) {
+            in tWallServiceNorth..tWallServiceWest -> wallServiceShape(shapeOf(state))
             tFloor -> FLOOR_SHAPE
             tLadder, tClearance, tLampClearance -> Shapes.empty()
             else -> {
@@ -77,6 +78,7 @@ class GhostBlock : Block(Properties.of().mapColor(MapColor.METAL).strength(0.5f)
     /** The outline (1.7.10's selected bounding box). */
     override fun getShape(state: BlockState, world: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape =
         when (shapeOf(state)) {
+            in tWallServiceNorth..tWallServiceWest -> wallServiceShape(shapeOf(state))
             tFloor -> FLOOR_SHAPE
             tLadder, tLampClearance -> Shapes.empty()
             else -> Shapes.block()
@@ -140,8 +142,28 @@ class GhostBlock : Block(Properties.of().mapColor(MapColor.METAL).strength(0.5f)
         const val tClearance = 3
         const val tLampClearance = 4
 
+        // Wall meter extension cells carry their shallow shape in block state. This
+        // works on remote clients and during collision queries without owner NBT.
+        const val tWallServiceNorth=5
+        const val tWallServiceSouth=6
+        const val tWallServiceEast=7
+        const val tWallServiceWest=8
+        fun wallServiceMeta(front: mods.eln.misc.Direction)=when(front) {
+            mods.eln.misc.Direction.ZN->tWallServiceNorth
+            mods.eln.misc.Direction.ZP->tWallServiceSouth
+            mods.eln.misc.Direction.XP->tWallServiceEast
+            mods.eln.misc.Direction.XN->tWallServiceWest
+            else->error("Wall service requires a horizontal front")
+        }
+        private fun wallServiceShape(meta: Int)=WALL_SERVICE[meta-tWallServiceNorth]
+        private val WALL_SERVICE=arrayOf(
+            Shapes.create(AABB(.08,0.0,.67,1.0,1.0,1.0)),
+            Shapes.create(AABB(0.0,0.0,0.0,.92,1.0,.33)),
+            Shapes.create(AABB(0.0,0.0,.08,.33,1.0,1.0)),
+            Shapes.create(AABB(.67,0.0,0.0,1.0,1.0,.92)))
+
         @JvmField
-        val SHAPE: IntegerProperty = IntegerProperty.create("shape", tCube, tLampClearance)
+        val SHAPE: IntegerProperty = IntegerProperty.create("shape", tCube, tWallServiceWest)
 
         private val FLOOR_SHAPE: VoxelShape = Shapes.create(AABB(0.0, 0.0, 0.0, 1.0, 0.0625, 1.0))
     }

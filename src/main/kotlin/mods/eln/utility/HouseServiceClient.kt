@@ -26,6 +26,9 @@ class HouseServiceDescriptor(val meter: Boolean,val disconnect: Boolean=false,va
         if(wide)ghostGroup=GhostGroup().apply { addElement(0,0,1,GhostBlock.tCube) }
         else if(!meter && !disconnect && mast==ServiceMastStyle.STANDARD)ghostGroup=GhostGroup().apply { addElement(0,1,0,GhostBlock.tClearance) }
     }
+    override fun getGhostGroupAt(coord: Coordinate,front: Direction): GhostGroup? = super.getGhostGroupAt(coord,front)?.also { group ->
+        if(wide)group.elementList.forEach { it.meta=GhostBlock.wallServiceMeta(front) }
+    }
     override fun checkCanPlace(coord: Coordinate?,front: Direction): String? {
         val reason=super.checkCanPlace(coord,front);if(reason!=null)return reason
         if(wide && coord!=null) {

@@ -72,6 +72,7 @@ class IndustrialElement(node: TransparentNode,descriptor: TransparentNodeDescrip
     private var elapsedSound=0.0
     private var consoleClock=0.0
     val outputCurrent get()=if(kind==IndustrialKind.PAD || kind==IndustrialKind.DRIVE)abs(tap.currentState.state) else contacts.sumOf { abs(it.current) }
+    val branchWatts get()=DoubleArray(4) { max(0.0,outputs[it].voltage*contacts[it].current) }
     val inputWatts get()=max(0.0,input.voltage*(if(tap.enabled)tap.current else contacts.sumOf { it.current })+resistor.power)
     val padSecondary=if(kind==IndustrialKind.PAD)ServiceSecondary(this,outputs[0]) { 240.0 } else null
     init {
@@ -90,10 +91,12 @@ class IndustrialElement(node: TransparentNode,descriptor: TransparentNodeDescrip
         else->false
     }
     fun applySettings(values: DoubleArray): Boolean {
+        // Legacy callers supplied only nominal voltage and budget.
+        if(kind==IndustrialKind.SHEDDER && values.size==2)return applySettings(kind.defaults.copyOf().also { values.copyInto(it) })
         if(!kind.valid(values) || cord.plugged && values[0]!=settings[0])return false
         settings=values.copyOf();configure();prepare();needPublish();return true
     }
-    fun setEnabled(value: Boolean) { enabled=value;configure();needPublish() }
+    fun setEnabled(value: Boolean) { enabled=value;if(kind==IndustrialKind.SHEDDER && !value)shed.step(.05,0.0,nominal,0.0,settings[1],false);configure();needPublish() }
     fun resetTrip() { if(temperature<80) { protection.reset();configure();needPublish() } }
     private fun configure() {
         contacts.forEach { it.closed=false };returnContact.closed=false
@@ -174,9 +177,12 @@ class IndustrialElement(node: TransparentNode,descriptor: TransparentNodeDescrip
                 if(tap.enabled) {
                     val fuse=PoleHardware.fuse(inventory.getItem(1))
                     val rating=PoleHardware.transformerWatts(inventory.getItem(0)) ?: 0
-                    val limit=min(fuse?.amps ?: 0.0,rating/nominal*1.25)
-                    if(protection.step(dt,input.voltage,tap.current,0.0,nominal,limit,0.0,1.5,2.0)) {
-                        inventory.setItem(1,Eln.findItemStack(PoleHardware.spentName,1));if(loadedWorld()!=null)play(mods.eln.sound.SoundCommand("eln:utility_fuse_blow").smallRange().mulVolume(.5));configure()
+                    if(protection.stepPad(dt,input.voltage,tap.current,nominal,fuse?.amps ?: 0.0,rating.toDouble())) {
+                        if(protection.reason==2) {
+                            inventory.setItem(1,Eln.findItemStack(PoleHardware.spentName,1))
+                            if(loadedWorld()!=null)play(mods.eln.sound.SoundCommand("eln:utility_fuse_blow").smallRange().mulVolume(.5))
+                        }
+                        configure();needPublish()
                     }
                 }
             }
@@ -186,7 +192,7 @@ class IndustrialElement(node: TransparentNode,descriptor: TransparentNodeDescrip
                 if(temperature>120) { protection.tripped=true;protection.reason=6 }
                 configure()
             }
-            IndustrialKind.SHEDDER->{ shed.step(dt,input.voltage,nominal,inputWatts,settings[1],enabled && signal.normalized<.6);configure() }
+            IndustrialKind.SHEDDER->{ shed.step(dt,input.voltage,nominal,inputWatts,settings[1],enabled && signal.normalized<.6,branchWatts,settings[2],settings[3],settings[4],settings[5]);configure() }
             IndustrialKind.WELDER->{ if(working && workJoules>=120000 && !weldResult().isEmpty && inventory.getItem(2).isEmpty) {
                 val result=weldResult();inventory.getItem(0).shrink(1);inventory.getItem(1).shrink(1);inventory.setItem(2,result);workJoules=0.0;welderTemplate=ItemStack.EMPTY;needPublish()
             } }
@@ -249,24 +255,26 @@ class IndustrialElement(node: TransparentNode,descriptor: TransparentNodeDescrip
     override fun newContainer(side: Direction,player: Player)=IndustrialContainer(player,inventory,kind)
     override fun multiMeterString(side: Direction)=tr("Input: %1$; output: %2$",Utils.plotUIP(input.voltage,input.current),Utils.plotUIP(outputs[0].voltage,outputCurrent))
     override fun thermoMeterString(side: Direction)=tr("Case temperature: %1$ C",temperature.toInt())
-    override fun getWaila()=linkedMapOf(tr("Supply") to Utils.plotVolt("",input.voltage),tr("Power") to Utils.plotPower("",inputWatts),tr("Status") to if(protection.tripped)tr("Tripped") else if(enabled)tr("Enabled") else tr("Disabled"))
+    override fun getWaila()=linkedMapOf(tr("Supply") to Utils.plotVolt("",input.voltage),tr("Power") to Utils.plotPower("",inputWatts),tr("Status") to if(protection.tripped)tr("Tripped") else if(kind==IndustrialKind.SHEDDER)shedStatusText(shed.status) else if(enabled)tr("Enabled") else tr("Disabled"))
     private fun save(tag: CompoundTag) {
         settings.forEachIndexed { i,v->tag.putDouble("industrialSetting$i",v) }
         tag.putBoolean("industrialEnabled",enabled);tag.putBoolean("industrialTrip",protection.tripped);tag.putInt("industrialTripReason",protection.reason);tag.putDouble("industrialTemperature",temperature)
         tag.putDouble("industrialLifetime",lifetimeJoules);tag.putDouble("industrialSession",sessionJoules);tag.putDouble("industrialWork",workJoules);tag.putDouble("industrialSurge",surgeRemaining)
         tag.putInt("industrialTarget",selectedTarget);tag.putLongArray("industrialTargets",targets);tag.putIntArray("industrialCircuits",targetCircuits)
         if(!welderTemplate.isEmpty)tag.put("industrialTemplate",welderTemplate.writeToNBT(CompoundTag()))
-        shed.closed.forEachIndexed { i,v->tag.putBoolean("industrialShed$i",v) };tag.putBoolean("industrialArmed",protection.armed);tag.putDouble("industrialTripTime",protection.elapsed)
+        shed.closed.forEachIndexed { i,v->tag.putBoolean("industrialShed$i",v) };tag.putBoolean("industrialArmed",protection.armed);tag.putDouble("industrialTripTime",protection.elapsed);tag.putInt("industrialPendingReason",protection.pendingReason)
+        if(kind==IndustrialKind.SHEDDER)shed.nominalDemand.forEachIndexed { i,w->tag.putDouble("industrialShedDemand$i",w) }
         cord.write(tag)
     }
     private fun load(tag: CompoundTag) {
         val p=DoubleArray(settings.size) { if(tag.contains("industrialSetting$it"))tag.getDouble("industrialSetting$it") else kind.defaults[it] };if(kind.valid(p))settings=p
-        enabled=!tag.contains("industrialEnabled") || tag.getBoolean("industrialEnabled");protection.tripped=tag.getBoolean("industrialTrip");protection.reason=tag.getInt("industrialTripReason").coerceIn(0,6)
+        enabled=!tag.contains("industrialEnabled") || tag.getBoolean("industrialEnabled");protection.tripped=tag.getBoolean("industrialTrip");protection.reason=tag.getInt("industrialTripReason").coerceIn(0,7)
         fun finite(key: String,default: Double,min: Double,max: Double)=tag.getDouble(key).takeIf { tag.contains(key) && it.isFinite() }?.coerceIn(min,max) ?: default
         temperature=finite("industrialTemperature",20.0,-50.0,1000.0);lifetimeJoules=finite("industrialLifetime",0.0,0.0,1e18);sessionJoules=finite("industrialSession",0.0,0.0,1e18);workJoules=finite("industrialWork",0.0,0.0,120000.0);surgeRemaining=finite("industrialSurge",200000.0,0.0,200000.0)
         selectedTarget=tag.getInt("industrialTarget").coerceIn(0,7);tag.getLongArray("industrialTargets").takeIf { it.size==8 }?.copyInto(targets);tag.getIntArray("industrialCircuits").takeIf { it.size==8 }?.let { a->a.forEachIndexed { i,v->targetCircuits[i]=v.coerceIn(0,11) } }
         welderTemplate=if(tag.contains("industrialTemplate"))stackFromNbt(tag.getCompound("industrialTemplate")) else ItemStack.EMPTY
-        shed.closed.indices.forEach { i->shed.closed[i]=!tag.contains("industrialShed$i") || tag.getBoolean("industrialShed$i") };protection.armed=tag.getBoolean("industrialArmed");protection.elapsed=finite("industrialTripTime",0.0,0.0,60.0)
+        shed.closed.indices.forEach { i->shed.closed[i]=!tag.contains("industrialShed$i") || tag.getBoolean("industrialShed$i") };protection.armed=tag.getBoolean("industrialArmed");protection.elapsed=finite("industrialTripTime",0.0,0.0,60.0);protection.pendingReason=tag.getInt("industrialPendingReason").coerceIn(0,7)
+        shed.nominalDemand.indices.forEach { i->shed.nominalDemand[i]=finite("industrialShedDemand$i",0.0,0.0,1e12) }
         cord.read(tag);configure()
     }
     override fun readFromNBT(tag: CompoundTag) { super.readFromNBT(tag);load(tag) }
@@ -276,7 +284,13 @@ class IndustrialElement(node: TransparentNode,descriptor: TransparentNodeDescrip
     override fun networkSerialize(out: DataOutputStream) {
         super.networkSerialize(out);settings.forEach(out::writeDouble);out.writeBoolean(enabled);out.writeBoolean(protection.tripped);out.writeBoolean(working)
         listOf(input.voltage,inputWatts,outputs[0].voltage,outputCurrent,temperature,hertz,lifetimeJoules,sessionJoules,workJoules,surgeRemaining,protection.reason.toDouble()).forEach(out::writeDouble)
-        out.writeByte(selectedTarget);out.writeUTF(telemetry.take(2000));shed.closed.forEach(out::writeBoolean);
+        out.writeByte(selectedTarget);out.writeUTF(telemetry.take(2000));shed.closed.forEach(out::writeBoolean)
+        if(kind==IndustrialKind.SHEDDER) {
+            out.writeUTF(shed.status);out.writeDouble(shed.remaining);out.writeInt(shed.next)
+            branchWatts.forEach(out::writeDouble);shed.nominalDemand.forEach(out::writeDouble)
+        }
+        if(kind==IndustrialKind.RELAY) { out.writeDouble(abs(contacts[0].current+returnContact.current));out.writeInt(protection.pendingReason);out.writeDouble(protection.elapsed) }
+        if(kind==IndustrialKind.PAD) { out.writeDouble(abs(tap.current));out.writeDouble(PoleHardware.fuse(inventory.getItem(1))?.amps ?: 0.0);out.writeDouble((PoleHardware.transformerWatts(inventory.getItem(0)) ?: 0).toDouble()) }
     }
     override fun networkUnserialize(stream: DataInputStream): Byte {
         val id=super.networkUnserialize(stream)
@@ -287,6 +301,7 @@ class IndustrialElement(node: TransparentNode,descriptor: TransparentNodeDescrip
             83->bindTarget()
             84->selectTarget(stream.readInt())
             85->commandTarget(stream.readBoolean())
+            86->if(kind==IndustrialKind.SHEDDER)shed.retry()
         }
         needPublish();return id
     }

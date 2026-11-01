@@ -10,7 +10,7 @@ enum class IndustrialKind(val title: String,val nominal: Double,val defaults: Do
     ARRESTER(I18N.TR_NAME(I18N.Type.NONE,"Pole Surge Arrester"),12470.0,doubleArrayOf(12470.0)),
     PAD(I18N.TR_NAME(I18N.Type.NONE,"Pad Mounted Neighbourhood Transformer"),12470.0,doubleArrayOf(12470.0,240.0)),
     DRIVE(I18N.TR_NAME(I18N.Type.NONE,"Variable Frequency Motor Drive"),480.0,doubleArrayOf(480.0,480.0,60.0,5.0,100.0)),
-    SHEDDER(I18N.TR_NAME(I18N.Type.NONE,"Automatic Load Shedding Controller"),240.0,doubleArrayOf(240.0,50000.0)),
+    SHEDDER(I18N.TR_NAME(I18N.Type.NONE,"Automatic Load Shedding Controller"),240.0,doubleArrayOf(240.0,50000.0,1.0,5.0,.85,.95)),
     CHARGER(I18N.TR_NAME(I18N.Type.NONE,"Programmable EV Pack Charger"),240.0,doubleArrayOf(240.0,7200.0,0.0,0.0)),
     WELDER(I18N.TR_NAME(I18N.Type.NONE,"Electric Welding Station"),240.0,doubleArrayOf(240.0,6000.0));
     val model get()="industrial_"+name.lowercase(java.util.Locale.ROOT)
@@ -22,7 +22,7 @@ enum class IndustrialKind(val title: String,val nominal: Double,val defaults: Do
         ARRESTER->listOf(tr("Nominal line V"))
         PAD->listOf(tr("Primary V"),tr("Secondary V"))
         DRIVE->listOf(tr("Nominal input V"),tr("Nominal output V"),tr("Frequency Hz"),tr("Ramp seconds"),tr("Current limit A"))
-        SHEDDER->listOf(tr("Nominal input V"),tr("Power budget W"))
+        SHEDDER->listOf(tr("Nominal input V"),tr("Power budget W"),tr("Shed delay s"),tr("Restore delay s"),tr("Shed below ratio"),tr("Restore above ratio"))
         CHARGER->listOf(tr("Nominal input V"),tr("Charge power W"),tr("Start hour (0-23)"),tr("End hour (0-23)"))
         WELDER->listOf(tr("Nominal input V"),tr("Welding power W"))
     }
@@ -35,7 +35,7 @@ enum class IndustrialKind(val title: String,val nominal: Double,val defaults: Do
             RELAY->p[1] in .01..10000.0 && p[2] in 0.0..1.0 && p[3] in 1.01..2.0 && p[4] in .05..60.0 && p[5] in 0.0..10000.0
             PAD->p[1] in 120.0..480.0
             DRIVE->p[1] in 12.0..3200.0 && p[2] in 0.0..60.0 && p[3] in .1..120.0 && p[4] in .1..1000.0
-            SHEDDER->p[1] in 100.0..1e6
+            SHEDDER->p[1] in 100.0..1e6 && p[2] in .1..60.0 && p[3] in 1.0..300.0 && p[4] in .1..0.98 && p[5]>p[4] && p[5] in .5..1.1
             CHARGER->p[0] in 120.0..480.0 && p[1] in 100.0..50000.0 && p[2] in 0.0..23.0 && p[3] in 0.0..23.0
             WELDER->p[0] in 120.0..480.0 && p[1] in 1000.0..20000.0
             else->true

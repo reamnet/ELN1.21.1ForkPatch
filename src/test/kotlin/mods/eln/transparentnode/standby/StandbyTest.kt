@@ -43,6 +43,7 @@ class StandbyTest {
             g.unit.tick(.05);a.unit.tick(.05)
             check(!(a.unit.mainContact.closed && a.unit.backupContact.closed))
             StandbyLink.update(world,a,a.unit.channel,ticks,a.unit.control.request)
+            StandbyLink.updateGenerator(world,g,ticks)
             g.unit.requested=StandbyLink.requested(world,g.unit.channel,ticks);ticks++
         }
         fun run(n: Int) { repeat(n) { tick() } }
@@ -234,5 +235,54 @@ class StandbyTest {
         assertEquals(TransferFeed.OPEN,a.unit.control.selected);assertFalse(a.unit.backupContact.closed)
         assertFalse(g.unit.setVoltage(Double.NaN));assertFalse(a.unit.setVoltage(0.0))
         val original=g.unit.nominal;assertFalse(g.unit.setVoltage(Double.POSITIVE_INFINITY));assertEquals(original,g.unit.nominal)
+    }
+    @Test fun atsResetsTheLinkedFaultedGeneratorAndRestoresTheCorrectedLoad() {
+        val c=Circuit(watts=20_000.0);c.source.enabled=false;c.run(220)
+        assertEquals("OVERLOAD",c.g.unit.fault);c.load.resistance=240.0*240/1000
+        val fuel=c.g.unit.fuel.availableJoules
+        assertEquals(StandbyLink.ResetResult(1,1),c.a.resetLinkedGenerators(c.world,c.ticks))
+        assertEquals(fuel,c.g.unit.fuel.availableJoules);assertFalse(c.g.unit.running);assertEquals(StandbyMode.AUTO,c.g.unit.mode)
+        c.run(160);assertTrue(c.g.unit.running);assertTrue(c.load.power>990)
+        assertFalse(c.a.unit.mainContact.closed);assertTrue(c.a.unit.backupContact.closed)
+    }
+    @Test fun atsResetIsOneShotAndAStillFaultedLoadLatchesAgain() {
+        val c=Circuit(watts=20_000.0);c.source.enabled=false;c.run(220)
+        c.a.resetLinkedGenerators(c.world,c.ticks);c.run(220);assertEquals("OVERLOAD",c.g.unit.fault)
+        val fuel=c.g.unit.fuel.availableJoules;c.run(300);assertEquals(fuel,c.g.unit.fuel.availableJoules)
+    }
+    @Test fun resettingAnOffEmptyGeneratorDoesNotRefuelStartItOrInterruptMains() {
+        val c=Circuit();c.run(40);c.g.unit.fuel.tank.drain(20_000,FluidAction.EXECUTE)
+        c.g.unit.mode=StandbyMode.MANUAL;c.g.unit.tick(.05);assertEquals("EMPTY",c.g.unit.fault)
+        c.g.unit.mode=StandbyMode.OFF;val before=c.g.unit.fuel.availableJoules
+        c.a.resetLinkedGenerators(c.world,c.ticks)
+        assertEquals(TransferFeed.MAINS,c.a.unit.control.selected);assertTrue(c.a.unit.mainContact.closed)
+        assertEquals(StandbyMode.OFF,c.g.unit.mode);assertEquals(before,c.g.unit.fuel.availableJoules)
+        c.run(120);assertFalse(c.g.unit.running);assertTrue(c.load.power>990)
+    }
+    @Test fun remoteResetsAreCaseSensitiveWorldScopedExpireAndNeverReachDisconnectedPeers() {
+        val world=Any();val other=Any();val a=ats();val g=generator()
+        g.unit.read(CompoundTag().apply { putString("standbyFault","OVERLOAD");putString("standbyChannel","Hospital") })
+        StandbyLink.updateGenerator(world,g,10)
+        for((w,ch,time) in listOf(Triple(other,"Hospital",11L),Triple(world,"hospital",11L),Triple(world,"",11L),Triple(world,"Hospital",111L))) {
+            a.unit.channel=ch;assertEquals(0,a.resetLinkedGenerators(w,time).reset);assertEquals("OVERLOAD",g.unit.fault)
+        }
+        StandbyLink.updateGenerator(world,g,120);StandbyLink.removeGenerator(world,g)
+        a.unit.channel="Hospital";assertEquals(0,a.resetLinkedGenerators(world,121).linked)
+        StandbyLink.updateGenerator(world,g,130);g.unit.channel="New channel"
+        assertEquals(0,a.resetLinkedGenerators(world,131).reset)
+    }
+    @Test fun aSharedChannelResetsFaultedPeersWithoutStoppingAHealthyGenerator() {
+        val c=Circuit();c.g.unit.mode=StandbyMode.MANUAL;c.run(90);assertTrue(c.g.unit.running)
+        val faulted=generator();faulted.unit.read(CompoundTag().apply { putString("standbyFault","BACKFEED");putString("standbyChannel","Hospital") })
+        StandbyLink.updateGenerator(c.world,faulted,c.ticks)
+        val fuel=c.g.unit.fuel.availableJoules
+        assertEquals(StandbyLink.ResetResult(2,1),c.a.resetLinkedGenerators(c.world,c.ticks))
+        assertTrue(c.g.unit.running);assertEquals(fuel,c.g.unit.fuel.availableJoules);assertEquals("",faulted.unit.fault)
+    }
+    @Test fun resettingAnAlreadyHealthyLinkDoesNotInterruptAnActiveBackupFeed() {
+        val c=Circuit();c.source.enabled=false;c.run(180)
+        assertEquals(TransferFeed.GENERATOR,c.a.unit.control.selected)
+        assertEquals(StandbyLink.ResetResult(1,0),c.a.resetLinkedGenerators(c.world,c.ticks))
+        repeat(50) { c.tick();assertTrue(c.a.unit.backupContact.closed);assertTrue(c.g.unit.running);assertTrue(c.load.power>990) }
     }
 }

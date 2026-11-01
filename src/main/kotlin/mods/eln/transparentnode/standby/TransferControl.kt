@@ -37,6 +37,7 @@ class TransferControl {
     private var backupStable=0.0
     private var backupStopped=0.0
     fun reset() { selected=TransferFeed.OPEN;pending=TransferFeed.OPEN;request=false;backupFault=false;breakTime=0.0;failed=0.0;recovered=0.0;backupStable=0.0;backupStopped=0.0 }
+    fun resetBackupFault() { if(backupFault) { backupFault=false;backupStable=0.0;backupStopped=0.0 } }
     fun step(seconds: Double,mains: Double,backup: Double,nominal: Double,enabled: Boolean=true): TransferFeed {
         if(!seconds.isFinite() || seconds<=0)return selected
         if(!enabled || !validVoltage(nominal)) { reset();return selected }
@@ -71,6 +72,26 @@ class TransferControl {
 object StandbyLink {
     private data class Request(val channel: String,val expiry: Long)
     private val worlds=WeakHashMap<Any,WeakHashMap<Any,Request>>()
+    // Values contain no owner/unit references, so unloaded generators remain collectable.
+    private val generators=WeakHashMap<Any,WeakHashMap<StandbyGeneratorElement,Long>>()
+    data class ResetResult(val linked: Int,val reset: Int)
+    fun updateGenerator(world: Any,owner: StandbyGeneratorElement,tick: Long) {
+        generators.getOrPut(world) { WeakHashMap() }[owner]=tick+100
+    }
+    fun removeGenerator(world: Any,owner: StandbyGeneratorElement) { generators[world]?.remove(owner) }
+    /** Explicit one-shot command to presently loaded peers; never queues a future restart. */
+    fun resetGenerators(world: Any,value: String,tick: Long): ResetResult {
+        val channel=channel(value)
+        if(channel.isBlank())return ResetResult(0,0)
+        val entries=generators[world] ?: return ResetResult(0,0)
+        entries.entries.removeIf { it.value<tick }
+        val linked=entries.keys.toList().filter { channel(it.unit.channel)==channel }
+        var reset=0
+        for(generator in linked)if(generator.unit.fault.isNotEmpty()) {
+            generator.unit.reset();generator.needPublish();reset++
+        }
+        return ResetResult(linked.size,reset)
+    }
     fun channel(value: String)=value.trim().take(64)
     fun update(world: Any,owner: Any,channel: String,tick: Long,wanted: Boolean) {
         val entries=worlds.getOrPut(world) { WeakHashMap() }
