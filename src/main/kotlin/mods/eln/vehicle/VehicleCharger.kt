@@ -79,7 +79,7 @@ class VehicleChargerElement(node: TransparentNode,descriptor: TransparentNodeDes
         VehicleChargers.register(this)
         val e=vehicle();val v=abs(input.voltage);val demand=e?.chargeDemand() ?: 0.0
         state=when { !enabled->"OFF";e==null->"IDLE";demand<.01->"FULL";!v.isFinite() || v>264->"OVERVOLTAGE";v<200->"WAIT_POWER";else->"CHARGING" }
-        sink.resistance=if(enabled && e!=null && demand>.01 && v.isFinite() && v<=264)maxOf(2.4,240.0*240.0/demand,v/100.0,v*v/24000.0) else 1e19
+        sink.resistance=if(enabled && e!=null)RoadPhysics.chargerResistance(v,demand) else 1e19
         needPublish()
     }
     internal fun account(dt: Double) {

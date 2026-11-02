@@ -107,27 +107,35 @@ object RoadVehicleChecks {
                         check(charger.watts in 23900.0..24001.0) { "Input ${charger.input.voltage} V, ${charger.input.current} A, ${charger.watts} W" };check(kotlin.math.abs(charger.input.current)<=100.01)
                         check((0..5).sumOf { RoadVehicles.battery(coupe.items.getItem(it))!!.getEnergy(coupe.items.getItem(it)) }>before+1000)
                         passed+="Wired 240 V charger draws 100 A / 24 kW and charges all six installed packs"
-                        charger.unplug();before=(0..5).sumOf { RoadVehicles.battery(coupe.items.getItem(it))!!.getEnergy(coupe.items.getItem(it)) }
+                        fixtures.voltage(BlockPos(282,80,256),120.0)
+                        before=(0..5).sumOf { RoadVehicles.battery(coupe.items.getItem(it))!!.getEnergy(coupe.items.getItem(it)) }
                     };next()
                 }
                 3->if(settled() && ticks>180) {
                     check(mods.eln.client.terrain.TerrainModels.hasBakedBody((mc.level!!.getBlockEntity(BlockPos(284,80,256)) as mods.eln.node.transparent.TransparentNodeEntity).elementRender!!))
                     Files.createDirectories(output);Screenshot.takeScreenshot(mc.mainRenderTarget).use { it.writeToFile(output.resolve("coupe-and-charger.png")) }
-                    server { check(charger.watts<1);check(!coupe.plugged);check((0..5).sumOf { RoadVehicles.battery(coupe.items.getItem(it))!!.getEnergy(coupe.items.getItem(it)) }==before)
+                    server { check(charger.watts<1);check(kotlin.math.abs(charger.input.current)<.01);check(coupe.plugged)
+                        check((0..5).sumOf { RoadVehicles.battery(coupe.items.getItem(it))!!.getEnergy(coupe.items.getItem(it)) }==before)
+                        passed+="A connected charger on 120 V draws no current and stores no energy"
+                        charger.unplug();fixtures.voltage(BlockPos(282,80,256),240.0)
                         coupe.items.setItem(6,net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND,7))
                         fixtures.player.teleportTo(fixtures.world,288.0,80.0,259.0,180f,0f)
                         listOf(RoadVehicleKind.CART.title,RoadVehicleKind.COUPE.title,VehicleChargerDescriptor.TITLE,VehicleLeadItem.TITLE,IndustrialItems.PACK).forEachIndexed { i,name->fixtures.player.inventory.setItem(i,Eln.findItemStack(name,1)) }
-                        fixtures.player.inventory.setChanged()
-                        passed+="Disconnect removes charging draw and releases vehicle; parked charge remains unchanged" };next()
+                        fixtures.player.inventory.setChanged() };next()
                 }
                 4->if(settled()) {
                     mc.options.keyShift.setDown(true)
                     if(ticks>30) {
+                        server {
+                            check(charger.watts<1);check(!coupe.plugged)
+                            check((0..5).sumOf { RoadVehicles.battery(coupe.items.getItem(it))!!.getEnergy(coupe.items.getItem(it)) }==before)
+                            passed+="Disconnect removes charging draw and releases vehicle; parked charge remains unchanged"
+                        }
                         val car=mc.level!!.getEntity(coupe.id) ?: error("Coupe not tracked")
                         mc.gameMode!!.interact(mc.player!!,car,InteractionHand.MAIN_HAND);next()
                     }
                 }
-                5->if(ticks>40 && mc.screen is net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<*>) {
+                5->if(settled() && ticks>40 && mc.screen is net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<*>) {
                     val menu=(mc.screen as net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<*>).menu as? VehicleMenu ?: return
                     check((0..5).all { !menu.slots[it].item.isEmpty });check(menu.slots[6].item.count==7)
                     for(kind in RoadVehicleKind.entries)check(mc.itemRenderer.getModel(Eln.findItemStack(kind.title,1),mc.level,mc.player,0).isCustomRenderer)

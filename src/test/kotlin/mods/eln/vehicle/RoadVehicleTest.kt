@@ -4,6 +4,15 @@ import mods.eln.api.media.ReservedMediaDevice
 import org.junit.Test
 import kotlin.test.*
 class RoadVehicleTest {
+    @Test fun chargerDisconnectsOutsideItsVoltageRangeAndRespectsItsInputRatings() {
+        for(v in listOf(0.0,120.0,199.0,265.0))assertTrue(v/RoadPhysics.chargerResistance(v,24000.0)<1e-9)
+        for(v in listOf(200.0,240.0,264.0))for(demand in listOf(100.0,12000.0,24000.0,100000.0)) {
+            val resistance=RoadPhysics.chargerResistance(v,demand)
+            assertTrue(resistance>0);assertTrue(v/resistance<=100.000001);assertTrue(v*v/resistance<=24000.000001)
+        }
+        for(v in listOf(Double.NaN,Double.POSITIVE_INFINITY))assertEquals(1e19,RoadPhysics.chargerResistance(v,24000.0))
+        for(demand in listOf(0.0,-1.0,Double.NaN,Double.POSITIVE_INFINITY))assertEquals(1e19,RoadPhysics.chargerResistance(240.0,demand))
+    }
     @Test fun normalTurnsAndStraightTravelDoNotTriggerTheCartHazard() {
         assertFalse(RoadPhysics.dangerousCorner(4.0,1.5));assertFalse(RoadPhysics.dangerousCorner(10.0,0.0));assertFalse(RoadPhysics.dangerousCorner(10.0,.5));assertTrue(RoadPhysics.dangerousCorner(10.0,1.25));assertTrue(RoadPhysics.dangerousCorner(-10.0,-1.25))
     }
