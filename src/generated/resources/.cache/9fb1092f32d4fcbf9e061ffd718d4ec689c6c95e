@@ -1,5 +1,6 @@
-// 1.21.1	2026-10-29T22:30:13.929620525	Recipes
+// 1.21.1	2026-11-02T05:35:54.302692675	Recipes
 72b08ae301f68a7a5b4ffeb00733765cfc9259c5 data/eln/advancement/recipes/misc/100_a_pole_fuse.json
+86e678bf2d333983da088f2c2e77cce5d15fd49a data/eln/advancement/recipes/misc/100_a_vehicle_charging_lead.json
 de21adcd90ac44899fa6d8e71cbbe823fbc0d070 data/eln/advancement/recipes/misc/100_kw_pole_transformer.json
 c45ab92bbdd9de0dab6c23fed31d9bcc1fda2fb0 data/eln/advancement/recipes/misc/100a_electrical_breaker.json
 af52ea42900df2bf3acdcf235f7428450d1fd083 data/eln/advancement/recipes/misc/100a_switch.json
@@ -55,6 +56,7 @@ ad729a343094aff97a065f60ed2f9d167006c45c data/eln/advancement/recipes/misc/230_k
 89f63fbdd24800bec040ad9bb07dd481720d5dd6 data/eln/advancement/recipes/misc/230_kv_three_phase_cable_riser_tower.json
 9a28955c4c5f8ee5486c72d69558d3a43b810d57 data/eln/advancement/recipes/misc/230_kv_three_phase_substation_disconnect.json
 7bdbf07307639585cdcc6632b21eeaf041d4fdb0 data/eln/advancement/recipes/misc/230_kv_to_69_kv_substation_transformer.json
+398e199edaf0c019eff78750ae6d3c095ec18449 data/eln/advancement/recipes/misc/240_v_100_a_vehicle_charger.json
 b9da251a1e1b2a2e902b9dd123fc30fbaba8b889 data/eln/advancement/recipes/misc/240_v_30_a_dryer_cord.json
 81468da204a26bb60e470d6a39005049a87d8760 data/eln/advancement/recipes/misc/240_v_30_a_dryer_outlet.json
 d707f23bc6f26d7da9b00a7623fca0dd8764a86e data/eln/advancement/recipes/misc/240_v_appliance_cord.json
@@ -183,6 +185,7 @@ ebba1a9d4970e8ff12e3cd160132a0f30e298f8b data/eln/advancement/recipes/misc/anima
 4f25d8237536c95dbf9260abc1eba30c1135390c data/eln/advancement/recipes/misc/arc_clay_ingot.json
 aaf002b4f655a5160db7f007d39f532725e392d7 data/eln/advancement/recipes/misc/arc_metal_block.json
 87f27f37ac46f2b46f427d11b750f0e44ada7879 data/eln/advancement/recipes/misc/arc_metal_ingot.json
+560e41f90fb6cec46e837ceb91f7771c5d3d8a25 data/eln/advancement/recipes/misc/arc_runner_coupe.json
 57cb0895c195bce2aeed6ac1db898b90b734bc1c data/eln/advancement/recipes/misc/arched_walkway_light.json
 01b94249fbc4c9e6840a3e7a50e9539dc7c8ecb7 data/eln/advancement/recipes/misc/armored_oval_bulkhead_light.json
 a3829eead5017016ac176dad92edacf980985e45 data/eln/advancement/recipes/misc/articulated_task_table_lamp.json
@@ -266,6 +269,7 @@ f3fb39ee635c664d073796021b23596d366757e5 data/eln/advancement/recipes/misc/e-coa
 38713309d9bba1b02f8fa4a0be6b45fedf6fc953 data/eln/advancement/recipes/misc/electric_coffee_maker.json
 c43aa8abc9891655ddced7cca6c1210b24f6cf33 data/eln/advancement/recipes/misc/electric_dryer.json
 092d52a3e528b5332c45370cddacbd18aaac6313 data/eln/advancement/recipes/misc/electric_forklift.json
+fe232c2f50598c625932a1dac149efb58ba2d421 data/eln/advancement/recipes/misc/electric_golf_cart.json
 14a0777ee3831ecfb08dadab4c6f2df91e4c4d45 data/eln/advancement/recipes/misc/electric_kettle.json
 16277033e3aab1c330e19689d9b9bdc59ea33ac2 data/eln/advancement/recipes/misc/electric_microwave.json
 4c170077462b3139f4468b3e018f47a1c4d18806 data/eln/advancement/recipes/misc/electric_mini_fridge.json
@@ -717,6 +721,7 @@ b92ab7ca884f9ed184a58030eb5db826ff84fdf9 data/eln/advancement/recipes/misc/xnor_
 fa6d0197e22cb931264c8d2f895daafa2e10bc59 data/eln/advancement/recipes/misc/xor_chip.json
 4f48998086765771b5d7d70b94ef7ef53ec83e60 data/eln/advancement/recipes/misc/yellow_brush.json
 f0d6d0698506da68cc4af61fabbf67b5cdad69a2 data/eln/recipe/100_a_pole_fuse.json
+3287a86fcda8512a365d88b07e6a25e436001d8b data/eln/recipe/100_a_vehicle_charging_lead.json
 9fd4e83a5225a3c2825a5a6ca11f4b0bd11e7537 data/eln/recipe/100_kw_pole_transformer.json
 633fa3d73cb3ffeaef8d77c9ce5c2fcb8a942031 data/eln/recipe/100a_electrical_breaker.json
 4f8bf933c920dfeb1efcac320fa5267f95b02ba3 data/eln/recipe/100a_switch.json
@@ -772,6 +777,7 @@ a97e819ab12e92106650bcba710cf002fa7f1abd data/eln/recipe/230_kv_cable_feed_insul
 08d5ec3c7f6b41c2cba45f13ac028f42bfc1ebce data/eln/recipe/230_kv_three_phase_cable_riser_tower.json
 04b1ee1021d3f83c0fcdfb93f258d2c360f46df1 data/eln/recipe/230_kv_three_phase_substation_disconnect.json
 e33f7e4e9fd59367346ead6cb6c63f5b6c6b335d data/eln/recipe/230_kv_to_69_kv_substation_transformer.json
+75f9de03164c23c8ac9db2a439577f7ee251c707 data/eln/recipe/240_v_100_a_vehicle_charger.json
 d161d987fc2eca45d713ee0452eba4bb6b477b9c data/eln/recipe/240_v_30_a_dryer_cord.json
 c7da7e78bb4e942c0f379d4a2161a029f203f4c4 data/eln/recipe/240_v_30_a_dryer_outlet.json
 3c94ced07d7007deb8221da1afb19177042a9d5f data/eln/recipe/240_v_appliance_cord.json
@@ -900,6 +906,7 @@ c943cd2919c99e333ec3ee4ca7baf78dd887041c data/eln/recipe/analog_vumeter.json
 d949c94e0865f41e9c1e76c198c5dcb9fa482c31 data/eln/recipe/arc_clay_ingot.json
 8544e876667b2de6b74381bea688cf670cb91ba1 data/eln/recipe/arc_metal_block.json
 21b021f48d419626b0d534d9272088d4c21d59c9 data/eln/recipe/arc_metal_ingot.json
+095b6df48d2754c96dc78a18e762c06030e21dd5 data/eln/recipe/arc_runner_coupe.json
 6c1b295ee645a5c774b9d26aa3c51633a616cb06 data/eln/recipe/arched_walkway_light.json
 b14235224a8f49f7c8c7683dad8eb3c94915b431 data/eln/recipe/armored_oval_bulkhead_light.json
 ee5bd901b56897c9b8b3e362cd4750d01229613f data/eln/recipe/articulated_task_table_lamp.json
@@ -983,6 +990,7 @@ cc8fdeed74a3e1046721d0911ef06dabfd6342cf data/eln/recipe/e-coal_helmet.json
 f58e1d022f1af2f3ee641ad23ecc7da22db5f243 data/eln/recipe/electric_coffee_maker.json
 d728c8f6351615baec216c1033979de280c93551 data/eln/recipe/electric_dryer.json
 a9ab3fbb72f072a4466ae15f876b419742266e29 data/eln/recipe/electric_forklift.json
+65b6c33aa7cd102948fa452eaac1916b64df2c89 data/eln/recipe/electric_golf_cart.json
 925191ab1bcc49b23d2d2aebc8bb73f7f8886d03 data/eln/recipe/electric_kettle.json
 1e5f1728133b9d7d1e125c6b4663166ebd68b8cd data/eln/recipe/electric_microwave.json
 e6f91419302fad1afb4dd73784bb64f9506c7b4e data/eln/recipe/electric_mini_fridge.json

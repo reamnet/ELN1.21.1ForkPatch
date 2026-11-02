@@ -80,6 +80,7 @@ Ferromagnetic_core_slot=Ferromagnetkern-Slot
 Fixed_ratio\:_12.47_kV_nominal_primary;_output_follows_grid_voltage=Fixed ratio: 12.47 kV nominal primary; output follows grid voltage
 Flexible_Appliance_Cord.name=Flexible Appliance Cord
 Fuel_usage=Brennstoffverbrauch
+Fully_charged=Voll geladen
 Fuse_blown=Fuse blown
 Generated_power=Erzeugte Leistung
 Generates_heat_when_supplied_with_fuel.=Erzeugt Wärme bei Brennstoffzufuhr.
@@ -842,6 +843,8 @@ No_matching_items.=No matching items.
 Search_results\:_%1$=Search results: %1$
 
 # src/main/kotlin/mods/eln/api/media/MediaAddonProvider.kt
+Jukebox_Ceiling_Speaker.name=Jukebox Ceiling Speaker
+Jukebox_Standing_Speaker.name=Jukebox Standing Speaker
 Powered_Browser_Television.name=Powered Browser Television
 Powered_Web_Jukebox.name=Powered Web Jukebox
 Wall-mounted_Browser_Television.name=Wall-mounted Browser Television
@@ -2016,7 +2019,6 @@ As_long_as_power_is_provided,_the_internal_battery=Solange Strom geliefert wird,
 Batteries_empty=Batterien leer
 Battery_capacity\:=Batteriekapazität:
 Charging...=Lädt...
-Fully_charged=Voll geladen
 Nominal_voltage\:=Nennspannung:
 Powered_by_Lamp_Supply=Von Lampenversorgung gespeist
 Specify_the_supply_channel=Versorgungskanal angeben
@@ -3680,6 +3682,36 @@ Rated_insulation\:_%1$_V;_span_limit\:_%2$_m=Rated insulation: %1$ V; span limit
 Single_Circuit_Insulator=Single Circuit Insulator
 Single_conductor;_mount_on_floors,_walls_or_ceilings=Single conductor; mount on floors, walls or ceilings
 Use_for_120,_240,_480_or_600_V;_select_a_service_circuit_for_modern_LV_poles=Use for 120, 240, 480 or 600 V; select a service circuit for modern LV poles
+
+# src/main/kotlin/mods/eln/vehicle/RoadVehicles.kt
+Arc_Runner_Coupe.name=Arc Runner Coupe
+Climbs_one_block._Fast_sharp_corners_cause_an_explosion_and_fire!=Climbs one block. Fast sharp corners cause an explosion and fire!
+Disconnect_the_charging_lead_before_driving=Disconnect the charging lead before driving
+Electric_Golf_Cart.name=Electric Golf Cart
+Install_six_20_kWh_traction_packs;_240_V_100_A_vehicle_charging=Install six 20 kWh traction packs; 240 V 100 A vehicle charging
+Movement_keys_drive;_sneak_dismounts;_plug_in_while_parked_to_charge=Movement keys drive; sneak dismounts; plug in while parked to charge
+Seats\:_%1$;_traction_packs\:_%2$;_maximum_speed\:_%3$_km/h=Seats: %1$; traction packs: %2$; maximum speed: %3$ km/h
+Sneak-right-click_while_parked\:_batteries_and_nine_storage_slots=Sneak-right-click while parked: batteries and nine storage slots
+
+# src/main/kotlin/mods/eln/vehicle/VehicleCharger.kt
+100_A_Vehicle_Charging_Lead.name=100 A Vehicle Charging Lead
+Charging=Charging
+Charging_lead_connected=Charging lead connected
+Connect_a_parked_vehicle=Connect a parked vehicle
+Overvoltage_disconnected=Overvoltage disconnected
+Select_a_loaded_vehicle_charger_first,_then_a_parked_vehicle_within_six_blocks=Select a loaded vehicle charger first, then a parked vehicle within six blocks
+Sneak-right-click_the_vehicle_with_the_lead_to_disconnect=Sneak-right-click the vehicle with the lead to disconnect
+Stored_this_session=Stored this session
+Use_on_a_240_V_100_A_Vehicle_Charger,_then_right-click_a_parked_vehicle_within_six_blocks=Use on a 240 V 100 A Vehicle Charger, then right-click a parked vehicle within six blocks
+Vehicle_charger\:_%1$_V,_%2$_A,_%3$_W=Vehicle charger: %1$ V, %2$ A, %3$ W
+Vehicle_charger_selected;_use_the_lead_on_a_parked_vehicle=Vehicle charger selected; use the lead on a parked vehicle
+Waiting_for_240_V_supply=Waiting for 240 V supply
+
+# src/main/kotlin/mods/eln/vehicle/VehicleClient.kt
+%1$_km/h_|_Battery_%2$%_|_Packs_%3$/%4$=%1$ km/h | Battery %2$% | Packs %3$/%4$
+240_V_100_A_Vehicle_Charger.name=240 V 100 A Vehicle Charger
+Storage=Storage
+Traction_battery_bays=Traction battery bays
 
 # src/main/kotlin/mods/eln/wiki/CircuitLessons.kt
 1._Hold_a_Multimeter_or_AllMeter._Normal_right-click_keeps_the_existing_machine_readings._Sneak-click_a_connector_to_select_reference_A,_then_sneak-click_a_second_connector_B.=1. Hold a Multimeter or AllMeter. Normal right-click keeps the existing machine readings. Sneak-click a connector to select reference A, then sneak-click a second connector B.

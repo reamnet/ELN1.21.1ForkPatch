@@ -52,10 +52,13 @@ class ElnItemModelProvider(output: PackOutput, helper: ExistingFileHelper) : Ite
     override fun registerModels() {
         ElnRegistry.registeredItems.forEach { (id, item) ->
             when (item) {
-                is DescriptorItem<*> -> if (item.descriptor is mods.eln.sixnode.electricaldatalogger.DataLogsPrintDescriptor)
+                is DescriptorItem<*> -> if(item.descriptor is mods.eln.vehicle.RoadVehicleItem)nodeItem(id,true) else if (item.descriptor is mods.eln.sixnode.electricaldatalogger.DataLogsPrintDescriptor)
                     withExistingParent(id.path, mcLoc("item/generated")).texture("layer0", mcLoc("item/paper"))
                 else flatItem(id, item.descriptor.iconPath, item.descriptor.voltageLevelColor)
                 is DescriptorBlockItem<*> -> {
+                    // These new optional audio endpoints own their item previews in EA Media.
+                    // Do not let a core-only placeholder model override the installed addon.
+                    if((item.descriptor as? mods.eln.api.media.MissingMediaDescriptor)?.reserved?.subId in 13..14)return@forEach
                     val model = modLoc("block/${id.path}")
                     if (existingFileHelper.exists(model, PackType.CLIENT_RESOURCES, ".json", "models")) withExistingParent(id.path, model)
                     else if (item.descriptor is mods.eln.client.itemrender.IItemRenderer) {

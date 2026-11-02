@@ -80,7 +80,7 @@ object ElnNetwork {
 
     @SubscribeEvent
     fun onRegisterPayloads(event: RegisterPayloadHandlersEvent) {
-        val registrar = event.registrar("eln-industrial-5")
+        val registrar = event.registrar("eln-vehicles-6")
         mods.eln.utility.PoleStreetlightNetwork.register(registrar)
         registrar.playBidirectional(RawPayload.TYPE, RawPayload.CODEC) { payload, context ->
             rawHandler?.invoke(payload.data, context)

@@ -1,5 +1,6 @@
-// 1.21.1	2026-10-30T03:19:25.176370766	Item Models: eln
+// 1.21.1	2026-11-02T05:43:05.599165019	Item Models: eln
 c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/100_a_pole_fuse.json
+f93030a66344007a6cbf214aea03c88a6e9fb436 assets/eln/models/item/100_a_vehicle_charging_lead.json
 a5ac578ee8f459ff5057195ce2b630f75ac6edbb assets/eln/models/item/100_kw_pole_transformer.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/100a_electrical_breaker.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/100a_switch.json
@@ -57,6 +58,7 @@ c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/230_kv_steel_tra
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/230_kv_three_phase_cable_riser_tower.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/230_kv_three_phase_substation_disconnect.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/230_kv_to_69_kv_substation_transformer.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/240_v_100_a_vehicle_charger.json
 f93030a66344007a6cbf214aea03c88a6e9fb436 assets/eln/models/item/240_v_30_a_dryer_cord.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/240_v_30_a_dryer_outlet.json
 f93030a66344007a6cbf214aea03c88a6e9fb436 assets/eln/models/item/240_v_appliance_cord.json
@@ -211,6 +213,7 @@ df25ff6c5d32ad5060413325e58105be86a993fb assets/eln/models/item/arc_clay_block.j
 51474ab5f455fd6d98fc4eefebf3b28e8954c4aa assets/eln/models/item/arc_clay_ingot.json
 e124037cf64a28313b60ec4d7c2ac7a57a540e0a assets/eln/models/item/arc_metal_block.json
 a6c1e4b7c825c6da54d228aa45c47850e07a2545 assets/eln/models/item/arc_metal_ingot.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/arc_runner_coupe.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/arched_walkway_light.json
 245eda229100d694e3aae6411a9c9ed749623da4 assets/eln/models/item/arithmetic_logic_unit.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/armored_oval_bulkhead_light.json
@@ -433,6 +436,7 @@ c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/dual_gumdrop_sid
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_coffee_maker.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_dryer.json
 8414bd216e3b5239f79449006aa1fb0cb4007b0c assets/eln/models/item/electric_forklift.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_golf_cart.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_kettle.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/electric_microwave.json
 e3c160d8996f205794fce647f1b79865110378a8 assets/eln/models/item/electric_minecart.json

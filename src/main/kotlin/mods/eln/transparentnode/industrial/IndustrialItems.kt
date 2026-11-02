@@ -16,6 +16,9 @@ object IndustrialItems {
     val FORKLIFT=I18N.TR_NAME(I18N.Type.NONE,"Electric Forklift")
     val PALLET=I18N.TR_NAME(I18N.Type.NONE,"Warehouse Equipment Pallet")
     fun register() {
+        Eln.sharedItemStackOne.addElement(4+(117 shl 6),mods.eln.vehicle.RoadVehicleItem(mods.eln.vehicle.RoadVehicleKind.CART))
+        Eln.sharedItemStackOne.addElement(5+(117 shl 6),mods.eln.vehicle.RoadVehicleItem(mods.eln.vehicle.RoadVehicleKind.COUPE))
+        Eln.sharedItemStackOne.addElement(6+(117 shl 6),mods.eln.vehicle.VehicleLeadItem())
         Eln.sharedItemStackOne.addElement(117 shl 6,object: BatteryItem(PACK,72000000.0,11520.0,50000.0,3) {
             init { creativeTab=Eln.creativeTabMachines;setDefaultIcon("upsindustrialbatterymodule") }
             override fun addInformation(stack: ItemStack?,player: Player?,list: MutableList<String>,advanced: Boolean) {

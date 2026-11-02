@@ -14,6 +14,9 @@ object IndustrialRecipes {
         }
         shaped(find(IndustrialItems.PACK),arrayOf("IBI","BBB","CBC",'I',find("Iron Plate"),'B',find("UPS Industrial Battery Module"),'C',find("Copper Cable")))
         shaped(find(IndustrialItems.FORKLIFT),arrayOf("FFF","CMC","III",'F',find(IndustrialItems.FRAME),'C',find("Copper Cable"),'M',find("Electrical Motor"),'I',ItemStack(Blocks.IRON_BLOCK)))
+        mods.eln.vehicle.RoadVehicleKind.entries.forEach { kind->shaped(find(kind.title),arrayOf("F F",if(kind==mods.eln.vehicle.RoadVehicleKind.CART)"CMC" else "MCM","III",'F',find(IndustrialItems.FRAME),'C',find("Copper Cable"),'M',find("Electrical Motor"),'I',ItemStack(Blocks.IRON_BLOCK))) }
+        shaped(find(mods.eln.vehicle.VehicleChargerDescriptor.TITLE),arrayOf("IPI","WCW","IMI",'I',find("Iron Plate"),'P',ItemStack(Items.REDSTONE),'W',find("Copper Cable"),'C',find("Electrical Motor"),'M',find("Machine Block")))
+        shaped(find(mods.eln.vehicle.VehicleLeadItem.TITLE),arrayOf("CCC","  C","  I",'C',find("Copper Cable"),'I',find("Iron Plate")))
         shaped(find(IndustrialItems.PALLET),arrayOf("PPP","S S","PPP",'P',ItemStack(Blocks.OAK_PLANKS),'S',ItemStack(Items.STICK)))
     }
 }

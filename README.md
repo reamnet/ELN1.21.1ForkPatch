@@ -32,6 +32,7 @@
 Electrical Age brings electrical simulation, wiring, lighting and industrial machinery to Minecraft:
 
 - **Power networks:** cables, batteries, generators, turbines, transformers and meters.
+- **Electric vehicles:** a four-seat golf cart and the six-pack Arc Runner Coupe, with storage and a wired 240 V / 100 A charger. See the [vehicle guide](docs/road-vehicles.md).
 - **Mechanical systems:** motors, generators, shafts, flywheels and large machines.
 - **Thermal management:** heat networks and the water-assisted [EC-240 evaporative cooler](docs/evaporative-cooler.md), with fan/pump power, outdoor-air interlocks and saved water/settings.
 - **Automation:** processing machines, signal wiring and optional computer control.

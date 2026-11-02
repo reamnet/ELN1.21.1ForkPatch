@@ -1517,6 +1517,7 @@ object TransparentNodeRegistration {
             transparentNodeItem.addDescriptor(kind.ordinal+(126 shl 6),mods.eln.transparentnode.industrial.IndustrialDescriptor(kind))
         }
         mods.eln.api.media.MediaAddons.registerReservedDevices()
+        transparentNodeItem.addDescriptor(15+(126 shl 6),mods.eln.vehicle.VehicleChargerDescriptor())
         mods.eln.transparentnode.laundry.MatterMachineKind.entries.forEach { kind ->
             transparentNodeItem.addDescriptor(kind.subId+(125 shl 6),mods.eln.transparentnode.laundry.MatterMachineDescriptor(kind).apply { setCreativeTab(Eln.creativeTabMachines) })
         }
