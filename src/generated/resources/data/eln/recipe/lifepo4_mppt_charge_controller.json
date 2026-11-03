@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "eln:mppt_solar_controller"
+    },
+    "I": {
+      "item": "eln:iron_plate"
+    },
+    "M": {
+      "item": "eln:machine_block"
+    },
+    "P": {
+      "item": "minecraft:comparator"
+    },
+    "W": {
+      "item": "eln:copper_cable"
+    }
+  },
+  "pattern": [
+    "IPI",
+    "WCW",
+    "IMI"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:lifepo4_mppt_charge_controller"
+  }
+}

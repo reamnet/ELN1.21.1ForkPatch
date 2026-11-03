@@ -1,4 +1,4 @@
-// 1.21.1	2026-11-02T05:43:05.599165019	Item Models: eln
+// 1.21.1	2026-11-03T01:55:29.246493174	Item Models: eln
 c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/100_a_pole_fuse.json
 f93030a66344007a6cbf214aea03c88a6e9fb436 assets/eln/models/item/100_a_vehicle_charging_lead.json
 a5ac578ee8f459ff5057195ce2b630f75ac6edbb assets/eln/models/item/100_kw_pole_transformer.json
@@ -43,6 +43,9 @@ c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/12v_ldo_regulato
 cb39dac39131a997f8e308c50d47e44182158a92 assets/eln/models/item/12v_led_light_bulb.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/15a_electrical_breaker.json
 545dc1ad8561074077d4e11ed76e1d2a30d05598 assets/eln/models/item/15a_lead_fuse.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/16_kwh_lifepo4_battery_cabinet.json
+dd4aed31ad85b4c06218ffafd126c977f45261ae assets/eln/models/item/16_kwh_lifepo4_cell_stack.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/16_kwh_wall-mounted_lifepo4_battery.json
 c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/1_a_pole_fuse.json
 c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/200_a_pole_fuse.json
 f93030a66344007a6cbf214aea03c88a6e9fb436 assets/eln/models/item/200_v_workshop_cord.json
@@ -105,8 +108,11 @@ c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/3.3v_ldo_regulat
 c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/30_a_pole_fuse.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/30a_electrical_breaker.json
 545dc1ad8561074077d4e11ed76e1d2a30d05598 assets/eln/models/item/30a_lead_fuse.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/32_kwh_lifepo4_battery_cabinet.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/32_kwh_wall-mounted_lifepo4_battery.json
 c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/3_a_pole_fuse.json
 7ead31e554acaf868cd943766ec50dba88b56735 assets/eln/models/item/3x_graphite_rods.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/400_a_dc_battery_disconnect.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/400a_electrical_breaker.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/40a_electrical_breaker.json
 f93030a66344007a6cbf214aea03c88a6e9fb436 assets/eln/models/item/480_v_industrial_cord.json
@@ -115,6 +121,8 @@ a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/480_v_industrial
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/480v_defence_turret.json
 1c10b6ad9521a41115967ed889d0cbc8263edaa8 assets/eln/models/item/480v_heavy_tungsten_heating_element.json
 e4cd44dda64a7a1a9dd0e5ccce50be42ad6556b5 assets/eln/models/item/480v_tungsten_heating_element.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/48_kwh_lifepo4_battery_cabinet.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/48_kwh_wall-mounted_lifepo4_battery.json
 dd4aed31ad85b4c06218ffafd126c977f45261ae assets/eln/models/item/48_v_20_kwh_traction_battery.json
 f93030a66344007a6cbf214aea03c88a6e9fb436 assets/eln/models/item/48_v_machine_cord.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/48_v_machine_outlet.json
@@ -141,6 +149,8 @@ c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/5v_boost_regulat
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/5v_control_relay_10a.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/5v_ldo_regulator_chip.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/60a_electrical_breaker.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/64_kwh_lifepo4_battery_cabinet.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/64_kwh_wall-mounted_lifepo4_battery.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/69_kv_cable_feed_insulator.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/69_kv_line_insulator.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/69_kv_steel_transmission_pole.json
@@ -153,6 +163,7 @@ f93030a66344007a6cbf214aea03c88a6e9fb436 assets/eln/models/item/800_v_industrial
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/800_v_industrial_outlet.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/800_v_line_insulator.json
 c83128b3aca12ad15e0e80881cec9f2c8d8f9f67 assets/eln/models/item/8_a_pole_fuse.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/ac_lifepo4_battery_charger.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/adjustable_gimbal_recessed_light.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/adjustable_suspended_warehouse_light.json
 31ec8c537b1489914b175d7928862f54c83e9e8a assets/eln/models/item/advanced_chip.json
@@ -495,6 +506,7 @@ c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/flywheel.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/four_cell_plug-in_ups.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/four_pole_changeover_relay.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/fuel_heat_furnace.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/fused_pv_combiner_and_disconnect.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/fused_underground_120_240v_service_pedestal.json
 a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/fusion_matter_reactor.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/garden_bollard_light.json
@@ -583,6 +595,7 @@ c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/led_vumeter.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/legacy_dc-dc_converter.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/legacy_signal_switch.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/life_oriented_battery.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/lifepo4_mppt_charge_controller.json
 b703b8b991247c6b34c1107753baf0bd85c57933 assets/eln/models/item/light_blue_brush.json
 bb502eb46e72e39c7d21dd57a362ef943ded9793 assets/eln/models/item/lightblock.json
 68c396545bc55c7e9595705509ac63673abab533 assets/eln/models/item/lime_brush.json
@@ -650,6 +663,7 @@ a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/north_american_m
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/not_chip.json
 09ffdf0437274d56bb90ab2c700c10716275e068 assets/eln/models/item/ntc_thermistor.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/nuclear_alarm.json
+a2b23c3c751a8755b918e3065b7eefce745d2a8f assets/eln/models/item/off-grid_inverter_charger.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/offset_twin_arm_parking_lot_light.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/offshore_caged_wellglass_light.json
 c0841affb6c5c9886af74507b9962f2fefa35c29 assets/eln/models/item/offshore_platform_floodlight.json

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "eln:ups_industrial_battery_module"
+    },
+    "C": {
+      "item": "eln:copper_cable"
+    },
+    "I": {
+      "item": "eln:iron_plate"
+    }
+  },
+  "pattern": [
+    "IBI",
+    "BCB",
+    "IBI"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eln:16_kwh_lifepo4_cell_stack"
+  }
+}

@@ -44,7 +44,7 @@ class MpptTracker {
  * regulated output. It starts EMPTY, stores joules in NBT, and cannot supply unpaid power.
  * It is not a battery bank: 5000 J is only a quarter-second at the hybrid's full rating.
  */
-class SolarPowerUnit(owner: TransparentNodeElement,val hybrid: Boolean) {
+class SolarPowerUnit(owner: TransparentNodeElement,val hybrid: Boolean,val batteryCharging: Boolean=false) {
     companion object {
         const val CAPACITY=5000.0
         const val MAX_INPUT=51_200.0
@@ -57,10 +57,11 @@ class SolarPowerUnit(owner: TransparentNodeElement,val hybrid: Boolean) {
     val negative=NbtElectricalLoad("solarNegative")
     val grid=NbtElectricalLoad("solarGrid")
     val output=NbtElectricalLoad("solarOutput")
+    val batteryReturn=NbtElectricalLoad("solarBatteryReturn")
     private val gridPin=NbtElectricalLoad("solarGridPin")
     private val outputPin=NbtElectricalLoad("solarOutputPin")
     val inputSource=SwitchableVoltageSource("hybridGrid").apply { connectTo(gridPin,null) }
-    val outputSource=SwitchableVoltageSource("hybridOutput").apply { connectTo(outputPin,null) }
+    val outputSource=SwitchableVoltageSource("hybridOutput").apply { connectTo(outputPin,if(batteryCharging)batteryReturn else null) }
     private val gridWire=Resistor(grid,gridPin).apply { resistance=.005 }
     private val outputWire=Resistor(outputPin,output).apply { resistance=.001 }
     val harvest=Resistor(solar,negative)
@@ -71,10 +72,10 @@ class SolarPowerUnit(owner: TransparentNodeElement,val hybrid: Boolean) {
     var priority=SolarPriority.SOLAR_FIRST
     /** Optional grid-following output. Existing installations retain voltage-regulated mode. */
     var gridFeed=false
-        set(value) { field=value && !hybrid;open("IDLE") }
+        set(value) { field=value && !hybrid && !batteryCharging;open("IDLE") }
     var fedJoules=0.0
         private set
-    var target=120.0
+    var target=if(batteryCharging)56.8 else 120.0
         private set
     private var dt=.05
     private var harvestCap=0.0
@@ -103,8 +104,9 @@ class SolarPowerUnit(owner: TransparentNodeElement,val hybrid: Boolean) {
     }
     private val solarAllowed get()=enabled && (!hybrid || priority!=SolarPriority.GRID_ONLY)
     private val gridAllowed get()=enabled && hybrid && priority!=SolarPriority.SOLAR_ONLY
+    private val inputVoltageLimit get()=if(batteryCharging)1000.0 else MAX_INPUT
     fun setVoltage(v: Double): Boolean {
-        if(!v.isFinite() || if(hybrid)v!=120.0 && v!=240.0 else v !in 12.0..3200.0)return false
+        if(!v.isFinite() || if(batteryCharging)v !in 52.0..58.4 else if(hybrid)v!=120.0 && v!=240.0 else v !in 12.0..3200.0)return false
         target=v;return true
     }
     val controller=object : ConservativePowerProcess {
@@ -120,10 +122,10 @@ class SolarPowerUnit(owner: TransparentNodeElement,val hybrid: Boolean) {
             val system=solar.subSystem
             val voltage=if(system!=null && system===negative.subSystem)system.solveVoltageDifferenceChecked(solar,negative)
                 else system?.solveChecked(solar)?.minus(negative.subSystem?.solveChecked(negative) ?: 0.0) ?: 0.0
-            harvest.resistance=if(harvestCap>.00001 && voltage.isFinite() && voltage in 6.0..MAX_INPUT)
+            harvest.resistance=if(harvestCap>.00001 && voltage.isFinite() && voltage in 6.0..inputVoltageLimit)
                 maxOf(tracker.resistance,voltage/MAX_AMPS,voltage*voltage/harvestCap,.0001) else 1e19
             if(!enabled) { open("DISABLED");return }
-            val b=probePort(outputPin,null,outputSource)
+            val b=probePort(outputPin,if(batteryCharging)batteryReturn else null,outputSource)
             if(gridFeed) {
                 // Follow an already energized bus. Never bootstrap a dead output as a grid.
                 // The probe excludes our own source, so the command is limited by external
@@ -185,7 +187,7 @@ class SolarPowerUnit(owner: TransparentNodeElement,val hybrid: Boolean) {
         }
         override fun failClosed() { harvest.resistance=1e19;open("PROTECTED") }
         override fun isolatesLoadOnFailure()=true
-        override fun connectedSystems(): Set<SubSystem> = setOfNotNull(solar.subSystem,negative.subSystem,gridPin.subSystem,outputPin.subSystem)
+        override fun connectedSystems(): Set<SubSystem> = setOfNotNull(solar.subSystem,negative.subSystem,gridPin.subSystem,outputPin.subSystem,if(batteryCharging)batteryReturn.subSystem else null)
         override fun trialSources()=listOf(inputSource,outputSource)
         override fun startupInputSources()=if(gridAllowed)listOf(inputSource) else emptyList()
         override fun startupOutputTargets()=if(enabled && !gridFeed)mapOf(outputSource to target) else emptyMap()
@@ -194,6 +196,7 @@ class SolarPowerUnit(owner: TransparentNodeElement,val hybrid: Boolean) {
     private fun open(reason: String) { inputSource.enabled=false;outputSource.enabled=false;solarUsed=0.0;status=reason }
     init {
         listOf(solar,negative,grid,output,gridPin,outputPin).forEach { it.serialResistance=.000001;owner.electricalLoadList.add(it) }
+        if(batteryCharging) { batteryReturn.serialResistance=.000001;owner.electricalLoadList.add(batteryReturn);owner.electricalComponentList.add(Resistor(batteryReturn,null).apply { resistance=1e6 }) }
         owner.electricalComponentList.addAll(listOf(inputSource,outputSource,gridWire,outputWire,harvest,
             // Reference the isolated PV return without a hard ground bond. A 1 Gohm
             // bleed is numerically indistinguishable from a floating island behind
@@ -204,7 +207,7 @@ class SolarPowerUnit(owner: TransparentNodeElement,val hybrid: Boolean) {
     fun account(seconds: Double) {
         if(!seconds.isFinite() || seconds<=0)return
         val volts=solar.voltage-negative.voltage
-        pvWatts=if(volts in 0.0..MAX_INPUT)harvest.power.coerceAtLeast(0.0) else 0.0
+        pvWatts=if(volts in 0.0..inputVoltageLimit)harvest.power.coerceAtLeast(0.0) else 0.0
         val discharge=if(outputSource.enabled)solarUsed/OUTPUT_EFFICIENCY else 0.0
         energy=(energy+(pvWatts*CHARGE_EFFICIENCY-discharge)*seconds).coerceIn(0.0,CAPACITY)
         heatWatts=pvWatts*(1-CHARGE_EFFICIENCY)+(discharge+gridWatts)*(1-OUTPUT_EFFICIENCY)+gridWire.power+outputWire.power
@@ -216,7 +219,7 @@ class SolarPowerUnit(owner: TransparentNodeElement,val hybrid: Boolean) {
         priority=SolarPriority.entries.getOrNull(tag.getInt("solarPriority")) ?: SolarPriority.SOLAR_FIRST
         gridFeed=tag.getBoolean("solarGridFeed")
         fedJoules=tag.getDouble("solarFedJoules").takeIf { it.isFinite() && it>=0 }?.coerceAtMost(1e18) ?: 0.0
-        target=120.0;setVoltage(tag.getDouble("solarTarget"))
+        target=if(batteryCharging)56.8 else 120.0;setVoltage(tag.getDouble("solarTarget"))
         energy=tag.getDouble("solarJoules").takeIf { it.isFinite() }?.coerceIn(0.0,CAPACITY) ?: 0.0
         tracker.read(tag);open("IDLE")
     }

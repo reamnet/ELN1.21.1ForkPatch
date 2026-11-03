@@ -16,6 +16,7 @@ object IndustrialItems {
     val FORKLIFT=I18N.TR_NAME(I18N.Type.NONE,"Electric Forklift")
     val PALLET=I18N.TR_NAME(I18N.Type.NONE,"Warehouse Equipment Pallet")
     fun register() {
+        mods.eln.transparentnode.offgrid.OffGridDevices.registerItems()
         Eln.sharedItemStackOne.addElement(4+(117 shl 6),mods.eln.vehicle.RoadVehicleItem(mods.eln.vehicle.RoadVehicleKind.CART))
         Eln.sharedItemStackOne.addElement(5+(117 shl 6),mods.eln.vehicle.RoadVehicleItem(mods.eln.vehicle.RoadVehicleKind.COUPE))
         Eln.sharedItemStackOne.addElement(6+(117 shl 6),mods.eln.vehicle.VehicleLeadItem())

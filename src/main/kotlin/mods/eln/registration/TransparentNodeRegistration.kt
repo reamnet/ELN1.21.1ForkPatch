@@ -1513,6 +1513,7 @@ object TransparentNodeRegistration {
     }
 
     private fun registerGridDevices(id: Int) {
+        mods.eln.transparentnode.offgrid.OffGridDevices.registerNodes()
         mods.eln.transparentnode.industrial.IndustrialKind.entries.forEach { kind ->
             transparentNodeItem.addDescriptor(kind.ordinal+(126 shl 6),mods.eln.transparentnode.industrial.IndustrialDescriptor(kind))
         }
