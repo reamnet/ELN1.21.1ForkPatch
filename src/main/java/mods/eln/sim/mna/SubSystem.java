@@ -66,17 +66,40 @@ public class SubSystem {
     private static final class VoltageDifferenceResponse {
         final AffinePortProjection projection;
         final double safeRhsLimit;
+        long version = Long.MIN_VALUE;
+        double value;
         VoltageDifferenceResponse(AffinePortProjection projection, double safeRhsLimit) {
             this.projection = projection;
             this.safeRhsLimit = safeRhsLimit;
         }
     }
     private boolean commandRhsOnly, commandRhsValid;
+    private final boolean probeDataReuse = !Boolean.getBoolean("eln.disableProbeDataReuse");
     private double[] commandRhsSnapshot;
     private double commandRhsMaximum;
+    private boolean commandRhsMaximumValid;
+    private long sourceRhsVersion;
+    private double[] referencedProbeRhs;
+    private boolean probeValidationKnown, probeValidationValue;
+    private int probeValidationKind;
+    private long probeValidationReuses, differentialResultReuses, portResultReuses;
+    private long directLegacyProbes;
+    private static final class CachedPortResult {
+        long version = Long.MIN_VALUE;
+        double voltage, resistance;
+    }
+    private CachedPortResult[] portResults;
     private long commandRhsReuses;
     public long getCommandRhsReuses() { return commandRhsReuses; }
-    public void invalidateSourceRhs() { commandRhsValid = false; }
+    public long getProbeValidationReuses() { return probeValidationReuses; }
+    public long getDifferentialResultReuses() { return differentialResultReuses; }
+    public long getPortResultReuses() { return portResultReuses; }
+    public long getDirectLegacyProbes() { return directLegacyProbes; }
+    public void invalidateSourceRhs() {
+        commandRhsValid = false;
+        probeValidationKnown = false;
+        sourceRhsVersion++;
+    }
     private long differentialVoltageProbeCount;
     public long getDifferentialVoltageProbeCount() { return differentialVoltageProbeCount; }
     private int portProjectionDepth;
@@ -160,6 +183,10 @@ public class SubSystem {
         voltageDifferenceRows = null;
         commandRhsSnapshot = null;
         commandRhsValid = false;
+        commandRhsMaximumValid = false;
+        probeValidationKnown = false;
+        referencedProbeRhs = null;
+        portResults = null;
         commandRhsOnly = true;
         // Exact classes only: capacitors, inductors, Delay and custom/subclass
         // callbacks may depend on physical state rather than tracked commands.
@@ -176,8 +203,8 @@ public class SubSystem {
         stateCount = states.size();
         portProjectionRows = null;
 
-        Profiler p = new Profiler();
-        p.add("Inversse with " + stateCount + " state : ");
+        Profiler p = Eln.config.getBooleanOrElse("debug.logging.enabled", false) ? new Profiler() : null;
+        if (p != null) p.add("Inversse with " + stateCount + " state : ");
 
         A = new double[stateCount][stateCount];
         preciseA = new DD[stateCount][stateCount];
@@ -281,8 +308,10 @@ public class SubSystem {
 
         matrixValid = true;
 
-        p.stop();
-        Utils.println(p);
+        if (p != null) {
+            p.stop();
+            Utils.println(p);
+        }
     }
 
     /** Diagnostic counters include speculative probes; they never advance circuit time. */
@@ -458,6 +487,24 @@ public class SubSystem {
     public long getCompactGaugeValidations() { return compactGaugeValidations; }
 
     private boolean validProbeRhs() {
+        // Only exact source classes have fully tracked RHS inputs. History/custom
+        // callbacks still execute and validate on every read, even if no setter ran.
+        if (probeDataReuse && commandRhsOnly && commandRhsValid && probeValidationKnown) {
+            probeValidationReuses++;
+            if (probeValidationKind > 0) sparseGaugeValidations++;
+            if (probeValidationKind == 2) compactGaugeValidations++;
+            return probeValidationValue;
+        }
+        probeValidationKind = 0;
+        boolean result = validateProbeRhs();
+        if (probeDataReuse && commandRhsOnly && commandRhsValid) {
+            probeValidationValue = result;
+            probeValidationKnown = true;
+        }
+        return result;
+    }
+
+    private boolean validateProbeRhs() {
         // Tiny systems are already cheap; sparse-row setup can cost more than
         // their original affine/full validation. Newly rebuilt matrices also keep
         // that path until repeated changing-RHS probes amortize inverse-row setup.
@@ -475,10 +522,50 @@ public class SubSystem {
                 Boolean valid = compactGaugeProbes
                     ? voltageGauge.validProbeRowsCompact(Idata,probeNonzeroColumns,nonzeroCount,this::responseRow)
                     : voltageGauge.validProbeRows(Idata,this::responseRow);
-                if (valid != null) { sparseGaugeValidations++;if(compactGaugeProbes)compactGaugeValidations++;return valid; }
+                if (valid != null) { sparseGaugeValidations++;if(compactGaugeProbes)compactGaugeValidations++;probeValidationKind=compactGaugeProbes ? 2 : 1;return valid; }
             }
         }
         return voltageGauge.validProbe(Idata, values -> asDoubles(solveProbePrecise(values)));
+    }
+
+    /** Source command setters and matrix invalidation own this snapshot's lifetime. */
+    private void sampleProbeRhs(boolean reuse) {
+        if (reuse && commandRhsOnly && commandRhsValid) {
+            System.arraycopy(commandRhsSnapshot, 0, Idata, 0, stateCount);
+            commandRhsReuses++;
+            return;
+        }
+        java.util.Arrays.fill(Idata, 0.0);
+        for (ISubSystemProcessI process : processI) process.simProcessI(this);
+        if (reuse && commandRhsOnly) {
+            if (commandRhsSnapshot == null) commandRhsSnapshot = new double[stateCount];
+            System.arraycopy(Idata, 0, commandRhsSnapshot, 0, stateCount);
+            commandRhsValid = true;
+            commandRhsMaximumValid = false;
+        }
+    }
+
+    private double probeRhsMaximum() {
+        if (commandRhsOnly && commandRhsValid && commandRhsMaximumValid) return commandRhsMaximum;
+        double maximum = 0.0;
+        for (double value : Idata) maximum = Math.max(maximum, Math.abs(value));
+        if (commandRhsOnly && commandRhsValid) {
+            commandRhsMaximum = maximum;
+            commandRhsMaximumValid = true;
+        }
+        return maximum;
+    }
+
+    private double[] referencedProbeRhs() {
+        if (!voltageGauge.getActive()) return Idata;
+        double[] rhs;
+        if (probeDataReuse) {
+            if (referencedProbeRhs == null) referencedProbeRhs = new double[stateCount];
+            System.arraycopy(Idata, 0, referencedProbeRhs, 0, stateCount);
+            rhs = referencedProbeRhs;
+        } else rhs = Idata.clone();
+        voltageGauge.applyRhs(rhs);
+        return rhs;
     }
 
     private DD[] responseRow(int index) {
@@ -594,8 +681,12 @@ public class SubSystem {
     public double solveChecked(State pin) {
         if (!matrixValid) generateMatrix();
         if (singularMatrix || pin == null || pin.getSubSystem() != this) return Double.NaN;
-        java.util.Arrays.fill(Idata, 0.0);
-        for (ISubSystemProcessI p : processI) p.simProcessI(this);
+        sampleProbeRhs(probeDataReuse);
+        if (probeDataReuse && voltageGauge.getActive()) {
+            if (!validProbeRhs()) return Double.NaN;
+            double value = dot(responseRow(pin.getId()), referencedProbeRhs()).doubleValue();
+            return Double.isFinite(value) ? value : Double.NaN;
+        }
         if (!voltageGauge.getActive()) {
             DD sum = dot(responseRow(pin.getId()), Idata);
             double value = sum.doubleValue();
@@ -612,39 +703,29 @@ public class SubSystem {
     /** Read a terminal-to-terminal voltage without committing physical state. Sample
      * source callbacks once, validate floating-island KCL, and project the difference
      * in DD before converting to double. Responses belong to this stamped matrix;
-     * source commands are read on every call and no physical voltage is cached. */
+     * exact tracked source commands may reuse an algebraic result until a command
+     * or matrix changes. History/custom callbacks never use that result cache. */
     public double solveVoltageDifferenceChecked(State a, State b) {
         if (!differentialVoltageProbes) return solveChecked(a) - solveChecked(b);
         if (!matrixValid) generateMatrix();
         if (singularMatrix || a == null || b == null
                 || a.getSubSystem() != this || b.getSubSystem() != this) return Double.NaN;
-        double maximum;
-        if (commandRhsOnly && commandRhsValid) {
-            System.arraycopy(commandRhsSnapshot, 0, Idata, 0, stateCount);
-            maximum = commandRhsMaximum;
-            commandRhsReuses++;
-        } else {
-            java.util.Arrays.fill(Idata, 0.0);
-            for (ISubSystemProcessI process : processI) process.simProcessI(this);
-            maximum = 0.0;
-            for (double value : Idata) maximum = Math.max(maximum, Math.abs(value));
-            if (!Double.isFinite(maximum)) return Double.NaN;
-            if (commandRhsOnly) {
-                if (commandRhsSnapshot == null) commandRhsSnapshot = new double[stateCount];
-                System.arraycopy(Idata, 0, commandRhsSnapshot, 0, stateCount);
-                commandRhsMaximum = maximum;
-                commandRhsValid = true;
-            }
-        }
-        double[] rhs = Idata;
-        if (voltageGauge.getActive()) {
-            if (!validProbeRhs()) return Double.NaN;
-            rhs = Idata.clone();
-            voltageGauge.applyRhs(rhs);
-        }
         long key = ((long) a.getId() << 32) | (b.getId() & 0xffffffffL);
         if (voltageDifferenceRows == null) voltageDifferenceRows = new java.util.HashMap<>();
         VoltageDifferenceResponse response = voltageDifferenceRows.get(key);
+        if (probeDataReuse && commandRhsOnly && response != null && response.version == sourceRhsVersion) {
+            differentialResultReuses++;
+            differentialVoltageProbeCount++;
+            return response.value;
+        }
+        sampleProbeRhs(true);
+        double maximum = probeRhsMaximum();
+        if (!Double.isFinite(maximum)) return Double.NaN;
+        double[] rhs = Idata;
+        if (voltageGauge.getActive()) {
+            if (!validProbeRhs()) return Double.NaN;
+            rhs = referencedProbeRhs();
+        }
         if (response == null) {
             DD[] aRow = responseRow(a.getId()), bRow = responseRow(b.getId());
             DD[] difference = new DD[stateCount];
@@ -664,7 +745,12 @@ public class SubSystem {
         if (response.projection == null || !(maximum < response.safeRhsLimit)) return solveChecked(a) - solveChecked(b);
         double value = response.projection.project(rhs).doubleValue();
         differentialVoltageProbeCount++;
-        return Double.isFinite(value) ? value : Double.NaN;
+        double checked = Double.isFinite(value) ? value : Double.NaN;
+        if (probeDataReuse && commandRhsOnly) {
+            response.version = sourceRhsVersion;
+            response.value = checked;
+        }
+        return checked;
     }
 
     /**
@@ -673,19 +759,37 @@ public class SubSystem {
      * Keeps the source command, enable flag and all physical state/history unchanged.
      */
     public Thevenin sourceThevenin(VoltageSource source) {
+        if (!matrixValid) generateMatrix();
+        State pin = source.getCurrentState();
+        if (!probeDataReuse || !commandRhsOnly || singularMatrix || pin.getSubSystem() != this
+                || !Double.isFinite(source.getVoltage())) return computeSourceThevenin(source);
+        if (portResults == null) portResults = new CachedPortResult[stateCount];
+        CachedPortResult cached = portResults[pin.getId()];
+        if (cached != null && cached.version == sourceRhsVersion) {
+            portResultReuses++;
+            // The public result is mutable; never return the cache's own storage.
+            Thevenin result = new Thevenin();
+            result.voltage = cached.voltage;
+            result.resistance = cached.resistance;
+            return result;
+        }
+        Thevenin result = computeSourceThevenin(source);
+        if (cached == null) portResults[pin.getId()] = cached = new CachedPortResult();
+        cached.version = sourceRhsVersion;
+        cached.voltage = result.voltage;
+        cached.resistance = result.resistance;
+        return result;
+    }
+
+    private Thevenin computeSourceThevenin(VoltageSource source) {
         Thevenin result = new Thevenin();
         result.voltage = Double.NaN;
         result.resistance = Double.NaN;
         if (!matrixValid) generateMatrix();
         State pin = source.getCurrentState();
         if (singularMatrix || pin.getSubSystem() != this || !Double.isFinite(source.getVoltage())) return result;
-        java.util.Arrays.fill(Idata, 0.0);
-        for (ISubSystemProcessI process : processI) process.simProcessI(this);
-        double[] rhs = Idata;
-        if (voltageGauge.getActive()) {
-            rhs = Idata.clone();
-            voltageGauge.applyRhs(rhs);
-        }
+        sampleProbeRhs(probeDataReuse);
+        double[] rhs = referencedProbeRhs();
         if (source instanceof SwitchableVoltageSource && !((SwitchableVoltageSource) source).getEnabled()) {
             return openSourceThevenin(source, rhs);
         }
@@ -981,8 +1085,38 @@ public class SubSystem {
     }
 
     public Thevenin getTh(State d, VoltageSource voltageSource) {
+        return getTh(d, voltageSource, true);
+    }
+
+    /** Partition links immediately replace both commands after reading their ports.
+     * On a linear feeder, leave the command intact while measuring it; restoring a
+     * previous physical voltage would invalidate otherwise identical solar reads.
+     * Unsupported callbacks retain the original two-sample path and its behavior.
+     */
+    public Thevenin interconnectionThevenin(State d, VoltageSource voltageSource) {
+        return getTh(d, voltageSource, false);
+    }
+
+    private Thevenin getTh(State d, VoltageSource voltageSource, boolean restoreCommand) {
         Thevenin thevenin = new Thevenin();
         double originalVoltage = d.state;
+
+        if (!matrixValid) generateMatrix();
+        // Linear, fully tracked sources have an exact port response. Avoid the two
+        // artificial +5 V / restore commands used by the legacy finite difference:
+        // besides two projections they invalidate every solar probe on this feeder.
+        // History/custom RHS callbacks keep the original sampling behavior below.
+        if (probeDataReuse && commandRhsOnly && Double.isFinite(originalVoltage)) {
+            Thevenin direct = sourceThevenin(voltageSource);
+            if (Double.isFinite(direct.voltage) && Double.isFinite(direct.resistance)
+                    && direct.resistance > 0.0 && direct.resistance < 1e18) {
+                // Legacy callers observe this final command, even if it differs
+                // from the source command on entry. Do not alter that contract.
+                if (restoreCommand) voltageSource.setVoltage(originalVoltage);
+                directLegacyProbes++;
+                return direct;
+            }
+        }
 
         double testVoltage = originalVoltage + 5;
         voltageSource.setVoltage(testVoltage);

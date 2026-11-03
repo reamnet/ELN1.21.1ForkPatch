@@ -6,6 +6,17 @@ import org.junit.Test
 import kotlin.test.*
 
 class AffinePortProjectionTest {
+    @org.junit.Test fun repeatedUnchangedReadsRetainPrecisionAndLaterChangesAreStillObserved() {
+        val row=arrayOf(DD.ONE,DD.of(1e16),DD.of(-1e16))
+        val projection=AffinePortProjection(row);val rhs=doubleArrayOf(.5,1.0,1.0)
+        repeat(10000) { assertEquals(.5,projection.project(rhs).toDouble(),0.0) }
+        rhs[0]=.75;assertEquals(.75,projection.project(rhs).toDouble(),0.0)
+        rhs[1]=Math.nextUp(1.0)
+        val expected=row.indices.fold(DD.ZERO) { total,i->total.add(row[i].multiply(rhs[i])) }
+        assertEquals(expected.toDouble(),projection.project(rhs).toDouble(),1e-15)
+        rhs[1]=Double.NaN;assertFalse(projection.project(rhs).isFinite)
+        rhs[1]=1.0;assertEquals(.75,projection.project(rhs).toDouble(),0.0)
+    }
     private fun circuit(size: Int, optimized: Boolean, asymmetric: Boolean=false): ProbeCircuit {
         val key="eln.disableAffinePortProjections";val old=System.getProperty(key)
         try {

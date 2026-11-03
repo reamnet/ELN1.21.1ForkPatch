@@ -84,20 +84,21 @@ public class RootSystem {
     public void generate() {
         if (!addComponents.isEmpty() || !addStates.isEmpty()) {
             converterConvergence.clear();
-            Profiler p = new Profiler();
-            p.add("*** Generate ***");
+            Profiler p = Eln.config.getBooleanOrElse("debug.logging.enabled", false) ? new Profiler() : null;
+            if (p != null) p.add("*** Generate ***");
             generateLine();
             generateSystems();
             generateInterSystems();
 
-            int stateCnt = 0, componentCnt = 0;
-
-            for (SubSystem s : systems) {
-                stateCnt += s.states.size();
-                componentCnt += s.component.size();
+            if (p != null) {
+                int stateCnt = 0, componentCnt = 0;
+                for (SubSystem s : systems) {
+                    stateCnt += s.states.size();
+                    componentCnt += s.component.size();
+                }
+                p.stop();
+                Utils.println(p + " **** " + stateCnt + "   " + componentCnt);
             }
-            p.stop();
-            Utils.println(p + " **** " + stateCnt + "   " + componentCnt);
         }
     }
 
@@ -237,10 +238,7 @@ public class RootSystem {
     }
 
     public void step() {
-        Profiler profiler = new Profiler();
-        profiler.add("Generate");
         generate();
-        profiler.add("interSystem");
         List<ConservativePowerProcess> converters = new ArrayList<>();
         List<IRootSystemPreStepProcess> legacy = new ArrayList<>();
         for (IRootSystemPreStepProcess process : processPre) {
@@ -322,17 +320,12 @@ public class RootSystem {
             sampleLegacy(legacy);
             for (SubSystem system : systems) system.stepCalc();
         }
-        profiler.add("stepCalc");
-        profiler.add("stepFlush");
         for (SubSystem s : systems) {
             s.stepFlush();
         }
-        profiler.add("simProcessFlush");
         for (ISubSystemProcessFlush p : processF) {
             p.simProcessFlush();
         }
-
-        profiler.stop();
 
         if (MetricsSubsystem.isSimulatorMetricsActive()) {
             collectAndPublishSimMetrics();

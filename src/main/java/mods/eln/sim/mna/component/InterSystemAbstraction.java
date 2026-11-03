@@ -106,8 +106,8 @@ public class InterSystemAbstraction implements IAbstractor, IDestructor, IRootSy
 
     @Override
     public void rootSystemPreStepProcess() {
-        Thevenin a = aNewDelay.getSubSystem().getTh(aState,aNewDelay);
-        Thevenin b = bNewDelay.getSubSystem().getTh(bState,bNewDelay);
+        Thevenin a = aNewDelay.getSubSystem().interconnectionThevenin(aState,aNewDelay);
+        Thevenin b = bNewDelay.getSubSystem().interconnectionThevenin(bState,bNewDelay);
 
         double voltage = (a.voltage - b.voltage) * b.resistance / (a.resistance + b.resistance) + b.voltage;
         if (Double.isNaN(voltage)) {

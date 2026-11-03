@@ -21,7 +21,7 @@ import kotlin.test.*
 
 /** Same physical circuit; baseline retains 3.0.65 optimizations and disables only the new work. */
 class ServerTickHotspotBenchmarkTest {
-    private class Grid(poles: Int, optimized: Boolean) {
+    internal class Grid(poles: Int, optimized: Boolean) {
         val root: RootSystem
         val hv: VoltageState
         private var windWatts=0.0
@@ -84,7 +84,7 @@ class ServerTickHotspotBenchmarkTest {
             } finally { saved.forEach { (k,v)->if(v==null)System.clearProperty(k) else System.setProperty(k,v) } }
         }
         fun step(i: Int,changeWind: Boolean=true): Double {
-            if(changeWind)windWatts=listOf(15_000.0,5000.0,1000.0,20_000.0)[(i/5)%4]
+            if(changeWind)wind(i)
             val start=System.nanoTime();root.step();val ms=(System.nanoTime()-start)/1e6
             assertTrue(hv.voltage>14_000,"Grid blinked at step $i")
             // A physical flush deliberately clears pending trial values. Re-solve
@@ -98,6 +98,7 @@ class ServerTickHotspotBenchmarkTest {
             secondaries.forEach { assertEquals(expected,it.state,.5) }
             return ms
         }
+        fun wind(i: Int) { windWatts=doubleArrayOf(15_000.0,5000.0,1000.0,20_000.0)[(i/5)%4] }
         fun counters()=mapOf("fullFactorizations" to root.systems.sumOf { it.fullFactorizations },
             "localJacobianBuilds" to root.localJacobianBuilds,
             "identicalRhsReuses" to root.systems.sumOf { it.identicalRhsReuses })

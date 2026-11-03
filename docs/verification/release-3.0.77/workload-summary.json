@@ -1,0 +1,51 @@
+[
+  {
+    "scene": "96_large_solar_open",
+    "baselineMilliseconds": 7.844585,
+    "optimizedMilliseconds": 7.631347,
+    "cpuReductionPercent": 1.832421929878758,
+    "allocationReductionPercent": 17.03064344964198
+  },
+  {
+    "scene": "96_large_solar_loaded",
+    "baselineMilliseconds": 6.561154,
+    "optimizedMilliseconds": 5.093193,
+    "cpuReductionPercent": 22.83031853733891,
+    "allocationReductionPercent": 25.059994704118303
+  },
+  {
+    "scene": "96_large_solar_night",
+    "baselineMilliseconds": 1.359856,
+    "optimizedMilliseconds": 0.109317,
+    "cpuReductionPercent": 92.22911027036406,
+    "allocationReductionPercent": 65.21580578781484
+  },
+  {
+    "scene": "1_battery_banks_grid_charge",
+    "baselineMilliseconds": 0.003693,
+    "optimizedMilliseconds": 0.002685,
+    "cpuReductionPercent": 4.271982912068351,
+    "allocationReductionPercent": 1.7699115044247815
+  },
+  {
+    "scene": "8_battery_banks_offgrid",
+    "baselineMilliseconds": 0.012667,
+    "optimizedMilliseconds": 0.011272,
+    "cpuReductionPercent": 10.991914178208317,
+    "allocationReductionPercent": 1.9675356615838635
+  },
+  {
+    "scene": "32_battery_banks_offgrid",
+    "baselineMilliseconds": 0.052242,
+    "optimizedMilliseconds": 0.039626,
+    "cpuReductionPercent": 21.424040596257534,
+    "allocationReductionPercent": 1.7759206059023258
+  },
+  {
+    "scene": "40_pole_mixed_grid",
+    "baselineMilliseconds": 30.717296,
+    "optimizedMilliseconds": 29.000078,
+    "cpuReductionPercent": 4.84861860043625,
+    "allocationReductionPercent": 0.10504766929505527
+  }
+]

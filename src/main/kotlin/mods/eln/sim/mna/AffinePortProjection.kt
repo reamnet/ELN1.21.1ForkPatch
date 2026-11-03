@@ -18,7 +18,7 @@ class AffinePortProjection(row: Array<DD>) {
 
     fun project(rhs: DoubleArray): DD {
         val saved = anchor
-        if (saved != null && trials < 16) {
+        if (saved != null) {
             var count = 0
             for (i in columns.indices) {
                 val value = rhs[columns[i]]
@@ -27,7 +27,10 @@ class AffinePortProjection(row: Array<DD>) {
                     changes[count++] = i
                 }
             }
-            if (count >= 0) {
+            // Reading the unchanged anchor introduces no arithmetic or rounding.
+            // Only actual delta projections consume the bounded refresh budget.
+            if(count==0) { shortcuts++;return saved }
+            if (count > 0 && trials < 16) {
                 var value: DD = saved
                 for (j in 0 until count) {
                     val i = changes[j]

@@ -1,0 +1,11 @@
+{
+  "passed": [
+    "All eight two-block battery variants place with occupied upper cells, exact capacity and saved charge",
+    "A real wired 240 V AC input powers the backed-up load and charges an initially empty external bank",
+    "MPPT transfers paid PV input into the physical battery bus and cabinet",
+    "Grid loss opens the mains contact and the external bank pays for 240 V backup power",
+    "After PV input stops, batteries do not feed unpaid power back through the MPPT",
+    "Every cabinet has a visible baked body and remote-client wall battery collision stays shallow",
+    "The real battery-screen button sends a server control packet and operates the BMS disconnect"
+  ]
+}

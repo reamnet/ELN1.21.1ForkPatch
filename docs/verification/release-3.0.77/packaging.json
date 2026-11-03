@@ -1,0 +1,11 @@
+{
+  "jar": "ElectricalAge-3.0.77.jar",
+  "version": "3.0.77",
+  "bytes": 21264243,
+  "sha256": "fb2a7ffb72e2746018567feb37ecbf5183769be259fb5146bb32b57cf93a184a",
+  "requiredClasses": [
+    "mods/eln/sim/mna/SubSystem.class",
+    "mods/eln/sim/mna/component/InterSystemAbstraction.class",
+    "mods/eln/sim/mna/AffinePortProjection.class"
+  ]
+}

@@ -438,7 +438,7 @@ public class Simulator /* ,IPacketHandler */ {
             double thermalSlowMicroseconds = thermalSlowNsStack / 1000.0;
             double slowMicroseconds = slowNsStack / 1000.0;
 
-            Utils.println("ticks " + new DecimalFormat("#").format((int) avgTickTime) + " us" + "  E " + electricalNsStack / 1000 + "  TF " + thermalFastNsStack / 1000 + "  TS " + thermalSlowNsStack / 1000 + "  S " + slowNsStack / 1000
+            if (Eln.config.getBooleanOrElse("debug.logging.enabled", false)) Utils.println("ticks " + new DecimalFormat("#").format((int) avgTickTime) + " us" + "  E " + electricalNsStack / 1000 + "  TF " + thermalFastNsStack / 1000 + "  TS " + thermalSlowNsStack / 1000 + "  S " + slowNsStack / 1000
 
                 + "    " + mna.getSubSystemCount() + " SS"
                 + "    " + electricalProcessList.size() + " EP"

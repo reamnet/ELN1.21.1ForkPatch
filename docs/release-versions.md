@@ -75,6 +75,8 @@ ForkPatch updates now use matching source tags, mod versions and jar filenames.
 | `v3.0.67` | — | New parking and gumdrop fixtures; four-cell plug-in UPS; detailed UPS/ATS enclosures and live displays; optional wall-mounted TV |
 | `v3.0.68` | — | Equipment material/detail refresh; legacy-style lamp/pole catalog sprites; opening refrigerator inventories warms the interior and opens the door |
 
+| `v3.0.77` | — | Audit server electrical workloads; reuse tracked probe data, replace legacy linear port perturbations, and avoid unused profiling/debug allocations |
+
 For example, compiling `v3.0.4` produces `ElectricalAge-3.0.4.jar`; compiling
 `v3.0.5` produces `ElectricalAge-3.0.5.jar`. The earlier `v3.0.0-port-forkpatch.N`
 tags remain available for the original source history. The numbered tags add

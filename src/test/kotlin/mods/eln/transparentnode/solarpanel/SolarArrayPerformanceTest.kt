@@ -13,7 +13,7 @@ import kotlin.test.*
 
 /** Explicit panel terminals and wire connections, rather than one scaled equivalent panel. */
 class SolarArrayPerformanceTest {
-    private class ArrayCircuit(val optimized: Boolean, val large: Boolean = true) {
+    internal class ArrayCircuit(val optimized: Boolean, val large: Boolean = true, val reuseProbes: Boolean = true) {
         val root = RootSystem(.01, 50)
         val positive = pin("positive bus")
         val negative = pin("negative bus")
@@ -66,17 +66,41 @@ class SolarArrayPerformanceTest {
         fun step(): Double {
             val key = "eln.disableDifferentialVoltageProbes"
             val old = System.getProperty(key)
+            val reuseKey = "eln.disableProbeDataReuse"
+            val oldReuse = System.getProperty(reuseKey)
             System.setProperty(key, (!optimized).toString())
+            System.setProperty(reuseKey, (!reuseProbes).toString())
             try {
                 val began = System.nanoTime()
                 root.step()
                 return (System.nanoTime() - began) / 1e6
             } finally {
                 if (old == null) System.clearProperty(key) else System.setProperty(key, old)
+                if (oldReuse == null) System.clearProperty(reuseKey) else System.setProperty(reuseKey, oldReuse)
             }
         }
         val voltage get() = positive.voltage - negative.voltage
         val probes get() = root.systems.sumOf { it.differentialVoltageProbeCount }
+    }
+
+    @Test fun directPartitionProbesPreserveEveryLargeArrayTerminalThroughLightAndLoadChanges() {
+        val baseline = ArrayCircuit(true, reuseProbes = false)
+        val cached = ArrayCircuit(true)
+        fun compare(steps: Int) {
+            repeat(steps) {
+                baseline.step(); cached.step()
+                assertEquals(baseline.voltage, cached.voltage, 1e-5)
+                baseline.terminals.zip(cached.terminals).forEach { (a, b) -> assertEquals(a.state, b.state, 1e-5) }
+            }
+        }
+        compare(20)
+        baseline.load(true); cached.load(true); compare(20)
+        baseline.light(.35); cached.light(.35); compare(12)
+        baseline.light(0.0); cached.light(0.0); compare(6)
+        baseline.light(1.0); cached.light(1.0); compare(12)
+        baseline.load(false); cached.load(false); compare(20)
+        assertTrue(cached.root.systems.sumOf { it.directLegacyProbes } > 1000)
+        assertEquals(0L, baseline.root.systems.sumOf { it.directLegacyProbes })
     }
 
     @Test fun twelveSeriesEightParallelRetainsOpenLoadedShadedAndNightBehavior() {

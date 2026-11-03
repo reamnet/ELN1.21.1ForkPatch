@@ -73,7 +73,7 @@ class VoltageDifferenceProbeTest {
         system.addComponent(Resistor(a, b).setResistance(10.0))
         system.addComponent(Resistor(b, null).setResistance(1.0))
         repeat(50) { assertEquals(10.0, system.solveVoltageDifferenceChecked(a, b), 1e-10) }
-        assertTrue(system.commandRhsReuses > 40)
+        assertTrue(system.commandRhsReuses + system.differentialResultReuses > 40)
         source.current = 2.0
         assertEquals(20.0, system.solveVoltageDifferenceChecked(a, b), 1e-10)
         var external = 0.0
