@@ -49,6 +49,24 @@ public class SubSystem {
 
     DD[][] AInvdata;
     private MnaFactorization factorization;
+    private final StampedMatrixCache<MatrixSolver> matrixSolvers = new StampedMatrixCache<>();
+    private final boolean stampedMatrixReuse = !Boolean.getBoolean("eln.disableStampedMatrixReuse");
+    private long reusedMatrixSolvers;
+    private static final class MatrixSolver {
+        final VoltageGauge gauge;
+        final MnaFactorization factorization;
+        final DD[][] inverse;
+        final DD[][] solveMatrix;
+        final int incrementalInversions;
+        MatrixSolver(VoltageGauge gauge, MnaFactorization factorization, DD[][] inverse,
+                     DD[][] solveMatrix, int incrementalInversions) {
+            this.gauge = gauge;
+            this.factorization = factorization;
+            this.inverse = inverse;
+            this.solveMatrix = solveMatrix;
+            this.incrementalInversions = incrementalInversions;
+        }
+    }
     private final boolean identicalRhsReuse = !Boolean.getBoolean("eln.disableIdenticalRhsReuse");
     private final boolean directPortDispatch = !Boolean.getBoolean("eln.disableDirectPortDispatch");
     private double[] lastPreciseRhs;
@@ -249,6 +267,26 @@ public class SubSystem {
         }
         symmetryCandidates = null;
 
+        // Newton trials repeatedly revisit source-enable masks. Stamping still
+        // runs normally; reuse only an exactly identical physical DD matrix with
+        // identical variable identities/order. Every RHS/probe/step cache above
+        // is reset, so a hit never reuses source commands or physical history.
+        MatrixSolver cachedSolver = stampedMatrixReuse ? matrixSolvers.find(preciseA, states) : null;
+        if (cachedSolver != null) {
+            voltageGauge = cachedSolver.gauge;
+            voltageGauge.resetRhsHistory();
+            factorization = cachedSolver.factorization;
+            AInvdata = cachedSolver.inverse;
+            lastSolveMatrix = cachedSolver.solveMatrix;
+            incrementalInversions = cachedSolver.incrementalInversions;
+            singularMatrix = false;
+            statesTab = states.toArray(new State[0]);
+            matrixValid = true;
+            reusedMatrixSolvers++;
+            if (p != null) { p.stop(); Utils.println(p); }
+            return;
+        }
+
         //	org.apache.commons.math3.linear.
 
         // Keep A as the physical stamp matrix for diagnostics and component contracts.
@@ -286,6 +324,8 @@ public class SubSystem {
                 lastSolveMatrix=preciseSolveMatrix;
             }
             singularMatrix = false;
+            if (stampedMatrixReuse) matrixSolvers.put(preciseA, states,
+                    new MatrixSolver(voltageGauge, factorization, AInvdata, lastSolveMatrix, incrementalInversions));
             if (captureMetrics) {
                 long inversionTimeNanoseconds = System.nanoTime() - inversionStartNanoseconds;
                 inversionCountSinceLastDrain++;
@@ -316,6 +356,7 @@ public class SubSystem {
 
     /** Diagnostic counters include speculative probes; they never advance circuit time. */
     public long getFullFactorizations() { return fullFactorizations; }
+    public long getReusedMatrixSolvers() { return reusedMatrixSolvers; }
     public long getUpdatedFactorizations() { return updatedFactorizations; }
     public long getFullProbeSolves() { return fullProbeSolves; }
     public long getAffineProbeUpdates() { return affineProbeUpdates; }
@@ -973,6 +1014,7 @@ public class SubSystem {
             }
         } finally {
             validStepSolution = false;
+            if (stampedMatrixReuse && preciseA != null) matrixSolvers.retainCurrent(preciseA);
         }
     }
 

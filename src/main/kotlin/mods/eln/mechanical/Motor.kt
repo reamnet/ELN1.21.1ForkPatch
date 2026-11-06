@@ -278,9 +278,11 @@ class MotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
 
         override fun prepareStep() {
             if (!retry.waiting && firstStep) {
-                // A spinning motor already has back EMF before its first drive trial.
+                // Seed the EMF command with the drive open. The first real trial
+                // establishes its current-limited load or regeneration command;
+                // upstream controllers must not first see a stalled ideal clamp.
                 powerSource.voltage = desc.radsToU.getValue(shaft.rads)
-                powerSource.enabled = true
+                powerSource.enabled = false
                 firstStep = false
             }
         }

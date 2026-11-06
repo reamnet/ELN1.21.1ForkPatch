@@ -71,6 +71,16 @@ class VoltageGauge @JvmOverloads constructor(matrix: Array<DoubleArray>, states:
     val active: Boolean get() = rows.isNotEmpty()
     fun isReference(index: Int)=referenceRows[index]
 
+    /** Matrix structure can be reused after a source-mask trial; RHS validation
+     * must start fresh, including the discarded floating-island KCL equations. */
+    fun resetRhsHistory() {
+        savedRhs.fill(0.0)
+        lastProbeRhs = null
+        lastProbeValid = false
+        compactCount = -1
+        compactValid = false
+    }
+
     /** Apply the same reference choice to the precision-preserving solve matrix. */
     fun applyMatrix(matrix: Array<Array<DD>>) {
         for (row in rows) {

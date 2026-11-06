@@ -1,0 +1,58 @@
+{
+  "profile": "https://spark.lucko.me/Q4JyWpp7fc",
+  "baseVersion": "3.0.77",
+  "supplyVoltageStages": [
+    3200,
+    12500,
+    69000,
+    3200
+  ],
+  "generatorModels": 4,
+  "originalTargetStartup": {
+    "physicalStep": 0,
+    "motorEvaluations": 400,
+    "outcome": "Both motors and all three target-voltage transformers enter numerical recovery"
+  },
+  "fixedResults": [
+    {
+      "targetMode": false,
+      "reuse": false,
+      "motors": 2,
+      "flywheels": 28,
+      "startupMotorTrials": 52,
+      "physicalSteps": 150,
+      "rads": 1.097680870160812,
+      "reusedSolvers": 0
+    },
+    {
+      "targetMode": false,
+      "reuse": true,
+      "motors": 2,
+      "flywheels": 28,
+      "startupMotorTrials": 52,
+      "physicalSteps": 150,
+      "rads": 1.097680870160812,
+      "reusedSolvers": 2
+    },
+    {
+      "targetMode": true,
+      "reuse": false,
+      "motors": 2,
+      "flywheels": 28,
+      "startupMotorTrials": 54,
+      "physicalSteps": 150,
+      "rads": 3.2096455031291664,
+      "reusedSolvers": 0
+    },
+    {
+      "targetMode": true,
+      "reuse": true,
+      "motors": 2,
+      "flywheels": 28,
+      "startupMotorTrials": 54,
+      "physicalSteps": 150,
+      "rads": 3.2096455031291664,
+      "reusedSolvers": 7
+    }
+  ]
+}

@@ -56,6 +56,22 @@ class MotorDriveRuntimeTest {
         }
     }
 
+    @Test fun aSpinningMotorRegeneratesOnItsFirstDriveStep() {
+        val c = Circuit(50, 0)
+        c.motor.shaft.rads = c.motor.desc.nominalRads.toDouble()
+        c.source.voltage *= .5
+        val before = c.motor.shaft.energy
+        c.root.step()
+        assertFalse(c.motor.electricalProcess.faulted)
+        assertTrue(c.motor.powerSource.power > 0.0)
+        assertTrue(c.motor.powerSource.power <= before / .01 * c.motor.desc.generationEfficiency + 1e-6)
+        assertTrue(abs(c.motor.powerSource.current) <= c.motor.desc.driveCurrentLimit * 1.000001 + 1e-7)
+        c.motor.thermal.PcTemp = 0.0
+        c.motor.shaftProcess.process(.01)
+        assertEquals((before - c.motor.shaft.energy) / .01,
+            c.motor.powerSource.power + c.motor.thermal.PcTemp, .01)
+    }
+
     @Test fun runtimeDriveStartsAndRegeneratesWithinItsCurrentAndEnergyLimits() {
         val c = Circuit(50, 0)
         repeat(1200) {
